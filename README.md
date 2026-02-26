@@ -34,4 +34,5 @@ npm start
 
 ## 📄 Licença
 
-Este projeto está sob a licença [MIT](LICENSE) - veja o arquivo LICENSE para detalhes.
+Este projeto é um software proprietário. Todos os direitos são reservados a ShapeExpress.
+A cópia, redistribuição ou uso comercial não autorizado deste código é estritamente proibido.
