@@ -11,17 +11,24 @@ interface WeekRowProps {
 export const WeekRow: React.FC<WeekRowProps> = React.memo(
   ({ week, onChange }) => {
     const handleNumberChange = useCallback(
-      (key: keyof WeekData, value: string) => {
+      (key: "sets" | "reps" | "load", value: string) => {
         const trimmed = value.trim();
         if (trimmed === "") {
-          onChange({ [key]: null } as Partial<WeekData>);
+          onChange({ [key]: null });
           return;
         }
 
         const numeric = Number(trimmed.replace(",", "."));
         if (Number.isNaN(numeric) || numeric < 0) return;
 
-        onChange({ [key]: numeric } as Partial<WeekData>);
+        onChange({ [key]: numeric });
+      },
+      [onChange]
+    );
+
+    const handleTextChange = useCallback(
+      (key: "rest", value: string) => {
+        onChange({ [key]: value });
       },
       [onChange]
     );
@@ -57,18 +64,18 @@ export const WeekRow: React.FC<WeekRowProps> = React.memo(
         <TextInput
           style={inputStyle}
           keyboardType="numeric"
-          placeholder="Desc"
-          placeholderTextColor="#4b5563"
-          value={week.rest?.toString() ?? ""}
-          onChangeText={(text) => handleNumberChange("rest", text)}
-        />
-        <TextInput
-          style={inputStyle}
-          keyboardType="numeric"
           placeholder="Kg"
           placeholderTextColor="#4b5563"
           value={week.load?.toString() ?? ""}
           onChangeText={(text) => handleNumberChange("load", text)}
+        />
+        <TextInput
+          style={inputStyle}
+          keyboardType="default"
+          placeholder="Desc"
+          placeholderTextColor="#4b5563"
+          value={week.rest?.toString() ?? ""}
+          onChangeText={(text) => handleTextChange("rest", text)}
         />
 
         <Text

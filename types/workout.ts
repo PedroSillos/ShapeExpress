@@ -19,7 +19,7 @@ export interface WeekData {
   week: number;
   sets: number | null;
   reps: number | null;
-  rest: number | null;
+  rest: string | null;
   load: number | null;
   volume: number | null;
 }
@@ -60,7 +60,7 @@ export const WeekDataSchema = z.object({
   week: z.number().int().min(1).max(8),
   sets: z.number().int().min(1).max(20).nullable(),
   reps: z.number().int().min(1).max(100).nullable(),
-  rest: z.number().int().min(0).max(600).nullable(),
+  rest: z.string().nullable(),
   load: z.number().min(0).max(1000).nullable(),
   volume: z.number().min(0).nullable()
 });

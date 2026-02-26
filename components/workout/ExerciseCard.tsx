@@ -132,8 +132,8 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = React.memo(
             <Text style={{ color: "#6b7280", width: 28 }} />
             <Text style={headerCellStyle}>Séries</Text>
             <Text style={headerCellStyle}>Reps</Text>
-            <Text style={headerCellStyle}>Desc</Text>
             <Text style={headerCellStyle}>Carga</Text>
+            <Text style={headerCellStyle}>Desc</Text>
             <Text
               style={{
                 color: "#6b7280",
