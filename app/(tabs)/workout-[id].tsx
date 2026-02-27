@@ -14,10 +14,8 @@ export default function WorkoutScreen() {
     ? rawId
     : "A") as WorkoutId;
 
-  const { workout, addExercise } = useWorkoutStore((s) => ({
-    workout: s.workouts[workoutId],
-    addExercise: s.addExercise
-  }));
+  const workout = useWorkoutStore((s) => s.workouts[workoutId]);
+  const addExercise = useWorkoutStore((s) => s.addExercise);
 
   if (!workout) {
     return (

@@ -22,6 +22,7 @@ import {
 interface WorkoutStore {
   workouts: Record<WorkoutId, Workout>;
   addExercise: (workoutId: WorkoutId) => void;
+  resetWorkouts: () => void;
   updateWeekData: (
     workoutId: WorkoutId,
     exerciseIndex: number,
@@ -102,6 +103,10 @@ export const useWorkoutStore = create<WorkoutStore>()(
             }
           };
         });
+      },
+
+      resetWorkouts: () => {
+        set({ workouts: createInitialWorkouts() });
       },
 
       updateWeekData: (
