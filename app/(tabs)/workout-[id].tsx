@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from "expo-router";
 import React from "react";
-import { FlatList, Text, View } from "react-native";
+import { FlatList, Pressable, Text, View } from "react-native";
 
 import type { WorkoutId } from "../../types/workout";
 import { useWorkoutStore } from "../../store/workoutStore";
@@ -14,7 +14,10 @@ export default function WorkoutScreen() {
     ? rawId
     : "A") as WorkoutId;
 
-  const workout = useWorkoutStore((s) => s.workouts[workoutId]);
+  const { workout, addExercise } = useWorkoutStore((s) => ({
+    workout: s.workouts[workoutId],
+    addExercise: s.addExercise
+  }));
 
   if (!workout) {
     return (
@@ -73,8 +76,37 @@ export default function WorkoutScreen() {
           <ExerciseCard workoutId={workoutId} exercise={item} />
         )}
         showsVerticalScrollIndicator={false}
+        ListFooterComponent={() => (
+          <Pressable
+            onPress={() => addExercise(workoutId)}
+            disabled={workout.exercises.length >= MAX_EXERCISES}
+            style={{
+              padding: 12,
+              borderRadius: 8,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor:
+                workout.exercises.length >= MAX_EXERCISES
+                  ? "#1f2937"
+                  : "#10b981",
+              marginTop: 8,
+              marginBottom: 32
+            }}
+          >
+            <Text
+              style={{
+                color:
+                  workout.exercises.length >= MAX_EXERCISES
+                    ? "#6b7280"
+                    : "#f0fdf4",
+                fontWeight: "600"
+              }}
+            >
+              Adicionar exercício
+            </Text>
+          </Pressable>
+        )}
       />
     </View>
   );
 }
-

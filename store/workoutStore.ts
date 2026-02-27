@@ -21,6 +21,7 @@ import {
 
 interface WorkoutStore {
   workouts: Record<WorkoutId, Workout>;
+  addExercise: (workoutId: WorkoutId) => void;
   updateWeekData: (
     workoutId: WorkoutId,
     exerciseIndex: number,
@@ -61,9 +62,7 @@ const createEmptyExercise = (index: number): Exercise => ({
 const createEmptyWorkout = (id: WorkoutId): Workout => ({
   id,
   label: `Treino ${id}`,
-  exercises: Array.from({ length: MAX_EXERCISES }, (_, index) =>
-    createEmptyExercise(index)
-  ),
+  exercises: [createEmptyExercise(0)],
   totalVolume: 0,
   lastUpdated: new Date().toISOString()
 });
@@ -79,6 +78,31 @@ export const useWorkoutStore = create<WorkoutStore>()(
   persist(
     (set, get) => ({
       workouts: createInitialWorkouts(),
+
+      addExercise: (workoutId) => {
+        set((state) => {
+          const workout = state.workouts[workoutId];
+          if (!workout || workout.exercises.length >= MAX_EXERCISES) {
+            return state;
+          }
+
+          const newExercise = createEmptyExercise(workout.exercises.length);
+          const exercises = [...workout.exercises, newExercise];
+
+          const updatedWorkout: Workout = {
+            ...workout,
+            exercises,
+            lastUpdated: new Date().toISOString()
+          };
+
+          return {
+            workouts: {
+              ...state.workouts,
+              [workoutId]: updatedWorkout
+            }
+          };
+        });
+      },
 
       updateWeekData: (
         workoutId,
