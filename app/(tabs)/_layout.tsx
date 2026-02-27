@@ -35,6 +35,16 @@ export default function TabsLayout() {
         }}
       />
 
+      <Tabs.Screen
+        name="workouts"
+        options={{
+          title: "Treinos",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="dumbbell" color={color} size={size} />
+          )
+        }}
+      />
+
       {workoutTabs.map((id) => (
         <Tabs.Screen
           key={id}
