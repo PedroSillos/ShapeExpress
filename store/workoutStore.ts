@@ -40,6 +40,7 @@ interface WorkoutStore {
     fromWeek: number
   ) => void;
   resetExercise: (workoutId: WorkoutId, exerciseIndex: number) => void;
+  removeExercise: (workoutId: WorkoutId, exerciseIndex: number) => void;
 }
 
 const createEmptyWeek = (week: number): WeekData => ({
@@ -268,6 +269,31 @@ export const useWorkoutStore = create<WorkoutStore>()(
           if (!exercises[exerciseIndex]) return state;
 
           exercises[exerciseIndex] = createEmptyExercise(exerciseIndex);
+
+          const updatedWorkout: Workout = {
+            ...workout,
+            exercises,
+            totalVolume: calculateWorkoutVolume(exercises),
+            lastUpdated: new Date().toISOString()
+          };
+
+          return {
+            workouts: {
+              ...state.workouts,
+              [workoutId]: updatedWorkout
+            }
+          };
+        });
+      },
+
+      removeExercise: (workoutId, exerciseIndex) => {
+        set((state) => {
+          const workout = state.workouts[workoutId];
+          if (!workout) return state;
+
+          const exercises = workout.exercises
+            .filter((_, i) => i !== exerciseIndex)
+            .map((ex, i) => ({ ...ex, index: i }));
 
           const updatedWorkout: Workout = {
             ...workout,

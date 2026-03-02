@@ -16,6 +16,7 @@ export default function WorkoutScreen() {
 
   const workout = useWorkoutStore((s) => s.workouts[workoutId]);
   const addExercise = useWorkoutStore((s) => s.addExercise);
+  const removeExercise = useWorkoutStore((s) => s.removeExercise);
 
   if (!workout) {
     return (
@@ -71,10 +72,17 @@ export default function WorkoutScreen() {
         data={workout.exercises}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <ExerciseCard workoutId={workoutId} exercise={item} />
+          <ExerciseCard
+            workoutId={workoutId}
+            exercise={item}
+            onDelete={() => removeExercise(workoutId, item.index)}
+          />
         )}
         showsVerticalScrollIndicator={false}
         ListFooterComponent={() => (
+          <Pressable
+            onPress={() => addExercise(workoutId)}
+            disabled={workout.exercises.length >= MAX_EXERCISES}
             style={({ pressed }) => ({
               padding: 12,
               borderRadius: 8,

@@ -1,19 +1,21 @@
 import React, { useCallback } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 
 import type { Exercise, WorkoutId, WeekData } from "../../types/workout";
 import { useWorkoutStore } from "../../store/workoutStore";
 import { getStagnationColor } from "../../utils/colors";
 import { detectStagnation } from "../../utils/stagnation";
+import { TrashIcon } from "../icons/TrashIcon";
 import { WeekRow } from "./WeekRow";
 
 interface ExerciseCardProps {
   workoutId: WorkoutId;
   exercise: Exercise;
+  onDelete: () => void;
 }
 
 export const ExerciseCard: React.FC<ExerciseCardProps> = React.memo(
-  ({ workoutId, exercise }) => {
+  ({ workoutId, exercise, onDelete }) => {
     const updateWeekData = useWorkoutStore((s) => s.updateWeekData);
     const updateExercise = useWorkoutStore((s) => s.updateExercise);
     const autoFillWeeks = useWorkoutStore((s) => s.autoFillWeeks);
@@ -44,6 +46,17 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = React.memo(
       resetExercise(workoutId, exercise.index);
     }, [exercise.index, resetExercise, workoutId]);
 
+    const handleDelete = () => {
+      Alert.alert(
+        "Deletar exercício",
+        "Você tem certeza que deseja deletar este exercício?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          { text: "Deletar", style: "destructive", onPress: onDelete }
+        ]
+      );
+    };
+
     return (
       <View
         style={{
@@ -66,23 +79,29 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = React.memo(
             backgroundColor: "#020617"
           }}
         >
-          <View style={{ flex: 1, marginRight: 8 }}>
+          <View
+            style={{
+              flex: 1,
+              marginRight: 8,
+              flexDirection: "row",
+              alignItems: "center"
+            }}
+          >
             <TextInput
               style={{
                 color: "#e5e7eb",
                 fontSize: 16,
-                fontWeight: "600"
+                fontWeight: "600",
+                flex: 1
               }}
               placeholder={`Exercício ${exercise.index + 1}`}
               placeholderTextColor="#4b5563"
               value={exercise.name}
               onChangeText={handleNameChange}
             />
-            {exercise.muscleGroup && (
-              <Text style={{ color: "#9ca3af", fontSize: 12 }}>
-                {exercise.muscleGroup}
-              </Text>
-            )}
+            <TouchableOpacity onPress={handleDelete} style={{ padding: 4 }}>
+              <TrashIcon width={20} height={20} />
+            </TouchableOpacity>
           </View>
 
           <View
@@ -160,7 +179,8 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = React.memo(
             flexDirection: "row",
             justifyContent: "flex-end",
             paddingHorizontal: 12,
-            paddingBottom: 8
+            paddingBottom: 8,
+            gap: 16
           }}
         >
           <TouchableOpacity onPress={handleReset}>
