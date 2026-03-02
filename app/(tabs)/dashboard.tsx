@@ -68,6 +68,40 @@ export default function DashboardScreen() {
     };
   }, [week, workouts]);
 
+  const kpiData = [
+    {
+      title: "Volume da semana",
+      value: totalVolumeThisWeek.toFixed(0),
+      unit: "kg",
+      status: volumeStatus,
+      subtitle:
+        prevWeekVolume > 0
+          ? `Semana anterior: ${prevWeekVolume.toFixed(0)} kg`
+          : "Sem histórico"
+    },
+    {
+      title: "Exercícios evoluindo",
+      value: progressingCount.toString(),
+      status: "progress" as StagnationLevel,
+      subtitle: "Stagnation = progress"
+    },
+    {
+      title: "Exercícios estagnados",
+      value: stagnantCount.toString(),
+      status:
+        stagnantCount > 0 ? ("warning" as StagnationLevel) : ("none" as StagnationLevel),
+      subtitle: "warning / critical"
+    },
+    {
+      title: "Grupos com mais volume",
+      value: topMuscles[0]?.muscle ?? "-",
+      status: "progress" as StagnationLevel,
+      subtitle: topMuscles[0]
+        ? `${topMuscles[0].volume.toFixed(0)} kg`
+        : "Sem dados"
+    }
+  ];
+
   return (
     <View
       style={{
@@ -129,56 +163,13 @@ export default function DashboardScreen() {
         </View>
       </View>
 
-      <View
-        style={{
-          flexDirection: "row",
-          marginHorizontal: -4,
-          marginBottom: 8
-        }}
-      >
-        <KPICard
-          title="Volume da semana"
-          value={totalVolumeThisWeek.toFixed(0)}
-          unit="kg"
-          status={volumeStatus}
-          subtitle={
-            prevWeekVolume > 0
-              ? `Semana anterior: ${prevWeekVolume.toFixed(0)} kg`
-              : "Sem histórico"
-          }
-        />
-        <KPICard
-          title="Exercícios evoluindo"
-          value={progressingCount.toString()}
-          status="progress"
-          subtitle="Stagnation = progress"
-        />
-      </View>
-
-      <View
-        style={{
-          flexDirection: "row",
-          marginHorizontal: -4,
-          marginBottom: 12
-        }}
-      >
-        <KPICard
-          title="Exercícios estagnados"
-          value={stagnantCount.toString()}
-          status={stagnantCount > 0 ? "warning" : "none"}
-          subtitle="warning / critical"
-        />
-        <KPICard
-          title="Grupos com mais volume"
-          value={topMuscles[0]?.muscle ?? "-"}
-          status="progress"
-          subtitle={
-            topMuscles[0]
-              ? `${topMuscles[0].volume.toFixed(0)} kg`
-              : "Sem dados"
-          }
-        />
-      </View>
+      <FlatList
+        data={kpiData}
+        numColumns={2}
+        keyExtractor={(item) => item.title}
+        renderItem={({ item }) => <KPICard {...item} />}
+        style={{ marginHorizontal: -4, marginBottom: 12 }}
+      />
 
       <Text
         style={{

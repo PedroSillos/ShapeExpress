@@ -75,27 +75,26 @@ export default function WorkoutScreen() {
         )}
         showsVerticalScrollIndicator={false}
         ListFooterComponent={() => (
-          <Pressable
-            onPress={() => addExercise(workoutId)}
-            disabled={workout.exercises.length >= MAX_EXERCISES}
-            style={{
+            style={({ pressed }) => ({
               padding: 12,
               borderRadius: 8,
               alignItems: "center",
               justifyContent: "center",
               backgroundColor:
                 workout.exercises.length >= MAX_EXERCISES
-                  ? "#1f2937"
-                  : "#10b981",
+                  ? "#111827"
+                  : pressed
+                    ? "#10a871"
+                    : "#10b981",
               marginTop: 8,
               marginBottom: 32
-            }}
+            })}
           >
             <Text
               style={{
                 color:
                   workout.exercises.length >= MAX_EXERCISES
-                    ? "#6b7280"
+                    ? "#4b5563"
                     : "#f0fdf4",
                 fontWeight: "600"
               }}
