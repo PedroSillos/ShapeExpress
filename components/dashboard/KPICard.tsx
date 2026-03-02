@@ -1,8 +1,16 @@
 import React from "react";
 import { View, Text } from "react-native";
-
+import { Card } from "../ui/Card";
 import type { StagnationLevel } from "../../types/workout";
-import { getStagnationColor } from "../../utils/colors";
+import { colors, typography, spacing } from "../../utils/theme";
+
+const statusColors = {
+  progress: colors.success,
+  warning: colors.warning,
+  critical: colors.error,
+  none: colors.textSecondary,
+  suggestion: colors.warning,
+};
 
 interface KPICardProps {
   title: string;
@@ -19,25 +27,22 @@ export const KPICard: React.FC<KPICardProps> = ({
   status,
   subtitle
 }) => {
-  const color = getStagnationColor(status);
+  const statusColor = statusColors[status];
 
   return (
-    <View
+    <Card
       style={{
         flex: 1,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: color,
-        padding: 12,
-        margin: 4,
-        backgroundColor: "#020617"
+        margin: spacing.xs,
+        borderLeftWidth: 4,
+        borderLeftColor: statusColor,
       }}
     >
       <Text
         style={{
-          color: "#9ca3af",
-          fontSize: 12,
-          marginBottom: 4
+          ...typography.bodySmall,
+          color: colors.textSecondary,
+          marginBottom: spacing.xs,
         }}
       >
         {title}
@@ -45,9 +50,8 @@ export const KPICard: React.FC<KPICardProps> = ({
       <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
         <Text
           style={{
-            color: "#e5e7eb",
-            fontSize: 22,
-            fontWeight: "600"
+            ...typography.h2,
+            color: colors.textPrimary,
           }}
         >
           {value}
@@ -55,9 +59,10 @@ export const KPICard: React.FC<KPICardProps> = ({
         {unit && (
           <Text
             style={{
-              color: "#6b7280",
-              marginLeft: 4,
-              marginBottom: 2
+              ...typography.body,
+              color: colors.textSecondary,
+              marginLeft: spacing.xs,
+              marginBottom: 2,
             }}
           >
             {unit}
@@ -67,15 +72,15 @@ export const KPICard: React.FC<KPICardProps> = ({
       {subtitle && (
         <Text
           style={{
-            color: "#6b7280",
-            fontSize: 11,
-            marginTop: 4
+            ...typography.caption,
+            color: colors.textSecondary,
+            marginTop: spacing.xs,
           }}
         >
           {subtitle}
         </Text>
       )}
-    </View>
+    </Card>
   );
 };
 

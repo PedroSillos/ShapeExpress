@@ -1,10 +1,7 @@
 import { Tabs } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { View } from "react-native";
-
-const TAB_BG = "#020617";
-const TAB_ACTIVE = "#22c55e";
-const TAB_INACTIVE = "#6b7280";
+import { colors } from "../../utils/theme";
 
 const workoutTabs = ["A", "B", "C", "D", "E", "F"] as const;
 
@@ -14,13 +11,28 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: TAB_BG,
-          borderTopColor: "#111827"
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+          borderTopWidth: 1,
+          height: 90,
+          paddingBottom: 24,
+          paddingTop: 8,
         },
-        tabBarActiveTintColor: TAB_ACTIVE,
-        tabBarInactiveTintColor: TAB_INACTIVE
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+        },
       }}
     >
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null,
+        }}
+      />
+
       <Tabs.Screen
         name="dashboard"
         options={{
@@ -29,7 +41,7 @@ export default function TabsLayout() {
             <MaterialCommunityIcons
               name="view-dashboard-outline"
               color={color}
-              size={size}
+              size={24}
             />
           )
         }}
@@ -40,35 +52,17 @@ export default function TabsLayout() {
         options={{
           title: "Treinos",
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="dumbbell" color={color} size={size} />
+            <MaterialCommunityIcons name="dumbbell" color={color} size={24} />
           )
         }}
       />
 
-      {workoutTabs.map((id) => (
-        <Tabs.Screen
-          key={id}
-          name={`workout-${id}`}
-          options={{
-            title: `Treino ${id}`,
-            tabBarIcon: ({ color, size }) => (
-              <View
-                style={{
-                  width: size,
-                  height: size,
-                  borderRadius: size / 2,
-                  borderWidth: 1,
-                  borderColor: color,
-                  alignItems: "center",
-                  justifyContent: "center"
-                }}
-              >
-                {/* simple text fallback instead of icon set for letters */}
-              </View>
-            )
-          }}
-        />
-      ))}
+      <Tabs.Screen
+        name="workout-[id]"
+        options={{
+          title: "Criar Treino",
+        }}
+      />
     </Tabs>
   );
 }

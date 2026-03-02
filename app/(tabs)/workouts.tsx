@@ -1,30 +1,43 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
+import { useRouter } from "expo-router";
+import { colors, typography, spacing } from "../../utils/theme";
+import { Button } from "../../components/ui/Button";
 
 export default function WorkoutsScreen() {
+  const router = useRouter();
+
+  const handleCreateWorkout = () => {
+    router.push("/(tabs)/workout-A");
+  };
+
   return (
-    <View
+    <ScrollView
       style={{
         flex: 1,
-        backgroundColor: "#020617",
-        padding: 16
+        backgroundColor: colors.background,
+      }}
+      contentContainerStyle={{
+        padding: spacing.md,
       }}
     >
       <Text
         style={{
-          color: "#e5e7eb",
-          fontSize: 22,
-          fontWeight: "600",
-          marginBottom: 8
+          ...typography.h1,
+          color: colors.textPrimary,
+          marginBottom: spacing.sm,
+          marginTop: spacing.xl,
         }}
       >
-        Workouts
+        Treinos
       </Text>
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Text style={{ color: "#9ca3af", fontSize: 16 }}>
-          This screen will display the list of workouts.
-        </Text>
-      </View>
-    </View>
+
+      <Button
+        onPress={handleCreateWorkout}
+        style={{ marginTop: spacing.lg }}
+      >
+        Criar treino
+      </Button>
+    </ScrollView>
   );
 }

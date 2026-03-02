@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from "react";
-import { View, Text, FlatList, Pressable } from "react-native";
-
+import { View, Text, FlatList, Pressable, ScrollView } from "react-native";
 import { KPICard } from "../../components/dashboard/KPICard";
 import { useWorkoutStore } from "../../store/workoutStore";
 import { detectStagnation } from "../../utils/stagnation";
 import type { StagnationLevel } from "../../types/workout";
+import { colors, typography, spacing, components } from "../../utils/theme";
 
 export default function DashboardScreen() {
   const [week, setWeek] = useState(1);
@@ -83,14 +83,14 @@ export default function DashboardScreen() {
       title: "Exercícios evoluindo",
       value: progressingCount.toString(),
       status: "progress" as StagnationLevel,
-      subtitle: "Stagnation = progress"
+      subtitle: "Em progresso"
     },
     {
       title: "Exercícios estagnados",
       value: stagnantCount.toString(),
       status:
         stagnantCount > 0 ? ("warning" as StagnationLevel) : ("none" as StagnationLevel),
-      subtitle: "warning / critical"
+      subtitle: "Necessitam atenção"
     },
     {
       title: "Grupos com mais volume",
@@ -103,19 +103,21 @@ export default function DashboardScreen() {
   ];
 
   return (
-    <View
+    <ScrollView
       style={{
         flex: 1,
-        backgroundColor: "#020617",
-        padding: 16
+        backgroundColor: colors.background,
+      }}
+      contentContainerStyle={{
+        padding: spacing.md,
       }}
     >
       <Text
         style={{
-          color: "#e5e7eb",
-          fontSize: 22,
-          fontWeight: "600",
-          marginBottom: 8
+          ...typography.h1,
+          color: colors.textPrimary,
+          marginBottom: spacing.sm,
+          marginTop: spacing.xl,
         }}
       >
         Dashboard
@@ -123,37 +125,39 @@ export default function DashboardScreen() {
 
       <View
         style={{
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: 12
+          marginBottom: spacing.lg,
         }}
       >
         <Text
           style={{
-            color: "#9ca3af",
-            marginRight: 8
+            ...typography.body,
+            color: colors.textSecondary,
+            marginBottom: spacing.sm,
           }}
         >
           Semana:
         </Text>
-        <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
           {Array.from({ length: 8 }, (_, i) => i + 1).map((w) => (
             <Pressable
               key={w}
               onPress={() => setWeek(w)}
               style={{
-                paddingHorizontal: 10,
-                paddingVertical: 4,
-                borderRadius: 999,
-                marginRight: 4,
-                marginBottom: 4,
-                backgroundColor: week === w ? "#22c55e" : "#111827"
+                minWidth: components.touchTarget.minWidth,
+                minHeight: components.touchTarget.minHeight,
+                paddingHorizontal: spacing.md,
+                paddingVertical: spacing.sm,
+                borderRadius: 8,
+                backgroundColor: week === w ? colors.primary : colors.surface,
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               <Text
                 style={{
-                  color: week === w ? "#020617" : "#e5e7eb",
-                  fontSize: 12
+                  ...typography.body,
+                  color: week === w ? colors.textPrimary : colors.textPrimary,
+                  fontWeight: '600',
                 }}
               >
                 {w}
@@ -168,45 +172,45 @@ export default function DashboardScreen() {
         numColumns={2}
         keyExtractor={(item) => item.title}
         renderItem={({ item }) => <KPICard {...item} />}
-        style={{ marginHorizontal: -4, marginBottom: 12 }}
+        scrollEnabled={false}
+        style={{ marginHorizontal: -spacing.xs, marginBottom: spacing.xl }}
       />
 
       <Text
         style={{
-          color: "#9ca3af",
-          fontSize: 14,
-          marginBottom: 4
+          ...typography.h3,
+          color: colors.textPrimary,
+          marginBottom: spacing.md,
         }}
       >
-        Volume por grupo muscular (top 5)
+        Volume por grupo muscular
       </Text>
 
-      <FlatList
-        data={topMuscles}
-        keyExtractor={(item) => item.muscle}
-        renderItem={({ item }) => (
-          <View
+      {topMuscles.map((item) => (
+        <View
+          key={item.muscle}
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            paddingVertical: spacing.md,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border,
+          }}
+        >
+          <Text style={{ ...typography.body, color: colors.textPrimary }}>
+            {item.muscle}
+          </Text>
+          <Text
             style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              paddingVertical: 6,
-              borderBottomWidth: 1,
-              borderBottomColor: "#111827"
+              ...typography.body,
+              color: colors.textSecondary,
+              fontVariant: ["tabular-nums"],
             }}
           >
-            <Text style={{ color: "#e5e7eb" }}>{item.muscle}</Text>
-            <Text
-              style={{
-                color: "#9ca3af",
-                fontVariant: ["tabular-nums"]
-              }}
-            >
-              {item.volume.toFixed(0)} kg
-            </Text>
-          </View>
-        )}
-      />
-    </View>
+            {item.volume.toFixed(0)} kg
+          </Text>
+        </View>
+      ))}
+    </ScrollView>
   );
 }
-
