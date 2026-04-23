@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-red: var(--theme-primary);
+  --color-brand-red-light: var(--theme-primary-light);
+  --color-dark-surface: var(--theme-bg);
+  --color-dark-card: var(--theme-card);
+  --color-dark-border: var(--theme-border);
+  
+  /* Redefine white and black to adapt to themes */
+  --color-white: var(--theme-text);
+  --color-black: var(--theme-text-inverse);
+  
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+}
+
+@layer base {
+  :root {
+    /* Default Theme Colors (Red) */
+    --theme-primary: #E53E3E;
+    --theme-primary-light: #FC8181;
+    
+    /* Default Mode (Dark) */
+    --theme-text: #ffffff;
+    --theme-text-inverse: #000000;
+    --theme-bg: #0F1115;
+    --theme-card: #1A1D23;
+    --theme-border: #2A2E37;
+  }
+
+  /* Themes */
+  :root[data-theme="blue"] {
+    --theme-primary: #3B82F6;
+    --theme-primary-light: #60A5FA;
+    --theme-bg: #0F111A;
+    --theme-card: #1A1D28;
+    --theme-border: #2A2E3D;
+  }
+
+  :root[data-theme="green"] {
+    --theme-primary: #10B981;
+    --theme-primary-light: #34D399;
+    --theme-bg: #0F1511;
+    --theme-card: #1A231D;
+    --theme-border: #2A372E;
+  }
+
+  :root[data-theme="purple"] {
+    --theme-primary: #8B5CF6;
+    --theme-primary-light: #A78BFA;
+    --theme-bg: #110F15;
+    --theme-card: #1D1A23;
+    --theme-border: #2E2A37;
+  }
+
+  :root[data-theme="orange"] {
+    --theme-primary: #F97316;
+    --theme-primary-light: #FDBA74;
+    --theme-bg: #15110F;
+    --theme-card: #231A1A;
+    --theme-border: #372A2A;
+  }
+
+  /* Light Mode Base Overrides */
+  :root[data-mode="light"] {
+    --theme-text: #111827;
+    --theme-text-inverse: #ffffff;
+    --theme-bg: #F9FAFB;
+    --theme-card: #FFFFFF;
+    --theme-border: #E5E7EB;
+  }
+
+  /* Light Mode Tinted Overrides (optional, to keep the theme flavor) */
+  :root[data-mode="light"][data-theme="blue"] {
+    --theme-bg: #EFF6FF;
+    --theme-border: #DBEAFE;
+  }
+  :root[data-mode="light"][data-theme="green"] {
+    --theme-bg: #ECFDF5;
+    --theme-border: #D1FAE5;
+  }
+  :root[data-mode="light"][data-theme="purple"] {
+    --theme-bg: #F5F3FF;
+    --theme-border: #EDE9FE;
+  }
+  :root[data-mode="light"][data-theme="orange"] {
+    --theme-bg: #FFF7ED;
+    --theme-border: #FFEDD5;
+  }
+
+  /* Customization: Radius */
+  :root[data-radius="square"] {
+    --radius-sm: 0px;
+    --radius-md: 0px;
+    --radius-lg: 0px;
+    --radius-xl: 0px;
+    --radius-2xl: 0px;
+    --radius-3xl: 0px;
+  }
+
+  /* Customization: Text Size */
+  :root[data-text-size="large"] {
+    font-size: 110%;
+  }
+  
+  :root[data-text-size="xlarge"] {
+    font-size: 125%;
+  }
+
+  body {
+    @apply bg-dark-surface text-white font-sans antialiased;
+  }
+}
+
+.glass {
+  @apply bg-white/5 backdrop-blur-lg border border-white/10;
+}
+
+.red-gradient {
+  background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-primary-light) 100%);
+}
+
+.red-text-gradient {
+  @apply bg-clip-text text-transparent;
+  background-image: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-primary-light) 100%);
+}
+
+/* Customization: Gradients */
+:root[data-gradients="disabled"] .red-gradient {
+  background: var(--theme-primary);
+}
+
+:root[data-gradients="disabled"] .red-text-gradient {
+  background-image: none;
+  color: var(--theme-primary);
+  -webkit-text-fill-color: var(--theme-primary);
+}
+
+/* Hide scrollbar but allow scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Global hide scrollbar (optional, but often desired in these app-like templates) */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Hide number input arrows */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+

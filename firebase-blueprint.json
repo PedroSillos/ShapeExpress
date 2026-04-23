@@ -1,0 +1,158 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "User's personal and fitness profile information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "userType": { "type": "string", "enum": ["treinador", "atleta"] },
+        "height": { "type": "number" },
+        "initialWeight": { "type": "number" },
+        "objective": { "type": "string" },
+        "birthDate": { "type": "string", "format": "date" },
+        "avatarUrl": { "type": "string" },
+        "trainingFrequency": { "type": "number" },
+        "experienceLevel": { "type": "string", "enum": ["Iniciante", "Intermediário", "Avançado"] },
+        "limitations": { "type": "string" },
+        "preferredStyle": { "type": "string" },
+        "cref": { "type": "string" },
+        "experienceYears": { "type": "string" },
+        "specialties": { "type": "array", "items": { "type": "string" } },
+        "serviceType": { "type": "string", "enum": ["Presencial", "Online", "Ambos"] },
+        "worksInGym": { "type": "boolean" },
+        "gymName": { "type": "string" },
+        "studentsCount": { "type": "string" },
+        "bio": { "type": "string" },
+        "instagram": { "type": "string" },
+        "personalCode": { "type": "string" },
+        "hasPersonal": { "type": "boolean" },
+        "personalCodeConnected": { "type": "string" },
+        "age": { "type": "number" },
+        "trainingLocation": { "type": "string", "enum": ["Casa", "Academia"] }
+      },
+      "required": ["name", "email", "height", "initialWeight", "birthDate"]
+    },
+    "UserStats": {
+      "title": "User Stats",
+      "description": "User's gamification and progress statistics",
+      "type": "object",
+      "properties": {
+        "level": { "type": "number" },
+        "xp": { "type": "number" },
+        "streak": { "type": "number" },
+        "bestStreak": { "type": "number" },
+        "weeklyGoal": { "type": "number" },
+        "completedThisWeek": { "type": "number" },
+        "totalWorkouts": { "type": "number" },
+        "totalVolume": { "type": "number" },
+        "medalsCount": { "type": "number" },
+        "streakResetDate": { "type": "string", "format": "date-time" },
+        "league": { "type": "string", "enum": ["Bronze", "Prata", "Ouro", "Platina", "Esmeralda", "Diamante"] }
+      },
+      "required": ["level", "xp", "streak", "totalWorkouts"]
+    },
+    "WorkoutTemplate": {
+      "title": "Workout Template",
+      "description": "A template for a workout or a training program",
+      "type": "object",
+      "properties": {
+        "creatorEmail": { "type": "string", "format": "email" },
+        "name": { "type": "string" },
+        "category": { "type": "string", "enum": ["basic", "multicycle"] },
+        "startDate": { "type": "string", "format": "date" },
+        "endDate": { "type": "string", "format": "date" },
+        "sheets": { "type": "array" },
+        "cycles": { "type": "array" }
+      },
+      "required": ["creatorEmail", "name", "category", "startDate", "endDate"]
+    },
+    "WorkoutSession": {
+      "title": "Workout Session",
+      "description": "A recorded workout session performed by a user",
+      "type": "object",
+      "properties": {
+        "userEmail": { "type": "string", "format": "email" },
+        "workoutId": { "type": "string" },
+        "workoutName": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "duration": { "type": "number" },
+        "exercises": { "type": "array" },
+        "totalVolume": { "type": "number" },
+        "xpEarned": { "type": "number" },
+        "caloriesBurned": { "type": "number" }
+      },
+      "required": ["userEmail", "workoutId", "date", "exercises", "totalVolume", "xpEarned"]
+    },
+    "BodyAssessment": {
+      "title": "Body Assessment",
+      "description": "A physical assessment of a user's body measurements",
+      "type": "object",
+      "properties": {
+        "userEmail": { "type": "string", "format": "email" },
+        "date": { "type": "string", "format": "date-time" },
+        "method": { "type": "string", "enum": ["7 Dobras", "3 Dobras", "Bioimpedância"] },
+        "weight": { "type": "number" },
+        "bodyFat": { "type": "number" },
+        "observation": { "type": "string" },
+        "photoUrl": { "type": "string" }
+      },
+      "required": ["userEmail", "date", "method", "weight", "bodyFat"]
+    },
+    "FcmToken": {
+      "title": "FCM Token",
+      "description": "Stores Firebase Cloud Messaging tokens for push notifications",
+      "type": "object",
+      "properties": {
+        "token": { "type": "string" },
+        "userEmail": { "type": "string", "format": "email" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["token", "userEmail", "updatedAt"]
+    },
+    "TrainerSettings": {
+      "title": "Trainer Settings",
+      "description": "Settings for a trainer including plans, evaluations, and anamnesis",
+      "type": "object",
+      "properties": {
+        "trainerEmail": { "type": "string", "format": "email" },
+        "plans": { "type": "array" },
+        "evaluations": { "type": "array" },
+        "anamnesis": { "type": "array" }
+      },
+      "required": ["trainerEmail"]
+    }
+  },
+  "firestore": {
+    "/users/{email}": {
+      "schema": "UserProfile",
+      "description": "User profile documents indexed by email"
+    },
+    "/trainer_settings/{email}": {
+      "schema": "TrainerSettings",
+      "description": "Trainer settings documents indexed by email"
+    },
+    "/stats/{email}": {
+      "schema": "UserStats",
+      "description": "User statistics documents indexed by email"
+    },
+    "/templates/{templateId}": {
+      "schema": "WorkoutTemplate",
+      "description": "Collection of workout templates"
+    },
+    "/sessions/{sessionId}": {
+      "schema": "WorkoutSession",
+      "description": "Collection of completed workout sessions"
+    },
+    "/assessments/{assessmentId}": {
+      "schema": "BodyAssessment",
+      "description": "Collection of body assessments"
+    },
+    "/fcm_tokens/{tokenId}": {
+      "schema": "FcmToken",
+      "description": "Collection of FCM tokens for users"
+    }
+  }
+}

@@ -1,0 +1,225 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: email
+    // Fields: name, email, height, initialWeight, birthDate, etc.
+    //
+    // Collection: stats
+    // Document ID: email
+    // Fields: level, xp, streak, totalWorkouts, etc.
+    //
+    // Collection: templates
+    // Document ID: auto-generated
+    // Fields: creatorEmail, name, category, startDate, endDate, etc.
+    //
+    // Collection: sessions
+    // Document ID: auto-generated
+    // Fields: userEmail, workoutId, date, exercises, totalVolume, xpEarned, etc.
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(email) {
+      return isAuthenticated() && (request.auth.token.email == email);
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.email != null &&
+        ((exists(/databases/$(database)/documents/users/$(request.auth.token.email)) && 
+          get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.role == 'admin') || 
+         (request.auth.token.email.lower() == "bagaielpfspp@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function validString(field, min, max) {
+      return request.resource.data[field] is string && 
+             request.resource.data[field].size() >= min && 
+             request.resource.data[field].size() <= max;
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    
+    function isValidUserProfile(data) {
+      return hasRequiredFields(['name', 'email', 'height', 'initialWeight', 'birthDate']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUserStats(data) {
+      return hasRequiredFields(['level', 'xp', 'streak', 'totalWorkouts']) &&
+             data.level is number && data.xp is number && data.streak is number;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{email} {
+      allow get: if true;
+      allow list: if isAuthenticated();
+      allow create, update: if isOwner(email) && isValidUserProfile(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /stats/{email} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(email) && isValidUserStats(request.resource.data);
+    }
+
+    match /templates/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.creatorEmail);
+      allow update, delete: if isAuthenticated() && (isOwner(resource.data.creatorEmail) || isAdmin());
+    }
+
+    match /sessions/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userEmail);
+      allow update, delete: if isAuthenticated() && (isOwner(resource.data.userEmail) || isAdmin());
+    }
+
+    match /assessments/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userEmail);
+      allow update, delete: if isAuthenticated() && (isOwner(resource.data.userEmail) || isAdmin());
+    }
+
+    match /training_profile/{email} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(email);
+    }
+
+    match /exercise_stats/{id} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isOwner(request.resource.data.userEmail);
+    }
+
+    match /connections/{id} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.studentEmail) || isOwner(resource.data.trainerEmail) || isAdmin());
+      allow create: if isAuthenticated() && isOwner(request.resource.data.studentEmail);
+      allow update, delete: if isAuthenticated() && (isOwner(resource.data.studentEmail) || isOwner(resource.data.trainerEmail) || isAdmin());
+    }
+
+    match /notifications/{id} {
+      allow read: if isAuthenticated() && isOwner(resource.data.userEmail);
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && isOwner(resource.data.userEmail);
+    }
+
+    match /messages/{id} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.senderEmail) || isOwner(resource.data.receiverEmail) || isAdmin());
+      allow create: if isAuthenticated() && isOwner(request.resource.data.senderEmail);
+    }
+
+    match /protocols/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (isAdmin() || (get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.userType == 'treinador' && isOwner(request.resource.data.creatorEmail)));
+      allow update, delete: if isAuthenticated() && (isAdmin() || (get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.userType == 'treinador' && isOwner(resource.data.creatorEmail)));
+    }
+
+    match /purchased_protocols/{id} {
+      allow read: if isAuthenticated() && isOwner(resource.data.userEmail);
+      allow write: if isAdmin();
+    }
+
+    match /posts/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userEmail);
+      allow update: if isAuthenticated() && (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount', 'commentsCount']) ||
+        (resource.data.keys().hasAll(['userEmail']) && isOwner(resource.data.userEmail)) || 
+        isAdmin()
+      );
+      allow delete: if isAuthenticated() && (
+        (resource.data.keys().hasAll(['userEmail']) && isOwner(resource.data.userEmail)) || 
+        isAdmin()
+      );
+    }
+
+    match /post_likes/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userEmail);
+      allow delete: if isAuthenticated() && resource.data.keys().hasAll(['userEmail']) && isOwner(resource.data.userEmail);
+    }
+
+    match /communities/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.createdBy);
+      allow update: if isAuthenticated() && (isOwner(resource.data.createdBy) || isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['membersCount']));
+      allow delete: if isAuthenticated() && (isOwner(resource.data.createdBy) || isAdmin());
+    }
+
+    match /community_members/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userEmail);
+      allow delete: if isAuthenticated() && resource.data.keys().hasAll(['userEmail']) && isOwner(resource.data.userEmail);
+    }
+
+    match /challenges/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /user_challenges/{id} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isAdmin());
+      allow create, update: if isAuthenticated() && isOwner(request.resource.data.userId);
+    }
+
+    match /community_messages/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userEmail);
+    }
+
+    match /post_comments/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userEmail);
+      allow delete: if isAuthenticated() && (
+        (resource.data.keys().hasAll(['userEmail']) && isOwner(resource.data.userEmail)) || 
+        isAdmin()
+      );
+    }
+
+    match /followers/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.followerEmail);
+      allow delete: if isAuthenticated() && resource.data.keys().hasAll(['followerEmail']) && isOwner(resource.data.followerEmail);
+    }
+
+    match /fcm_tokens/{tokenId} {
+      allow read: if isAuthenticated() && isOwner(resource.data.userEmail);
+      allow create, update: if isAuthenticated() && isOwner(request.resource.data.userEmail);
+      allow delete: if isAuthenticated() && isOwner(resource.data.userEmail);
+    }
+
+    match /trainer_settings/{email} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(email) && isOwner(request.resource.data.trainerEmail);
+      allow delete: if isOwner(email);
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
