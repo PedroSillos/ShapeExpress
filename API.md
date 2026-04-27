@@ -238,7 +238,7 @@ Integrated via Google GenAI library for workout analysis and recommendations.
 
 **Configuration:**
 ```env
-GEMINI_API_KEY=your_gemini_api_key
+GEMINI_API_KEY=AIzaSyBCWv2iGReQHXim42B6BzpOpjYcW5jXJuY
 ```
 
 **Client-side Usage:**
@@ -313,7 +313,7 @@ STRIPE_SECRET_KEY=sk_test_...
 STRIPE_PUBLIC_KEY=pk_test_...
 
 # AI
-GEMINI_API_KEY=...
+GEMINI_API_KEY=AIzaSyBCWv2iGReQHXim42B6BzpOpjYcW5jXJuY
 
 # Firebase (client-side, prefixed with VITE_)
 VITE_FIREBASE_API_KEY=...

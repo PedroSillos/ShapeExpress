@@ -49,7 +49,7 @@ STRIPE_SECRET_KEY=sk_test_your_key
 STRIPE_PUBLIC_KEY=pk_test_your_key
 
 # AI Services
-GEMINI_API_KEY=your_gemini_api_key
+GEMINI_API_KEY=AIzaSyBCWv2iGReQHXim42B6BzpOpjYcW5jXJuY
 
 # Server
 APP_URL=http://localhost:3000
