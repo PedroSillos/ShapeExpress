@@ -1,9 +1,9 @@
 {
-  "projectId": "gen-lang-client-0364260547",
-  "appId": "1:258256054890:web:61aabae650f25205ee7813",
-  "apiKey": "AIzaSyA_GF-rGlxT1QC7BNL3y0VDhov2BnsTAXQ",
-  "authDomain": "gen-lang-client-0364260547.firebaseapp.com",
+  "projectId": "shapeexpress",
+  "appId": "1:129919049822:web:94aa1f4143935d10cfd4cf",
+  "apiKey": "AIzaSyBO_hOZEEzJdPunZz0YRj82HFAS-Svq6LQ",
+  "authDomain": "shapeexpress.firebaseapp.com",
   "firestoreDatabaseId": "",
-  "storageBucket": "gen-lang-client-0364260547.firebasestorage.app",
-  "messagingSenderId": "258256054890"
+  "storageBucket": "shapeexpress.firebasestorage.app",
+  "messagingSenderId": "129919049822"
 }
