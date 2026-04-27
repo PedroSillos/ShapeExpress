@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Shape Express</string>
+    <string name="title_activity_main">Shape Express</string>
+    <string name="package_name">com.shapeexpress.app</string>
+    <string name="custom_url_scheme">com.shapeexpress.app</string>
+</resources>
