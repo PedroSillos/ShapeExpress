@@ -1,7 +1,31 @@
-import { GoogleGenAI } from "@google/genai";
 import { WorkoutSession, UserProfile, StagnationReport, ProgressScore, Community } from "../../domain/entities";
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || "" });
+// Get token from localStorage (same mechanism as useAppState)
+const getToken = (): string | null => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem("shape_express_token");
+  }
+  return null;
+};
+
+// Call backend API instead of direct Gemini (security fix)
+const callBackendAI = async (endpoint: string, body: any): Promise<any> => {
+  const token = getToken();
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-user-email': token || '',
+    },
+    body: JSON.stringify(body),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to get AI response');
+  }
+  
+  return response.json();
+};
 
 export async function getAICoachAdvice(
   userProfile: UserProfile,
@@ -9,37 +33,14 @@ export async function getAICoachAdvice(
   stagnationReports: StagnationReport[],
   progressScore: ProgressScore | null
 ): Promise<string> {
-  const model = ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            text: `Você é um Personal Trainer IA de elite chamado "Shape Express Coach". 
-            Analise os dados do usuário e forneça conselhos motivadores e técnicos para sua evolução.
-            
-            Perfil do Usuário:
-            - Nome: ${userProfile?.name}
-            - Objetivo: ${userProfile?.objective}
-            - Nível: ${userProfile?.experienceLevel || 'Intermediário'}
-            
-            Dados Recentes:
-            - Total de Treinos: ${sessions.length}
-            - Score de Progresso: ${progressScore?.score || 'N/A'} (${progressScore?.classification || 'N/A'})
-            - Relatórios de Estagnação: ${JSON.stringify(stagnationReports)}
-            
-            Responda em Português (Brasil). Seja conciso, use emojis e foque em como superar a estagnação se houver, ou como manter o ritmo se estiver progredindo bem.
-            Limite a resposta a no máximo 3 parágrafos curtos.`
-          }
-        ]
-      }
-    ]
-  });
-
   try {
-    const response = await model;
-    return response.text || "Não consegui gerar um conselho no momento. Continue treinando firme!";
+    const data = await callBackendAI('/api/ai/coach-advice', {
+      userProfile,
+      sessions,
+      stagnationReports,
+      progressScore,
+    });
+    return data.advice || "Não consegui gerar um conselho no momento. Continue treinando firme!";
   } catch (error) {
     console.error("AI Coach Error:", error);
     return "O Coach está ocupado no momento, mas ele diz: Não desista!";
@@ -54,30 +55,15 @@ export async function getRecommendedCommunities(
   userCommunityIds: string[]
 ): Promise<Community[]> {
   try {
-    const prompt = `
-      Com base no perfil do atleta abaixo, sugira as 3 comunidades mais adequadas para ele entre as disponíveis.
-      
-      Perfil do Atleta:
-      - Nome: ${userProfile.name}
-      - Objetivo: ${userProfile.objective}
-      - Nível: ${userLevel}
-      - Liga: ${userLeague}
-      
-      Comunidades Disponíveis:
-      ${communities.map(c => `- ID: ${c.id}, Nome: ${c.name}, Descrição: ${c.description}, Tags: ${c.tags}`).join('\n')}
-      
-      Comunidades que ele já participa: ${userCommunityIds.join(', ')}
-      
-      Retorne APENAS um array JSON com os IDs das comunidades recomendadas. Exemplo: ["id1", "id2"]
-    `;
-
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt
+    const data = await callBackendAI('/api/ai/recommend-communities', {
+      userProfile,
+      userLevel,
+      userLeague,
+      communities,
+      userCommunityIds,
     });
-
-    const text = response.text || "[]";
-    const recommendedIds = JSON.parse(text.match(/\[.*\]/)?.[0] || '[]');
+    
+    const recommendedIds = data.recommendations || [];
     return communities.filter(c => recommendedIds.includes(c.id));
   } catch (error) {
     console.error('AI Recommendation error:', error);
