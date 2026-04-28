@@ -1201,7 +1201,8 @@ export default function App() {
 
       {/* Bottom Navigation */}
       {isLoggedIn && !activeWorkout && !['create-workout', 'edit-workout'].includes(activeTab) && (
-        <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass border-t border-white/10 py-3 grid grid-cols-5 items-center z-50">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-dark-surface">
+        <nav className="max-w-md mx-auto border-t border-white/10 py-3 grid grid-cols-5 items-center">
           <div className="flex justify-center">
             <NavButton active={activeTab === 'dashboard'} icon={<LayoutDashboard size={20} />} label="Início" onClick={() => switchTab('dashboard')} />
           </div>
@@ -1241,6 +1242,7 @@ export default function App() {
             )}
           </div>
         </nav>
+        </div>
       )}
 
       {/* Workout Selector Modal */}
