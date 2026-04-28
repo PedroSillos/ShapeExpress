@@ -7,9 +7,9 @@
     "dev": "tsx server.ts",
     "build": "vite build",
     "preview": "vite preview",
-    "clean": "rm -rf dist",
+    "clean": "rd /s /q dist",
     "lint": "tsc --noEmit",
-    "android": "npm run build && rm -Recurse -Force android/app/build && npx capacitor sync"
+    "android": "npm run build && rd /s /q android\\app\\build & npx capacitor sync && npx capacitor open android"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",

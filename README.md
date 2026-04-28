@@ -55,7 +55,9 @@ To build the Android app from the React app:
 npm run android
 
 # Option 2: Manual commands
-npm run build && rm -Recurse -Force android/app/build && npx capacitor sync
+npm run build
+rm -Recurse -Force android/app/build
+npx capacitor sync
 npx capacitor open android
 ```
 
