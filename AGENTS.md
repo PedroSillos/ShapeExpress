@@ -84,6 +84,44 @@ src/
 
 ---
 
+## 🔐 Security Guidelines
+
+### Environment Variables
+- **Never hardcode secrets** — all keys must live in `.env.local` (gitignored)
+- Required secrets: `STRIPE_SECRET_KEY`, `GEMINI_API_KEY`, Firebase config vars
+- Never expose `STRIPE_SECRET_KEY` or `GEMINI_API_KEY` to the frontend (`VITE_` prefix = public)
+
+### Authentication
+- All `/api/*` routes (except `/api/health`) must use `authMiddleware` in [server.ts](server.ts)
+- Prefer Firebase ID token (`Authorization: Bearer <token>`) over the `x-user-email` fallback header
+- Never trust user-supplied identity without server-side verification
+
+### Input Validation
+- Validate and sanitize all request body fields using `express-validator` before processing
+- Use the existing `validateProtocolId` / `validateSessionId` patterns for new endpoints
+- Reject unexpected or oversized payloads early
+
+### AI Endpoints
+- Never include raw user-controlled strings directly in Gemini prompts without sanitization
+- Limit prompt-injected data to known, typed fields (name, objective, level, etc.)
+- Always cap AI response usage to avoid runaway costs (model: `gemini-2.0-flash`)
+
+### Stripe
+- Verify payment status server-side via `stripe.checkout.sessions.retrieve` — never trust client claims
+- Use Stripe webhooks (with signature verification) for production purchase fulfillment
+- `protocolId` in metadata must be validated before use
+
+### Firebase
+- Use Firebase Admin SDK (server-side) for privileged Firestore writes
+- Client SDK is acceptable for reads/writes scoped to the authenticated user
+- Apply Firestore Security Rules to enforce ownership (`request.auth.uid == resource.data.userId`)
+
+### General
+- No `console.log` of sensitive data (tokens, emails, payment info) in production
+- Keep dependencies up to date; run `npm audit` regularly
+
+---
+
 ## ⚠️ Current Limitations
 
 - **No test framework** configured (no vitest/jest)
