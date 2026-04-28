@@ -71,7 +71,9 @@ firebase emulators:start
 
 ```bash
 npx capacitor sync
-npx capacitor run android
 npx capacitor open android
-cd android && ./gradlew assembleDebug
+cd android
+./gradlew assembleDebug
+cd ..
+npx capacitor run android
 ```
