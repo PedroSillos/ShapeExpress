@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "android": "npm run build && rm -rf android/app/build && npx capacitor sync"
+    "android": "npm run build && rm -Recurse -Force android/app/build && npx capacitor sync"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",

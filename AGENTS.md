@@ -21,13 +21,13 @@ React 19 + TypeScript + Vite frontend, Express backend, Firebase, Stripe, Gemini
 npm run android
 
 # Option 2: Manual commands
-npm run build && rm -rf android/app/build && npx capacitor sync
+npm run build && rm -Recurse -Force android/app/build && npx capacitor sync
 npx capacitor open android
 ```
 
 This ensures:
 1. Fresh React build (`npm run build`)
-2. Clears Android build cache (`rm -rf android/app/build`)
+2. Clears Android build cache (`rm -Recurse -Force android/app/build`)
 3. Syncs to Android project (`npx capacitor sync`)
 
 ## Key Files
