@@ -122,14 +122,6 @@ src/
 
 ---
 
-## ⚠️ Current Limitations
-
-- **No test framework** configured (no vitest/jest)
-- **Firebase required** for full functionality
-- **Stripe optional** for payments
-
----
-
 ## 🔧 Tech Stack
 
 | Layer | Technology |
