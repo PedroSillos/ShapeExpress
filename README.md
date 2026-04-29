@@ -41,7 +41,6 @@ The app will be available at:
 |---------|-------------|
 | `npm run dev` | Start dev server (Vite + Express) |
 | `npm run build` | Production build |
-| `npm run preview` | Preview production build |
 | `npm run lint` | TypeScript check |
 | `npm run clean` | Remove dist folder |
 | `npm run android` | Build Android without cache |

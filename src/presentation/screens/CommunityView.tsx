@@ -31,6 +31,7 @@ import {
   User,
 } from "lucide-react";
 import { cn } from "../../utils/cn";
+import { getFirebaseErrorMessage } from "../../utils/firebaseErrors";
 import { formatDistanceToNow, endOfDay, endOfWeek, endOfMonth, differenceInSeconds } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";

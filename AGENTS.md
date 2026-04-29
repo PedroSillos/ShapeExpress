@@ -8,7 +8,7 @@ React 19 + TypeScript + Vite frontend, Express backend, Firebase, Stripe, Gemini
 |---------|-------------|
 | `npm run dev` | Dev server (Vite :5173 + Express :3000) |
 | `npm run build` | Production build |
-| `npm run lint` | TypeScript check (`tsc --noEmit`) |
+| `npm run lint` | TypeScript check |
 | `npm run clean` | Remove dist folder |
 | `npm run android` | Build Android without cache (recommended) |
 

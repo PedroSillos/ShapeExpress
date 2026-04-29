@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../utils/cn';
-import { UserProfile } from '../../types';
+import { UserProfile } from '../../domain/entities';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { MOCK_PROTOCOLS } from '../../constants';

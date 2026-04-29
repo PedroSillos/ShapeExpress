@@ -963,7 +963,7 @@ export default function App() {
                 api.getNotifications()
               ]);
               setStudentConnections(connections);
-              setUserProfile(profile || DEFAULT_PROFILE);
+              setUserProfile((profile as UserProfile) || DEFAULT_PROFILE);
               setNotifications(notifs);
             } catch (error) {
               console.error("Failed to request connection:", error);
@@ -979,7 +979,7 @@ export default function App() {
                 api.getNotifications()
               ]);
               setStudentConnections(connections);
-              setUserProfile(profile || DEFAULT_PROFILE);
+              setUserProfile((profile as UserProfile) || DEFAULT_PROFILE);
               setNotifications(notifs);
             } catch (error) {
               console.error("Failed to disconnect trainer:", error);
@@ -1043,7 +1043,7 @@ export default function App() {
                 senderId: userProfile?.email || '',
                 receiverId: activeChatStudent.id,
                 text,
-                timestamp: res.createdAt
+                timestamp: new Date().toISOString()
               };
               setChatMessages(prev => ({
                 ...prev,
@@ -4490,6 +4490,7 @@ function StudentsView({ students, userProfile, onMessage, pendingRequests, onRes
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showRequestsPopup, setShowRequestsPopup] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [firestoreError, setFirestoreError] = useState<Error | null>(null);
   const [showFinancialDashboard, setShowFinancialDashboard] = useState(false);
   const [settingsTab, setSettingsTab] = useState<'planos' | 'avaliacoes' | 'anamnese'>('planos');
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState<string | null>(null);

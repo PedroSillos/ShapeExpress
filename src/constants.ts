@@ -5,7 +5,7 @@ import {
   UserStats,
   UserTrainingProfile,
   UserProfile,
-} from "./types";
+} from "./domain/entities";
 import { Challenge } from "./domain/entities";
 
 export const EXERCISES: Exercise[] = [
