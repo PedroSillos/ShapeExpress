@@ -26,15 +26,10 @@ npx capacitor sync
 npx capacitor open android
 ```
 
-This ensures:
-1. Fresh React build (`npm run build`)
-2. Clears Android build cache (`rm -Recurse -Force android/app/build`)
-3. Syncs to Android project (`npx capacitor sync`)
-
 ## Key Files
 
-- [server.ts](server.ts) — Express backend (auth, Stripe, AI, WebSocket)
 - [src/App.tsx](src/App.tsx) — Routing
+- [server.ts](server.ts) — Express backend (auth, Stripe, AI, WebSocket)
 - [src/firebase.ts](src/firebase.ts) — Firebase config
 - [vite.config.ts](vite.config.ts) — Vite + Tailwind
 - [capacitor.config.ts](capacitor.config.ts) — Capacitor config (`webDir: 'dist'`)
@@ -65,6 +60,10 @@ src/features/your-feature/
 | `entities` | Shared types/contracts | Logic, components |
 | `shared` | Generic UI, hooks, utils | Feature-specific code |
 | `services` | API calls, Firebase ops | React components |
+
+## Cross-Platform Requirement
+
+Always consider both the **web app** and **Android app** when making changes. UI, routing, API calls, and feature behavior must work correctly on both platforms. Test or verify changes against both targets before considering a task complete.
 
 ## Conventions
 

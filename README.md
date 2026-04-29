@@ -59,11 +59,6 @@ npx capacitor sync
 npx capacitor open android
 ```
 
-This ensures a fresh build by:
-1. Building the React app (`npm run build`)
-2. Clearing Android build cache (`rm -Recurse -Force android/app/build`)
-3. Syncing to Android project (`npx capacitor sync`)
-
 ## Features
 
 - **Authentication** — Email/Password and Google sign-in via Firebase
