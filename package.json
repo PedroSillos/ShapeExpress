@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx server.ts",
+    "dev": "npm run clean & npx vite & tsx server.ts",
     "build": "vite build",
     "preview": "vite preview",
-    "clean": "rd /s /q dist",
+    "clean": "(if exist dist rd /s /q dist) & (if exist node_modules\\.vite rd /s /q node_modules\\.vite)",
     "lint": "tsc --noEmit",
     "android": "npm run build && rd /s /q android\\app\\build & npx capacitor sync && npx capacitor open android"
   },

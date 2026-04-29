@@ -6,10 +6,10 @@ React 19 + TypeScript + Vite frontend, Express backend, Firebase, Stripe, Gemini
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start dev server (Vite + Express) |
+| `npm run dev` | Clean cache, start Vite dev server + Express |
 | `npm run build` | Production build |
 | `npm run lint` | TypeScript check |
-| `npm run clean` | Remove dist folder |
+| `npm run clean` | Remove `dist/` and Vite cache (`node_modules/.vite`) |
 
 ## Android / Capacitor (No Cache)
 

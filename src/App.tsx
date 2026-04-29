@@ -1005,6 +1005,10 @@ export default function App() {
           onRespond={async (id, status) => {
             try {
               await api.respondToConnection(id, status);
+              await Promise.all([
+                api.getStudents(),
+                api.getTrainerConnections()
+              ]);
             } catch (error) {
               console.error("Failed to respond to connection:", error);
             }

@@ -276,13 +276,23 @@ export const useAppState = () => {
   const api = useMemo(() => {
     return {
       getProfile: async () => {
-        if (!currentUser?.email) return null;
+        const email = currentUser?.email || token || localStorage.getItem('shape_express_token');
+        if (!email) return null;
         try {
-          const docRef = doc(db, 'users', currentUser.email);
-          const docSnap = await getDoc(docRef);
+          const emailLower = email.toLowerCase();
+          let docSnap = await getDoc(doc(db, 'users', email));
+          if (!docSnap.exists()) docSnap = await getDoc(doc(db, 'users', emailLower));
           if (docSnap.exists()) {
             setUserProfile(docSnap.data() as UserProfile);
             return docSnap.data();
+          }
+          // Fallback: query by email field
+          const q = query(collection(db, 'users'), where('email', '==', emailLower));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            const data = snap.docs[0].data() as UserProfile;
+            setUserProfile(data);
+            return data;
           }
         } catch (e) {}
         return null;
@@ -317,8 +327,10 @@ export const useAppState = () => {
         } catch (e) {}
       },
       getTemplates: async () => {
+        const email = currentUser?.email || token || localStorage.getItem('shape_express_token');
+        if (!email) return [];
         try {
-          const q = query(collection(db, 'templates'));
+          const q = query(collection(db, 'templates'), where('userId', '==', email));
           const querySnapshot = await getDocs(q);
           const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as WorkoutTemplate));
           setTemplates(data);
@@ -355,8 +367,10 @@ export const useAppState = () => {
         }
       },
       getSessions: async () => {
+        const email = currentUser?.email || token || localStorage.getItem('shape_express_token');
+        if (!email) return [];
         try {
-          const q = query(collection(db, 'sessions'));
+          const q = query(collection(db, 'sessions'), where('userId', '==', email));
           const querySnapshot = await getDocs(q);
           const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as WorkoutSession));
           setSessions(data);
@@ -448,69 +462,60 @@ export const useAppState = () => {
         }
       },
       getStudents: async () => {
-        if (!currentUser?.email) return [];
+        const email = currentUser?.email || token || localStorage.getItem('shape_express_token');
+        if (!email) return [];
         try {
-          // get trainer connections where trainerEmail == currentUser.email
-          const connectionsQ = query(collection(db, 'connections'), where('trainerEmail', '==', currentUser.email.toLowerCase()));
-          const connectionsSnap = await getDocs(connectionsQ);
-          if (connectionsSnap.empty) {
-            setStudents([]);
-            return [];
-          }
-          
-          const acceptedConnections = connectionsSnap.docs
+          const emailLower = email.toLowerCase();
+          const [snapLower, snapOriginal] = await Promise.all([
+            getDocs(query(collection(db, 'connections'), where('trainerEmail', '==', emailLower))),
+            email !== emailLower
+              ? getDocs(query(collection(db, 'connections'), where('trainerEmail', '==', email)))
+              : Promise.resolve(null)
+          ]);
+
+          const allDocs = [...snapLower.docs, ...(snapOriginal?.docs || [])];
+          const seen = new Set<string>();
+          const uniqueDocs = allDocs.filter(d => { if (seen.has(d.id)) return false; seen.add(d.id); return true; });
+
+          const acceptedConnections = uniqueDocs
             .map(d => d.data())
             .filter(data => data.status === 'accepted');
-            
+
           if (acceptedConnections.length === 0) {
             setStudents([]);
             return [];
           }
 
-          const studentEmails = acceptedConnections.map(data => data.studentEmail);
-          
-          const studentPromises = studentEmails.map(async (email) => {
-            const q = query(collection(db, 'users'), where('email', '==', email));
+          const studentEmails = acceptedConnections.map(data => data.studentEmail as string);
+
+          const studentPromises = studentEmails.map(async (sEmail) => {
+            const emailL = sEmail.toLowerCase();
+            const q = query(collection(db, 'users'), where('email', '==', emailL));
             const snap = await getDocs(q);
+            let userData: UserProfile | null = null;
             if (!snap.empty) {
-              const u = snap.docs[0].data() as UserProfile;
-              return {
-                id: u.email || email,
-                name: u.name || email.split('@')[0],
-                email: u.email || email,
-                avatarUrl: u.avatarUrl || 'https://picsum.photos/400',
-                lastWorkout: new Date().toISOString(),
-                progress: 50,
-                streak: 0,
-                status: 'new' as const,
-                weeklyWorkouts: [],
-                score: 0
-              } as Student;
+              userData = snap.docs[0].data() as UserProfile;
             } else {
-              // Try fallback case insensitive by querying directly via document get if it was saved with exact casing
-              const alternativeDocRef = doc(db, 'users', email);
-              const alternativeSnap = await getDoc(alternativeDocRef);
-              if (alternativeSnap.exists()) {
-                const u = alternativeSnap.data() as UserProfile;
-                return {
-                  id: u.email || email,
-                  name: u.name || email.split('@')[0],
-                  email: u.email || email,
-                  avatarUrl: u.avatarUrl || 'https://picsum.photos/400',
-                  lastWorkout: new Date().toISOString(),
-                  progress: 50,
-                  streak: 0,
-                  status: 'new' as const,
-                  weeklyWorkouts: [],
-                  score: 0
-                } as Student;
+              for (const id of [emailL, sEmail]) {
+                const d = await getDoc(doc(db, 'users', id));
+                if (d.exists()) { userData = d.data() as UserProfile; break; }
               }
             }
-            return null;
+            return {
+              id: userData?.email || emailL,
+              name: userData?.name || emailL.split('@')[0],
+              email: userData?.email || emailL,
+              avatarUrl: userData?.avatarUrl || 'https://picsum.photos/400',
+              lastWorkout: new Date().toISOString(),
+              progress: 50,
+              streak: 0,
+              status: 'new' as const,
+              weeklyWorkouts: [],
+              score: 0
+            } as Student;
           });
-          
-          const resolvedStudents = (await Promise.all(studentPromises)).filter((s): s is Student => s !== null);
-          
+
+          const resolvedStudents = await Promise.all(studentPromises);
           setStudents(resolvedStudents);
           return resolvedStudents;
         } catch (e) {
@@ -566,11 +571,21 @@ export const useAppState = () => {
         }
       },
       getTrainerConnections: async () => {
-        if (!currentUser?.email) return [];
+        const email = currentUser?.email || token || localStorage.getItem('shape_express_token');
+        if (!email) return [];
         try {
-          const q = query(collection(db, 'connections'), where('trainerEmail', '==', currentUser.email.toLowerCase()));
-          const snap = await getDocs(q);
-          const data = snap.docs.map(d => d.data() as TrainerConnection);
+          const emailLower = email.toLowerCase();
+          const [snapLower, snapOriginal] = await Promise.all([
+            getDocs(query(collection(db, 'connections'), where('trainerEmail', '==', emailLower))),
+            email !== emailLower
+              ? getDocs(query(collection(db, 'connections'), where('trainerEmail', '==', email)))
+              : Promise.resolve(null)
+          ]);
+          const allDocs = [...snapLower.docs, ...(snapOriginal?.docs || [])];
+          const seen = new Set<string>();
+          const data = allDocs
+            .filter(d => { if (seen.has(d.id)) return false; seen.add(d.id); return true; })
+            .map(d => d.data() as TrainerConnection);
           setTrainerConnections(data);
           return data;
         } catch (e) {
@@ -919,17 +934,15 @@ export const useAppState = () => {
           api.getTrainers(),
           api.getPurchasedProtocols(),
         ]);
-        
-        // Load trainer/student specific data
-        if (profile) {
-          if ((profile as UserProfile).userType === 'treinador') {
-            await Promise.all([
-              api.getTrainerConnections(),
-              api.getStudents()
-            ]);
-          } else {
-            await api.getStudentConnections();
-          }
+
+        const effectiveUserType = (profile as UserProfile | null)?.userType;
+        if (effectiveUserType === 'treinador') {
+          await Promise.all([
+            api.getTrainerConnections(),
+            api.getStudents()
+          ]);
+        } else {
+          await api.getStudentConnections();
         }
       } catch (e) {
         console.error("Error syncing data:", e);
