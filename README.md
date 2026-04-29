@@ -35,7 +35,7 @@ The app will be available at:
 - Frontend: http://localhost:5173
 - Backend: http://localhost:3000
 
-## Available Scripts
+## Web App
 
 | Command | Description |
 |---------|-------------|
@@ -43,9 +43,8 @@ The app will be available at:
 | `npm run build` | Production build |
 | `npm run lint` | TypeScript check |
 | `npm run clean` | Remove dist folder |
-| `npm run android` | Build Android without cache |
 
-## Mobile (Android)
+## Android / Capacitor (No Cache)
 
 To build the Android app from the React app:
 

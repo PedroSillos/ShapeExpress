@@ -2,15 +2,14 @@
 
 React 19 + TypeScript + Vite frontend, Express backend, Firebase, Stripe, Gemini AI.
 
-## Commands
+## Web App
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Dev server (Vite :5173 + Express :3000) |
+| `npm run dev` | Start dev server (Vite + Express) |
 | `npm run build` | Production build |
 | `npm run lint` | TypeScript check |
 | `npm run clean` | Remove dist folder |
-| `npm run android` | Build Android without cache (recommended) |
 
 ## Android / Capacitor (No Cache)
 
