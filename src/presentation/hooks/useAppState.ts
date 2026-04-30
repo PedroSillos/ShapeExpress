@@ -255,6 +255,18 @@ export const useAppState = () => {
     TrainerConnection[]
   >([]);
   const [students, setStudents] = useState<Student[]>([]);
+  const setStudentsTracked = (val: Student[] | ((prev: Student[]) => Student[])) => {
+    if (typeof val === 'function') {
+      setStudents(prev => {
+        const next = val(prev);
+        console.log('[students] setStudents fn called, result:', next.map(s => s.email), new Error().stack?.split('\n')[2]?.trim());
+        return next;
+      });
+    } else {
+      console.log('[students] setStudents called with:', val.map(s => s.email), new Error().stack?.split('\n')[2]?.trim());
+      setStudents(val);
+    }
+  };
   const [trainers, setTrainers] = useState<UserProfile[]>([]);
 
   const [posts, setPosts] = useState<Post[]>([]);
@@ -466,6 +478,7 @@ export const useAppState = () => {
         if (!email) return [];
         try {
           const emailLower = email.toLowerCase();
+
           const [snapLower, snapOriginal] = await Promise.all([
             getDocs(query(collection(db, 'connections'), where('trainerEmail', '==', emailLower))),
             email !== emailLower
@@ -473,16 +486,23 @@ export const useAppState = () => {
               : Promise.resolve(null)
           ]);
 
-          const allDocs = [...snapLower.docs, ...(snapOriginal?.docs || [])];
+          let allDocs = [...snapLower.docs, ...(snapOriginal?.docs || [])];
+
+          if (allDocs.length === 0) {
+            const fallbackSnap = await getDocs(
+              query(collection(db, 'connections'), where('status', '==', 'accepted'))
+            );
+            allDocs = fallbackSnap.docs.filter(d =>
+              (d.data().trainerEmail || '').toLowerCase() === emailLower
+            );
+          }
+
           const seen = new Set<string>();
           const uniqueDocs = allDocs.filter(d => { if (seen.has(d.id)) return false; seen.add(d.id); return true; });
-
-          const acceptedConnections = uniqueDocs
-            .map(d => d.data())
-            .filter(data => data.status === 'accepted');
+          const acceptedConnections = uniqueDocs.map(d => d.data()).filter(data => data.status === 'accepted');
 
           if (acceptedConnections.length === 0) {
-            setStudents([]);
+            setStudentsTracked([]);
             return [];
           }
 
@@ -490,22 +510,25 @@ export const useAppState = () => {
 
           const studentPromises = studentEmails.map(async (sEmail) => {
             const emailL = sEmail.toLowerCase();
-            const q = query(collection(db, 'users'), where('email', '==', emailL));
-            const snap = await getDocs(q);
             let userData: UserProfile | null = null;
-            if (!snap.empty) {
-              userData = snap.docs[0].data() as UserProfile;
-            } else {
-              for (const id of [emailL, sEmail]) {
-                const d = await getDoc(doc(db, 'users', id));
-                if (d.exists()) { userData = d.data() as UserProfile; break; }
+            try {
+              const snapE = await getDocs(query(collection(db, 'users'), where('email', '==', emailL)));
+              if (!snapE.empty) {
+                userData = snapE.docs[0].data() as UserProfile;
+              } else {
+                const d = await getDoc(doc(db, 'users', emailL));
+                if (d.exists()) userData = d.data() as UserProfile;
               }
+            } catch (userErr) {
+              console.error('[getStudents] error fetching user profile for', emailL, userErr);
             }
             return {
               id: userData?.email || emailL,
               name: userData?.name || emailL.split('@')[0],
               email: userData?.email || emailL,
               avatarUrl: userData?.avatarUrl || 'https://picsum.photos/400',
+              objective: userData?.objective,
+              experienceLevel: userData?.experienceLevel,
               lastWorkout: new Date().toISOString(),
               progress: 50,
               streak: 0,
@@ -516,10 +539,10 @@ export const useAppState = () => {
           });
 
           const resolvedStudents = await Promise.all(studentPromises);
-          setStudents(resolvedStudents);
+          setStudentsTracked(resolvedStudents);
           return resolvedStudents;
         } catch (e) {
-          console.error(e);
+          console.error('[getStudents] error:', e);
           return [];
         }
       },
@@ -651,7 +674,9 @@ export const useAppState = () => {
                 };
                 setStudents(prev => {
                   if (prev.some(s => (s.email || '').toLowerCase() === (newStudent.email || '').toLowerCase())) return prev;
-                  return [...prev, newStudent];
+                  const next = [...prev, newStudent];
+                  console.log('[students] respondToConnection setStudents:', next.map(s => s.email));
+                  return next;
                 });
               }
               toast.success("Aluno conectado com sucesso!");
@@ -700,7 +725,7 @@ export const useAppState = () => {
               await deleteDoc(d.ref);
             }
             setTrainerConnections(prev => prev.filter(c => c.studentEmail !== email));
-            setStudents(prev => prev.filter(s => s.email !== email));
+            setStudentsTracked(prev => prev.filter(s => s.email !== email));
             toast.success("Aluno desconectado com sucesso.");
           }
         } catch(e) {
@@ -901,15 +926,17 @@ export const useAppState = () => {
         toast.success("Até logo!");
       },
     };
-  }, [fetchWithAuth, currentUser, userProfile]);
+  }, [currentUser]);
 
   // Custom persistence and initialization
   useEffect(() => {
     const savedToken = localStorage.getItem("shape_express_token");
+    console.log('[init] savedToken:', savedToken);
     if (savedToken) {
       setToken(savedToken);
       setCurrentUser({ email: savedToken });
       setIsLoggedIn(true);
+      console.log('[init] setIsLoggedIn(true), token:', savedToken);
       const defaultTab = localStorage.getItem('app-default-tab') || 'dashboard';
       setActiveTab(defaultTab as any);
     }
@@ -918,40 +945,110 @@ export const useAppState = () => {
 
   // Real-time synchronization & Data Fetching
   useEffect(() => {
+    console.log('[syncAll effect] isLoggedIn:', isLoggedIn, '| token:', token);
     if (!isLoggedIn || !token) return;
 
+    const email = token;
+    const emailLower = email.toLowerCase();
+
     const syncAll = async () => {
+      console.log('[syncAll] START email:', email);
       try {
-        const [profile] = await Promise.all([
-          api.getProfile(),
-          api.getStats(),
-          api.getTemplates(),
-          api.getSessions(),
-          api.getAssessments(),
-          api.getTrainingProfile(),
-          api.getExerciseStats(),
-          api.getNotifications(),
-          api.getTrainers(),
-          api.getPurchasedProtocols(),
+        // Fetch profile directly without relying on currentUser closure
+        let profile: UserProfile | null = null;
+        try {
+          let docSnap = await getDoc(doc(db, 'users', email));
+          if (!docSnap.exists()) docSnap = await getDoc(doc(db, 'users', emailLower));
+          if (docSnap.exists()) {
+            profile = docSnap.data() as UserProfile;
+          } else {
+            const q = query(collection(db, 'users'), where('email', '==', emailLower));
+            const snap = await getDocs(q);
+            if (!snap.empty) profile = snap.docs[0].data() as UserProfile;
+          }
+          if (profile) setUserProfile(profile);
+        } catch (e) { console.error('[syncAll] error fetching profile', e); }
+
+        console.log('[syncAll] profile:', profile?.email, '| userType:', profile?.userType);
+
+        // Fetch remaining data in parallel
+        await Promise.all([
+          getDoc(doc(db, 'stats', email)).then(snap => {
+            if (snap.exists()) setUserStats(snap.data() as UserStats);
+          }).catch(() => {}),
+          getDocs(query(collection(db, 'templates'), where('userId', '==', email))).then(snap => {
+            setTemplates(snap.docs.map(d => ({ id: d.id, ...d.data() } as WorkoutTemplate)));
+          }).catch(() => {}),
+          getDocs(query(collection(db, 'sessions'), where('userId', '==', email))).then(snap => {
+            setSessions(snap.docs.map(d => ({ id: d.id, ...d.data() } as WorkoutSession)));
+          }).catch(() => {}),
+          getDocs(query(collection(db, 'users'), where('userType', '==', 'treinador'))).then(snap => {
+            if (!snap.empty) setTrainers(snap.docs.map(d => d.data() as UserProfile));
+          }).catch(() => {}),
         ]);
 
-        const effectiveUserType = (profile as UserProfile | null)?.userType;
-        if (effectiveUserType === 'treinador') {
-          await Promise.all([
-            api.getTrainerConnections(),
-            api.getStudents()
-          ]);
+        console.log('[syncAll] parallel fetches done, checking userType:', profile?.userType);
+
+        if (profile?.userType === 'treinador') {
+          console.log('[syncAll] fetching connections for trainer:', emailLower);
+          const connSnap = await getDocs(
+            query(collection(db, 'connections'), where('trainerEmail', '==', emailLower))
+          );
+          console.log('[syncAll] connections found:', connSnap.docs.length);
+          const allConns = connSnap.docs.map(d => d.data() as TrainerConnection);
+          setTrainerConnections(allConns);
+
+          const accepted = allConns.filter(c => c.status === 'accepted');
+          console.log('[syncAll] accepted connections:', accepted.length);
+          if (accepted.length === 0) {
+            setStudentsTracked([]);
+          } else {
+            const studentList = await Promise.all(accepted.map(async (conn) => {
+              const sEmailL = conn.studentEmail.toLowerCase();
+              let userData: UserProfile | null = null;
+              try {
+                const snap = await getDocs(query(collection(db, 'users'), where('email', '==', sEmailL)));
+                if (!snap.empty) {
+                  userData = snap.docs[0].data() as UserProfile;
+                } else {
+                  const d = await getDoc(doc(db, 'users', sEmailL));
+                  if (d.exists()) userData = d.data() as UserProfile;
+                }
+              } catch (e) { console.error('[syncAll] error fetching student', sEmailL, e); }
+              return {
+                id: userData?.email || sEmailL,
+                name: userData?.name || sEmailL.split('@')[0],
+                email: userData?.email || sEmailL,
+                avatarUrl: userData?.avatarUrl || 'https://picsum.photos/400',
+                objective: userData?.objective,
+                experienceLevel: userData?.experienceLevel,
+                lastWorkout: new Date().toISOString(),
+                progress: 50,
+                streak: 0,
+                status: 'new' as const,
+                weeklyWorkouts: [],
+                score: 0
+              } as Student;
+            }));
+            console.log('[syncAll] setStudents:', studentList.map(s => s.email));
+            setStudentsTracked(studentList);
+          }
         } else {
-          await api.getStudentConnections();
+          try {
+            const snap = await getDocs(
+              query(collection(db, 'connections'), where('studentEmail', '==', emailLower))
+            );
+            setStudentConnections(snap.docs.map(d => d.data() as TrainerConnection));
+          } catch (e) { console.error('[syncAll] error fetching student connections', e); }
         }
       } catch (e) {
-        console.error("Error syncing data:", e);
+        console.error('[syncAll] OUTER ERROR:', e);
       }
     };
 
     syncAll();
-
-  }, [isLoggedIn, token, api]);
+    return () => { console.log('[syncAll effect] CLEANUP — token:', token, 'isLoggedIn:', isLoggedIn); };
+  }, [isLoggedIn, token]);
 
   const filteredTemplates = useMemo(() => {
     if (userProfile?.userType === 'treinador') {

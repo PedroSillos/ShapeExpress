@@ -11,15 +11,18 @@ import { Student, UserProfile, AppNotification, TrainerConnection } from '../../
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 
-export function StudentsView({ students, userProfile, onMessage, pendingRequests, onRespond, onDisconnect, onViewWorkouts }: { 
+export function StudentsView({ students, userProfile, onMessage, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution }: { 
   students: Student[], 
   userProfile: UserProfile, 
   onMessage: (student: Student) => void,
   pendingRequests: AppNotification[],
   onRespond: (id: string, status: 'accepted' | 'rejected') => Promise<void>,
   onDisconnect: (studentEmail: string) => Promise<void>,
-  onViewWorkouts: (student: Student) => void
+  onViewWorkouts: (student: Student) => void,
+  onViewEvolution?: (student: Student) => void,
+  [key: string]: any
 }) {
+  console.log('[StudentsView] render — students:', students.length, students.map(s => s.email));
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'Todos' | 'Evoluindo' | 'Estagnados' | 'Em Risco' | 'Novos'>('Todos');
   const [showFilters, setShowFilters] = useState(false);
