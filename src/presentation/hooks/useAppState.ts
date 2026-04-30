@@ -534,7 +534,8 @@ export const useAppState = () => {
               streak: 0,
               status: 'new' as const,
               weeklyWorkouts: [],
-              score: 0
+              score: 0,
+              connectionStatus: 'accepted' as const
             } as Student;
           });
 
@@ -670,7 +671,8 @@ export const useAppState = () => {
                   streak: 0,
                   status: 'new' as const,
                   weeklyWorkouts: [],
-                  score: 0
+                  score: 0,
+                  connectionStatus: 'accepted' as const
                 };
                 setStudents(prev => {
                   if (prev.some(s => (s.email || '').toLowerCase() === (newStudent.email || '').toLowerCase())) return prev;
