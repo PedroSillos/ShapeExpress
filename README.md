@@ -17,6 +17,7 @@ Shape Express is a comprehensive fitness tracking application that helps users m
 | Payments | Stripe |
 | AI | Google Gemini API |
 | Mobile | Capacitor 8 |
+| Testing | Playwright (browser automation) |
 
 ## Quick Start
 
@@ -71,6 +72,7 @@ npx capacitor open android
 - **Express** — Quick workout mode
 - **Profile** — User profile management
 - **Notifications** — Push notifications for reminders
+- **Students** — Trainer view with per-student last workout date (shows "Ainda não fez o primeiro treino" when no sessions exist)
 
 ## Environment Variables
 

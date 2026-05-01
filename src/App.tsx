@@ -4696,7 +4696,7 @@ function StudentsView({ students, userProfile, onMessage, pendingRequests, onRes
             </div>
             <div>
               <p className="text-[10px] text-white/40 font-bold uppercase">Último Treino</p>
-              <p className="text-sm font-bold">{(() => { try { return format(parseISO(selectedStudent.lastWorkout), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }); } catch { return selectedStudent.lastWorkout; } })()}</p>
+              <p className="text-sm font-bold">{selectedStudent.lastWorkout ? (() => { try { return format(parseISO(selectedStudent.lastWorkout), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }); } catch { return selectedStudent.lastWorkout; } })() : 'Ainda não fez o primeiro treino'}</p>
             </div>
           </Card>
           <Card className="flex items-center gap-3">
@@ -5033,7 +5033,7 @@ function StudentsView({ students, userProfile, onMessage, pendingRequests, onRes
                   </div>
                   <div className="flex items-center gap-3 mt-1">
                     <p className="text-[10px] text-white/40 flex items-center gap-1">
-                      <Clock size={10} /> {(() => { try { return format(parseISO(student.lastWorkout), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }); } catch { return student.lastWorkout; } })()}
+                      <Clock size={10} /> {student.lastWorkout ? (() => { try { return format(parseISO(student.lastWorkout), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }); } catch { return student.lastWorkout; } })() : 'Ainda não fez o primeiro treino'}
                     </p>
                     <p className="text-[10px] text-emerald-400 font-bold">+{student.progress}%</p>
                     <p className="text-[10px] text-orange-400 font-bold flex items-center gap-1">

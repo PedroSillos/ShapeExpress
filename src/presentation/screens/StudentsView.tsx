@@ -260,7 +260,7 @@ export function StudentsView({ students, userProfile, onMessage, pendingRequests
                   <div className="flex flex-col">
                     <span className="text-[8px] text-white/20 uppercase font-bold">Último Treino</span>
                     <span className="text-[10px] font-bold">
-                      {(() => { try { return format(parseISO(student.lastWorkout), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }); } catch { return student.lastWorkout; } })()}
+                      {student.lastWorkout ? (() => { try { return format(parseISO(student.lastWorkout), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }); } catch { return student.lastWorkout; } })() : 'Ainda não fez o primeiro treino'}
                     </span>
                   </div>
                   <ChevronRight size={18} className="ml-auto text-white/20 group-hover:text-brand-red transition-colors" />

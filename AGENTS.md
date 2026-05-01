@@ -28,13 +28,29 @@ npx capacitor open android
 
 ## Key Files
 
-- [src/App.tsx](src/App.tsx) — Routing
+- [src/App.tsx](src/App.tsx) — Routing + inline trainer/student screens
+- [src/presentation/screens]
+- [src/presentation/hooks]
 - [server.ts](server.ts) — Express backend (auth, Stripe, AI, WebSocket)
 - [src/firebase.ts](src/firebase.ts) — Firebase config
 - [vite.config.ts](vite.config.ts) — Vite + Tailwind
 - [capacitor.config.ts](capacitor.config.ts) — Capacitor config (`webDir: 'dist'`)
 
-## Architecture
+## Browser Automation with Playwright
+
+Playwright is available (`npx playwright`) and used for validating UI changes against the running dev server. To run a quick headless check:
+
+```js
+// example: pw-check.mjs
+import { chromium } from 'playwright';
+const browser = await chromium.launch({ headless: true });
+const page = await browser.newPage();
+await page.goto('http://localhost:5173');
+// login, navigate, assert...
+await browser.close();
+```
+
+Run with `node pw-check.mjs`. Delete the script after use — do not commit temporary Playwright scripts.
 
 FSD (Feature-Sliced Design):
 - New features go in `src/features/<name>/` with `index.ts` barrel export
