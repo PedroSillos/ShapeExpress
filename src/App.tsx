@@ -5062,26 +5062,7 @@ function StudentsView({ students, userProfile, onMessage, pendingRequests, onRes
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-2 border-t border-white/5">
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedStudent(student);
-                  }}
-                  className="flex-1 py-2 bg-white/5 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
-                >
-                  Ver Perfil
-                </button>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onMessage(student);
-                  }}
-                  className="flex-1 py-2 bg-brand-red/10 text-brand-red rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-brand-red/20 transition-colors"
-                >
-                  Mensagem
-                </button>
-              </div>
+
             </Card>
           ))
         ) : (

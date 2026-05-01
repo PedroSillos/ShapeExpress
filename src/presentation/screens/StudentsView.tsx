@@ -259,15 +259,7 @@ export function StudentsView({ students, userProfile, onMessage, pendingRequests
                     <span className="text-[8px] text-white/20 uppercase font-bold">Último Treino</span>
                     <span className="text-[10px] font-bold">{student.lastWorkout}</span>
                   </div>
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onMessage(student);
-                    }}
-                    className="ml-auto p-2 bg-white/5 rounded-xl text-white/40 hover:text-brand-red hover:bg-brand-red/10 transition-all"
-                  >
-                    <MessageCircle size={18} />
-                  </button>
+                  <ChevronRight size={18} className="ml-auto text-white/20 group-hover:text-brand-red transition-colors" />
                 </div>
               </div>
             </div>
