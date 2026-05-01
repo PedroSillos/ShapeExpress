@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { 
   Search, SlidersHorizontal, UserPlus, X, RefreshCw, ChevronRight, 
   MessageCircle, Trash2, ShieldCheck, AlertTriangle, TrendingUp, 
@@ -257,7 +259,9 @@ export function StudentsView({ students, userProfile, onMessage, pendingRequests
                   <div className="w-px h-4 bg-white/5" />
                   <div className="flex flex-col">
                     <span className="text-[8px] text-white/20 uppercase font-bold">Último Treino</span>
-                    <span className="text-[10px] font-bold">{student.lastWorkout}</span>
+                    <span className="text-[10px] font-bold">
+                      {(() => { try { return format(parseISO(student.lastWorkout), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }); } catch { return student.lastWorkout; } })()}
+                    </span>
                   </div>
                   <ChevronRight size={18} className="ml-auto text-white/20 group-hover:text-brand-red transition-colors" />
                 </div>

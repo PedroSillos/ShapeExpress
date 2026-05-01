@@ -4618,7 +4618,7 @@ function StudentsView({ students, userProfile, onMessage, pendingRequests, onRes
 
   const stats = {
     active: activeStudents.length,
-    today: activeStudents.filter(s => s.lastWorkout === 'Hoje' || s.lastWorkout === '1 dia atrás').length,
+    today: activeStudents.filter(s => { try { const d = parseISO(s.lastWorkout); const now = new Date(); return d.toDateString() === now.toDateString() || d.toDateString() === new Date(now.setDate(now.getDate() - 1)).toDateString(); } catch { return false; } }).length,
     atRisk: activeStudents.filter(s => s.status === 'at-risk').length,
     avgProgress: students.length > 0 ? Math.round(students.reduce((acc, s) => acc + s.score, 0) / students.length) : 0
   };
@@ -4696,7 +4696,7 @@ function StudentsView({ students, userProfile, onMessage, pendingRequests, onRes
             </div>
             <div>
               <p className="text-[10px] text-white/40 font-bold uppercase">Último Treino</p>
-              <p className="text-sm font-bold">{selectedStudent.lastWorkout}</p>
+              <p className="text-sm font-bold">{(() => { try { return format(parseISO(selectedStudent.lastWorkout), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }); } catch { return selectedStudent.lastWorkout; } })()}</p>
             </div>
           </Card>
           <Card className="flex items-center gap-3">
@@ -4954,7 +4954,7 @@ function StudentsView({ students, userProfile, onMessage, pendingRequests, onRes
                   </div>
                   <div className="flex-1">
                     <p className="text-xs font-bold">{student.name} está em risco</p>
-                    <p className="text-[10px] text-white/40">{student.lastWorkout}. Envie um lembrete.</p>
+                    <p className="text-[10px] text-white/40">{(() => { try { return format(parseISO(student.lastWorkout), "dd 'de' MMMM", { locale: ptBR }); } catch { return student.lastWorkout; } })()}. Envie um lembrete.</p>
                   </div>
                   <button 
                     onClick={() => onMessage(student)}
@@ -5033,7 +5033,7 @@ function StudentsView({ students, userProfile, onMessage, pendingRequests, onRes
                   </div>
                   <div className="flex items-center gap-3 mt-1">
                     <p className="text-[10px] text-white/40 flex items-center gap-1">
-                      <Clock size={10} /> {student.lastWorkout}
+                      <Clock size={10} /> {(() => { try { return format(parseISO(student.lastWorkout), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }); } catch { return student.lastWorkout; } })()}
                     </p>
                     <p className="text-[10px] text-emerald-400 font-bold">+{student.progress}%</p>
                     <p className="text-[10px] text-orange-400 font-bold flex items-center gap-1">
