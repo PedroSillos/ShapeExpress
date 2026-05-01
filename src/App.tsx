@@ -238,6 +238,12 @@ export default function App() {
   const [communityInitialTab, setCommunityInitialTab] = useState<'feed' | 'challenges' | 'ranking' | 'chat'>('feed');
   const [communityInitialRankingType, setCommunityInitialRankingType] = useState<'community' | 'global' | 'league' | 'friends'>('community');
   const [creatingAdTemplate, setCreatingAdTemplate] = useState<WorkoutTemplate | null>(null);
+  const [studentTemplates, setStudentTemplates] = useState<WorkoutTemplate[]>([]);
+
+  useEffect(() => {
+    if (!selectedStudentForWorkouts) { setStudentTemplates([]); return; }
+    api.getStudentTemplates(selectedStudentForWorkouts.email).then(setStudentTemplates);
+  }, [selectedStudentForWorkouts?.email]);
 
   useEffect(() => {
     if (isLoggedIn && activeTab === 'community' && recommendedCommunities.length === 0) {
@@ -1063,13 +1069,16 @@ export default function App() {
       case 'student-workouts': return selectedStudentForWorkouts ? (
         <WorkoutTemplatesView 
           studentName={selectedStudentForWorkouts.name}
-          templates={templates.filter(t => t.userId === selectedStudentForWorkouts.email && t.creatorEmail === userProfile.email)}
+          templates={studentTemplates}
           onSelect={(t) => {
             setEditingTemplate(t);
             setActiveTab('edit-workout');
           }}
           onAdd={() => setActiveTab('create-workout')}
-          onDelete={deleteTemplate}
+          onDelete={async (id) => {
+            await deleteTemplate(id);
+            setStudentTemplates(prev => prev.filter(t => t.id !== id));
+          }}
           onBack={() => {
             setSelectedStudentForWorkouts(null);
             setActiveTab('students');
@@ -1087,8 +1096,8 @@ export default function App() {
           }}
         />
       ) : null;
-      case 'create-workout': return <CreateWorkoutView userProfile={userProfile} studentEmail={selectedStudentForWorkouts?.email} onSave={(t) => { createTemplate(t); setActiveTab(selectedStudentForWorkouts ? 'student-workouts' : 'workouts'); }} onCancel={() => setActiveTab(selectedStudentForWorkouts ? 'student-workouts' : 'workouts')} />;
-      case 'edit-workout': return editingTemplate ? <CreateWorkoutView userProfile={userProfile} studentEmail={selectedStudentForWorkouts?.email || editingTemplate.userId} initialTemplate={editingTemplate} onSave={(t) => { updateTemplate(t); setEditingTemplate(null); setActiveTab(selectedStudentForWorkouts ? 'student-workouts' : 'workouts'); }} onCancel={() => { setEditingTemplate(null); setActiveTab(selectedStudentForWorkouts ? 'student-workouts' : 'workouts'); }} /> : null;
+      case 'create-workout': return <CreateWorkoutView userProfile={userProfile} studentEmail={selectedStudentForWorkouts?.email} onSave={async (t) => { await createTemplate(t); if (selectedStudentForWorkouts) { api.getStudentTemplates(selectedStudentForWorkouts.email).then(setStudentTemplates); } setActiveTab(selectedStudentForWorkouts ? 'student-workouts' : 'workouts'); }} onCancel={() => setActiveTab(selectedStudentForWorkouts ? 'student-workouts' : 'workouts')} />;
+      case 'edit-workout': return editingTemplate ? <CreateWorkoutView userProfile={userProfile} studentEmail={selectedStudentForWorkouts?.email || editingTemplate.userId} initialTemplate={editingTemplate} onSave={async (t) => { await updateTemplate(t); setEditingTemplate(null); if (selectedStudentForWorkouts) { api.getStudentTemplates(selectedStudentForWorkouts.email).then(setStudentTemplates); } setActiveTab(selectedStudentForWorkouts ? 'student-workouts' : 'workouts'); }} onCancel={() => { setEditingTemplate(null); setActiveTab(selectedStudentForWorkouts ? 'student-workouts' : 'workouts'); }} /> : null;
       case 'new-assessment': return <NewAssessmentView onSave={(a) => { createAssessment(a); setActiveTab('stats'); }} onCancel={() => setActiveTab('stats')} />;
       case 'edit-assessment': return editingAssessment ? <NewAssessmentView initialData={editingAssessment} onSave={(a) => { updateAssessment(a); setEditingAssessment(null); setActiveTab('stats'); }} onCancel={() => { setEditingAssessment(null); setActiveTab('stats'); }} /> : null;
       case 'settings-goal': return <SettingsGoalView currentGoal={userStats.weeklyGoal} onSave={(g) => { updateStats({...userStats, weeklyGoal: g}); setActiveTab('profile'); }} onCancel={() => setActiveTab('profile')} />;

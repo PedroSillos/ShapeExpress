@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "templates",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "creatorEmail", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

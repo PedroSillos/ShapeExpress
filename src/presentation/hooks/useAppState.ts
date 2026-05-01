@@ -725,6 +725,34 @@ export const useAppState = () => {
           toast.error("Erro ao desconectar aluno.");
         }
       },
+      getStudentTemplates: async (studentEmail: string) => {
+        if (!currentUser?.email) return [];
+        const trainerEmail = currentUser.email.toLowerCase();
+        const studentEmailLower = studentEmail.toLowerCase();
+        try {
+          // Compound query — requires Firestore composite index on (userId, creatorEmail)
+          const q = query(
+            collection(db, 'templates'),
+            where('userId', '==', studentEmailLower),
+            where('creatorEmail', '==', trainerEmail)
+          );
+          const snap = await getDocs(q);
+          return snap.docs.map(d => ({ id: d.id, ...d.data() } as WorkoutTemplate));
+        } catch (e: any) {
+          // Fallback: filter by userId only, then filter creatorEmail in memory
+          // (used while composite index is being created)
+          console.warn('[getStudentTemplates] compound query failed, using fallback:', e?.message);
+          try {
+            const q2 = query(collection(db, 'templates'), where('userId', '==', studentEmailLower));
+            const snap2 = await getDocs(q2);
+            return snap2.docs
+              .map(d => ({ id: d.id, ...d.data() } as WorkoutTemplate))
+              .filter(t => (t.creatorEmail || '').toLowerCase() === trainerEmail);
+          } catch (e2) {
+            return [];
+          }
+        }
+      },
       getMessages: async (email: string) => [],
       sendMessage: async (email: string, text: string) => ({ id: "1", text, senderEmail: currentUser?.email }),
       getProtocols: async () => [],
