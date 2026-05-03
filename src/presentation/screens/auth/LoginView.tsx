@@ -17,7 +17,8 @@ export function LoginView({ onLogin, onForgotPassword, onRegister, api }: LoginV
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
-  const handleLogin = async () => {
+  const handleLogin = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!isValidEmail(email)) {
       setError('Por favor, insira um email válido.');
       return;
@@ -47,7 +48,7 @@ export function LoginView({ onLogin, onForgotPassword, onRegister, api }: LoginV
             {error}
           </div>
         )}
-        <div className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1.5">
             <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-2">Email</label>
             <div className="relative">
@@ -87,14 +88,13 @@ export function LoginView({ onLogin, onForgotPassword, onRegister, api }: LoginV
               </button>
             </div>
           </div>
-        </div>
-
-        <button 
-          onClick={handleLogin}
-          className="w-full py-4 red-gradient rounded-2xl text-black font-bold shadow-lg shadow-brand-red/20 active:scale-95 transition-transform"
-        >
-          Entrar na Arena
-        </button>
+          <button 
+            type="submit"
+            className="w-full py-4 red-gradient rounded-2xl text-black font-bold shadow-lg shadow-brand-red/20 active:scale-95 transition-transform"
+          >
+            Entrar na Arena
+          </button>
+        </form>
 
         <div className="pt-2">
           <button 

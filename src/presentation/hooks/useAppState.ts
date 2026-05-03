@@ -972,6 +972,10 @@ export const useAppState = () => {
       },
       logout: async () => {
         await signOut(auth);
+        // Manually clear all Firebase auth keys to ensure session is fully destroyed
+        Object.keys(localStorage)
+          .filter(k => k.startsWith('firebase:'))
+          .forEach(k => localStorage.removeItem(k));
         localStorage.removeItem("shape_express_token");
         syncedToken = null;
         setToken(null);
@@ -984,21 +988,37 @@ export const useAppState = () => {
     };
   }, [currentUser]);
 
-  const initRan = useRef(false);
-
-  // Custom persistence and initialization
+  // Use Firebase Auth as the single source of truth for session state
   useEffect(() => {
-    if (initRan.current) return;
-    initRan.current = true;
-    const savedToken = localStorage.getItem("shape_express_token");
-    if (savedToken) {
-      setToken(savedToken);
-      setCurrentUser({ email: savedToken });
-      setIsLoggedIn(true);
-      const defaultTab = localStorage.getItem('app-default-tab') || 'dashboard';
-      setActiveTab(defaultTab as any);
-    }
-    setInitialLoading(false);
+    // Fallback: if Firebase Auth doesn't resolve within 5s, unblock the UI
+    const fallbackTimer = setTimeout(() => {
+      setInitialLoading(false);
+      setActiveTab('login');
+    }, 5000);
+
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      clearTimeout(fallbackTimer);
+      if (firebaseUser?.email) {
+        const email = firebaseUser.email;
+        localStorage.setItem("shape_express_token", email);
+        setToken(email);
+        setCurrentUser({ email });
+        setIsLoggedIn(true);
+        const defaultTab = localStorage.getItem('app-default-tab') || 'dashboard';
+        setActiveTab(defaultTab as any);
+      } else {
+        // No active Firebase session or user explicitly logged out
+        localStorage.removeItem("shape_express_token");
+        syncedToken = null;
+        setToken(null);
+        setCurrentUser(null);
+        setIsLoggedIn(false);
+        setActiveTab('login');
+      }
+      setInitialLoading(false);
+    });
+
+    return () => { unsubscribe(); clearTimeout(fallbackTimer); };
   }, []);
 
   const syncRan = useRef<string | null>(null);

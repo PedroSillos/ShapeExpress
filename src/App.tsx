@@ -1429,10 +1429,8 @@ export default function App() {
                   Cancelar
                 </button>
                 <button 
-                  onClick={() => {
-                    setIsLoggedIn(false);
-                    resetUserStates();
-                    setActiveTab('login');
+                  onClick={async () => {
+                    await api.logout();
                     setShowLogoutConfirm(false);
                   }}
                   className="flex-1 py-4 bg-red-500 rounded-2xl text-white font-bold shadow-lg shadow-red-500/20 active:scale-95 transition-transform"
@@ -4018,10 +4016,14 @@ function StatsContainer({
 
 function StatsView({ sessions, templates, onCreateWorkout, onGoToStore, hideHeader, readOnly }: { sessions: WorkoutSession[], templates: WorkoutTemplate[], onCreateWorkout: () => void, onGoToStore: () => void, hideHeader?: boolean, readOnly?: boolean }) {
   const chartData = useMemo(() => {
-    return sessions.slice(0, 7).reverse().map(s => ({
-      date: format(parseISO(s.date), 'dd/MM'),
-      volume: s.totalVolume
-    }));
+    return [...sessions]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 7)
+      .reverse()
+      .map(s => ({
+        date: format(parseISO(s.date), 'dd/MM'),
+        volume: s.totalVolume
+      }));
   }, [sessions]);
 
   const muscleData = useMemo(() => {
