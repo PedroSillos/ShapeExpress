@@ -13,7 +13,7 @@ import { Student, UserProfile, AppNotification, TrainerConnection } from '../../
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 
-export function StudentsView({ students, userProfile, onMessage, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution }: { 
+export function StudentsView({ students, userProfile, onMessage, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, selectedStudentForProfile, setSelectedStudentForProfile }: { 
   students: Student[], 
   userProfile: UserProfile, 
   onMessage: (student: Student) => void,
@@ -22,13 +22,13 @@ export function StudentsView({ students, userProfile, onMessage, pendingRequests
   onDisconnect: (studentEmail: string) => Promise<void>,
   onViewWorkouts: (student: Student) => void,
   onViewEvolution?: (student: Student) => void,
-  [key: string]: any
+  selectedStudentForProfile: Student | null,
+  setSelectedStudentForProfile: (s: Student | null) => void
 }) {
   console.log('[StudentsView] render — students:', students.length, students.map(s => s.email));
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'Todos' | 'Evoluindo' | 'Estagnados' | 'Em Risco' | 'Novos'>('Todos');
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedStudentForProfile, setSelectedStudentForProfile] = useState<Student | null>(null);
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState<Student | null>(null);
   const [isResponding, setIsResponding] = useState<string | null>(null);
   const [showFinancialDashboard, setShowFinancialDashboard] = useState(false);

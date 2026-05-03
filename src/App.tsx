@@ -236,6 +236,7 @@ export default function App() {
   } = useAppState();
 
   const [communityInitialTab, setCommunityInitialTab] = useState<'feed' | 'challenges' | 'ranking' | 'chat'>('feed');
+  const [selectedStudentForProfile, setSelectedStudentForProfile] = useState<Student | null>(null);
   const [communityInitialRankingType, setCommunityInitialRankingType] = useState<'community' | 'global' | 'league' | 'friends'>('community');
   const [creatingAdTemplate, setCreatingAdTemplate] = useState<WorkoutTemplate | null>(null);
   const [studentTemplates, setStudentTemplates] = useState<WorkoutTemplate[]>([]);
@@ -1038,6 +1039,8 @@ export default function App() {
             setSelectedStudentForEvolution(student);
             setActiveTab('student-evolution');
           }}
+          selectedStudentForProfile={selectedStudentForProfile}
+          setSelectedStudentForProfile={setSelectedStudentForProfile}
         />
       );
       case 'chat': return activeChatStudent ? (
@@ -1243,7 +1246,7 @@ export default function App() {
                 active={activeTab === 'students'} 
                 icon={<Users size={20} />} 
                 label="Alunos" 
-                onClick={() => switchTab('students')} 
+                onClick={() => { setSelectedStudentForProfile(null); switchTab('students'); }} 
               />
             ) : (
               <NavButton 
@@ -4497,7 +4500,7 @@ function FinancialDashboardModal({ onClose, students, plans }: { onClose: () => 
   );
 }
 
-function StudentsView({ students, userProfile, onMessage, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, api }: { 
+function StudentsView({ students, userProfile, onMessage, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, api, selectedStudentForProfile, setSelectedStudentForProfile }: { 
   students: Student[], 
   userProfile: UserProfile, 
   onMessage: (s: Student) => void,
@@ -4506,10 +4509,22 @@ function StudentsView({ students, userProfile, onMessage, pendingRequests, onRes
   onDisconnect: (email: string) => void,
   onViewWorkouts?: (student: Student) => void,
   onViewEvolution?: (student: Student) => void,
-  api: any
+  api: any,
+  selectedStudentForProfile: Student | null,
+  setSelectedStudentForProfile: (s: Student | null) => void
 }) {
   const [filter, setFilter] = useState<'all' | 'evolving' | 'stagnated' | 'at-risk' | 'new'>('all');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+
+  // Sync with external selectedStudentForProfile — when nav resets it to null, close detail view
+  useEffect(() => {
+    if (selectedStudentForProfile === null) setSelectedStudent(null);
+  }, [selectedStudentForProfile]);
+
+  const openStudent = (s: Student) => {
+    setSelectedStudent(s);
+    setSelectedStudentForProfile(s);
+  };
   const [showRequestsPopup, setShowRequestsPopup] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [firestoreError, setFirestoreError] = useState<Error | null>(null);
@@ -4744,10 +4759,10 @@ function StudentsView({ students, userProfile, onMessage, pendingRequests, onRes
           </div>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={(selectedStudent.weeklyWorkouts || []).map((w, i) => ({ name: `Sem ${i+1}`, value: w }))}>
+              <BarChart data={(selectedStudent.weeklyWorkouts || []).map((w, i) => ({ name: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'][i] || `D${i+1}`, value: w }))}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" vertical={false} />
                 <XAxis dataKey="name" stroke="var(--theme-text)" strokeOpacity={0.5} fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="var(--theme-text)" strokeOpacity={0.5} fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="var(--theme-text)" strokeOpacity={0.5} fontSize={10} tickLine={false} axisLine={false} hide />
                 <Bar dataKey="value" fill="var(--theme-primary)" radius={[4, 4, 0, 0]}>
                   {(selectedStudent.weeklyWorkouts || []).map((entry, index) => (
                     <Cell key={`cell-${index}`} fill="var(--theme-primary)" fillOpacity={entry >= 4 ? 1 : entry >= 2 ? 0.5 : 0.25} />
@@ -5031,7 +5046,7 @@ function StudentsView({ students, userProfile, onMessage, pendingRequests, onRes
             <Card 
               key={student.id} 
               className="p-4 flex flex-col gap-4 hover:bg-white/5 transition-colors cursor-pointer group"
-              onClick={() => setSelectedStudent(student)}
+              onClick={() => openStudent(student)}
             >
               <div className="flex items-center gap-4">
                 <img src={student.avatarUrl} alt={student.name} className="w-12 h-12 rounded-full object-cover border border-white/10" />
@@ -5056,15 +5071,15 @@ function StudentsView({ students, userProfile, onMessage, pendingRequests, onRes
               <div className="space-y-1.5">
                 <div className="flex justify-between text-[8px] font-bold text-white/20 uppercase">
                   <span>Consistência</span>
-                  <span>{Math.round((student.score / 100) * 8)}/8</span>
+                  <span>{(student.weeklyWorkouts || []).filter(w => w).length}/7</span>
                 </div>
                 <div className="flex gap-1">
-                  {Array.from({ length: 8 }).map((_, i) => (
+                  {(student.weeklyWorkouts || [0,0,0,0,0,0,0]).map((w, i) => (
                     <div 
                       key={i} 
                       className={cn(
                         "h-1 flex-1 rounded-full",
-                        i < (student.score / 100) * 8 ? "bg-emerald-500" : "bg-white/5"
+                        w ? "bg-emerald-500" : "bg-white/5"
                       )} 
                     />
                   ))}

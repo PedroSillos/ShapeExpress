@@ -513,6 +513,7 @@ export const useAppState = () => {
               console.error('[getStudents] error fetching user profile for', emailL, userErr);
             }
             let lastWorkout = '';
+            const weeklyWorkouts = [0, 0, 0, 0, 0, 0, 0];
             try {
               const sessSnap = await getDocs(query(collection(db, 'sessions'), where('userId', '==', emailL)));
               if (!sessSnap.empty) {
@@ -520,6 +521,19 @@ export const useAppState = () => {
                   .map(d => d.data() as WorkoutSession)
                   .sort((a, b) => b.date.localeCompare(a.date));
                 lastWorkout = sorted[0].date;
+                const now = new Date();
+                sessSnap.docs.forEach(d => {
+                  const s = d.data() as WorkoutSession;
+                  try {
+                    const sessionDate = new Date(s.date);
+                    const diffDays = Math.floor((now.getTime() - sessionDate.getTime()) / 86400000);
+                    if (diffDays >= 0 && diffDays < 7) {
+                        const jsDay = sessionDate.getDay();
+                        const monBasedIndex = jsDay === 0 ? 6 : jsDay - 1;
+                        weeklyWorkouts[monBasedIndex] = 1;
+                      }
+                  } catch (e) {}
+                });
               }
             } catch (sessErr) {
               console.error('[getStudents] error fetching sessions for', emailL, sessErr);
@@ -535,7 +549,7 @@ export const useAppState = () => {
               progress: 50,
               streak: 0,
               status: 'new' as const,
-              weeklyWorkouts: [],
+              weeklyWorkouts,
               score: 0,
               connectionStatus: 'accepted' as const
             } as Student;
@@ -1050,6 +1064,7 @@ export const useAppState = () => {
                 }
               } catch (e) {}
               let lastWorkout = '';
+              const weeklyWorkouts = [0, 0, 0, 0, 0, 0, 0];
               try {
                 const sessSnap = await getDocs(query(collection(db, 'sessions'), where('userId', '==', sEmailL)));
                 if (!sessSnap.empty) {
@@ -1057,6 +1072,20 @@ export const useAppState = () => {
                     .map(d => d.data() as WorkoutSession)
                     .sort((a, b) => b.date.localeCompare(a.date));
                   lastWorkout = sorted[0].date;
+                  const now = new Date();
+                  sessSnap.docs.forEach(d => {
+                    const s = d.data() as WorkoutSession;
+                    try {
+                      const sessionDate = new Date(s.date);
+                      const diffDays = Math.floor((now.getTime() - sessionDate.getTime()) / 86400000);
+                      if (diffDays >= 0 && diffDays < 7) {
+                        // Map JS getDay() (0=Sun) to Mon-based index (Mon=0...Sun=6)
+                        const jsDay = sessionDate.getDay();
+                        const monBasedIndex = jsDay === 0 ? 6 : jsDay - 1;
+                        weeklyWorkouts[monBasedIndex] = 1;
+                      }
+                    } catch (e) {}
+                  });
                 }
               } catch (e) {}
               return {
@@ -1070,7 +1099,7 @@ export const useAppState = () => {
                 progress: 50,
                 streak: 0,
                 status: 'new' as const,
-                weeklyWorkouts: [],
+                weeklyWorkouts,
                 score: 0,
                 connectionStatus: 'accepted' as const
               } as Student;

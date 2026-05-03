@@ -38,7 +38,7 @@ npx capacitor open android
 
 ## Browser Automation with Playwright
 
-Playwright is available (`npx playwright`) and used for validating UI changes against the running dev server. To run a quick headless check:
+Playwright is available (`npx playwright`) and should be used for validating UI changes against the running dev server (unless said otherwise). To run a quick headless check:
 
 ```js
 // example: pw-check.mjs
