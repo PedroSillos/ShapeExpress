@@ -28,13 +28,13 @@ npx capacitor open android
 
 ## Key Files
 
-- [src/App.tsx](src/App.tsx) — Routing + inline trainer/student screens
+- [src/App.tsx]
 - [src/presentation/screens]
 - [src/presentation/hooks]
-- [server.ts](server.ts) — Express backend (auth, Stripe, AI, WebSocket)
-- [src/firebase.ts](src/firebase.ts) — Firebase config
-- [vite.config.ts](vite.config.ts) — Vite + Tailwind
-- [capacitor.config.ts](capacitor.config.ts) — Capacitor config (`webDir: 'dist'`)
+- [server.ts]
+- [src/firebase.ts]
+- [vite.config.ts]
+- [capacitor.config.ts]
 
 ## Browser Automation with Playwright
 

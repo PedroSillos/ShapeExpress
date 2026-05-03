@@ -62,17 +62,17 @@ npx capacitor open android
 
 ## Features
 
-- **Authentication** — Email/Password and Google sign-in via Firebase
-- **Dashboard** — Overview of fitness progress and stats
-- **Workouts** — Create and manage workout routines
-- **Stats** — Track progress and calculate scores
-- **Calendar** — View workout history by date
-- **Leaderboard** — Compete with other users
-- **Chat** — Real-time messaging via WebSocket
-- **Express** — Quick workout mode
-- **Profile** — User profile management
-- **Notifications** — Push notifications for reminders
-- **Students** — Trainer view with per-student last workout date (shows "Ainda não fez o primeiro treino" when no sessions exist)
+- **Authentication**
+- **Dashboard**
+- **Workouts**
+- **Stats**
+- **Calendar**
+- **Leaderboard**
+- **Chat**
+- **Express**
+- **Profile**
+- **Notifications**
+- **Students**
 
 ## Environment Variables
 
