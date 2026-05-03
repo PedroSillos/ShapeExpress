@@ -3837,11 +3837,20 @@ function StudentEvolutionView({
       setLoading(true);
       try {
         // Fetch all sessions and assessments for the student
-        const [allSessions, allAssessments, allTemplates] = await Promise.all([
-          api.queryDocs('sessions', 'userEmail', '==', student.email),
-          api.queryDocs('assessments', 'userEmail', '==', student.email),
-          api.queryDocs('templates', 'userId', '==', student.email)
+        const studentEmailLower = student.email.toLowerCase();
+        const [allSessions, allAssessmentsByEmail, allAssessmentsByUserId, allTemplates] = await Promise.all([
+          api.queryDocs('sessions', 'userId', '==', studentEmailLower),
+          api.queryDocs('assessments', 'userEmail', '==', studentEmailLower),
+          api.queryDocs('assessments', 'userId', '==', studentEmailLower),
+          api.queryDocs('templates', 'userId', '==', studentEmailLower)
         ]);
+        // Merge assessments from both possible field names, deduplicate by id
+        const seenIds = new Set<string>();
+        const allAssessments = [...allAssessmentsByEmail, ...allAssessmentsByUserId].filter(a => {
+          if (seenIds.has(a.id)) return false;
+          seenIds.add(a.id);
+          return true;
+        });
 
         // Filter templates to only those created by the trainer
         const trainerTemplates = allTemplates.filter((t: WorkoutTemplate) => t.creatorEmail === trainerEmail);
@@ -3894,7 +3903,7 @@ function StudentEvolutionView({
         onNewAssessment={() => {}}
         onDeleteAssessment={() => {}}
         onEditAssessment={() => {}}
-        initialTab="evolution"
+        initialTab="stats"
         readOnly={true}
       />
     </div>

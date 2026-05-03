@@ -512,6 +512,18 @@ export const useAppState = () => {
             } catch (userErr) {
               console.error('[getStudents] error fetching user profile for', emailL, userErr);
             }
+            let lastWorkout = '';
+            try {
+              const sessSnap = await getDocs(query(collection(db, 'sessions'), where('userId', '==', emailL)));
+              if (!sessSnap.empty) {
+                const sorted = sessSnap.docs
+                  .map(d => d.data() as WorkoutSession)
+                  .sort((a, b) => b.date.localeCompare(a.date));
+                lastWorkout = sorted[0].date;
+              }
+            } catch (sessErr) {
+              console.error('[getStudents] error fetching sessions for', emailL, sessErr);
+            }
             return {
               id: userData?.email || emailL,
               name: userData?.name || emailL.split('@')[0],
@@ -519,7 +531,7 @@ export const useAppState = () => {
               avatarUrl: userData?.avatarUrl || 'https://picsum.photos/400',
               objective: userData?.objective,
               experienceLevel: userData?.experienceLevel,
-              lastWorkout: '',
+              lastWorkout,
               progress: 50,
               streak: 0,
               status: 'new' as const,
@@ -751,6 +763,15 @@ export const useAppState = () => {
           } catch (e2) {
             return [];
           }
+        }
+      },
+      queryDocs: async (collectionName: string, field: string, op: string, value: string) => {
+        try {
+          const q = query(collection(db, collectionName), where(field, op as any, value));
+          const snap = await getDocs(q);
+          return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        } catch (e) {
+          return [];
         }
       },
       getMessages: async (email: string) => [],
@@ -1028,6 +1049,16 @@ export const useAppState = () => {
                   if (d.exists()) userData = d.data() as UserProfile;
                 }
               } catch (e) {}
+              let lastWorkout = '';
+              try {
+                const sessSnap = await getDocs(query(collection(db, 'sessions'), where('userId', '==', sEmailL)));
+                if (!sessSnap.empty) {
+                  const sorted = sessSnap.docs
+                    .map(d => d.data() as WorkoutSession)
+                    .sort((a, b) => b.date.localeCompare(a.date));
+                  lastWorkout = sorted[0].date;
+                }
+              } catch (e) {}
               return {
                 id: userData?.email || sEmailL,
                 name: userData?.name || sEmailL.split('@')[0],
@@ -1035,7 +1066,7 @@ export const useAppState = () => {
                 avatarUrl: userData?.avatarUrl || 'https://picsum.photos/400',
                 objective: userData?.objective,
                 experienceLevel: userData?.experienceLevel,
-                lastWorkout: '',
+                lastWorkout,
                 progress: 50,
                 streak: 0,
                 status: 'new' as const,
