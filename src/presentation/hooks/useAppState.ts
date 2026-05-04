@@ -889,10 +889,49 @@ export const useAppState = () => {
       getPosts: async (cid?: string) => [],
       createPost: async (post: any) => {},
       likePost: async (pid: string) => {},
-      getCommunities: async () => [],
-      getUserCommunities: async () => [],
-      createCommunity: async (n: string, d: string) => {},
-      joinCommunity: async (id: string) => {},
+      getCommunities: async (): Promise<Community[]> => {
+        try {
+          const snap = await getDocs(collection(db, 'communities'));
+          return snap.docs.map(d => ({ id: d.id, ...d.data() } as Community));
+        } catch (e) { return []; }
+      },
+      getUserCommunities: async (): Promise<string[]> => {
+        const email = currentUser?.email;
+        if (!email) return [];
+        try {
+          const snap = await getDocs(
+            query(collection(db, 'communityMembers'), where('userEmail', '==', email.toLowerCase()))
+          );
+          return snap.docs.map(d => d.data().communityId as string);
+        } catch (e) { return []; }
+      },
+      createCommunity: async (n: string, d: string): Promise<Community | null> => {
+        const email = currentUser?.email;
+        if (!email) return null;
+        try {
+          const newComm = { name: n, description: d, membersCount: 1, tags: [], createdBy: email, createdAt: new Date().toISOString() };
+          const ref = await addDoc(collection(db, 'communities'), newComm);
+          await addDoc(collection(db, 'communityMembers'), { communityId: ref.id, userEmail: email.toLowerCase() });
+          return { id: ref.id, ...newComm };
+        } catch (e) { return null; }
+      },
+      joinCommunity: async (id: string) => {
+        const email = currentUser?.email;
+        if (!email) return;
+        try {
+          const existing = await getDocs(
+            query(collection(db, 'communityMembers'), where('communityId', '==', id), where('userEmail', '==', email.toLowerCase()))
+          );
+          if (existing.empty) {
+            await addDoc(collection(db, 'communityMembers'), { communityId: id, userEmail: email.toLowerCase() });
+            const commRef = doc(db, 'communities', id);
+            const commSnap = await getDoc(commRef);
+            if (commSnap.exists()) {
+              await updateDoc(commRef, { membersCount: (commSnap.data().membersCount || 0) + 1 });
+            }
+          }
+        } catch (e) {}
+      },
       getChallenges: async () => [],
       getUserChallenges: async () => [],
       updateChallengeProgress: async (id: string, p: number, c?: boolean) => {},
@@ -907,7 +946,15 @@ export const useAppState = () => {
       followUser: async (e: string) => {},
       unfollowUser: async (e: string) => {},
       searchUsers: async (q: string) => [],
-      searchCommunities: async (q: string) => [],
+      searchCommunities: async (q: string): Promise<Community[]> => {
+        try {
+          const snap = await getDocs(collection(db, 'communities'));
+          const lower = q.toLowerCase();
+          return snap.docs
+            .map(d => ({ id: d.id, ...d.data() } as Community))
+            .filter(c => c.name.toLowerCase().includes(lower) || c.description?.toLowerCase().includes(lower));
+        } catch (e) { return []; }
+      },
       uploadImage: async (file: File) => ({ url: "" }),
       login: async (email: string, password: string) => {
         try {
