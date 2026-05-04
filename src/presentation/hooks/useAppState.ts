@@ -705,9 +705,49 @@ export const useAppState = () => {
           toast.error("Erro ao responder solicitação.");
         }
       },
-      getNotifications: async () => [],
-      markNotificationRead: async (id: string) => {},
-      clearAllNotifications: async () => {},
+      sendNotification: async (toEmail: string, notification: Omit<AppNotification, 'id' | 'userEmail' | 'read'>) => {
+        try {
+          const notif: AppNotification = {
+            ...notification,
+            id: Date.now().toString(),
+            userEmail: toEmail.toLowerCase(),
+            read: false,
+          };
+          await setDoc(doc(db, 'notifications', notif.id), notif);
+        } catch (e: any) {
+          console.error('[sendNotification] error:', e);
+          throw e;
+        }
+      },
+      getNotifications: async () => {
+        const email = currentUser?.email;
+        if (!email) return [];
+        try {
+          const snap = await getDocs(
+            query(collection(db, 'notifications'), where('userEmail', '==', email.toLowerCase()))
+          );
+          const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as AppNotification));
+          setNotifications(data);
+          return data;
+        } catch (e) { return []; }
+      },
+      markNotificationRead: async (id: string) => {
+        try {
+          await updateDoc(doc(db, 'notifications', id), { read: true });
+          setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+        } catch (e) {}
+      },
+      clearAllNotifications: async () => {
+        const email = currentUser?.email;
+        if (!email) return;
+        try {
+          const snap = await getDocs(
+            query(collection(db, 'notifications'), where('userEmail', '==', email.toLowerCase()))
+          );
+          await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+          setNotifications([]);
+        } catch (e) {}
+      },
       getTrainerSettings: async () => ({}),
       updateTrainerSettings: async (settings: any) => {},
       disconnectTrainer: async (email: string) => {
@@ -1166,7 +1206,16 @@ export const useAppState = () => {
 
     syncAll();
 
-    return () => { syncRan.current = null; };
+    // Real-time notifications listener
+    const notifUnsub = onSnapshot(
+      query(collection(db, 'notifications'), where('userEmail', '==', emailLower)),
+      (snap) => {
+        setNotifications(snap.docs.map(d => ({ id: d.id, ...d.data() } as AppNotification)));
+      },
+      () => {}
+    );
+
+    return () => { syncRan.current = null; notifUnsub(); };
   }, [isLoggedIn, token]);
 
   const filteredTemplates = useMemo(() => {

@@ -1036,6 +1036,20 @@ export default function App() {
           onMessage={(student) => { 
             setActiveChatStudent(student); 
             setActiveTab('chat'); 
+          }}
+          onReminder={async (student) => {
+            try {
+              await api.sendNotification(student.email, {
+                title: 'Lembrete de Pagamento',
+                message: `Seu pagamento vence em breve. Entre em contato com seu treinador ${userProfile.name} para regularizar.`,
+                timestamp: new Date().toISOString(),
+                type: 'warning',
+              });
+              toast.success(`Lembrete enviado para ${student.name}!`);
+            } catch (error) {
+              console.error('Failed to send reminder:', error);
+              toast.error('Erro ao enviar lembrete.');
+            }
           }} 
           onDisconnect={async (studentEmail) => {
             try {
@@ -4135,7 +4149,8 @@ function StatsView({ sessions, templates, onCreateWorkout, onGoToStore, hideHead
   );
 }
 
-function FinancialDashboardModal({ onClose, students, plans }: { onClose: () => void, students: Student[], plans: any[] }) {
+function FinancialDashboardModal({ onClose, students, plans, onReminder }: { onClose: () => void, students: Student[], plans: any[], onReminder: (student: Student) => Promise<void> }) {
+  const [sendingReminder, setSendingReminder] = useState<string | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<'revenue' | 'active' | 'late' | 'new' | 'cancellations' | 'retention' | null>(null);
   const [selectedMonthData, setSelectedMonthData] = useState<{ month: string, students: Student[], metricTitle: string } | null>(null);
 
@@ -4490,7 +4505,17 @@ function FinancialDashboardModal({ onClose, students, plans }: { onClose: () => 
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-bold text-emerald-500">R$ 150,00</p>
-                          <button className="text-[10px] text-white/40 hover:text-white underline mt-1">Lembrar</button>
+                          <button
+                            disabled={sendingReminder === student.id}
+                            onClick={async () => {
+                              setSendingReminder(student.id);
+                              await onReminder(student);
+                              setSendingReminder(null);
+                            }}
+                            className="text-[10px] text-white/40 hover:text-amber-400 underline mt-1 disabled:opacity-40 transition-colors"
+                          >
+                            {sendingReminder === student.id ? 'Enviando...' : 'Lembrar'}
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -4505,10 +4530,11 @@ function FinancialDashboardModal({ onClose, students, plans }: { onClose: () => 
   );
 }
 
-function StudentsView({ students, userProfile, onMessage, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, api, selectedStudentForProfile, setSelectedStudentForProfile }: { 
+function StudentsView({ students, userProfile, onMessage, onReminder, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, api, selectedStudentForProfile, setSelectedStudentForProfile }: { 
   students: Student[], 
   userProfile: UserProfile, 
   onMessage: (s: Student) => void,
+  onReminder: (student: Student) => Promise<void>,
   pendingRequests: any[],
   onRespond: (id: string, status: 'accepted' | 'rejected') => void,
   onDisconnect: (email: string) => void,
@@ -5787,6 +5813,7 @@ function StudentsView({ students, userProfile, onMessage, pendingRequests, onRes
             onClose={() => setShowFinancialDashboard(false)} 
             students={students} 
             plans={plans}
+            onReminder={onReminder}
           />
         )}
       </AnimatePresence>
