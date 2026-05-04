@@ -788,8 +788,35 @@ export const useAppState = () => {
           return [];
         }
       },
-      getMessages: async (email: string) => [],
-      sendMessage: async (email: string, text: string) => ({ id: "1", text, senderEmail: currentUser?.email }),
+      getMessages: async (otherEmail: string) => {
+        const myEmail = currentUser?.email;
+        if (!myEmail) return [];
+        const roomId = [myEmail.toLowerCase(), otherEmail.toLowerCase()].sort().join('_');
+        try {
+          const snap = await getDocs(
+            query(collection(db, 'messages', roomId, 'msgs'), where('roomId', '==', roomId))
+          );
+          return snap.docs
+            .map(d => ({ id: d.id, ...d.data() } as ChatMessage))
+            .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+        } catch (e) {
+          return [];
+        }
+      },
+      sendMessage: async (otherEmail: string, text: string) => {
+        const myEmail = currentUser?.email;
+        if (!myEmail) throw new Error('Not authenticated');
+        const roomId = [myEmail.toLowerCase(), otherEmail.toLowerCase()].sort().join('_');
+        const msg: Omit<ChatMessage, 'id'> & { roomId: string } = {
+          senderId: myEmail,
+          receiverId: otherEmail.toLowerCase(),
+          text,
+          timestamp: new Date().toISOString(),
+          roomId,
+        };
+        const ref = await addDoc(collection(db, 'messages', roomId, 'msgs'), msg);
+        return { id: ref.id, ...msg };
+      },
       getProtocols: async () => [],
       createProtocol: async (p: any) => {},
       getPurchasedProtocols: async () => [],

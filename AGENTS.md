@@ -109,12 +109,12 @@ Fallback: `x-user-email: user@example.com` (legacy)
 | `/api/ai/coach-advice` | POST | AI coaching advice |
 | `/api/ai/recommend-communities` | POST | AI community recommendations |
 
-### WebSocket
+### Chat (Firestore)
 
-`ws://localhost:3000` — real-time chat.
+Chat is implemented directly via Firestore — **no WebSocket**. Messages are stored at:
 
-```json
-{ "type": "message|typing|seen", "roomId": "...", "userId": "...", "message": "...", "timestamp": 0 }
+```
+messages/{roomId}/msgs/{msgId}
 ```
 
 ### Stripe Test Cards
@@ -142,7 +142,7 @@ Fallback: `x-user-email: user@example.com` (legacy)
 | Module not found | Check `@/` alias, run `npm install` |
 | Firebase auth failing | Verify `.env.local` keys, check Firebase Console auth methods |
 | Stripe error | Confirm `STRIPE_SECRET_KEY=sk_test_...`, server on `:3000` |
-| WebSocket fails | Ensure server on `:3000`, check firewall |
+| Chat messages not appearing | Check Firestore rules allow read/write on `messages/{roomId}/msgs`; verify both users share the same `roomId` (emails sorted alphabetically) |
 
 ## Firebase Emulator (optional)
 

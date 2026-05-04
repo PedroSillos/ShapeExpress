@@ -253,16 +253,29 @@ export default function App() {
   }, [isLoggedIn, activeTab, recommendedCommunities.length, api, setRecommendedCommunities]);
 
 
+  const chatUnsubRef = useRef<(() => void) | null>(null);
+
   useEffect(() => {
-    if (activeChatStudent) {
-      api.getMessages(activeChatStudent.id).then(msgs => {
-        setChatMessages(prev => ({
-          ...prev,
-          [activeChatStudent.id]: msgs
-        }));
-      }).catch(err => console.error("Failed to fetch messages:", err));
-    }
-  }, [activeChatStudent, api]);
+    chatUnsubRef.current?.();
+    chatUnsubRef.current = null;
+    if (!activeChatStudent || !userProfile?.email) return;
+    const myEmail = userProfile.email.toLowerCase();
+    const otherEmail = activeChatStudent.email.toLowerCase();
+    const roomId = [myEmail, otherEmail].sort().join('_');
+    Promise.all([import('firebase/firestore'), import('./firebase')]).then(([{ collection, query: fQuery, onSnapshot }, { db }]) => {
+      const unsub = onSnapshot(
+        fQuery(collection(db, 'messages', roomId, 'msgs')),
+        (snapshot) => {
+          const msgs = snapshot.docs
+            .map(d => ({ id: d.id, ...d.data() } as any))
+            .sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+          setChatMessages(prev => ({ ...prev, [activeChatStudent.id]: msgs }));
+        }
+      );
+      chatUnsubRef.current = unsub;
+    });
+    return () => { chatUnsubRef.current?.(); chatUnsubRef.current = null; };
+  }, [activeChatStudent?.id, userProfile?.email]);
 
   // Fetch AI Advice
   useEffect(() => {
@@ -1050,18 +1063,8 @@ export default function App() {
           userProfile={userProfile}
           onSendMessage={async (text) => {
             try {
-              const res = await api.sendMessage(activeChatStudent.id, text);
-              const newMessage: ChatMessage = {
-                id: res.id,
-                senderId: userProfile?.email || '',
-                receiverId: activeChatStudent.id,
-                text,
-                timestamp: new Date().toISOString()
-              };
-              setChatMessages(prev => ({
-                ...prev,
-                [activeChatStudent.id]: [...(prev[activeChatStudent.id] || []), newMessage]
-              }));
+              const res = await api.sendMessage(activeChatStudent.email, text);
+              // The real-time listener will update the messages automatically
             } catch (error) {
               console.error("Failed to send message:", error);
             }
