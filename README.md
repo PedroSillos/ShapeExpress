@@ -42,23 +42,13 @@ The app will be available at:
 |---------|-------------|
 | `npm run dev` | Clean cache, start Vite dev server + Express |
 | `npm run build` | Production build |
-| `npm run lint` | TypeScript check |
 | `npm run clean` | Remove `dist/` and Vite cache (`node_modules/.vite`) |
 
 ## Android / Capacitor (No Cache)
 
-To build the Android app from the React app:
-
-```bash
-# Option 1: npm script (recommended)
-npm run android
-
-# Option 2: Manual commands
-npm run build
-rm -Recurse -Force android/app/build
-npx capacitor sync
-npx capacitor open android
-```
+| Command | Description |
+|---------|-------------|
+| `npm run android` | Build the Android app from the React app |
 
 ## Features
 
@@ -88,7 +78,6 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_PUBLIC_KEY=pk_test_...
-GEMINI_API_KEY=
 APP_URL=http://localhost:3000
 NODE_ENV=development
 ```
