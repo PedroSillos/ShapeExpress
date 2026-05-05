@@ -886,9 +886,71 @@ export const useAppState = () => {
         });
         return res.json();
       },
-      getPosts: async (cid?: string) => [],
-      createPost: async (post: any) => {},
-      likePost: async (pid: string) => {},
+      getPosts: async (cid?: string, filter?: string): Promise<Post[]> => {
+        const email = currentUser?.email;
+        if (!email) return [];
+        try {
+          const q = cid
+            ? query(collection(db, 'posts'), where('communityId', '==', cid))
+            : query(collection(db, 'posts'));
+          const snap = await getDocs(q);
+          const posts = snap.docs.map(d => ({ id: d.id, ...d.data() } as Post));
+          // Only show posts from users that exist in the DB
+          const userEmails = [...new Set(posts.map(p => p.userId).filter(Boolean))];
+          if (userEmails.length === 0) return [];
+          const existingEmails = new Set<string>();
+          await Promise.all(userEmails.map(async (ue) => {
+            const uSnap = await getDocs(query(collection(db, 'users'), where('email', '==', ue.toLowerCase())));
+            if (!uSnap.empty) existingEmails.add(ue.toLowerCase());
+          }));
+          const likedSnap = await getDocs(query(collection(db, 'postLikes'), where('userEmail', '==', email.toLowerCase())));
+          const likedIds = new Set(likedSnap.docs.map(d => d.data().postId as string));
+          return posts
+            .filter(p => existingEmails.has((p.userId || '').toLowerCase()))
+            .map(p => ({ ...p, likedByMe: likedIds.has(p.id) }))
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        } catch (e) { return []; }
+      },
+      createPost: async (post: any): Promise<Post | null> => {
+        const email = currentUser?.email;
+        if (!email) return null;
+        try {
+          const userSnap = await getDocs(query(collection(db, 'users'), where('email', '==', email.toLowerCase())));
+          if (userSnap.empty) return null;
+          const userData = userSnap.docs[0].data() as UserProfile;
+          const newPost = {
+            ...post,
+            userId: email.toLowerCase(),
+            userName: userData.name || email.split('@')[0],
+            userAvatar: userData.avatarUrl || '',
+            likesCount: 0,
+            commentsCount: 0,
+            createdAt: new Date().toISOString(),
+          };
+          const ref = await addDoc(collection(db, 'posts'), newPost);
+          return { id: ref.id, ...newPost } as Post;
+        } catch (e) { return null; }
+      },
+      likePost: async (pid: string) => {
+        const email = currentUser?.email;
+        if (!email) return;
+        try {
+          const likeId = `${pid}_${email.toLowerCase()}`;
+          const likeRef = doc(db, 'postLikes', likeId);
+          const likeSnap = await getDoc(likeRef);
+          const postRef = doc(db, 'posts', pid);
+          const postSnap = await getDoc(postRef);
+          if (!postSnap.exists()) return;
+          const current = postSnap.data().likesCount || 0;
+          if (likeSnap.exists()) {
+            await deleteDoc(likeRef);
+            await updateDoc(postRef, { likesCount: Math.max(0, current - 1) });
+          } else {
+            await setDoc(likeRef, { postId: pid, userEmail: email.toLowerCase() });
+            await updateDoc(postRef, { likesCount: current + 1 });
+          }
+        } catch (e) {}
+      },
       getCommunities: async (): Promise<Community[]> => {
         try {
           const snap = await getDocs(collection(db, 'communities'));
@@ -932,11 +994,81 @@ export const useAppState = () => {
           }
         } catch (e) {}
       },
-      getChallenges: async () => [],
-      getUserChallenges: async () => [],
-      updateChallengeProgress: async (id: string, p: number, c?: boolean) => {},
-      cancelChallenge: async (id: string) => {},
-      getCommunityRanking: async (id: string) => [],
+      getChallenges: async (): Promise<Challenge[]> => {
+        try {
+          const snap = await getDocs(collection(db, 'challenges'));
+          return snap.docs.map(d => ({ id: d.id, ...d.data() } as Challenge));
+        } catch (e) { return []; }
+      },
+      getUserChallenges: async (): Promise<UserChallenge[]> => {
+        const email = currentUser?.email;
+        if (!email) return [];
+        try {
+          const snap = await getDocs(
+            query(collection(db, 'userChallenges'), where('userId', '==', email.toLowerCase()))
+          );
+          return snap.docs.map(d => d.data() as UserChallenge);
+        } catch (e) { return []; }
+      },
+      updateChallengeProgress: async (id: string, p: number, collected?: boolean) => {
+        const email = currentUser?.email;
+        if (!email) return;
+        try {
+          const docId = `${id}_${email.toLowerCase()}`;
+          await setDoc(doc(db, 'userChallenges', docId), {
+            userId: email.toLowerCase(),
+            challengeId: id,
+            progress: p,
+            completed: p > 0,
+            ...(collected !== undefined ? { collected } : {}),
+          }, { merge: true });
+        } catch (e) {}
+      },
+      cancelChallenge: async (id: string) => {
+        const email = currentUser?.email;
+        if (!email) return;
+        try {
+          const docId = `${id}_${email.toLowerCase()}`;
+          await setDoc(doc(db, 'userChallenges', docId), {
+            userId: email.toLowerCase(),
+            challengeId: id,
+            progress: 0,
+            completed: false,
+            cancelled: true,
+          }, { merge: true });
+        } catch (e) {}
+      },
+      getCommunityRanking: async (communityId: string): Promise<Ranking[]> => {
+        try {
+          // Get members of this community
+          const membersSnap = await getDocs(
+            query(collection(db, 'communityMembers'), where('communityId', '==', communityId))
+          );
+          const memberEmails = membersSnap.docs.map(d => d.data().userEmail as string);
+          if (memberEmails.length === 0) return [];
+          // Only include members that exist in users collection
+          const ranking: Ranking[] = [];
+          await Promise.all(memberEmails.map(async (memberEmail) => {
+            const [userSnap, statsSnap] = await Promise.all([
+              getDocs(query(collection(db, 'users'), where('email', '==', memberEmail.toLowerCase()))),
+              getDoc(doc(db, 'stats', memberEmail.toLowerCase())),
+            ]);
+            if (userSnap.empty) return; // skip users not in DB
+            const userData = userSnap.docs[0].data() as UserProfile;
+            const statsData = statsSnap.exists() ? statsSnap.data() as UserStats : null;
+            ranking.push({
+              userId: memberEmail.toLowerCase(),
+              userName: userData.name || memberEmail.split('@')[0],
+              userAvatar: userData.avatarUrl || '',
+              communityId,
+              xp: statsData?.xp || 0,
+              streak: statsData?.streak || 0,
+              lastActivityAt: new Date().toISOString(),
+            });
+          }));
+          return ranking.sort((a, b) => b.xp - a.xp);
+        } catch (e) { return []; }
+      },
       getCommunityMessages: async (id: string) => [],
       sendCommunityMessage: async (id: string, c: string) => {},
       getRecommendedCommunities: async () => [],
@@ -945,7 +1077,15 @@ export const useAppState = () => {
       addXP: async (xp: number) => {},
       followUser: async (e: string) => {},
       unfollowUser: async (e: string) => {},
-      searchUsers: async (q: string) => [],
+      searchUsers: async (q: string): Promise<UserProfile[]> => {
+        try {
+          const snap = await getDocs(collection(db, 'users'));
+          const lower = q.toLowerCase();
+          return snap.docs
+            .map(d => d.data() as UserProfile)
+            .filter(u => u.name?.toLowerCase().includes(lower) || u.email?.toLowerCase().includes(lower));
+        } catch (e) { return []; }
+      },
       searchCommunities: async (q: string): Promise<Community[]> => {
         try {
           const snap = await getDocs(collection(db, 'communities'));
