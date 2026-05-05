@@ -235,7 +235,7 @@ export default function App() {
     personalRecords,
   } = useAppState();
 
-  const [communityInitialTab, setCommunityInitialTab] = useState<'feed' | 'challenges' | 'ranking' | 'chat'>('feed');
+  const [communityInitialTab, setCommunityInitialTab] = useState<'feed' | 'challenges' | 'ranking'>('feed');
   const [selectedStudentForProfile, setSelectedStudentForProfile] = useState<Student | null>(null);
   const [communityInitialRankingType, setCommunityInitialRankingType] = useState<'community' | 'global' | 'league' | 'friends'>('community');
   const [creatingAdTemplate, setCreatingAdTemplate] = useState<WorkoutTemplate | null>(null);

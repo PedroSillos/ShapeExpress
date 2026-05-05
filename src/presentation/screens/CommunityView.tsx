@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Users,
-  MessageSquare,
   Trophy,
+  MessageSquare,
   Flame,
   Heart,
   Share2,
   Plus,
-  Send,
   Image as ImageIcon,
+  Send,
   CheckCircle2,
   TrendingUp,
   Target,
@@ -61,7 +61,7 @@ interface CommunityViewProps {
   posts: Post[];
   setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
   getLeaderboard: (league: string) => Promise<LeaderboardEntry[]>;
-  initialTab?: "feed" | "challenges" | "ranking" | "chat";
+  initialTab?: "feed" | "challenges" | "ranking";
   initialRankingType?: "community" | "global" | "league" | "friends";
 }
 
@@ -79,7 +79,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
   initialRankingType = "community",
 }) => {
   const [activeTab, setActiveTab] = useState<
-    "feed" | "challenges" | "ranking" | "chat"
+    "feed" | "challenges" | "ranking"
   >(initialTab);
   const [rankingType, setRankingType] = useState<
     "community" | "global" | "league" | "friends"
@@ -116,7 +116,6 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
   const [ranking, setRanking] = useState<Ranking[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
-  const [newMessage, setNewMessage] = useState("");
   const [newPostText, setNewPostText] = useState("");
   const [isPosting, setIsPosting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -125,23 +124,9 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
 
   const userLeague = userStats.league || "Bronze";
 
-  const chatEndRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     loadInitialData();
   }, []);
-
-  useEffect(() => {
-    if (activeTab === "chat" && activeCommunity) {
-      loadMessages();
-    }
-  }, [activeTab, activeCommunity]);
-
-  useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [communityMessages]);
 
   useEffect(() => {
     if (activeTab === "ranking" && rankingType !== "community") {
@@ -277,16 +262,6 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
       console.error("Failed to load community data:", error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const loadMessages = async () => {
-    if (!activeCommunity) return;
-    try {
-      const res = await api.getCommunityMessages(activeCommunity.id);
-      setCommunityMessages(res);
-    } catch (error) {
-      console.error("Failed to load messages:", error);
     }
   };
 
@@ -563,20 +538,6 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !activeCommunity) return;
-    try {
-      const msg = await api.sendCommunityMessage(
-        activeCommunity.id,
-        newMessage,
-      );
-      setCommunityMessages((prev) => [...prev, msg]);
-      setNewMessage("");
-    } catch (error) {
-      console.error("Failed to send message:", error);
-    }
-  };
-
   const handleJoinCommunity = async (communityId: string) => {
     try {
       await api.joinCommunity(communityId);
@@ -668,7 +629,6 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
             { id: "feed", label: "Feed", icon: <TrendingUp size={16} /> },
             { id: "challenges", label: "Desafios", icon: <Target size={16} /> },
             { id: "ranking", label: "Ranking", icon: <Trophy size={16} /> },
-            { id: "chat", label: "Chat", icon: <MessageSquare size={16} /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -1147,84 +1107,6 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
             </motion.div>
           )}
 
-          {activeTab === "chat" && (
-            <motion.div
-              key="chat"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="flex flex-col h-[calc(100vh-280px)]"
-            >
-              <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
-                {communityMessages.map((msg, idx) => {
-                  const isMe = msg.userId === userProfile?.email;
-                  return (
-                    <div
-                      key={msg.id || idx}
-                      className={cn(
-                        "flex flex-col",
-                        isMe ? "items-end" : "items-start",
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          "max-w-[80%] p-3 rounded-2xl text-sm",
-                          isMe
-                            ? "bg-brand-red text-black rounded-tr-none"
-                            : "bg-white/5 border border-white/10 text-white rounded-tl-none",
-                        )}
-                      >
-                        {!isMe && (
-                          <div className="flex items-center gap-2 mb-1">
-                            <img
-                              src={msg.userAvatar}
-                              className="w-4 h-4 rounded-full"
-                              referrerPolicy="no-referrer"
-                            />
-                            <p className="text-[10px] font-bold text-brand-red">
-                              {msg.userName}
-                            </p>
-                          </div>
-                        )}
-                        <p>{msg.content}</p>
-                        <p
-                          className={cn(
-                            "text-[8px] mt-1 text-right opacity-40",
-                          )}
-                        >
-                          {formatDistanceToNow(new Date(msg.createdAt), {
-                            addSuffix: true,
-                            locale: ptBR,
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-                <div ref={chatEndRef} />
-              </div>
-
-              <div className="p-4 bg-dark-surface/50 border-t border-white/5 backdrop-blur-md">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                    placeholder="Envie uma mensagem..."
-                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-colors"
-                  />
-                  <button
-                    onClick={handleSendMessage}
-                    disabled={!newMessage.trim()}
-                    className="w-12 h-12 bg-brand-red rounded-xl flex items-center justify-center text-black disabled:opacity-50 active:scale-95 transition-transform"
-                  >
-                    <Send size={20} />
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
         </AnimatePresence>
         )}
       </div>
