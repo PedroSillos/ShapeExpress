@@ -48,10 +48,19 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [userChallenges, setUserChallenges] = useState<UserChallenge[]>([]);
   const [ranking, setRanking] = useState<Ranking[]>([]);
+  const [userCommunityRole, setUserCommunityRole] = useState<string | null>(null);
 
   useEffect(() => { setActiveTab(initialTab); }, [initialTab]);
   useEffect(() => { loadInitialData(); }, []);
   useEffect(() => { if (activeTab === "feed") loadPosts(); }, [activeTab, feedFilter, activeCommunity]);
+  useEffect(() => {
+    if (!activeCommunity) { setUserCommunityRole(null); return; }
+    api.getCommunityRole(activeCommunity.id)
+      .then((role: string | null) => setUserCommunityRole(role))
+      .catch(() => {});
+  }, [activeCommunity?.id]);
+
+  const canCreateChallenge = userCommunityRole === "creator" || userCommunityRole === "moderator";
 
   const loadInitialData = async () => {
     setIsLoading(true);
@@ -247,6 +256,10 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
                 key="challenges"
                 challenges={challenges}
                 userChallenges={userChallenges}
+                communityId={activeCommunity.id}
+                api={api}
+                canCreate={canCreateChallenge}
+                onChallengeCreated={(c) => setChallenges((prev) => [...prev, c])}
                 onCollect={handleCollectChallenge}
                 onCancel={handleCancelChallenge}
               />

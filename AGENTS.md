@@ -139,7 +139,7 @@ messages/{roomId}/msgs/{msgId}
 
 | Problem | Fix |
 |---------|-----|
-| Module not found | Check `@/` alias, run `npm install` |
+| Module not found | Check relative import paths, run `npm install` |
 | Firebase auth failing | Verify `.env.local` keys, check Firebase Console auth methods |
 | Stripe error | Confirm `STRIPE_SECRET_KEY=sk_test_...`, server on `:3000` |
 

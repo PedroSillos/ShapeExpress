@@ -1151,6 +1151,12 @@ export const useAppState = () => {
           return snap.docs.map(d => ({ id: d.id, ...d.data() } as Challenge));
         } catch (e) { return []; }
       },
+      createChallenge: async (challenge: Omit<Challenge, 'id'>): Promise<Challenge | null> => {
+        try {
+          const ref = await addDoc(collection(db, 'challenges'), challenge);
+          return { id: ref.id, ...challenge };
+        } catch (e) { return null; }
+      },
       deleteChallenge: async (challengeId: string) => {
         try {
           await deleteDoc(doc(db, 'challenges', challengeId));
@@ -1234,8 +1240,41 @@ export const useAppState = () => {
       getCommunityMessages: async (id: string) => [],
       sendCommunityMessage: async (id: string, c: string) => {},
       getRecommendedCommunities: async () => [],
-      getPostComments: async (id: string) => [],
-      addPostComment: async (id: string, t: string) => {},
+      getPostComments: async (postId: string) => {
+        try {
+          const snap = await getDocs(
+            query(collection(db, 'postComments'), where('postId', '==', postId))
+          );
+          return snap.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        } catch (e) { return []; }
+      },
+      addPostComment: async (postId: string, text: string) => {
+        const email = currentUser?.email;
+        if (!email) return null;
+        try {
+          const userSnap = await getDocs(query(collection(db, 'users'), where('email', '==', email.toLowerCase())));
+          if (userSnap.empty) return null;
+          const userData = userSnap.docs[0].data() as UserProfile;
+          const comment = {
+            postId,
+            text,
+            userId: email.toLowerCase(),
+            userName: userData.name || email.split('@')[0],
+            userAvatar: userData.avatarUrl || '',
+            createdAt: new Date().toISOString(),
+          };
+          const ref = await addDoc(collection(db, 'postComments'), comment);
+          // Increment commentsCount on the post
+          const postRef = doc(db, 'posts', postId);
+          const postSnap = await getDoc(postRef);
+          if (postSnap.exists()) {
+            await updateDoc(postRef, { commentsCount: (postSnap.data().commentsCount || 0) + 1 });
+          }
+          return { id: ref.id, ...comment };
+        } catch (e) { return null; }
+      },
       addXP: async (xp: number) => {},
       followUser: async (e: string) => {},
       unfollowUser: async (e: string) => {},
