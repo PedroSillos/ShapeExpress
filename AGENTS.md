@@ -54,8 +54,8 @@ Run with `node pw-check.mjs`. Delete the script after use — do not commit temp
 
 FSD (Feature-Sliced Design):
 - New features go in `src/features/<name>/` with `index.ts` barrel export
-- Import via `@/features/<name>`, never deep paths
-- Features never import other features; use `@/shared` or `@/entities`
+- Import via relative paths from `src/presentation/screens` (e.g. `../../features/community`)
+- Features never import other features; use shared utils or entities
 
 ### Feature Structure
 
@@ -142,7 +142,6 @@ messages/{roomId}/msgs/{msgId}
 | Module not found | Check `@/` alias, run `npm install` |
 | Firebase auth failing | Verify `.env.local` keys, check Firebase Console auth methods |
 | Stripe error | Confirm `STRIPE_SECRET_KEY=sk_test_...`, server on `:3000` |
-| Chat messages not appearing | Check Firestore rules allow read/write on `messages/{roomId}/msgs`; verify both users share the same `roomId` (emails sorted alphabetically) |
 
 ## Firebase Emulator (optional)
 

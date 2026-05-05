@@ -446,4 +446,22 @@ export interface Community {
   membersCount: number;
   tags: string[];
   bannerUrl?: string;
+  isPublic?: boolean;
+  creatorId?: string;
+  allowMemberPosts?: boolean;
+}
+
+export type CommunityRole = "creator" | "moderator" | "member";
+export type CommunityMemberStatus = "active" | "pending" | "banned";
+
+export interface CommunityMember {
+  id?: string;
+  communityId: string;
+  userEmail: string;
+  userName?: string;
+  userAvatar?: string;
+  role: CommunityRole;
+  status: CommunityMemberStatus;
+  joinedAt: string;
+  banReason?: string;
 }

@@ -24,6 +24,8 @@ import {
   UserChallenge,
   CommunityMessage,
   Ranking,
+  CommunityMember,
+  CommunityRole,
 } from "../../domain/entities";
 
 import {
@@ -971,9 +973,15 @@ export const useAppState = () => {
         const email = currentUser?.email;
         if (!email) return null;
         try {
-          const newComm = { name: n, description: d, membersCount: 1, tags: [], createdBy: email, createdAt: new Date().toISOString() };
+          const newComm = { name: n, description: d, membersCount: 1, tags: [], createdBy: email, createdAt: new Date().toISOString(), isPublic: true, creatorId: email.toLowerCase(), allowMemberPosts: true };
           const ref = await addDoc(collection(db, 'communities'), newComm);
-          await addDoc(collection(db, 'communityMembers'), { communityId: ref.id, userEmail: email.toLowerCase() });
+          await addDoc(collection(db, 'communityMembers'), {
+            communityId: ref.id,
+            userEmail: email.toLowerCase(),
+            role: 'creator',
+            status: 'active',
+            joinedAt: new Date().toISOString(),
+          });
           return { id: ref.id, ...newComm };
         } catch (e) { return null; }
       },
@@ -985,13 +993,167 @@ export const useAppState = () => {
             query(collection(db, 'communityMembers'), where('communityId', '==', id), where('userEmail', '==', email.toLowerCase()))
           );
           if (existing.empty) {
-            await addDoc(collection(db, 'communityMembers'), { communityId: id, userEmail: email.toLowerCase() });
             const commRef = doc(db, 'communities', id);
             const commSnap = await getDoc(commRef);
-            if (commSnap.exists()) {
+            const isPublic = commSnap.exists() ? (commSnap.data().isPublic !== false) : true;
+            const status = isPublic ? 'active' : 'pending';
+            await addDoc(collection(db, 'communityMembers'), {
+              communityId: id,
+              userEmail: email.toLowerCase(),
+              role: 'member',
+              status,
+              joinedAt: new Date().toISOString(),
+            });
+            if (isPublic && commSnap.exists()) {
               await updateDoc(commRef, { membersCount: (commSnap.data().membersCount || 0) + 1 });
             }
           }
+        } catch (e) {}
+      },
+      getCommunityMembers: async (communityId: string) => {
+        try {
+          // Fetch all members of the community (no status filter — handle in memory for backwards compat)
+          const snap = await getDocs(
+            query(collection(db, 'communityMembers'), where('communityId', '==', communityId))
+          );
+          const members = await Promise.all(snap.docs.map(async (d) => {
+            const data = d.data();
+            // Treat missing status as 'active' (legacy docs before status field was added)
+            const status = data.status || 'active';
+            if (status !== 'active') return null;
+            const userSnap = await getDocs(query(collection(db, 'users'), where('email', '==', data.userEmail)));
+            if (userSnap.empty) return null;
+            const userData = userSnap.docs[0].data() as UserProfile;
+            return {
+              id: d.id,
+              communityId,
+              userEmail: data.userEmail,
+              userName: userData.name || data.userEmail.split('@')[0],
+              userAvatar: userData.avatarUrl || '',
+              role: data.role || 'member',
+              status: 'active' as const,
+              joinedAt: data.joinedAt || '',
+            } as CommunityMember;
+          }));
+          return members.filter(Boolean) as CommunityMember[];
+        } catch (e) { return []; }
+      },
+      getPendingMembers: async (communityId: string) => {
+        try {
+          const snap = await getDocs(
+            query(collection(db, 'communityMembers'), where('communityId', '==', communityId), where('status', '==', 'pending'))
+          );
+          const members = await Promise.all(snap.docs.map(async (d) => {
+            const data = d.data();
+            const userSnap = await getDocs(query(collection(db, 'users'), where('email', '==', data.userEmail)));
+            if (userSnap.empty) return null;
+            const userData = userSnap.docs[0].data() as import('../../domain/entities').UserProfile;
+            return {
+              id: d.id,
+              communityId,
+              userEmail: data.userEmail,
+              userName: userData.name || data.userEmail.split('@')[0],
+              userAvatar: userData.avatarUrl || '',
+              role: 'member' as const,
+              status: 'pending' as const,
+              joinedAt: data.joinedAt || '',
+            } as CommunityMember;
+          }));
+          return members.filter(Boolean) as CommunityMember[];
+        } catch (e) { return []; }
+      },
+      approveMember: async (communityId: string, memberDocId: string) => {
+        try {
+          await updateDoc(doc(db, 'communityMembers', memberDocId), { status: 'active' });
+          const commRef = doc(db, 'communities', communityId);
+          const commSnap = await getDoc(commRef);
+          if (commSnap.exists()) {
+            await updateDoc(commRef, { membersCount: (commSnap.data().membersCount || 0) + 1 });
+          }
+        } catch (e) {}
+      },
+      rejectMember: async (memberDocId: string) => {
+        try {
+          await deleteDoc(doc(db, 'communityMembers', memberDocId));
+        } catch (e) {}
+      },
+      updateMemberRole: async (memberDocId: string, newRole: CommunityRole) => {
+        try {
+          await updateDoc(doc(db, 'communityMembers', memberDocId), { role: newRole });
+        } catch (e) {}
+      },
+      banMember: async (communityId: string, memberDocId: string, reason: string) => {
+        try {
+          await updateDoc(doc(db, 'communityMembers', memberDocId), { status: 'banned', banReason: reason });
+          const commRef = doc(db, 'communities', communityId);
+          const commSnap = await getDoc(commRef);
+          if (commSnap.exists()) {
+            await updateDoc(commRef, { membersCount: Math.max(0, (commSnap.data().membersCount || 1) - 1) });
+          }
+        } catch (e) {}
+      },
+      unbanMember: async (memberDocId: string) => {
+        try {
+          await updateDoc(doc(db, 'communityMembers', memberDocId), { status: 'active', banReason: null });
+        } catch (e) {}
+      },
+      getBannedMembers: async (communityId: string) => {
+        try {
+          const snap = await getDocs(
+            query(collection(db, 'communityMembers'), where('communityId', '==', communityId), where('status', '==', 'banned'))
+          );
+          const members = await Promise.all(snap.docs.map(async (d) => {
+            const data = d.data();
+            const userSnap = await getDocs(query(collection(db, 'users'), where('email', '==', data.userEmail)));
+            if (userSnap.empty) return null;
+            const userData = userSnap.docs[0].data() as import('../../domain/entities').UserProfile;
+            return {
+              id: d.id,
+              communityId,
+              userEmail: data.userEmail,
+              userName: userData.name || data.userEmail.split('@')[0],
+              userAvatar: userData.avatarUrl || '',
+              role: data.role || 'member',
+              status: 'banned' as const,
+              joinedAt: data.joinedAt || '',
+              banReason: data.banReason || '',
+            } as CommunityMember;
+          }));
+          return members.filter(Boolean) as CommunityMember[];
+        } catch (e) { return []; }
+      },
+      updateCommunity: async (communityId: string, data: Partial<Community>) => {
+        try {
+          await updateDoc(doc(db, 'communities', communityId), data as any);
+        } catch (e) {}
+      },
+      deleteCommunity: async (communityId: string) => {
+        try {
+          await deleteDoc(doc(db, 'communities', communityId));
+        } catch (e) {}
+      },
+      getCommunityRole: async (communityId: string): Promise<CommunityRole | null> => {
+        const email = currentUser?.email;
+        if (!email) return null;
+        try {
+          const snap = await getDocs(
+            query(collection(db, 'communityMembers'), where('communityId', '==', communityId), where('userEmail', '==', email.toLowerCase()))
+          );
+          if (snap.empty) return null;
+          return (snap.docs[0].data().role || 'member') as CommunityRole;
+        } catch (e) { return null; }
+      },
+      getChallengesByCommunity: async (communityId: string): Promise<Challenge[]> => {
+        try {
+          const snap = await getDocs(
+            query(collection(db, 'challenges'), where('communityId', '==', communityId))
+          );
+          return snap.docs.map(d => ({ id: d.id, ...d.data() } as Challenge));
+        } catch (e) { return []; }
+      },
+      deleteChallenge: async (challengeId: string) => {
+        try {
+          await deleteDoc(doc(db, 'challenges', challengeId));
         } catch (e) {}
       },
       getChallenges: async (): Promise<Challenge[]> => {

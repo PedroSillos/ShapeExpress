@@ -73,6 +73,7 @@ npx capacitor open android
 - **Profile**
 - **Notifications**
 - **Students**
+- **Communities**
 
 ## Environment Variables
 
