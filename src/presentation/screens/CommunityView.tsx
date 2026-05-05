@@ -864,9 +864,30 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
               exit={{ opacity: 0, y: -10 }}
               className="p-6 space-y-6"
             >
-              {renderChallengeGroup("Desafios Diários", "daily")}
-              {renderChallengeGroup("Desafios Semanais", "weekly")}
-              {renderChallengeGroup("Desafios da Comunidade", "community")}
+              {challenges.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
+                  <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-white/20">
+                    <Target size={32} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold">Ainda não existe nenhum desafio nessa comunidade</h3>
+                    <p className="text-xs text-white/40 mt-1">Crie o primeiro desafio para engajar os membros.</p>
+                  </div>
+                  <button
+                    onClick={() => setShowSettingsModal(true)}
+                    className="flex items-center gap-2 px-6 py-3 bg-brand-red text-black rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-brand-red/90 transition-colors active:scale-95"
+                  >
+                    <Plus size={16} />
+                    Criar desafio
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {renderChallengeGroup("Desafios Diários", "daily")}
+                  {renderChallengeGroup("Desafios Semanais", "weekly")}
+                  {renderChallengeGroup("Desafios da Comunidade", "community")}
+                </>
+              )}
             </motion.div>
           )}
 
