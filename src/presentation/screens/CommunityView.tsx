@@ -81,9 +81,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
   const [activeTab, setActiveTab] = useState<
     "feed" | "challenges" | "ranking"
   >(initialTab);
-  const [rankingType, setRankingType] = useState<
-    "community" | "global" | "league" | "friends"
-  >(initialRankingType);
+  const [rankingType] = useState<"community">("community");
   const [feedFilter, setFeedFilter] = useState<"global" | "following">(
     "global",
   );
@@ -103,9 +101,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
     if (initialTab) setActiveTab(initialTab);
   }, [initialTab]);
 
-  useEffect(() => {
-    if (initialRankingType) setRankingType(initialRankingType);
-  }, [initialRankingType]);
+
   const [communities, setCommunities] = useState<Community[]>([]);
   const [userCommunityIds, setUserCommunityIds] = useState<string[]>([]);
   const [activeCommunity, setActiveCommunity] = useState<Community | null>(
@@ -114,8 +110,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [userChallenges, setUserChallenges] = useState<UserChallenge[]>([]);
   const [ranking, setRanking] = useState<Ranking[]>([]);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [isLeaderboardLoading, setIsLeaderboardLoading] = useState(false);
+
   const [newPostText, setNewPostText] = useState("");
   const [isPosting, setIsPosting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -127,58 +122,6 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
   useEffect(() => {
     loadInitialData();
   }, []);
-
-  useEffect(() => {
-    if (activeTab === "ranking" && rankingType !== "community") {
-      fetchLeaderboard();
-    }
-  }, [activeTab, rankingType, userLeague]);
-
-  const fetchLeaderboard = async () => {
-    setIsLeaderboardLoading(true);
-    try {
-      const leagueParam =
-        rankingType === "global"
-          ? "global"
-          : rankingType === "friends"
-            ? "friends"
-            : userLeague;
-      const data = await getLeaderboard(leagueParam);
-
-      if (data.length === 0) {
-        // Fallback to mock data for demo if no real data in DB
-        const mockData: LeaderboardEntry[] = Array.from({ length: 10 }).map(
-          (_, i) => ({
-            id: `mock-${i}`,
-            name: [
-              "Lucas Oliveira",
-              "Mariana Costa",
-              "Pedro Santos",
-              "Ana Silva",
-              "João Pereira",
-              "Carla Dias",
-              "Bruno Lima",
-              "Sofia Rocha",
-              "Tiago Alves",
-              "Beatriz Cruz",
-            ][i],
-            avatarUrl: `https://picsum.photos/seed/user${i + (rankingType === "global" ? 100 : rankingType === "friends" ? 300 : 200)}/200`,
-            xp: 15000 - i * 1200,
-            streak: 50 - i * 4,
-            level: 30 - i * 2,
-            rank: i + 1,
-          }),
-        );
-        setLeaderboard(mockData);
-      } else {
-        setLeaderboard(data);
-      }
-    } catch (error) {
-      console.error("Error fetching leaderboard:", error);
-    } finally {
-      setIsLeaderboardLoading(false);
-    }
-  };
 
   const handleFollowToggle = async (
     targetEmail: string,
@@ -195,7 +138,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
         const data = await api.getCommunityRanking(activeCommunity.id);
         setRanking(data);
       } else {
-        fetchLeaderboard();
+
       }
     } catch (error) {
       console.error("Error toggling follow:", error);
@@ -899,232 +842,83 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
               exit={{ opacity: 0, y: -10 }}
               className="p-6 space-y-6"
             >
-              {/* Ranking Type Selector */}
-              <div className="flex bg-white/5 p-1 rounded-xl">
-                {[
-                  { id: "community", label: "Comunidade" },
-                  { id: "global", label: "Global" },
-                  { id: "league", label: "Liga" },
-                  { id: "friends", label: "Amigos" },
-                ].map((type) => (
-                  <button
-                    key={type.id}
-                    onClick={() => setRankingType(type.id as any)}
-                    className={cn(
-                      "flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all",
-                      rankingType === type.id
-                        ? "bg-brand-red text-black"
-                        : "text-white/40",
-                    )}
-                  >
-                    {type.label}
-                  </button>
-                ))}
-              </div>
-
-              {rankingType === "community" ? (
-                <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-                  <div className="p-4 border-b border-white/5 bg-white/5">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-white/60">
-                      Top Atletas - {activeCommunity?.name}
-                    </h2>
-                  </div>
-                  <div className="divide-y divide-white/5">
-                    {ranking.map((item, index) => {
-                      const isMe = item.userId === userProfile?.email;
-                      return (
-                        <div
-                          key={item.userId}
-                          className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="w-8 flex justify-center">
-                              {index < 3 ? (
-                                <Medal
-                                  className={cn(
-                                    "w-5 h-5",
-                                    index === 0
-                                      ? "text-yellow-500"
-                                      : index === 1
-                                        ? "text-slate-400"
-                                        : "text-amber-600",
-                                  )}
-                                />
-                              ) : (
-                                <span className="text-[10px] font-black text-white/40">
-                                  {index + 1}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <img
-                                src={item.userAvatar}
-                                className="w-10 h-10 rounded-full object-cover border border-white/10"
-                                referrerPolicy="no-referrer"
-                              />
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm font-bold">
-                                    {item.userName}
-                                  </p>
-                                  {isMe && (
-                                    <span className="text-[8px] px-1.5 py-0.5 rounded bg-brand-red/10 text-brand-red font-bold uppercase">
-                                      Você
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-[10px] text-white/40 uppercase tracking-widest">
-                                  {item.xp} XP • {item.streak} Dias
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            {!isMe && (
-                              <button
-                                onClick={() =>
-                                  handleFollowToggle(
-                                    item.userId,
-                                    item.isFollowing,
-                                  )
-                                }
-                                className={cn(
-                                  "p-2 rounded-lg transition-all",
-                                  item.isFollowing
-                                    ? "bg-brand-red/10 text-brand-red"
-                                    : "bg-white/5 text-white/40 hover:bg-white/10",
-                                )}
-                              >
-                                {item.isFollowing ? (
-                                  <UserCheck size={14} />
-                                ) : (
-                                  <UserPlus size={14} />
-                                )}
-                              </button>
-                            )}
-                            <div className="text-right min-w-[30px]">
-                              <p className="text-xs font-bold text-brand-red">
-                                #{index + 1}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+              <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                <div className="p-4 border-b border-white/5 bg-white/5">
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-white/60">
+                    Top Atletas - {activeCommunity?.name}
+                  </h2>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {isLeaderboardLoading ? (
-                    <div className="flex flex-col items-center justify-center py-20 space-y-4">
-                      <RefreshCw
-                        className="animate-spin text-brand-red"
-                        size={32}
-                      />
-                      <p className="text-xs font-bold text-white/40 uppercase tracking-widest">
-                        Carregando Ranking...
-                      </p>
-                    </div>
-                  ) : (
-                    leaderboard.map((entry, index) => {
-                      const isMe = entry.id === userProfile?.email;
-                      const rank = entry.rank || index + 1;
-                      return (
-                        <div
-                          key={entry.id}
-                          className={cn(
-                            "p-4 rounded-2xl flex items-center gap-4 transition-all border",
-                            isMe
-                              ? "border-brand-red/50 bg-brand-red/5"
-                              : "bg-white/5 border-white/10",
-                          )}
-                        >
-                          <div className="flex items-center justify-center w-8 h-8">
-                            {rank <= 3 ? (
+                <div className="divide-y divide-white/5">
+                  {ranking.map((item, index) => {
+                    const isMe = item.userId === userProfile?.email;
+                    return (
+                      <div
+                        key={item.userId}
+                        className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-8 flex justify-center">
+                            {index < 3 ? (
                               <Medal
                                 className={cn(
-                                  "w-6 h-6",
-                                  rank === 1
+                                  "w-5 h-5",
+                                  index === 0
                                     ? "text-yellow-500"
-                                    : rank === 2
+                                    : index === 1
                                       ? "text-slate-400"
                                       : "text-amber-600",
                                 )}
                               />
                             ) : (
-                              <span className="text-xs font-bold text-white/40">
-                                #{rank}
+                              <span className="text-[10px] font-black text-white/40">
+                                {index + 1}
                               </span>
                             )}
                           </div>
-
-                          <img
-                            src={entry.avatarUrl}
-                            alt={entry.name}
-                            className="w-10 h-10 rounded-full object-cover border-2 border-white/10"
-                            referrerPolicy="no-referrer"
-                          />
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-sm font-bold truncate">
-                                {entry.name}
-                              </h4>
-                              {isMe && (
-                                <span className="text-[8px] py-0.5 px-1.5 rounded bg-brand-red/10 border border-brand-red text-brand-red font-bold">
-                                  VOCÊ
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-3 mt-0.5">
-                              <span className="text-[10px] text-white/40 font-medium">
-                                Nível {entry.level}
-                              </span>
-                              <div className="flex items-center gap-1 text-[10px] text-orange-400 font-bold">
-                                <Flame size={10} />
-                                {entry.streak}
-                              </div>
-                            </div>
-                          </div>
-
                           <div className="flex items-center gap-3">
-                            {!isMe && (
-                              <button
-                                onClick={() =>
-                                  handleFollowToggle(
-                                    entry.id,
-                                    entry.isFollowing,
-                                  )
-                                }
-                                className={cn(
-                                  "p-2 rounded-lg transition-all",
-                                  entry.isFollowing
-                                    ? "bg-brand-red/10 text-brand-red"
-                                    : "bg-white/5 text-white/40 hover:bg-white/10",
+                            <img
+                              src={item.userAvatar}
+                              className="w-10 h-10 rounded-full object-cover border border-white/10"
+                              referrerPolicy="no-referrer"
+                            />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-bold">{item.userName}</p>
+                                {isMe && (
+                                  <span className="text-[8px] px-1.5 py-0.5 rounded bg-brand-red/10 text-brand-red font-bold uppercase">
+                                    Você
+                                  </span>
                                 )}
-                              >
-                                {entry.isFollowing ? (
-                                  <UserCheck size={14} />
-                                ) : (
-                                  <UserPlus size={14} />
-                                )}
-                              </button>
-                            )}
-                            <div className="text-right min-w-[60px]">
-                              <div className="text-sm font-bold">
-                                {entry.xp.toLocaleString()}
                               </div>
-                              <div className="text-[8px] text-white/40 font-bold uppercase tracking-widest">
-                                XP Total
-                              </div>
+                              <p className="text-[10px] text-white/40 uppercase tracking-widest">
+                                {item.xp} XP • {item.streak} Dias
+                              </p>
                             </div>
                           </div>
                         </div>
-                      );
-                    })
-                  )}
+                        <div className="flex items-center gap-3">
+                          {!isMe && (
+                            <button
+                              onClick={() => handleFollowToggle(item.userId, item.isFollowing)}
+                              className={cn(
+                                "p-2 rounded-lg transition-all",
+                                item.isFollowing
+                                  ? "bg-brand-red/10 text-brand-red"
+                                  : "bg-white/5 text-white/40 hover:bg-white/10",
+                              )}
+                            >
+                              {item.isFollowing ? <UserCheck size={14} /> : <UserPlus size={14} />}
+                            </button>
+                          )}
+                          <div className="text-right min-w-[30px]">
+                            <p className="text-xs font-bold text-brand-red">#{index + 1}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
+              </div>
             </motion.div>
           )}
 
