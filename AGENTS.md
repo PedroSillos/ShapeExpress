@@ -99,6 +99,7 @@ Always consider both the **web app** and **Android app** when making changes. UI
 - Imports: `@/` alias always
 - TypeScript strict — no implicit `any`
 - Naming: `PascalCase` components/types, `camelCase` functions, `UPPER_SNAKE_CASE` constants
+- **SRP**: each file must have one responsibility — one component, one hook, one service. Screens only orchestrate; business logic belongs in hooks or domain use-cases. Split any file that does more than one thing.
 
 ## API Endpoints
 
