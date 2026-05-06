@@ -12,7 +12,7 @@ Shape Express is a comprehensive fitness tracking application that helps users m
 |-------|------------|
 | Frontend | React 19, TypeScript, Vite 6 |
 | Styling | TailwindCSS 4, Motion |
-| Backend | Express.js, WebSockets |
+| Backend | Express.js |
 | Database | Firebase (Firestore, Auth, Storage) |
 | Payments | Stripe |
 | AI | Google Gemini API |
@@ -42,13 +42,14 @@ The app will be available at:
 |---------|-------------|
 | `npm run dev` | Clean cache, start Vite dev server + Express |
 | `npm run build` | Production build |
+| `npm run lint` | TypeScript check (`tsc --noEmit`) |
 | `npm run clean` | Remove `dist/` and Vite cache (`node_modules/.vite`) |
 
-## Android / Capacitor (No Cache)
+## Android / Capacitor
 
 | Command | Description |
 |---------|-------------|
-| `npm run android` | Build the Android app from the React app |
+| `npm run android` | Build + sync + open Android project |
 
 ## Features
 
@@ -64,6 +65,7 @@ The app will be available at:
 - **Notifications**
 - **Students**
 - **Communities**
+- **Store**
 
 ## Environment Variables
 

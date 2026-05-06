@@ -31,6 +31,11 @@ npx capacitor open android
 - [src/App.tsx]
 - [src/presentation/screens]
 - [src/presentation/hooks]
+- [src/presentation/components]
+- [src/features/community]
+- [src/features/register]
+- [src/domain/use-cases]
+- [src/data/services/aiService.ts]
 - [server.ts]
 - [src/firebase.ts]
 - [vite.config.ts]
@@ -52,7 +57,9 @@ await browser.close();
 
 Run with `node pw-check.mjs`. Delete the script after use — do not commit temporary Playwright scripts.
 
-**ALWAYS** use playwrite to validate changes before considering a change as complete
+**ALWAYS** use playwright to validate changes before considering a change as complete
+
+## Architecture
 
 ### FSD (Feature-Sliced Design):
 
@@ -132,10 +139,10 @@ messages/{roomId}/msgs/{msgId}
 
 - **Secrets**: all keys in `.env.local` (gitignored). `VITE_` prefix = public/client-side — never put `STRIPE_SECRET_KEY` or `GEMINI_API_KEY` there.
 - **Auth**: every `/api/*` route (except `/api/health`) must use `authMiddleware`. Prefer `Authorization: Bearer <firebase-id-token>` over `x-user-email` fallback.
-- **Input validation**: use `express-validator` on all request body fields before processing.
+- **Input validation**: use `express-validator` on all request body fields before processing (see existing `validateProtocolId` pattern).
 - **AI prompts**: only inject known typed fields — never raw user strings. Use `gemini-2.0-flash` to control costs.
 - **Stripe**: verify payment server-side via `stripe.checkout.sessions.retrieve`; use webhook signature verification in production.
-- **Firebase**: Admin SDK for privileged writes; enforce Firestore Security Rules.
+- **Firebase**: Admin SDK for privileged writes; enforce Firestore Security Rules (`request.auth.uid == resource.data.userId`).
 - **Logging**: never log tokens, emails, or payment data.
 
 ## Troubleshooting
@@ -152,18 +159,3 @@ messages/{roomId}/msgs/{msgId}
 npm install -g firebase-tools
 firebase emulators:start
 ```
-
-- UI strings: **Portuguese** · Code/comments: **English**
-- Dark theme classes: `bg-dark-card`, `border-dark-border`
-- Class merging: `cn()` from `@/shared/lib/cn`
-- Imports: `@/` alias always
-
-## Security Guidelines
-
-- **Secrets**: all keys in `.env.local` (gitignored). `VITE_` prefix = public/client-side — never put `STRIPE_SECRET_KEY` or `GEMINI_API_KEY` there.
-- **Auth**: every `/api/*` route (except `/api/health`) must use `authMiddleware`. Prefer `Authorization: Bearer <firebase-id-token>` over `x-user-email` fallback.
-- **Input validation**: use `express-validator` on all request body fields before processing (see existing `validateProtocolId` pattern).
-- **AI prompts**: only inject known typed fields — never raw user strings. Use `gemini-2.0-flash` to control costs.
-- **Stripe**: verify payment server-side via `stripe.checkout.sessions.retrieve`; use webhook signature verification in production.
-- **Firebase**: Admin SDK for privileged writes; enforce Firestore Security Rules (`request.auth.uid == resource.data.userId`).
-- **Logging**: never log tokens, emails, or payment data.
