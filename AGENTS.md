@@ -52,7 +52,10 @@ await browser.close();
 
 Run with `node pw-check.mjs`. Delete the script after use — do not commit temporary Playwright scripts.
 
-FSD (Feature-Sliced Design):
+**ALWAYS** use playwrite to validate changes before considering a change as complete
+
+### FSD (Feature-Sliced Design):
+
 - New features go in `src/features/<name>/` with `index.ts` barrel export
 - Import via relative paths from `src/presentation/screens` (e.g. `../../features/community`)
 - Features never import other features; use shared utils or entities
