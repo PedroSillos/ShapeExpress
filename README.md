@@ -15,9 +15,15 @@ Shape Express is a comprehensive fitness tracking application that helps users m
 | Backend | Express.js |
 | Database | Firebase (Firestore, Auth, Storage) |
 | Payments | Stripe |
-| AI | Google Gemini API |
+| AI | Google Gemini API (`gemini-2.0-flash`) |
 | Mobile | Capacitor 8 |
 | Testing | Playwright (browser automation) |
+
+## Prerequisites
+
+- Node.js 20+
+- JDK 17+ (Android builds only)
+- Android Studio (Android builds only)
 
 ## Quick Start
 
@@ -26,7 +32,8 @@ Shape Express is a comprehensive fitness tracking application that helps users m
 npm install
 
 # Copy environment file and fill in credentials
-cp .env.example .env.local
+copy .env.example .env.local   # Windows
+cp .env.example .env.local     # macOS/Linux
 
 # Start development server
 npm run dev
@@ -53,19 +60,10 @@ The app will be available at:
 
 ## Features
 
-- **Authentication**
-- **Dashboard**
-- **Workouts**
-- **Stats**
-- **Calendar**
-- **Leaderboard**
-- **Chat**
-- **Express**
-- **Profile**
-- **Notifications**
-- **Students**
-- **Communities**
-- **Store**
+- Authentication, Dashboard, Workouts, Stats, Calendar
+- Leaderboard, Chat, Express (marketplace), Store
+- Profile, Achievements, Body Assessment
+- Notifications, Students, Communities
 
 ## Environment Variables
 

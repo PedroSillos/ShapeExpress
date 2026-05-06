@@ -41,6 +41,19 @@ npx capacitor open android
 - [vite.config.ts]
 - [capacitor.config.ts]
 
+## Do / Don't
+
+| Do | Don't |
+|----|-------|
+| Use `@/` alias for all imports | Use relative `../../` imports outside of features |
+| Use `cn()` for class merging | Concatenate class strings manually |
+| Put business logic in hooks or domain use-cases | Put logic inline in screen components |
+| Use `gemini-2.0-flash` for AI calls | Use other Gemini models (cost control) |
+| Delete Playwright scripts after use | Commit temporary `pw-*.mjs` scripts |
+| Validate all API inputs with `express-validator` | Trust raw request body fields |
+| Use `Authorization: Bearer <token>` | Rely on `x-user-email` for new routes |
+| Keep files under 500 lines | Let files grow without splitting |
+
 ## Browser Automation with Playwright
 
 Playwright is available (`npx playwright`) and should be used for validating UI changes against the running dev server (unless said otherwise). To run a quick headless check:
@@ -61,7 +74,7 @@ Run with `node pw-check.mjs`. Delete the script after use — do not commit temp
 
 ## Architecture
 
-### FSD (Feature-Sliced Design):
+### FSD (Feature-Sliced Design)
 
 - New features go in `src/features/<name>/` with `index.ts` barrel export
 - Import via relative paths from `src/presentation/screens` (e.g. `../../features/community`)
@@ -99,7 +112,7 @@ Always consider both the **web app** and **Android app** when making changes. UI
 - Imports: `@/` alias always
 - TypeScript strict — no implicit `any`
 - Naming: `PascalCase` components/types, `camelCase` functions, `UPPER_SNAKE_CASE` constants
-- **SRP**: each file must have one responsibility — one component, one hook, one service. Screens only orchestrate; business logic belongs in hooks or domain use-cases. Split any file that does more than one thing.
+- **SRP**: each file has one responsibility — one component, one hook, one service. Screens only orchestrate; business logic belongs in hooks or domain use-cases. Split any file that does more than one thing.
 
 ## API Endpoints
 
@@ -143,7 +156,7 @@ messages/{roomId}/msgs/{msgId}
 - **Input validation**: use `express-validator` on all request body fields before processing (see existing `validateProtocolId` pattern).
 - **AI prompts**: only inject known typed fields — never raw user strings. Use `gemini-2.0-flash` to control costs.
 - **Stripe**: verify payment server-side via `stripe.checkout.sessions.retrieve`; use webhook signature verification in production.
-- **Firebase**: Admin SDK for privileged writes; enforce Firestore Security Rules (`request.auth.uid == resource.data.userId`).
+- **Firebase**: Admin SDK for privileged writes; enforce Firestore Security Rules (`request.auth.token.email == email`).
 - **Logging**: never log tokens, emails, or payment data.
 
 ## Troubleshooting
@@ -153,6 +166,13 @@ messages/{roomId}/msgs/{msgId}
 | Module not found | Check relative import paths, run `npm install` |
 | Firebase auth failing | Verify `.env.local` keys, check Firebase Console auth methods |
 | Stripe error | Confirm `STRIPE_SECRET_KEY=sk_test_...`, server on `:3000` |
+| Android assets stale | Run `npm run android` (clears `android/app/build` before sync) |
+| Capacitor changes not reflected | Always `npm run build` before `npx capacitor sync` |
+| White screen on Android | Check `webDir` in `capacitor.config.ts` points to `dist` |
+
+## Dependencies Note
+
+- `better-sqlite3` and `multer` are installed but not actively used in current routes — do not add new features depending on them without confirming they are still needed.
 
 ## Firebase Emulator (optional)
 
