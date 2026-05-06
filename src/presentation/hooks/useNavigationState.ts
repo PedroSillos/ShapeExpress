@@ -1,0 +1,25 @@
+import { useState } from "react";
+import type { BodyAssessment, WorkoutSession } from "../../domain/entities";
+
+export type AppTab =
+  | "dashboard" | "calendar" | "workouts" | "stats" | "achievements"
+  | "profile" | "edit-profile" | "evolution" | "trainers"
+  | "new-assessment" | "edit-assessment" | "create-workout" | "edit-workout"
+  | "login" | "settings-goal" | "settings-notifications"
+  | "forgot-password" | "register" | "help" | "express" | "library"
+  | "students" | "student-workouts" | "student-evolution"
+  | "chat" | "notifications" | "community" | "purchased-products" | "leaderboard";
+
+export const useNavigationState = () => {
+  const [activeTab, setActiveTab] = useState<AppTab>("login");
+  const [swipeDirection, setSwipeDirection] = useState(0);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [editingAssessment, setEditingAssessment] = useState<BodyAssessment | null>(null);
+
+  return {
+    activeTab, setActiveTab,
+    swipeDirection, setSwipeDirection,
+    showLogoutConfirm, setShowLogoutConfirm,
+    editingAssessment, setEditingAssessment,
+  };
+};
