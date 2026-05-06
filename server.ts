@@ -58,8 +58,45 @@ async function startServer() {
     res.json({ status: 'ok' });
   });
 
+  // Input validation rules
+  const validateProtocolId = body('protocolId')
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .matches(/^[a-zA-Z0-9_-]+$/)
+    .withMessage('ID de protocolo inválido');
+
+  const validateSessionId = body('sessionId')
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .matches(/^[a-zA-Z0-9_-]+$/)
+    .withMessage('ID de sessão inválido');
+
+  const validateCoachAdvice = [
+    body('userProfile.name').optional().trim().isLength({ max: 100 }).escape(),
+    body('userProfile.objective').optional().trim().isLength({ max: 200 }).escape(),
+    body('userProfile.experienceLevel').optional().isIn(['Iniciante', 'Intermediário', 'Avançado']),
+    body('sessions').optional().isArray({ max: 100 }),
+    body('progressScore.score').optional().isNumeric(),
+    body('progressScore.classification').optional().trim().isLength({ max: 50 }).escape(),
+    body('stagnationReports').optional().isArray({ max: 50 }),
+  ];
+
+  const validateRecommendCommunities = [
+    body('userProfile.name').optional().trim().isLength({ max: 100 }).escape(),
+    body('userProfile.objective').optional().trim().isLength({ max: 200 }).escape(),
+    body('userLevel').optional().isInt({ min: 1, max: 1000 }),
+    body('userLeague').optional().isIn(['Bronze', 'Prata', 'Ouro', 'Platina', 'Esmeralda', 'Diamante']),
+    body('communities').optional().isArray({ max: 200 }),
+    body('userCommunityIds').optional().isArray({ max: 200 }),
+  ];
+
   // AI Coach Endpoint (server-side Gemini)
-  app.post('/api/ai/coach-advice', authMiddleware, async (req, res) => {
+  app.post('/api/ai/coach-advice', authMiddleware, validateCoachAdvice, async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     if (!genAI) {
       return res.status(500).json({ error: 'AI não está configurado. Adicione GEMINI_API_KEY nas variáveis de ambiente.' });
     }
@@ -96,7 +133,12 @@ async function startServer() {
   });
 
   // AI Community Recommendations Endpoint
-  app.post('/api/ai/recommend-communities', authMiddleware, async (req, res) => {
+  app.post('/api/ai/recommend-communities', authMiddleware, validateRecommendCommunities, async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     if (!genAI) {
       return res.status(500).json({ error: 'AI não está configurado.' });
     }
@@ -134,19 +176,6 @@ async function startServer() {
       res.status(500).json({ error: 'Erro ao gerar recomendações.' });
     }
   });
-
-  // Input validation rules
-  const validateProtocolId = body('protocolId')
-    .trim()
-    .isLength({ min: 1, max: 100 })
-    .matches(/^[a-zA-Z0-9_-]+$/)
-    .withMessage('ID de protocolo inválido');
-
-  const validateSessionId = body('sessionId')
-    .trim()
-    .isLength({ min: 1, max: 100 })
-    .matches(/^[a-zA-Z0-9_-]+$/)
-    .withMessage('ID de sessão inválido');
 
   // Stripe Endpoints
   // Note: For fully secure external Firebase admin integration, a service account JSON is needed.

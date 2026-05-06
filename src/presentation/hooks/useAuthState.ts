@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { tokenStore } from "../../data/services/tokenStore";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -24,6 +25,7 @@ export const useAuthState = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ email: string } | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem("shape_express_token"));
+  const [idToken, setIdToken] = useState<string | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
 
   const fetchWithAuth = useCallback(async (
@@ -31,7 +33,7 @@ export const useAuthState = () => {
     options: RequestInit = {},
     retries = 3,
   ): Promise<Response> => {
-    const currentToken = token || localStorage.getItem("shape_express_token");
+    const currentToken = idToken;
     try {
       const res = await fetch(url, {
         ...options,
@@ -53,7 +55,7 @@ export const useAuthState = () => {
       }
       throw error;
     }
-  }, [token]);
+  }, [idToken]);
 
   // Tab to restore after auth resolves — read by useAppState to redirect
   const [restoredTab, setRestoredTab] = useState<string | null>(null);
@@ -64,16 +66,21 @@ export const useAuthState = () => {
       setRestoredTab("login");
     }, 5000);
 
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       clearTimeout(fallbackTimer);
       if (firebaseUser?.email) {
         const email = firebaseUser.email;
+        const freshIdToken = await firebaseUser.getIdToken();
+        tokenStore.idToken = freshIdToken;
+        setIdToken(freshIdToken);
         localStorage.setItem("shape_express_token", email);
         setToken(email);
         setCurrentUser({ email });
         setIsLoggedIn(true);
         setRestoredTab(localStorage.getItem("app-default-tab") || "dashboard");
       } else {
+        tokenStore.idToken = null;
+        setIdToken(null);
         localStorage.removeItem("shape_express_token");
         syncState.syncedToken = null;
         setToken(null);
@@ -90,7 +97,9 @@ export const useAuthState = () => {
   const login = async (email: string, password: string) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const idToken = await userCredential.user.getIdToken();
+      const freshIdToken = await userCredential.user.getIdToken();
+      tokenStore.idToken = freshIdToken;
+      setIdToken(freshIdToken);
       let userDoc = null;
       try {
         const snap = await getDoc(doc(db, "users", email));
@@ -101,7 +110,7 @@ export const useAuthState = () => {
       setToken(email);
       setCurrentUser({ email });
       setIsLoggedIn(true);
-      return { token: idToken, user: userDoc || { email, name: email.split("@")[0] } };
+      return { token: freshIdToken, user: userDoc || { email, name: email.split("@")[0] } };
     } catch (e: any) {
       if (e.code === "auth/operation-not-allowed") {
         toast.error("O login por Email/Senha não está habilitado no console do Firebase.");
@@ -116,7 +125,9 @@ export const useAuthState = () => {
     try {
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
-      const idToken = await userCredential.user.getIdToken();
+      const freshIdToken = await userCredential.user.getIdToken();
+      tokenStore.idToken = freshIdToken;
+      setIdToken(freshIdToken);
       const email = userCredential.user.email!;
       let userDoc: UserProfile | null = null;
       try {
@@ -147,7 +158,7 @@ export const useAuthState = () => {
       setToken(email);
       setCurrentUser({ email });
       setIsLoggedIn(true);
-      return { token: idToken, user: userDoc };
+      return { token: freshIdToken, user: userDoc };
     } catch (e: any) {
       toast.error(getFirebaseErrorMessage(e));
       throw new Error(getFirebaseErrorMessage(e));
@@ -157,7 +168,9 @@ export const useAuthState = () => {
   const register = async (data: any) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-      const idToken = await userCredential.user.getIdToken();
+      const freshIdToken = await userCredential.user.getIdToken();
+      tokenStore.idToken = freshIdToken;
+      setIdToken(freshIdToken);
       const isTrainer = (data.userType || "atleta") === "treinador";
       const userProfile = {
         ...data,
@@ -183,7 +196,7 @@ export const useAuthState = () => {
       setToken(data.email);
       setCurrentUser({ email: data.email });
       setIsLoggedIn(true);
-      return { token: idToken, user: userProfile };
+      return { token: freshIdToken, user: userProfile };
     } catch (e: any) {
       if (e.code === "auth/operation-not-allowed") {
         toast.error("O login por Email/Senha não está habilitado no console do Firebase.");
@@ -220,7 +233,9 @@ export const useAuthState = () => {
       .filter((k) => k.startsWith("firebase:"))
       .forEach((k) => localStorage.removeItem(k));
     localStorage.removeItem("shape_express_token");
+    tokenStore.idToken = null;
     syncState.syncedToken = null;
+    setIdToken(null);
     setToken(null);
     setCurrentUser(null);
     setIsLoggedIn(false);
@@ -232,6 +247,7 @@ export const useAuthState = () => {
     isLoggedIn, setIsLoggedIn,
     currentUser,
     token, setToken,
+    idToken,
     initialLoading,
     restoredTab,
     fetchWithAuth,

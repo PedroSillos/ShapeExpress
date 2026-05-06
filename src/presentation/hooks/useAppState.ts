@@ -24,7 +24,7 @@ export const useAppState = () => {
   const notifs = useNotificationsState(auth.currentUser, auth.isLoggedIn, auth.token);
   const chat = useChatState(auth.currentUser);
   const community = useCommunityState(auth.currentUser);
-  const store = useStoreState(auth.currentUser, auth.token);
+  const store = useStoreState(auth.currentUser, auth.idToken);
 
   // Boot sync after login
   useSyncState(auth.isLoggedIn, auth.token, {

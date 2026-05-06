@@ -1,29 +1,16 @@
 import { WorkoutSession, UserProfile, StagnationReport, ProgressScore, Community } from "../../domain/entities";
+import { tokenStore } from "./tokenStore";
 
-// Get token from localStorage (same mechanism as useAppState)
-const getToken = (): string | null => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem("shape_express_token");
-  }
-  return null;
-};
-
-// Call backend API instead of direct Gemini (security fix)
 const callBackendAI = async (endpoint: string, body: any): Promise<any> => {
-  const token = getToken();
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-user-email': token || '',
+      Authorization: `Bearer ${tokenStore.idToken || ''}`,
     },
     body: JSON.stringify(body),
   });
-  
-  if (!response.ok) {
-    throw new Error('Failed to get AI response');
-  }
-  
+  if (!response.ok) throw new Error('Failed to get AI response');
   return response.json();
 };
 

@@ -2,7 +2,6 @@ export const useStoreState = (
   currentUser: { email: string } | null,
   token: string | null,
 ) => {
-  const currentToken = () => token || localStorage.getItem("shape_express_token");
 
   const getProtocols = async () => [];
   const createProtocol = async (_p: any) => {};
@@ -13,8 +12,7 @@ export const useStoreState = (
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${currentToken()}`,
-        "x-user-email": currentUser?.email || "",
+        Authorization: `Bearer ${token || ''}`,
       },
       body: JSON.stringify({ protocolId: id }),
     });
@@ -26,8 +24,7 @@ export const useStoreState = (
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${currentToken()}`,
-        "x-user-email": currentUser?.email || "",
+        Authorization: `Bearer ${token || ''}`,
       },
       body: JSON.stringify({ sessionId: sid, protocolId: pid }),
     });
