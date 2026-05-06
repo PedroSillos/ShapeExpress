@@ -1,131 +1,175 @@
-import React from 'react';
-import { Flame, TrendingUp, Clock, Award, ChevronRight, Play, Sparkles, User, Scale, Target, Zap, Heart, Trophy } from 'lucide-react';
-import { Card } from '../components/Card';
-import { Badge } from '../components/Badge';
-import { WorkoutSession, WorkoutTemplate, UserTrainingProfile, ExerciseUserStats, UserCalorieProfile, BodyAssessment, UserProfile } from '../../domain/entities';
+import { useState, useMemo, useEffect } from 'react';
+import { startOfWeek, parseISO } from 'date-fns';
+import {
+  UserStats,
+  WorkoutSession,
+  WorkoutTemplate,
+  UserTrainingProfile,
+  ExerciseUserStats,
+  UserCalorieProfile,
+  BodyAssessment,
+  UserProfile,
+  ProgressScore,
+} from '../../domain/entities';
+import {
+  StatsWidget,
+  CaloriesWidget,
+  ProgressScoreWidget,
+  AiCoachWidget,
+  HireCoachWidget,
+  MotivationWidget,
+  CommunityWidget,
+  PersonalRecordsWidget,
+  WeeklyGoalWidget,
+  LastAchievementWidget,
+} from '../components/DashboardWidgets';
+import { WaterWidget } from '../components/WaterWidget';
+import { NextWorkoutWidget } from '../components/NextWorkoutWidget';
 
 interface DashboardViewProps {
-  user: UserProfile;
-  trainingProfile: UserTrainingProfile;
+  userStats: UserStats;
   sessions: WorkoutSession[];
   templates: WorkoutTemplate[];
-  onStartWorkout: (t: WorkoutTemplate) => void;
-  onViewEvolution: () => void;
+  onStartWorkout: () => void;
   onViewAchievements: () => void;
+  userProfile: UserTrainingProfile;
+  exerciseStats: ExerciseUserStats[];
+  calorieProfile: UserCalorieProfile;
+  assessments: BodyAssessment[];
+  mainUserProfile: UserProfile;
+  progressScore: ProgressScore | null;
+  aiAdvice: string | null;
+  isAiLoading: boolean;
+  switchTab: (tab: string) => void;
+  personalRecords: { weight: number; date: string; name: string }[];
+  studentConnections?: any[];
+  trainers?: UserProfile[];
 }
 
-export function DashboardView({ user, trainingProfile, sessions, templates, onStartWorkout, onViewEvolution, onViewAchievements, trainers = [] }: DashboardViewProps & { trainers?: UserProfile[] }) {
-  const lastSession = sessions[0];
-  const weeklyWorkouts = sessions.filter(s => {
-    const d = new Date(s.date);
-    const now = new Date();
-    const diff = now.getTime() - d.getTime();
-    return diff < 7 * 24 * 60 * 60 * 1000;
-  }).length;
+const DEFAULT_WIDGETS = [
+  { id: 'stats', visible: true },
+  { id: 'next-workout', visible: true },
+  { id: 'water', visible: true },
+  { id: 'calories', visible: true },
+  { id: 'progress-score', visible: true },
+  { id: 'ai-coach', visible: true },
+  { id: 'hire-coach', visible: true },
+  { id: 'motivation', visible: true },
+  { id: 'community', visible: true },
+  { id: 'records', visible: true },
+  { id: 'weekly-goal', visible: true },
+  { id: 'last-achievement', visible: true },
+];
+
+function loadWidgets() {
+  try {
+    const saved = localStorage.getItem('app-dashboard-widgets');
+    if (!saved) return DEFAULT_WIDGETS;
+    const parsed = JSON.parse(saved);
+    const merged = DEFAULT_WIDGETS.map(dw => {
+      const found = parsed.find((pw: any) => pw.id === dw.id);
+      return found ? { ...dw, visible: found.visible } : dw;
+    });
+    merged.sort((a, b) => {
+      const ia = parsed.findIndex((pw: any) => pw.id === a.id);
+      const ib = parsed.findIndex((pw: any) => pw.id === b.id);
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
+    return merged;
+  } catch {
+    return DEFAULT_WIDGETS;
+  }
+}
+
+export function DashboardView({
+  userStats,
+  sessions,
+  templates,
+  onStartWorkout,
+  onViewAchievements,
+  userProfile,
+  exerciseStats,
+  calorieProfile,
+  assessments,
+  mainUserProfile,
+  progressScore,
+  aiAdvice,
+  isAiLoading,
+  switchTab,
+  personalRecords,
+  studentConnections = [],
+  trainers = [],
+}: DashboardViewProps) {
+  const [widgets, setWidgets] = useState(loadWidgets);
+
+  useEffect(() => {
+    const handler = () => setWidgets(loadWidgets());
+    window.addEventListener('dashboard-widgets-updated', handler);
+    return () => window.removeEventListener('dashboard-widgets-updated', handler);
+  }, []);
+
+  const weeklyVolume = useMemo(
+    () => sessions.slice(0, 5).reduce((acc, s) => acc + s.totalVolume, 0),
+    [sessions],
+  );
+
+  const completedThisWeek = useMemo(() => {
+    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+    return sessions.filter(s => parseISO(s.date) >= weekStart).length;
+  }, [sessions]);
+
+  const renderWidget = (id: string) => {
+    switch (id) {
+      case 'stats':
+        return <StatsWidget key="stats" userStats={userStats} weeklyVolume={weeklyVolume} />;
+      case 'next-workout':
+        return (
+          <NextWorkoutWidget
+            key="next-workout"
+            templates={templates}
+            sessions={sessions}
+            onStartWorkout={onStartWorkout}
+            userProfile={userProfile}
+            exerciseStats={exerciseStats}
+            calorieProfile={calorieProfile}
+            assessments={assessments}
+            mainUserProfile={mainUserProfile}
+            trainers={trainers}
+          />
+        );
+      case 'water':
+        return <WaterWidget key="water" />;
+      case 'calories':
+        return <CaloriesWidget key="calories" calorieProfile={calorieProfile} />;
+      case 'progress-score':
+        if (!progressScore || sessions.length === 0) return null;
+        return <ProgressScoreWidget key="progress-score" progressScore={progressScore} />;
+      case 'ai-coach':
+        if (!aiAdvice && !isAiLoading) return null;
+        return <AiCoachWidget key="ai-coach" aiAdvice={aiAdvice} isAiLoading={isAiLoading} />;
+      case 'hire-coach':
+        if (!(mainUserProfile?.userType === 'atleta' && studentConnections.length === 0)) return null;
+        return <HireCoachWidget key="hire-coach" onPress={() => switchTab('trainers')} />;
+      case 'motivation':
+        return <MotivationWidget key="motivation" />;
+      case 'community':
+        return <CommunityWidget key="community" onPress={() => switchTab('leaderboard')} />;
+      case 'records':
+        return <PersonalRecordsWidget key="records" records={personalRecords} />;
+      case 'weekly-goal':
+        return <WeeklyGoalWidget key="weekly-goal" completed={completedThisWeek} goal={userStats.weeklyGoal} />;
+      case 'last-achievement':
+        return <LastAchievementWidget key="last-achievement" onPress={onViewAchievements} />;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="space-y-6 pb-12">
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold">Olá, {user.name.split(' ')[0]}!</h2>
-          <p className="text-xs text-white/40">Pronto para o treino de hoje?</p>
-        </div>
-        <div className="w-12 h-12 rounded-full bg-brand-red/10 border border-brand-red/20 flex items-center justify-center text-brand-red overflow-hidden">
-          {user.avatarUrl ? (
-            <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
-          ) : (
-            <User size={24} />
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="p-6 space-y-4 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-brand-red/5 blur-2xl rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-700" />
-          <div className="w-10 h-10 rounded-full bg-brand-red/10 flex items-center justify-center text-brand-red">
-            <Flame size={20} />
-          </div>
-          <div>
-            <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">Treinos na Semana</p>
-            <p className="text-2xl font-bold">{weeklyWorkouts}</p>
-          </div>
-        </Card>
-        <Card className="p-6 space-y-4 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-brand-red/5 blur-2xl rounded-full -mr-12 -mt-12 group-hover:scale-150 transition-transform duration-700" />
-          <div className="w-10 h-10 rounded-full bg-brand-red/10 flex items-center justify-center text-brand-red">
-            <TrendingUp size={20} />
-          </div>
-          <div>
-            <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">Volume Total</p>
-            <p className="text-2xl font-bold">{lastSession?.totalVolume || 0}kg</p>
-          </div>
-        </Card>
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center justify-between px-2">
-          <h3 className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Treinos Sugeridos</h3>
-          <button className="text-[10px] text-brand-red font-bold uppercase tracking-widest flex items-center gap-1">
-            Ver Todos <ChevronRight size={10} />
-          </button>
-        </div>
-        <div className="space-y-3">
-          {templates.slice(0, 2).map((template) => {
-            const trainer = template.creatorEmail && template.creatorEmail !== user.email 
-              ? trainers.find(t => t.email === template.creatorEmail)
-              : null;
-            
-            return (
-              <Card key={template.id} className="p-4 flex items-center justify-between group">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 group-hover:text-brand-red transition-colors">
-                    <Play size={18} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold">{template.name}</h4>
-                    <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">
-                      {template.category === 'multicycle' ? `${template.cycles?.length || 0} Ciclos` : `${template.sheets?.length || 0} Vezes por Semana`}
-                    </p>
-                    {trainer && (
-                      <p className="text-[10px] text-brand-red font-bold uppercase tracking-wider mt-0.5">
-                        Por {trainer.name}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <button 
-                  onClick={() => onStartWorkout(template)}
-                  className="p-2 bg-brand-red text-black rounded-lg shadow-lg shadow-brand-red/20 active:scale-95 transition-transform"
-                >
-                  <Play size={14} fill="currentColor" />
-                </button>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="space-y-4 pt-4">
-        <h3 className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-2">Acesso Rápido</h3>
-        <div className="grid grid-cols-2 gap-3">
-          <button onClick={onViewEvolution} className="w-full text-left">
-            <Card className="p-4 flex items-center gap-3 group">
-              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 group-hover:text-brand-red transition-colors">
-                <Scale size={16} />
-              </div>
-              <span className="text-xs font-bold">Evolução</span>
-            </Card>
-          </button>
-          <button onClick={onViewAchievements} className="w-full text-left">
-            <Card className="p-4 flex items-center gap-3 group">
-              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 group-hover:text-brand-red transition-colors">
-                <Trophy size={16} />
-              </div>
-              <span className="text-xs font-bold">Conquistas</span>
-            </Card>
-          </button>
-        </div>
-      </div>
+    <div className="space-y-6">
+      {widgets.filter(w => w.visible).map(w => renderWidget(w.id))}
     </div>
   );
 }
