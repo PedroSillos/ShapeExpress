@@ -60,3 +60,8 @@ android/local.properties
 
 # Playwright temporary scripts (per AGENTS.md)
 pw-*.mjs
+
+# Playwright test results
+test-results/
+playwright-report/
+playwright/.cache/

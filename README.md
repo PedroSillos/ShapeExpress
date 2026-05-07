@@ -52,6 +52,40 @@ The app will be available at:
 | `npm run lint` | TypeScript check (`tsc --noEmit`) |
 | `npm run clean` | Remove all temporary files, logs, cache, and Android builds |
 
+## Testing
+
+| Command | Description |
+|---------|-------------|
+| `npm run test:e2e` | Run E2E tests (headless) |
+| `npm run test:e2e:ui` | Run E2E tests with interactive UI |
+| `npm run test:e2e:headed` | Run E2E tests with visible browser |
+| `npm run test:e2e:report` | Show test report |
+
+### Test Users
+
+- **Atleta**: pedro1@se.com / Pedro001
+- **Treinador**: tiago1@se.com / Tiago001
+
+### Writing Tests
+
+When adding new features, create corresponding E2E tests in `tests/e2e/`:
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { testUsers } from '../fixtures/users';
+import { login } from '../helpers/auth';
+
+test.describe('Nova Feature', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page, testUsers.pedro.email, testUsers.pedro.password);
+  });
+
+  test('deve fazer algo', async ({ page }) => {
+    // seu teste aqui
+  });
+});
+```
+
 ## Android / Capacitor
 
 | Command | Description |

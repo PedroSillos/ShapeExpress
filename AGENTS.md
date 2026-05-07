@@ -72,6 +72,74 @@ Run with `node pw-check.mjs`. Delete the script after use — do not commit temp
 
 **ALWAYS** use playwright to validate changes before considering a change as complete
 
+## E2E Testing
+
+### Running Tests
+
+| Command | Description |
+|---------|-------------|
+| `npm run test:e2e` | Run all E2E tests (headless) |
+| `npm run test:e2e:ui` | Interactive UI mode for debugging |
+| `npm run test:e2e:headed` | Run with visible browser |
+| `npm run test:e2e:report` | View test report |
+
+### Test Structure
+
+```
+tests/
+├── e2e/
+│   ├── auth.spec.ts       # Authentication flows
+│   ├── dashboard.spec.ts  # Navigation
+│   ├── workouts.spec.ts   # Workout CRUD
+│   ├── profile.spec.ts    # Profile management
+│   └── chat.spec.ts       # Messaging
+├── fixtures/
+│   └── users.ts           # Test user credentials
+└── helpers/
+    └── auth.ts            # Reusable login/logout
+```
+
+### Test Users
+
+- **Atleta**: pedro1@se.com / Pedro001
+- **Treinador**: tiago1@se.com / Tiago001
+
+### Adding Tests for New Features
+
+When implementing a new feature, **always add E2E tests** covering the main user flow:
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { testUsers } from '../fixtures/users';
+import { login } from '../helpers/auth';
+
+test.describe('Nova Feature', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page, testUsers.pedro.email, testUsers.pedro.password);
+  });
+
+  test('deve executar fluxo principal', async ({ page }) => {
+    // Navegar para feature
+    await page.click('text=/Feature/i');
+    
+    // Interagir
+    await page.fill('input[name="campo"]', 'valor');
+    await page.click('button[type="submit"]');
+    
+    // Verificar resultado
+    await expect(page.locator('body')).toContainText(/Sucesso/i);
+  });
+});
+```
+
+### CI/CD
+
+E2E tests run automatically on:
+- Pull requests to `main` or `develop`
+- Pushes to `main` or `develop`
+
+Tests must pass before merging. Check GitHub Actions for results and screenshots on failures.
+
 ## Architecture
 
 ### FSD (Feature-Sliced Design)
