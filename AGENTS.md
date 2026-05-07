@@ -107,6 +107,7 @@ Always consider both the **web app** and **Android app** when making changes. UI
 ## Conventions
 
 - UI strings: **Portuguese** · Code/comments: **English**
+- **Git commits**: **Portuguese (pt-BR)** — all commit messages must be in Brazilian Portuguese
 - Dark theme classes: `bg-dark-card`, `border-dark-border`
 - Class merging: `cn()` from `@/shared/lib/cn`
 - Imports: `@/` alias always
