@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "129919049822",
-    "project_id": "shapeexpress",
-    "storage_bucket": "shapeexpress.firebasestorage.app"
+    "project_number": "YOUR_PROJECT_NUMBER",
+    "project_id": "your-project-id",
+    "storage_bucket": "your-project.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:129919049822:android:71d4e2584d88ecc1cfd4cf",
+        "mobilesdk_app_id": "1:YOUR_PROJECT_NUMBER:android:YOUR_APP_ID",
         "android_client_info": {
           "package_name": "com.shapeexpress.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "129919049822-ehkqjjj9bd62iq3rls6nagju048tcb7e.apps.googleusercontent.com",
+          "client_id": "YOUR_PROJECT_NUMBER-xxxxxxxxxxxxx.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCidBEXaCtS28jgobAyA3_MLBothNbDy30"
+          "current_key": "YOUR_FIREBASE_API_KEY"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "129919049822-ehkqjjj9bd62iq3rls6nagju048tcb7e.apps.googleusercontent.com",
+              "client_id": "YOUR_PROJECT_NUMBER-xxxxxxxxxxxxx.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
