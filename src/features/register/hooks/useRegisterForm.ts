@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { UserProfile } from '../../../domain/entities';
 import { isValidEmail, isValidPhone, isValidDate } from '../../../utils/validation';
+import { getRandomSportAvatar, generateAvatarUrl } from '../../../shared/lib/sportAvatars';
 
 export function useRegisterForm(
   onRegister: (p: UserProfile) => void,
@@ -13,7 +14,7 @@ export function useRegisterForm(
     name: '',
     email: '',
     phone: '',
-    avatarUrl: `https://picsum.photos/seed/${Math.random()}/400`,
+    avatarUrl: generateAvatarUrl(getRandomSportAvatar()),
     specialties: [],
     experienceLevel: 'Iniciante',
     trainingFrequency: 3,

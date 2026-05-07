@@ -2,6 +2,7 @@ import { Camera, Instagram } from 'lucide-react';
 import { Card } from '../../../presentation/components/Card';
 import { InputGroup } from '../../../presentation/components/InputGroup';
 import { ImageUpload } from '../../../presentation/components/ImageUpload';
+import { SportAvatarSelector } from './SportAvatarSelector';
 import { UserProfile } from '../../../domain/entities';
 
 interface Props {
@@ -38,6 +39,11 @@ export function TrainerStep4({ formData, setFormData, isLoading, onFinalize, onB
           </div>
           <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Foto de perfil</p>
         </div>
+
+        <SportAvatarSelector
+          currentAvatarUrl={formData.avatarUrl || ''}
+          onSelect={(url) => setFormData({ ...formData, avatarUrl: url })}
+        />
 
         <div className="space-y-1.5">
           <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-2">Mini bio</label>

@@ -2,6 +2,7 @@ import { Camera, Ruler, Scale, Calendar as CalendarIcon } from 'lucide-react';
 import { Card } from '../../../presentation/components/Card';
 import { InputGroup } from '../../../presentation/components/InputGroup';
 import { ImageUpload } from '../../../presentation/components/ImageUpload';
+import { SportAvatarSelector } from './SportAvatarSelector';
 import { cn } from '../../../utils/cn';
 import { isValidDate } from '../../../utils/validation';
 import { UserProfile } from '../../../domain/entities';
@@ -42,6 +43,11 @@ export function AthleteStep6({ formData, setFormData, fieldErrors, setFieldError
           </div>
           <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Foto de perfil</p>
         </div>
+
+        <SportAvatarSelector
+          currentAvatarUrl={formData.avatarUrl || ''}
+          onSelect={(url) => setFormData({ ...formData, avatarUrl: url })}
+        />
 
         <div className="grid grid-cols-2 gap-4">
           <InputGroup label="Altura (cm)" value={formData.height?.toString() || ''} onChange={(v) => setFormData({ ...formData, height: Number(v) })} icon={<Ruler size={18} />} type="number" />

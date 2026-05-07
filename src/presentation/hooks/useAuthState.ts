@@ -15,6 +15,7 @@ import {
 } from "firebase/auth";
 import { getFirebaseErrorMessage } from "../../utils/firebaseErrors";
 import type { UserProfile } from "../../domain/entities";
+import { getRandomSportAvatar, generateAvatarUrl } from "../../shared/lib/sportAvatars";
 
 // Tracks which token has already been synced to prevent Strict Mode double-invoke
 // Using an object so the reference is stable and mutable across modules
@@ -143,7 +144,7 @@ export const useAuthState = () => {
             initialWeight: 80,
             objective: "Manutenção",
             birthDate: "2000-01-01",
-            avatarUrl: userCredential.user.photoURL || "https://picsum.photos/seed/user/400",
+            avatarUrl: userCredential.user.photoURL || generateAvatarUrl(getRandomSportAvatar()),
             hasPersonal: false,
           };
           await setDoc(doc(db, "users", email), userDoc);
@@ -179,7 +180,7 @@ export const useAuthState = () => {
         initialWeight: data.initialWeight || 80,
         objective: data.objective || "Manutenção",
         birthDate: data.birthDate || "2000-01-01",
-        avatarUrl: data.avatarUrl || "https://picsum.photos/seed/user/400",
+        avatarUrl: data.avatarUrl || generateAvatarUrl(getRandomSportAvatar()),
         hasPersonal: data.hasPersonal || false,
         ...(isTrainer ? { personalCode: Math.random().toString(36).substring(2, 8).toUpperCase() } : {}),
       };
