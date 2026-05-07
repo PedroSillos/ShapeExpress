@@ -1,26 +1,31 @@
 import React from 'react';
-import { Zap } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import logoImg from '../../assets/logo.png';
+import iconImg from '../../assets/icon.png';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  iconOnly?: boolean;
 }
 
-export const Logo = ({ size = 'md', className }: LogoProps) => {
+export const Logo = ({ size = 'md', className, iconOnly = false }: LogoProps) => {
   const sizes = {
-    sm: { icon: 24, box: 'w-8 h-8', text: 'text-lg' },
-    md: { icon: 24, box: 'w-10 h-10', text: 'text-2xl' },
-    lg: { icon: 32, box: 'w-14 h-14', text: 'text-4xl' }
+    sm: { width: 120, height: 120 },
+    md: { width: 180, height: 180 },
+    lg: { width: 240, height: 240 }
   };
   const s = sizes[size];
   
   return (
-    <div className={cn("flex items-center justify-center gap-2", className)}>
-      <div className={cn(s.box, "bg-brand-red rounded-xl flex items-center justify-center shadow-lg shadow-brand-red/20 rotate-3")}>
-        <Zap size={s.icon} className="text-black fill-current" />
-      </div>
-      <span className={cn(s.text, "font-black tracking-tighter text-white italic")}>SHAPE<span className="text-brand-red">EXPRESS</span></span>
+    <div className={cn("flex items-center justify-center", className)}>
+      <img 
+        src={iconOnly ? iconImg : logoImg} 
+        alt="Shape Express" 
+        width={s.width}
+        height={s.height}
+        className="object-contain"
+      />
     </div>
   );
 };
