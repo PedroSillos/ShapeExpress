@@ -96,14 +96,7 @@ export function useRegisterForm(
       setIsLoading(false);
     }
 
-    if (step === 2 && userType === 'treinador') {
-      if (!formData.cref) {
-        setFieldErrors({ cref: 'CREF é obrigatório' });
-        setError('Por favor, insira seu CREF.');
-        scrollToField('cref');
-        return;
-      }
-    }
+
 
     if (step === 2 && userType === 'atleta') {
       if (formData.hasPersonal === undefined) {
