@@ -1,4 +1,4 @@
-import { Camera, Instagram } from 'lucide-react';
+import { Camera, Instagram, Calendar as CalendarIcon } from 'lucide-react';
 import { Card } from '../../../presentation/components/Card';
 import { InputGroup } from '../../../presentation/components/InputGroup';
 import { ImageUpload } from '../../../presentation/components/ImageUpload';
@@ -8,13 +8,15 @@ import { UserProfile } from '../../../domain/entities';
 interface Props {
   formData: Partial<UserProfile>;
   setFormData: (d: Partial<UserProfile>) => void;
+  fieldErrors: Record<string, string>;
+  clearFieldError: (f: string) => void;
   isLoading: boolean;
   onFinalize: () => void;
   onBack: () => void;
   api: any;
 }
 
-export function TrainerStep4({ formData, setFormData, isLoading, onFinalize, onBack, api }: Props) {
+export function TrainerStep4({ formData, setFormData, fieldErrors, clearFieldError, isLoading, onFinalize, onBack, api }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -61,6 +63,16 @@ export function TrainerStep4({ formData, setFormData, isLoading, onFinalize, onB
           onChange={(v) => setFormData({ ...formData, instagram: v })}
           icon={<Instagram size={18} />}
           placeholder="@seuusuario"
+        />
+
+        <InputGroup
+          id="field-birthDate"
+          error={fieldErrors.birthDate}
+          label="Data de nascimento"
+          value={formData.birthDate || ''}
+          onChange={(v) => { setFormData({ ...formData, birthDate: v }); clearFieldError('birthDate'); }}
+          icon={<CalendarIcon size={18} />}
+          type="date"
         />
 
         <button

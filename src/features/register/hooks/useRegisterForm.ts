@@ -123,6 +123,15 @@ export function useRegisterForm(
       }
     }
 
+    if (step === 4 && userType === 'treinador') {
+      if (!formData.birthDate || !isValidDate(formData.birthDate)) {
+        setFieldErrors({ birthDate: 'Data de nascimento é obrigatória' });
+        setError('Por favor, insira uma data de nascimento válida.');
+        scrollToField('birthDate');
+        return;
+      }
+    }
+
     if (step === 6 && userType === 'atleta') {
       if (!formData.birthDate || !isValidDate(formData.birthDate)) {
         setFieldErrors({ birthDate: 'Data de nascimento inválida' });
