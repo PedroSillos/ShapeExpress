@@ -7,9 +7,9 @@
     "dev": "npm run clean & npx vite & tsx server.ts",
     "build": "vite build",
     "preview": "vite preview",
-    "clean": "(if exist dist rd /s /q dist) & (if exist node_modules\\.vite rd /s /q node_modules\\.vite)",
+    "clean": "(if exist dist rd /s /q dist) & (if exist node_modules\\.vite rd /s /q node_modules\\.vite) & (if exist *.log del /q *.log) & (if exist npm-debug.log* del /q npm-debug.log*) & (if exist yarn-debug.log* del /q yarn-debug.log*) & (if exist *.tmp del /q *.tmp) & (if exist *.temp del /q *.temp) & (if exist *.bak del /q *.bak) & (if exist *.backup del /q *.backup) & (if exist *.old del /q *.old) & (if exist pw-*.mjs del /q pw-*.mjs) & (if exist android\\app\\build rd /s /q android\\app\\build) & (if exist android\\.gradle\\buildOutputCleanup rd /s /q android\\.gradle\\buildOutputCleanup)",
     "lint": "tsc --noEmit",
-    "android": "npm run build && rd /s /q android\\app\\build & npx capacitor sync && npx capacitor open android"
+    "android": "npm run build && npm run clean && npx capacitor sync && npx capacitor open android"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
@@ -18,9 +18,7 @@
     "@google/genai": "^1.29.0",
     "@stripe/stripe-js": "^8.11.0",
     "@tailwindcss/vite": "^4.1.14",
-    "@types/multer": "^2.1.0",
     "@vitejs/plugin-react": "^5.0.4",
-    "better-sqlite3": "^12.4.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
@@ -30,7 +28,6 @@
     "firebase-admin": "^13.7.0",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
-    "multer": "^2.1.1",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -39,13 +36,11 @@
     "sonner": "^2.0.7",
     "stripe": "^20.4.1",
     "tailwind-merge": "^3.5.0",
-    "vite": "^6.2.0",
-    "ws": "^8.20.0"
+    "vite": "^6.2.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
-    "@types/ws": "^8.18.1",
     "autoprefixer": "^10.4.21",
     "playwright": "^1.59.1",
     "tailwindcss": "^4.1.14",

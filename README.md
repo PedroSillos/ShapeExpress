@@ -50,7 +50,7 @@ The app will be available at:
 | `npm run dev` | Clean cache, start Vite dev server + Express |
 | `npm run build` | Production build |
 | `npm run lint` | TypeScript check (`tsc --noEmit`) |
-| `npm run clean` | Remove `dist/` and Vite cache (`node_modules/.vite`) |
+| `npm run clean` | Remove all temporary files, logs, cache, and Android builds |
 
 ## Android / Capacitor
 
