@@ -115,6 +115,36 @@ Always consider both the **web app** and **Android app** when making changes. UI
 - Naming: `PascalCase` components/types, `camelCase` functions, `UPPER_SNAKE_CASE` constants
 - **SRP**: each file has one responsibility — one component, one hook, one service. Screens only orchestrate; business logic belongs in hooks or domain use-cases. Split any file that does more than one thing.
 
+### Commit Conventions (PT-BR)
+
+All commit messages must follow the Conventional Commits standard in **Brazilian Portuguese**.
+
+Format: `<tipo>(<escopo>): <descrição>`
+
+#### Main Types
+
+| Type | Usage |
+|------|-------|
+| `funcionalidade:` | New feature |
+| `correção:` | Bug fix |
+| `documentação:` | Documentation changes |
+| `refatoração:` | Code refactoring |
+| `segurança:` | Security fixes |
+| `tarefa:` | Maintenance/configuration |
+| `desempenho:` | Performance improvements |
+| `teste:` | Add/fix tests |
+| `estilo:` | Formatting, whitespace (no code change) |
+| `build:` | Build system or dependencies |
+| `cicd:` | CI/CD configuration |
+
+#### Examples
+
+```bash
+funcionalidade(auth): adiciona login com Google
+correção(chat): corrige envio de mensagens duplicadas
+refatoração(App): aplica princípio de responsabilidade única
+```
+
 ## API Endpoints
 
 Express backend on port **3000**. All routes except `/api/health` require `authMiddleware`.

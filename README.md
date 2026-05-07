@@ -87,6 +87,20 @@ NODE_ENV=development
 
 For AI agent instructions and detailed development guidelines, see [AGENTS.md](AGENTS.md).
 
+## Commit Conventions
+
+This project uses **Conventional Commits in Brazilian Portuguese**.
+
+Format: `<tipo>(<escopo>): <descrição>`
+
+### Examples
+
+```bash
+funcionalidade(auth): adiciona login com Google
+correção(chat): corrige envio de mensagens duplicadas
+refatoração(hooks): extrai lógica de autenticação
+```
+
 ## License
 
 Private — All rights reserved.
