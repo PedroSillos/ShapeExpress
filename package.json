@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "clean": "(if exist dist rd /s /q dist) & (if exist node_modules\\.vite rd /s /q node_modules\\.vite) & (if exist *.log del /q *.log) & (if exist npm-debug.log* del /q npm-debug.log*) & (if exist yarn-debug.log* del /q yarn-debug.log*) & (if exist *.tmp del /q *.tmp) & (if exist *.temp del /q *.temp) & (if exist *.bak del /q *.bak) & (if exist *.backup del /q *.backup) & (if exist *.old del /q *.old) & (if exist pw-*.mjs del /q pw-*.mjs) & (if exist android\\app\\build rd /s /q android\\app\\build) & (if exist android\\.gradle\\buildOutputCleanup rd /s /q android\\.gradle\\buildOutputCleanup)",
     "lint": "tsc --noEmit",
-    "android": "npm run build && npm run clean && npx capacitor sync && npx capacitor open android",
+    "android": "npm run clean && npm run build && npx capacitor sync && npx capacitor open android",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
