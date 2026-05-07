@@ -10,12 +10,3 @@ coverage/
 # Firebase sensitive configs
 android/app/google-services.json
 firebase-applet-config.json
-
-# Security & Testing
-SECURITY_*.md
-QUICK_CHECKLIST.md
-playwright-results-*.json
-pw-test*.mjs
-screenshots/
-scripts/rotate-*.bat
-scripts/rotate-*.sh
