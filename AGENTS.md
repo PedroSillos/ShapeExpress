@@ -83,30 +83,13 @@ Run with `node pw-check.mjs`. Delete the script after use — do not commit temp
 | `npm run test:e2e:headed` | Run with visible browser |
 | `npm run test:e2e:report` | View test report |
 
-### Test Structure
-
-```
-tests/
-├── e2e/
-│   ├── auth.spec.ts       # Authentication flows
-│   ├── dashboard.spec.ts  # Navigation
-│   ├── workouts.spec.ts   # Workout CRUD
-│   ├── profile.spec.ts    # Profile management
-│   └── chat.spec.ts       # Messaging
-├── fixtures/
-│   └── users.ts           # Test user credentials
-└── helpers/
-    └── auth.ts            # Reusable login/logout
-```
-
 ### Test Users
 
-- **Atleta**: pedro1@se.com / Pedro001
-- **Treinador**: tiago1@se.com / Tiago001
+Test users are configured in `tests/fixtures/users.ts`. **Ask the user for test account credentials** - do not commit passwords to the repository.
 
 ### Adding Tests for New Features
 
-When implementing a new feature, **always add E2E tests** covering the main user flow:
+When implementing a new feature, **always** add E2E tests covering the main user flow:
 
 ```typescript
 import { test, expect } from '@playwright/test';
@@ -119,14 +102,9 @@ test.describe('Nova Feature', () => {
   });
 
   test('deve executar fluxo principal', async ({ page }) => {
-    // Navegar para feature
     await page.click('text=/Feature/i');
-    
-    // Interagir
     await page.fill('input[name="campo"]', 'valor');
     await page.click('button[type="submit"]');
-    
-    // Verificar resultado
     await expect(page.locator('body')).toContainText(/Sucesso/i);
   });
 });
@@ -134,11 +112,7 @@ test.describe('Nova Feature', () => {
 
 ### CI/CD
 
-E2E tests run automatically on:
-- Pull requests to `main` or `develop`
-- Pushes to `main` or `develop`
-
-Tests must pass before merging. Check GitHub Actions for results and screenshots on failures.
+E2E tests run automatically on PRs to `main` or `develop`. Tests must pass before merging.
 
 ## Architecture
 
