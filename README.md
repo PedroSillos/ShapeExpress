@@ -1,72 +1,54 @@
 # Shape Express
 
-Premium fitness tracking platform built with React 19, TypeScript, Vite, Firebase, Express, and Capacitor.
+Plataforma premium de acompanhamento fitness com treinos, progresso, comunidades, IA e pagamentos.
 
-## What is Shape Express?
+## Stack
 
-Shape Express is a comprehensive fitness tracking application that helps users monitor their workouts, track progress, and achieve their fitness goals. The platform includes features for workout management, progress tracking, social features, AI-powered coaching, and more.
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|------------|
+| Camada | Tecnologia |
+|--------|------------|
 | Frontend | React 19, TypeScript, Vite 6 |
-| Styling | TailwindCSS 4, Motion |
-| Backend | Express.js |
-| Database | Firebase (Firestore, Auth, Storage) |
-| Payments | Stripe |
-| AI | Google Gemini API (`gemini-2.0-flash`) |
-| Mobile | Capacitor 8 |
+| Estilo | TailwindCSS 4, Motion |
+| Backend | Express.js (porta 3000) |
+| Banco de dados | Firebase (Firestore, Auth, Storage) |
+| Pagamentos | Stripe |
+| IA | Google Gemini (`gemini-2.0-flash`) |
+| Mobile | Capacitor 8 (Android) |
+| Deploy | Railway |
 
-## Prerequisites
+## Pré-requisitos
 
 - Node.js 20+
-- JDK 17+ (Android builds only)
-- Android Studio (Android builds only)
+- JDK 17+ e Android Studio (apenas para builds Android)
 
-## Quick Start
+## Início Rápido
 
 ```bash
-# Install dependencies
 npm install
 
-# Copy environment file and fill in credentials
-copy .env.example .env.local   # Windows
-cp .env.example .env.local     # macOS/Linux
+# Windows
+copy .env.example .env.local
+# macOS/Linux
+cp .env.example .env.local
 
-# Start development server
 npm run dev
 ```
 
-The app will be available at:
 - Frontend: http://localhost:5173
 - Backend: http://localhost:3000
 
-## Web App
+## Comandos
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Clean cache, start Vite dev server + Express |
-| `npm run build` | Production build |
-| `npm run lint` | TypeScript check (`tsc --noEmit`) |
-| `npm run clean` | Remove all temporary files, logs, cache, and Android builds |
+| Comando | Descrição |
+|---------|-----------|
+| `npm run dev` | Limpa cache e inicia Vite + Express |
+| `npm run build` | Build de produção |
+| `npm run lint` | Verificação TypeScript (`tsc --noEmit`) |
+| `npm run clean` | Remove dist, cache, logs e build Android |
+| `npm run android` | Build + sync + abre projeto Android |
 
-## Android / Capacitor
+## Variáveis de Ambiente
 
-| Command | Description |
-|---------|-------------|
-| `npm run android` | Build + sync + open Android project |
-
-## Features
-
-- Authentication, Dashboard, Workouts, Stats, Calendar
-- Leaderboard, Chat, Express (marketplace), Store
-- Profile, Achievements, Body Assessment
-- Notifications, Students, Communities
-
-## Environment Variables
-
-Create a `.env.local` file with the following keys:
+Crie `.env.local` com as seguintes chaves:
 
 ```env
 VITE_FIREBASE_API_KEY=
@@ -82,17 +64,25 @@ APP_URL=http://localhost:3000
 NODE_ENV=development
 ```
 
-## Documentation
+> Variáveis com prefixo `VITE_` ficam expostas no cliente. Nunca coloque `STRIPE_SECRET_KEY` ou `GEMINI_API_KEY` com esse prefixo.
 
-For AI agent instructions and detailed development guidelines, see [AGENTS.md](AGENTS.md).
+## Funcionalidades
 
-## Commit Conventions
+- Autenticação, Dashboard, Treinos, Estatísticas, Calendário
+- Placar, Chat (Firestore em tempo real), Express (marketplace), Loja
+- Perfil, Conquistas, Avaliação Corporal
+- Notificações, Alunos, Comunidades
+- Coach IA e recomendação de comunidades por IA
 
-This project uses **Conventional Commits in Brazilian Portuguese**.
+## Deploy
 
-Format: `<tipo>(<escopo>): <descrição>`
+O projeto está configurado para Railway via `railway.toml`. O comando de start em produção é `npm run start`.
 
-### Examples
+## Convenções de Commit
+
+Conventional Commits em **português (pt-BR)**.
+
+Formato: `<tipo>(<escopo>): <descrição>`
 
 ```bash
 funcionalidade(auth): adiciona login com Google
@@ -100,6 +90,6 @@ correção(chat): corrige envio de mensagens duplicadas
 refatoração(hooks): extrai lógica de autenticação
 ```
 
-## License
+## Licença
 
-Private — All rights reserved.
+Privado — Todos os direitos reservados.

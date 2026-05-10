@@ -1,173 +1,94 @@
 # Shape Express — AI Agent Instructions
 
-React 19 + TypeScript + Vite frontend, Express backend, Firebase, Stripe, Gemini AI.
+React 19 + TypeScript + Vite 6 frontend, Express backend, Firebase, Stripe, Gemini AI, Capacitor 8 (Android). Deploy via Railway.
 
-## Web App
+> **Antes de qualquer mudança**: leia este arquivo inteiro.
+
+## Commands
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Clean cache, start Vite dev server + Express |
+| `npm run dev` | Clean cache, start Vite (5173) + Express (3000) |
 | `npm run build` | Production build |
-| `npm run lint` | TypeScript check |
-| `npm run clean` | Remove `dist/` and Vite cache (`node_modules/.vite`) |
-
-## Android / Capacitor (No Cache)
-
-**Always use no-cache workflow** to ensure fresh builds:
-
-```bash
-# Option 1: npm script (recommended)
-npm run android
-
-# Option 2: Manual commands
-npm run build
-rm -Recurse -Force android/app/build
-npx capacitor sync
-npx capacitor open android
-```
-
-## Key Files
-
-- [src/App.tsx]
-- [src/presentation/screens]
-- [src/presentation/hooks]
-- [src/presentation/components]
-- [src/features/community]
-- [src/features/register]
-- [src/domain/use-cases]
-- [src/data/services/aiService.ts]
-- [server.ts]
-- [src/firebase.ts]
-- [vite.config.ts]
-- [capacitor.config.ts]
-
-## Do / Don't
-
-| Do | Don't |
-|----|-------|
-| Use `@/` alias for all imports | Use relative `../../` imports outside of features |
-| Use `cn()` for class merging | Concatenate class strings manually |
-| Put business logic in hooks or domain use-cases | Put logic inline in screen components |
-| Use `gemini-2.0-flash` for AI calls | Use other Gemini models (cost control) |
-| Validate all API inputs with `express-validator` | Trust raw request body fields |
-| Use `Authorization: Bearer <token>` | Rely on `x-user-email` for new routes |
-| Keep files under 500 lines | Let files grow without splitting |
-| Run `npm run test:e2e` before finishing any task | Consider a change complete without passing E2E tests |
+| `npm run lint` | TypeScript check (`tsc --noEmit`) |
+| `npm run clean` | Remove `dist/`, Vite cache, logs, Android build |
+| `npm run android` | Clean → build → capacitor sync → open Android |
+| `npm run start` | Production server (Railway) |
 
 ## E2E Tests
 
-Before considering any change complete, **always** run:
+Always run before considering any task complete:
 
 ```bash
-npm run test:e2e        # teste de login (web, headless)
-npm run test:e2e:headed # teste de login com browser visível
-npm run test:android    # build Android (requer JDK + Android SDK)
+npm run test:e2e          # web, headless
+npm run test:e2e:headed   # web, visible browser
+npm run test:android      # Android build (requires JDK + Android SDK)
 ```
 
-The test covers: logout if a session is active → login. It must pass before committing.
+Test covers: logout if session active → login. Must pass before committing.
 
-All tests must use `test.step()` for every action, with descriptive Portuguese messages. Example:
-
-```typescript
-await test.step(`Digita o email: ${user.email}`, () => page.fill('input[type="email"]', user.email));
-await test.step('Clica em "Entrar na Arena"', () => page.click('button[type="submit"]'));
-await test.step('Verifica que o login foi bem-sucedido', () => expect(page.locator('body')).not.toContainText(/Entrar na Arena/i));
-```
-
-Never write a test action outside a `test.step()`. Passwords must appear masked (e.g. `'*'.repeat(password.length)`), never in plain text.
-
-Test credentials go in `.env.local` (never hardcoded):
-
-```
-TEST_USER_EMAIL=
-TEST_USER_PASSWORD=
-```
-
-Tests also run automatically on every push/PR to `main` or `develop` via GitHub Actions.
+Rules:
+- Every action inside `test.step()` with descriptive Portuguese messages
+- Passwords masked: `'*'.repeat(password.length)` — never plain text
+- Credentials in `.env.local`: `TEST_USER_EMAIL` / `TEST_USER_PASSWORD`
+- Tests run automatically on push/PR to `main` or `develop` via GitHub Actions
 
 ## Architecture
 
 ### FSD (Feature-Sliced Design)
 
-- New features go in `src/features/<name>/` with `index.ts` barrel export
-- Import via relative paths from `src/presentation/screens` (e.g. `../../features/community`)
-- Features never import other features; use shared utils or entities
-
-### Feature Structure
-
 ```
-src/features/your-feature/
-├── index.ts       # barrel export (required)
-├── types.ts
-└── ui/
-    └── YourView.tsx
+src/
+├── features/<name>/     # Domain UI, feature hooks, local state
+│   ├── index.ts         # barrel export (required)
+│   ├── types.ts
+│   └── ui/
+├── presentation/
+│   ├── screens/         # Orchestration only — no business logic
+│   ├── hooks/           # Shared presentation hooks
+│   └── components/      # Shared UI components
+├── domain/
+│   ├── entities/        # Shared types/contracts
+│   └── use-cases/       # Pure business logic
+├── data/services/       # API calls, Firebase ops
+├── shared/lib/          # Generic utils (cn, sportAvatars)
+└── utils/               # Helpers (cn, firebaseErrors, validation, youtube)
 ```
 
-### Layer Responsibilities
+Layer rules:
+- Features never import other features — use `shared` or `entities`
+- Screens only orchestrate; logic belongs in hooks or use-cases
+- `data/services` never imports React components
 
-| Layer | Owns | Never |
-|-------|------|-------|
-| `app` | Routing, providers, feature composition | Business logic |
-| `features` | Domain UI, feature hooks, local state | Cross-feature imports |
-| `entities` | Shared types/contracts | Logic, components |
-| `shared` | Generic UI, hooks, utils | Feature-specific code |
-| `services` | API calls, Firebase ops | React components |
+### Key Files
 
-## Cross-Platform Requirement
+- `src/App.tsx` — root composition, routing state, modal orchestration
+- `src/presentation/AppRouter.tsx` — tab-based routing
+- `src/presentation/hooks/useAppState.ts` — global app state
+- `src/data/services/aiService.ts` — Gemini client calls
+- `server.ts` — Express backend (auth, Stripe, Gemini, health)
+- `src/firebase.ts` — Firebase client initialization
+- `vite.config.ts` / `capacitor.config.ts`
 
-Always consider both the **web app** and **Android app** when making changes. UI, routing, API calls, and feature behavior must work correctly on both platforms. Test or verify changes against both targets before considering a task complete.
+## Do / Don't
 
-## Conventions
-
-- UI strings: **Portuguese** · Code/comments: **English**
-- **Git commits**: **Portuguese (pt-BR)** — all commit messages must be in Brazilian Portuguese
-- Dark theme classes: `bg-dark-card`, `border-dark-border`
-- Class merging: `cn()` from `@/shared/lib/cn`
-- Imports: `@/` alias always
-- TypeScript strict — no implicit `any`
-- Naming: `PascalCase` components/types, `camelCase` functions, `UPPER_SNAKE_CASE` constants
-- **SRP**: each file has one responsibility — one component, one hook, one service. Screens only orchestrate; business logic belongs in hooks or domain use-cases. Split any file that does more than one thing.
-
-### Commit Conventions (PT-BR)
-
-All commit messages must follow the Conventional Commits standard in **Brazilian Portuguese**.
-
-Format: `<tipo>(<escopo>): <descrição>`
-
-#### Main Types
-
-| Type | Usage |
-|------|-------|
-| `funcionalidade:` | New feature |
-| `correção:` | Bug fix |
-| `documentação:` | Documentation changes |
-| `refatoração:` | Code refactoring |
-| `segurança:` | Security fixes |
-| `tarefa:` | Maintenance/configuration |
-| `desempenho:` | Performance improvements |
-| `teste:` | Add/fix tests |
-| `estilo:` | Formatting, whitespace (no code change) |
-| `build:` | Build system or dependencies |
-| `cicd:` | CI/CD configuration |
-
-#### Examples
-
-```bash
-funcionalidade(auth): adiciona login com Google
-correção(chat): corrige envio de mensagens duplicadas
-refatoração(App): aplica princípio de responsabilidade única
-```
+| Do | Don't |
+|----|-------|
+| Use `@/` alias for all imports | Use relative `../../` imports outside features |
+| Use `cn()` from `@/utils/cn` for class merging | Concatenate class strings manually |
+| Put business logic in hooks or domain use-cases | Put logic inline in screen components |
+| Use `gemini-2.0-flash` for AI calls | Use other Gemini models |
+| Validate all API inputs with `express-validator` | Trust raw request body fields |
+| Use `Authorization: Bearer <firebase-id-token>` | Rely on `x-user-email` for new routes |
+| Keep files under 500 lines | Let files grow without splitting |
+| Run `npm run test:e2e` before finishing any task | Consider a change complete without passing E2E |
+| Consider both web and Android when making changes | Test only one platform |
 
 ## API Endpoints
 
-Express backend on port **3000**. All routes except `/api/health` require `authMiddleware`.
+Express on port **3000**. All routes except `/api/health` require `authMiddleware`.
 
-### Authentication
-
-Preferred: `Authorization: Bearer <firebase-id-token>`  
-Fallback: `x-user-email: user@example.com` (legacy)
-
-### Endpoints
+Auth: `Authorization: Bearer <firebase-id-token>` (preferred) or `x-user-email` (legacy fallback).
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
@@ -177,13 +98,7 @@ Fallback: `x-user-email: user@example.com` (legacy)
 | `/api/ai/coach-advice` | POST | AI coaching advice |
 | `/api/ai/recommend-communities` | POST | AI community recommendations |
 
-### Chat (Firestore)
-
-Chat is implemented directly via Firestore — **no WebSocket**. Messages are stored at:
-
-```
-messages/{roomId}/msgs/{msgId}
-```
+Chat is Firestore-only — no WebSocket. Messages at `messages/{roomId}/msgs/{msgId}`.
 
 ### Stripe Test Cards
 
@@ -193,34 +108,53 @@ messages/{roomId}/msgs/{msgId}
 | 4000 0000 0000 0002 | Declined |
 | 4000 0025 0000 3155 | 3D Secure |
 
+## Conventions
+
+- UI strings: **Portuguese (pt-BR)** · Code/comments: **English**
+- Git commits: **Portuguese (pt-BR)**, Conventional Commits format
+- Dark theme classes: `bg-dark-card`, `border-dark-border`
+- TypeScript strict — no implicit `any`
+- Naming: `PascalCase` components/types, `camelCase` functions, `UPPER_SNAKE_CASE` constants
+- SRP: one component/hook/service per file
+
+### Commit Types
+
+| Type | Usage |
+|------|-------|
+| `funcionalidade:` | New feature |
+| `correção:` | Bug fix |
+| `refatoração:` | Refactoring |
+| `documentação:` | Docs |
+| `segurança:` | Security |
+| `tarefa:` | Maintenance |
+| `desempenho:` | Performance |
+| `teste:` | Tests |
+| `estilo:` | Formatting only |
+| `build:` | Build/deps |
+| `cicd:` | CI/CD |
+
 ## Security Guidelines
 
-- **Secrets**: all keys in `.env.local` (gitignored). `VITE_` prefix = public/client-side — never put `STRIPE_SECRET_KEY` or `GEMINI_API_KEY` there.
-- **Auth**: every `/api/*` route (except `/api/health`) must use `authMiddleware`. Prefer `Authorization: Bearer <firebase-id-token>` over `x-user-email` fallback.
-- **Input validation**: use `express-validator` on all request body fields before processing (see existing `validateProtocolId` pattern).
-- **AI prompts**: only inject known typed fields — never raw user strings. Use `gemini-2.0-flash` to control costs.
+- **Secrets**: all keys in `.env.local` (gitignored). `VITE_` prefix = client-side — never put `STRIPE_SECRET_KEY` or `GEMINI_API_KEY` there.
+- **Auth**: every `/api/*` route (except `/api/health`) must use `authMiddleware`. Prefer Bearer token over `x-user-email`.
+- **Input validation**: use `express-validator` on all request body fields (see `validateProtocolId` / `validateCoachAdvice` patterns in `server.ts`).
+- **AI prompts**: inject only known typed fields — never raw user strings.
 - **Stripe**: verify payment server-side via `stripe.checkout.sessions.retrieve`; use webhook signature verification in production.
-- **Firebase**: Admin SDK for privileged writes; enforce Firestore Security Rules (`request.auth.token.email == email`).
+- **Firebase**: Admin SDK for privileged writes; enforce Firestore Security Rules (`request.auth.token.email == email`). On Railway: `FIREBASE_SERVICE_ACCOUNT` env var. On Cloud Run: Application Default Credentials.
 - **Logging**: never log tokens, emails, or payment data.
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---------|-----|
-| Module not found | Check relative import paths, run `npm install` |
+| Module not found | Check import paths, run `npm install` |
 | Firebase auth failing | Verify `.env.local` keys, check Firebase Console auth methods |
 | Stripe error | Confirm `STRIPE_SECRET_KEY=sk_test_...`, server on `:3000` |
-| Android assets stale | Run `npm run android` (clears `android/app/build` before sync) |
-| Capacitor changes not reflected | Always `npm run build` before `npx capacitor sync` |
+| Android assets stale | Run `npm run android` (clears build before sync) |
 | White screen on Android | Check `webDir` in `capacitor.config.ts` points to `dist` |
+| Capacitor changes not reflected | Always `npm run build` before `npx capacitor sync` |
 
-## Dependencies Note
+## Notes
 
-- `better-sqlite3` and `multer` are installed but not actively used in current routes — do not add new features depending on them without confirming they are still needed.
-
-## Firebase Emulator (optional)
-
-```bash
-npm install -g firebase-tools
-firebase emulators:start
-```
+- `better-sqlite3` and `multer` are installed but unused — do not build features on them without confirming they are still needed.
+- Firebase Emulator: `npm install -g firebase-tools && firebase emulators:start`
