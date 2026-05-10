@@ -7,10 +7,17 @@ export default defineConfig({
   testDir: './tests/e2e',
   timeout: 30000,
   reporter: [['list', { printSteps: true }]],
-  use: {
-    baseURL: 'http://localhost:5173',
-    headless: true,
-  },
+  projects: [
+    {
+      name: 'web',
+      testMatch: '**/auth.spec.ts',
+      use: { baseURL: 'http://localhost:5173', headless: true },
+    },
+    {
+      name: 'android',
+      testMatch: '**/android.spec.ts',
+    },
+  ],
   webServer: {
     command: 'npx vite',
     url: 'http://localhost:5173',

@@ -15,7 +15,7 @@ test('login', async ({ page }) => {
     page.fill('input[type="email"]', testUser.email)
   );
 
-  await test.step('Digita a senha', () =>
+  await test.step(`Digita a senha: ${'*'.repeat(testUser.password.length)}`, () =>
     page.fill('input[type="password"]', testUser.password)
   );
 

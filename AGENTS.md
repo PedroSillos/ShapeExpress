@@ -59,7 +59,9 @@ npx capacitor open android
 Before considering any change complete, **always** run:
 
 ```bash
-npm run test:e2e
+npm run test:e2e        # teste de login (web, headless)
+npm run test:e2e:headed # teste de login com browser visível
+npm run test:android    # build Android (requer JDK + Android SDK)
 ```
 
 The test covers: logout if a session is active → login. It must pass before committing.
@@ -72,7 +74,7 @@ await test.step('Clica em "Entrar na Arena"', () => page.click('button[type="sub
 await test.step('Verifica que o login foi bem-sucedido', () => expect(page.locator('body')).not.toContainText(/Entrar na Arena/i));
 ```
 
-Never write a test action outside a `test.step()`. Passwords must not appear in step descriptions.
+Never write a test action outside a `test.step()`. Passwords must appear masked (e.g. `'*'.repeat(password.length)`), never in plain text.
 
 Test credentials go in `.env.local` (never hardcoded):
 
