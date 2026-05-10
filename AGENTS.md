@@ -49,70 +49,9 @@ npx capacitor open android
 | Use `cn()` for class merging | Concatenate class strings manually |
 | Put business logic in hooks or domain use-cases | Put logic inline in screen components |
 | Use `gemini-2.0-flash` for AI calls | Use other Gemini models (cost control) |
-| Delete Playwright scripts after use | Commit temporary `pw-*.mjs` scripts |
 | Validate all API inputs with `express-validator` | Trust raw request body fields |
 | Use `Authorization: Bearer <token>` | Rely on `x-user-email` for new routes |
 | Keep files under 500 lines | Let files grow without splitting |
-
-## Browser Automation with Playwright
-
-Playwright is available (`npx playwright`) and should be used for validating UI changes against the running dev server (unless said otherwise). To run a quick headless check:
-
-```js
-// example: pw-check.mjs
-import { chromium } from 'playwright';
-const browser = await chromium.launch({ headless: true });
-const page = await browser.newPage();
-await page.goto('http://localhost:5173');
-// login, navigate, assert...
-await browser.close();
-```
-
-Run with `node pw-check.mjs`. Delete the script after use — do not commit temporary Playwright scripts.
-
-**ALWAYS** use playwright to validate changes before considering a change as complete
-
-## E2E Testing
-
-### Running Tests
-
-| Command | Description |
-|---------|-------------|
-| `npm run test:e2e` | Run all E2E tests (headless) |
-| `npm run test:e2e:ui` | Interactive UI mode for debugging |
-| `npm run test:e2e:headed` | Run with visible browser |
-| `npm run test:e2e:report` | View test report |
-
-### Test Users
-
-Test users are configured in `tests/fixtures/users.ts`. **Never hardcode credentials** — use environment variables `TEST_USER_EMAIL` and `TEST_USER_PASSWORD` in `.env.local`.
-
-### Adding Tests for New Features
-
-When implementing a new feature, **always** add E2E tests covering the main user flow:
-
-```typescript
-import { test, expect } from '@playwright/test';
-import { testUsers } from '../fixtures/users';
-import { login } from '../helpers/auth';
-
-test.describe('Nova Feature', () => {
-  test.beforeEach(async ({ page }) => {
-    await login(page, testUsers.pedro.email, testUsers.pedro.password);
-  });
-
-  test('deve executar fluxo principal', async ({ page }) => {
-    await page.click('text=/Feature/i');
-    await page.fill('input[name="campo"]', 'valor');
-    await page.click('button[type="submit"]');
-    await expect(page.locator('body')).toContainText(/Sucesso/i);
-  });
-});
-```
-
-### CI/CD
-
-E2E tests run automatically on PRs to `main` or `develop`. Tests must pass before merging.
 
 ## Architecture
 

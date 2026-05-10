@@ -17,7 +17,6 @@ Shape Express is a comprehensive fitness tracking application that helps users m
 | Payments | Stripe |
 | AI | Google Gemini API (`gemini-2.0-flash`) |
 | Mobile | Capacitor 8 |
-| Testing | Playwright (browser automation) |
 
 ## Prerequisites
 
@@ -51,16 +50,6 @@ The app will be available at:
 | `npm run build` | Production build |
 | `npm run lint` | TypeScript check (`tsc --noEmit`) |
 | `npm run clean` | Remove all temporary files, logs, cache, and Android builds |
-
-## Testing
-
-| Command | Description |
-|---------|-------------|
-| `npm run test:e2e` | Run E2E tests (headless) |
-| `npm run test:e2e:ui` | Run E2E tests with interactive UI |
-| `npm run test:e2e:headed` | Run E2E tests with visible browser |
-| `npm run test:e2e:report` | Show test report |
-
 
 ## Android / Capacitor
 
