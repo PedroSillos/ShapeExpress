@@ -52,6 +52,26 @@ npx capacitor open android
 | Validate all API inputs with `express-validator` | Trust raw request body fields |
 | Use `Authorization: Bearer <token>` | Rely on `x-user-email` for new routes |
 | Keep files under 500 lines | Let files grow without splitting |
+| Run `npm run test:e2e` before finishing any task | Consider a change complete without passing E2E tests |
+
+## E2E Tests
+
+Before considering any change complete, **always** run:
+
+```bash
+npm run test:e2e
+```
+
+The test covers: logout if a session is active → login. It must pass before committing.
+
+Test credentials go in `.env.local` (never hardcoded):
+
+```
+TEST_USER_EMAIL=
+TEST_USER_PASSWORD=
+```
+
+Tests also run automatically on every push/PR to `main` or `develop` via GitHub Actions.
 
 ## Architecture
 
