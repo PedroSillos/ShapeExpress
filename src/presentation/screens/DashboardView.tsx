@@ -23,7 +23,6 @@ import {
   WeeklyGoalWidget,
   LastAchievementWidget,
 } from '../components/DashboardWidgets';
-import { WaterWidget } from '../components/WaterWidget';
 import { NextWorkoutWidget } from '../components/NextWorkoutWidget';
 
 interface DashboardViewProps {
@@ -49,7 +48,6 @@ interface DashboardViewProps {
 const DEFAULT_WIDGETS = [
   { id: 'stats', visible: true },
   { id: 'next-workout', visible: true },
-  { id: 'water', visible: true },
   { id: 'calories', visible: true },
   { id: 'progress-score', visible: true },
   { id: 'ai-coach', visible: true },
@@ -139,8 +137,6 @@ export function DashboardView({
             trainers={trainers}
           />
         );
-      case 'water':
-        return <WaterWidget key="water" />;
       case 'calories':
         return <CaloriesWidget key="calories" calorieProfile={calorieProfile} />;
       case 'progress-score':
