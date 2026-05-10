@@ -64,6 +64,16 @@ npm run test:e2e
 
 The test covers: logout if a session is active → login. It must pass before committing.
 
+All tests must use `test.step()` for every action, with descriptive Portuguese messages. Example:
+
+```typescript
+await test.step(`Digita o email: ${user.email}`, () => page.fill('input[type="email"]', user.email));
+await test.step('Clica em "Entrar na Arena"', () => page.click('button[type="submit"]'));
+await test.step('Verifica que o login foi bem-sucedido', () => expect(page.locator('body')).not.toContainText(/Entrar na Arena/i));
+```
+
+Never write a test action outside a `test.step()`. Passwords must not appear in step descriptions.
+
 Test credentials go in `.env.local` (never hardcoded):
 
 ```
