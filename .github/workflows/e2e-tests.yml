@@ -40,6 +40,8 @@ jobs:
           echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env.local
           echo "APP_URL=http://localhost:3000" >> .env.local
           echo "NODE_ENV=test" >> .env.local
+          echo "TEST_USER_EMAIL=${{ secrets.TEST_USER_EMAIL }}" >> .env.local
+          echo "TEST_USER_PASSWORD=${{ secrets.TEST_USER_PASSWORD }}" >> .env.local
 
       - name: Run E2E tests
         run: npm run test:e2e

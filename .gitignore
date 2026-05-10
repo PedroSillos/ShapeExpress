@@ -65,3 +65,6 @@ pw-*.mjs
 test-results/
 playwright-report/
 playwright/.cache/
+
+# capacitor-assets temp folder
+assets/icon.png

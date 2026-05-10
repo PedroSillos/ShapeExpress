@@ -85,7 +85,7 @@ Run with `node pw-check.mjs`. Delete the script after use — do not commit temp
 
 ### Test Users
 
-Test users are configured in `tests/fixtures/users.ts`. **Ask the user for test account credentials** - do not commit passwords to the repository.
+Test users are configured in `tests/fixtures/users.ts`. **Never hardcode credentials** — use environment variables `TEST_USER_EMAIL` and `TEST_USER_PASSWORD` in `.env.local`.
 
 ### Adding Tests for New Features
 

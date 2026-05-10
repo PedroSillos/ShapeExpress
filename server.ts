@@ -7,6 +7,25 @@ import Stripe from 'stripe';
 import admin from 'firebase-admin';
 import { GoogleGenAI } from "@google/genai";
 import { body, validationResult } from 'express-validator';
+import { config } from 'dotenv';
+
+// Load .env.local in development
+if (process.env.NODE_ENV !== 'production') {
+  config({ path: '.env.local' });
+}
+
+// Initialize Firebase Admin
+// On Railway: set FIREBASE_SERVICE_ACCOUNT env var with the JSON content
+// On Cloud Run: uses Application Default Credentials automatically
+if (admin.apps.length === 0) {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    admin.initializeApp({
+      credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT))
+    });
+  } else {
+    admin.initializeApp();
+  }
+}
 
 // Initialize Stripe
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' as any }) : null;
@@ -19,7 +38,7 @@ const __dirname = path.dirname(__filename);
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = parseInt(process.env.PORT || '3000');
 
   app.use(express.json());
 
