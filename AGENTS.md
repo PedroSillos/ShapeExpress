@@ -20,12 +20,18 @@ React 19 + TypeScript + Vite 6 frontend, Express backend, Firebase, Stripe, Gemi
 Always run before considering any task complete:
 
 ```bash
-npm run test:e2e          # web, headless
-npm run test:e2e:headed   # web, visible browser
-npm run test:android      # Android build (requires JDK + Android SDK)
+npm run test:e2e          # login + android em sequência, aborta se login falhar (headless)
+npm run test:e2e:headed   # mesmo, browser visível
+npm run test:login        # só o teste de login (headless)
+npm run test:login:headed # só o teste de login (browser visível)
+npm run test:android      # só o build Android
 ```
 
-Test covers: logout if session active → login. Must pass before committing.
+Test structure:
+- `tests/e2e/auth.spec.ts` — login test
+- `tests/e2e/android.spec.ts` — Android build test
+- `tests/e2e/e2e.spec.ts` — runs both in sequence; aborts if login fails
+- `tests/helpers/steps.ts` — shared logic used by all specs
 
 Rules:
 - Every action inside `test.step()` with descriptive Portuguese messages

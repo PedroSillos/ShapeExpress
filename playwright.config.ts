@@ -5,17 +5,22 @@ dotenv.config({ path: '.env.local' });
 
 export default defineConfig({
   testDir: './tests/e2e',
-  timeout: 30000,
+  timeout: 600000,
   reporter: [['list', { printSteps: true }]],
   projects: [
     {
-      name: 'web',
+      name: 'login',
       testMatch: '**/auth.spec.ts',
       use: { baseURL: 'http://localhost:5173', headless: true },
     },
     {
       name: 'android',
       testMatch: '**/android.spec.ts',
+    },
+    {
+      name: 'e2e',
+      testMatch: '**/e2e.spec.ts',
+      use: { baseURL: 'http://localhost:5173', headless: true },
     },
   ],
   webServer: {
