@@ -66,3 +66,10 @@ async function testConnection() {
   }
 }
 testConnection();
+
+// Expose signOut for E2E tests
+if (import.meta.env.DEV) {
+  import('firebase/auth').then(({ signOut }) => {
+    (window as any).__testSignOut = () => signOut(auth);
+  });
+}
