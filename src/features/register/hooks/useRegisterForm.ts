@@ -131,7 +131,6 @@ export function useRegisterForm(
         return;
       }
     }
-
     if (step === 6 && userType === 'atleta') {
       if (!formData.birthDate || !isValidDate(formData.birthDate)) {
         setFieldErrors({ birthDate: 'Data de nascimento inválida' });

@@ -20,24 +20,29 @@ React 19 + TypeScript + Vite 6 frontend, Express backend, Firebase, Stripe, Gemi
 Always run before considering any task complete:
 
 ```bash
-npm run test:e2e          # login + android em sequência, aborta se login falhar (headless)
-npm run test:e2e:headed   # mesmo, browser visível
-npm run test:login        # só o teste de login (headless)
-npm run test:login:headed # só o teste de login (browser visível)
+npm run test:web          # login + register atleta + register treinador (headless)
+npm run test:web:headed   # mesmo, browser visível
 npm run test:android      # só o build Android
+npm run test:e2e          # web + android em sequência, aborta se web falhar (headless)
+npm run test:e2e:headed   # mesmo, browser visível
 ```
 
 Test structure:
-- `tests/e2e/auth.spec.ts` — login test
-- `tests/e2e/android.spec.ts` — Android build test
-- `tests/e2e/e2e.spec.ts` — runs both in sequence; aborts if login fails
+- `tests/e2e/web.spec.ts` — exporta `webTests()` (login, register atleta, register treinador)
+- `tests/e2e/android.spec.ts` — exporta `androidTests()` (build Android)
+- `tests/e2e/web.run.ts` — runner do projeto `web`
+- `tests/e2e/android.run.ts` — runner do projeto `android`
+- `tests/e2e/e2e.spec.ts` — runner do projeto `e2e` (chama `webTests` + `androidTests`)
+- `tests/e2e/auth.spec.ts` — login isolado
+- `tests/e2e/register.spec.ts` — register atleta isolado
 - `tests/helpers/steps.ts` — shared logic used by all specs
 
 Rules:
 - Every action inside `test.step()` with descriptive Portuguese messages
 - Passwords masked: `'*'.repeat(password.length)` — never plain text
-- Credentials in `.env.local`: `TEST_USER_EMAIL` / `TEST_USER_PASSWORD`
-- Tests run automatically on push/PR to `main` or `develop` via GitHub Actions
+- Credentials in `.env.local`: `TEST_USER_EMAIL` / `TEST_USER_PASSWORD` / `TEST_ATHLETE_EMAIL` / `TEST_ATHLETE_PASSWORD` / `TEST_TRAINER_EMAIL` / `TEST_TRAINER_PASSWORD`
+- Register tests generate dynamic credentials and save them to `.env.local` automatically
+- Tests run automatically on push/PR to `main` or `develop` via GitHub Actions (web only — android runs locally)
 
 ## Architecture
 

@@ -50,8 +50,8 @@ export function AthleteStep6({ formData, setFormData, fieldErrors, setFieldError
         />
 
         <div className="grid grid-cols-2 gap-4">
-          <InputGroup label="Altura (cm)" value={formData.height?.toString() || ''} onChange={(v) => setFormData({ ...formData, height: Number(v) })} icon={<Ruler size={18} />} type="number" />
-          <InputGroup label="Peso (kg)" value={formData.initialWeight?.toString() || ''} onChange={(v) => setFormData({ ...formData, initialWeight: Number(v) })} icon={<Scale size={18} />} type="number" />
+          <InputGroup id="field-height" label="Altura (cm)" value={formData.height?.toString() || ''} onChange={(v) => setFormData({ ...formData, height: Number(v) })} icon={<Ruler size={18} />} type="number" />
+          <InputGroup id="field-weight" label="Peso (kg)" value={formData.initialWeight?.toString() || ''} onChange={(v) => setFormData({ ...formData, initialWeight: Number(v) })} icon={<Scale size={18} />} type="number" />
         </div>
 
         <InputGroup

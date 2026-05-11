@@ -35,6 +35,6 @@ jobs:
           echo "TEST_USER_EMAIL=${{ secrets.TEST_USER_EMAIL }}" >> .env.local
           echo "TEST_USER_PASSWORD=${{ secrets.TEST_USER_PASSWORD }}" >> .env.local
 
-      - name: Run login test
-        run: npm run test:login
+      - name: Run web tests
+        run: npm run test:web
 

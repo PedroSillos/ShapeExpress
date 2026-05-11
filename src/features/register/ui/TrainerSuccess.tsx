@@ -33,7 +33,7 @@ export function TrainerSuccess({ onFinalize }: Props) {
             <QrCode size={18} className="text-blue-400" />QR Code
           </button>
         </div>
-        <button onClick={onFinalize} className="w-full py-4 red-gradient rounded-2xl text-black font-bold shadow-lg shadow-brand-red/20 active:scale-95 transition-transform">
+        <button onClick={onFinalize} data-testid="btn-ir-dashboard" className="w-full py-4 red-gradient rounded-2xl text-black font-bold shadow-lg shadow-brand-red/20 active:scale-95 transition-transform">
           Ir para o Dashboard
         </button>
       </Card>

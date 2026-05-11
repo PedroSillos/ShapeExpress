@@ -9,13 +9,13 @@ export default defineConfig({
   reporter: [['list', { printSteps: true }]],
   projects: [
     {
-      name: 'login',
-      testMatch: '**/auth.spec.ts',
+      name: 'web',
+      testMatch: '**/web.run.ts',
       use: { baseURL: 'http://localhost:5173', headless: true },
     },
     {
       name: 'android',
-      testMatch: '**/android.spec.ts',
+      testMatch: '**/android.run.ts',
     },
     {
       name: 'e2e',

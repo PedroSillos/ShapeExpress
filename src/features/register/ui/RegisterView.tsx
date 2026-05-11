@@ -85,7 +85,7 @@ export function RegisterView({ onRegister, onBack, api }: RegisterViewProps) {
 
     if (step === 4 && userType === 'treinador') return (
       <motion.div key="step4-trainer" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-        <TrainerStep4 formData={form.formData} setFormData={form.setFormData} fieldErrors={form.fieldErrors} clearFieldError={form.clearFieldError} isLoading={form.isLoading} onFinalize={form.handleFinalize} onBack={form.prevStep} api={api} />
+        <TrainerStep4 formData={form.formData} setFormData={form.setFormData} fieldErrors={form.fieldErrors} clearFieldError={form.clearFieldError} isLoading={form.isLoading} onFinalize={form.nextStep} onBack={form.prevStep} api={api} />
       </motion.div>
     );
 
