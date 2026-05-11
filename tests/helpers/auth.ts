@@ -4,13 +4,15 @@ export async function logout(page: Page) {
   // If already on login screen, nothing to do
   if (await page.locator('text=/Entrar na Arena/i').isVisible({ timeout: 2000 }).catch(() => false)) return;
 
-  // Use the signOut helper exposed by the app in DEV mode
-  await page.evaluate(async () => {
-    const fn = (window as any).__testSignOut;
-    if (fn) await fn();
-  });
+  // Wait for __testSignOut to be available (async import in firebase.ts)
+  await page.waitForFunction(() => typeof (window as any).__testSignOut === 'function', { timeout: 10000 });
 
-  await page.waitForSelector('text=/Entrar na Arena/i', { timeout: 10000 });
+  // Call Firebase signOut directly in the browser context
+  await page.evaluate(async () => { await (window as any).__testSignOut(); });
+
+  // Wait for loading spinner to disappear, then wait for login screen
+  await page.locator('.animate-spin').waitFor({ state: 'hidden', timeout: 10000 }).catch(() => {});
+  await page.waitForSelector('text=/Entrar na Arena/i', { timeout: 15000 });
 }
 
 export async function login(page: Page, email: string, password: string) {
