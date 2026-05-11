@@ -231,6 +231,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onSettingsGoal={() => setActiveTab('settings-goal')}
           onSettingsNotifications={() => setActiveTab('settings-notifications')}
           onHelp={() => setActiveTab('help')}
+          onDeleteAccount={() => api.deleteAccount()}
         />
       );
     case 'notifications':

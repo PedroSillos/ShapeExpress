@@ -61,6 +61,7 @@ export const useAppState = () => {
     checkEmailExists: auth.checkEmailExists,
     forgotPassword: auth.forgotPassword,
     logout: () => auth.logout(resetUserStates),
+    deleteAccount: () => auth.deleteAccount(resetUserStates),
 
     // Profile
     getProfile: profile.getProfile,

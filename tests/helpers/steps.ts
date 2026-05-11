@@ -2,9 +2,16 @@ import { test, expect, Page } from '@playwright/test';
 import { execSync } from 'child_process';
 import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { logout } from './auth';
+import { logout, login } from './auth';
 
 const s = (prefix: string, label: string) => `${prefix} › ${label}`;
+
+export function readEnvCredentials(emailKey: string, passwordKey: string): { email: string; password: string } {
+  const envPath = join(process.cwd(), '.env.local');
+  const content = readFileSync(envPath, 'utf-8');
+  const get = (key: string) => content.match(new RegExp(`^${key}=(.+)$`, 'm'))?.[1]?.trim() ?? '';
+  return { email: get(emailKey), password: get(passwordKey) };
+}
 
 function saveCredentialsToEnv(emailKey: string, passwordKey: string, email: string, password: string) {
   const envPath = join(process.cwd(), '.env.local');
@@ -158,6 +165,8 @@ export async function runRegisterAthleteTest(page: Page, prefix = 'register : at
   writeFileSync(join(dir, 'register-credentials.txt'), credentials + '\n');
   saveCredentialsToEnv('TEST_ATHLETE_EMAIL', 'TEST_ATHLETE_PASSWORD', email, password);
 
+  await test.step(s(prefix, 'Faz logout após registro'), () => logout(page));
+
   return { email, password };
 }
 
@@ -259,7 +268,39 @@ export async function runRegisterTrainerTest(page: Page, prefix = 'register') {
   writeFileSync(join(dir, 'register-credentials.txt'), credentials + '\n', { flag: 'a' });
   saveCredentialsToEnv('TEST_TRAINER_EMAIL', 'TEST_TRAINER_PASSWORD', email, password);
 
+  await test.step(s(prefix, 'Faz logout após registro'), () => logout(page));
+
   return { email, password };
+}
+
+export async function runDeleteAccountTest(page: Page, email: string, password: string, prefix = 'delete') {
+  await test.step(s(prefix, 'Faz login com a conta a ser deletada'), () => login(page, email, password));
+
+  await test.step(s(prefix, 'Navega para o perfil'), async () => {
+    await page.locator('button:has(img[alt="Profile"])').waitFor({ state: 'visible', timeout: 10000 });
+    // Retry click until ProfileView renders (restoredTab effect may override activeTab briefly)
+    for (let i = 0; i < 5; i++) {
+      await page.locator('button:has(img[alt="Profile"])').click();
+      const found = await page.locator('[data-testid="btn-delete-account"]').isVisible({ timeout: 2000 }).catch(() => false);
+      if (found) break;
+    }
+  });
+
+  await test.step(s(prefix, 'Aguarda tela de perfil'), () =>
+    page.waitForSelector('[data-testid="btn-delete-account"]', { timeout: 10000 })
+  );
+
+  await test.step(s(prefix, 'Clica em "Deletar Conta"'), () =>
+    page.click('[data-testid="btn-delete-account"]')
+  );
+
+  await test.step(s(prefix, 'Confirma a exclusão'), () =>
+    page.click('[data-testid="btn-confirm-delete-account"]')
+  );
+
+  await test.step(s(prefix, 'Verifica retorno à tela de login'), () =>
+    page.waitForSelector('text=/Entrar na Arena/i', { timeout: 15000 })
+  );
 }
 
 export async function runAndroidBuildTest(prefix = 'android') {

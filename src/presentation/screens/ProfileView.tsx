@@ -1,7 +1,8 @@
-import React from 'react';
-import { User, Mail, Smartphone, GraduationCap, Dumbbell, Briefcase, Lock, QrCode, Building2, Instagram, ChevronRight, Camera, LogOut, Settings, Bell, Target, HelpCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Mail, Smartphone, LogOut, Settings, Bell, Target, HelpCircle, Trash2, AlertTriangle } from 'lucide-react';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
+import { ChevronRight, Camera } from 'lucide-react';
 import { UserProfile, UserTrainingProfile } from '../../domain/entities';
 
 interface ProfileViewProps {
@@ -12,14 +13,16 @@ interface ProfileViewProps {
   onSettingsGoal: () => void;
   onSettingsNotifications: () => void;
   onHelp: () => void;
+  onDeleteAccount: () => void;
 }
 
-export function ProfileView({ user, trainingProfile, onLogout, onEdit, onSettingsGoal, onSettingsNotifications, onHelp }: ProfileViewProps) {
+export function ProfileView({ user, trainingProfile, onLogout, onEdit, onSettingsGoal, onSettingsNotifications, onHelp, onDeleteAccount }: ProfileViewProps) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   return (
     <div className="space-y-6 pb-12">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">Meu Perfil</h2>
-        <button onClick={onLogout} className="p-2 text-white/40 hover:text-brand-red transition-colors">
+        <button data-testid="btn-logout" onClick={onLogout} className="p-2 text-white/40 hover:text-brand-red transition-colors">
           <LogOut size={20} />
         </button>
       </div>
@@ -80,6 +83,15 @@ export function ProfileView({ user, trainingProfile, onLogout, onEdit, onSetting
             </div>
             <ChevronRight size={18} className="text-white/20" />
           </button>
+          <button data-testid="btn-delete-account" onClick={() => setShowDeleteConfirm(true)} className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors group">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 group-hover:text-red-500 transition-colors">
+                <Trash2 size={18} />
+              </div>
+              <span className="text-sm font-bold text-red-400">Deletar Conta</span>
+            </div>
+            <ChevronRight size={18} className="text-white/20" />
+          </button>
         </Card>
       </div>
 
@@ -102,6 +114,22 @@ export function ProfileView({ user, trainingProfile, onLogout, onEdit, onSetting
           </div>
         </Card>
       </div>
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6">
+          <div className="bg-dark-card border border-dark-border rounded-2xl p-6 space-y-4 w-full max-w-sm">
+            <div className="flex items-center gap-3 text-red-400">
+              <AlertTriangle size={22} />
+              <span className="font-bold text-base">Deletar Conta</span>
+            </div>
+            <p className="text-sm text-white/60">Esta ação é irreversível. Todos os seus dados serão permanentemente removidos.</p>
+            <div className="flex gap-3 pt-2">
+              <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-2 rounded-xl border border-dark-border text-sm font-bold hover:bg-white/5 transition-colors">Cancelar</button>
+              <button data-testid="btn-confirm-delete-account" onClick={() => { setShowDeleteConfirm(false); onDeleteAccount(); }} className="flex-1 py-2 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 text-sm font-bold hover:bg-red-500/30 transition-colors">Deletar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

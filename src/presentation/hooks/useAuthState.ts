@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { auth, db } from "../../firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 import { tokenStore } from "../../data/services/tokenStore";
 import {
   signInWithEmailAndPassword,
@@ -12,6 +12,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   fetchSignInMethodsForEmail,
+  deleteUser,
 } from "firebase/auth";
 import { getFirebaseErrorMessage } from "../../utils/firebaseErrors";
 import type { UserProfile } from "../../domain/entities";
@@ -228,6 +229,32 @@ export const useAuthState = () => {
     }
   };
 
+  const deleteAccount = async (onLogout?: () => void) => {
+    const firebaseUser = auth.currentUser;
+    if (!firebaseUser?.email) return;
+    const email = firebaseUser.email;
+    try {
+      await deleteDoc(doc(db, "users", email));
+      await deleteDoc(doc(db, "stats", email));
+      await deleteUser(firebaseUser);
+    } catch (e: any) {
+      toast.error("Erro ao deletar conta: " + e.message);
+      throw e;
+    }
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith("firebase:"))
+      .forEach((k) => localStorage.removeItem(k));
+    localStorage.removeItem("shape_express_token");
+    tokenStore.idToken = null;
+    syncState.syncedToken = null;
+    setIdToken(null);
+    setToken(null);
+    setCurrentUser(null);
+    setIsLoggedIn(false);
+    onLogout?.();
+    toast.success("Conta deletada com sucesso.");
+  };
+
   const logout = async (onLogout?: () => void) => {
     await signOut(auth);
     Object.keys(localStorage)
@@ -253,6 +280,6 @@ export const useAuthState = () => {
     restoredTab,
     fetchWithAuth,
     login, loginWithGoogle, register,
-    checkEmailExists, forgotPassword, logout,
+    checkEmailExists, forgotPassword, logout, deleteAccount,
   };
 };

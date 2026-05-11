@@ -36,7 +36,7 @@ export function LogoutModal({ open, onCancel, onConfirm }: LogoutModalProps) {
               <button onClick={onCancel} className="flex-1 py-4 bg-white/5 rounded-2xl font-bold hover:bg-white/10 transition-colors">
                 Cancelar
               </button>
-              <button onClick={onConfirm} className="flex-1 py-4 bg-red-500 rounded-2xl text-white font-bold shadow-lg shadow-red-500/20 active:scale-95 transition-transform">
+              <button onClick={onConfirm} data-testid="btn-confirm-logout" className="flex-1 py-4 bg-red-500 rounded-2xl text-white font-bold shadow-lg shadow-red-500/20 active:scale-95 transition-transform">
                 Sair
               </button>
             </div>
