@@ -7,8 +7,8 @@ on:
     branches: [main, develop]
 
 jobs:
-  test-login:
-    timeout-minutes: 10
+  test-web:
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
