@@ -25,32 +25,38 @@ function saveCredentialsToEnv(emailKey: string, passwordKey: string, email: stri
   writeFileSync(envPath, content);
 }
 
+const LANDING_SELECTOR = 'button:has-text("COMEÇAR AGORA")';
+
 export async function runLoginTest(page: Page, testUser: { email: string; password: string }, prefix = 'login') {
   await test.step(s(prefix, 'Abre a página inicial'), () => page.goto('/'));
 
-  const isLoggedIn = await page.locator('text=/Entrar na Arena/i').isVisible({ timeout: 3000 }).then(v => !v).catch(() => false);
-  if (isLoggedIn) {
+  const isOnLanding = await page.locator(LANDING_SELECTOR).isVisible({ timeout: 3000 }).catch(() => false);
+  if (!isOnLanding) {
     await test.step(s(prefix, 'Sessão ativa detectada — fazendo logout'), () => logout(page));
   }
 
+  await test.step(s(prefix, 'Clica em "JÁ TENHO UMA CONTA"'), () =>
+    page.click('button:has-text("JÁ TENHO UMA CONTA")')
+  );
+
   await test.step(s(prefix, `Digita o email: ${testUser.email}`), () =>
-    page.fill('input[type="email"]', testUser.email)
+    page.fill('input[type="text"]', testUser.email)
   );
 
   await test.step(s(prefix, `Digita a senha: ${'*'.repeat(testUser.password.length)}`), () =>
     page.fill('input[type="password"]', testUser.password)
   );
 
-  await test.step(s(prefix, 'Clica em "Entrar na Arena"'), () =>
+  await test.step(s(prefix, 'Clica em "Entrar"'), () =>
     page.click('button[type="submit"]')
   );
 
   await test.step(s(prefix, 'Aguarda o login ser concluído'), () =>
-    page.waitForSelector('text=/Entrar na Arena/i', { state: 'hidden', timeout: 15000 })
+    page.waitForSelector(LANDING_SELECTOR, { state: 'hidden', timeout: 15000 })
   );
 
   await test.step(s(prefix, 'Verifica que o login foi bem-sucedido'), () =>
-    expect(page.locator('body')).not.toContainText(/Entrar na Arena/i)
+    expect(page.locator(LANDING_SELECTOR)).not.toBeVisible()
   );
 }
 
@@ -60,13 +66,13 @@ export async function runRegisterAthleteTest(page: Page, prefix = 'register : at
 
   await test.step(s(prefix, 'Abre a página inicial'), () => page.goto('/'));
 
-  const isLoggedIn = await page.locator('text=/Entrar na Arena/i').isVisible({ timeout: 3000 }).then(v => !v).catch(() => false);
-  if (isLoggedIn) {
+  const isOnLanding = await page.locator(LANDING_SELECTOR).isVisible({ timeout: 3000 }).catch(() => false);
+  if (!isOnLanding) {
     await test.step(s(prefix, 'Sessão ativa detectada — fazendo logout'), () => logout(page));
   }
 
-  await test.step(s(prefix, 'Clica em "Criar conta"'), () =>
-    page.click('button:has-text("Criar conta")')
+  await test.step(s(prefix, 'Clica em "COMEÇAR AGORA"'), () =>
+    page.click(LANDING_SELECTOR)
   );
 
   // Step 1 — Identificação básica
@@ -154,7 +160,7 @@ export async function runRegisterAthleteTest(page: Page, prefix = 'register : at
     page.click('button:has-text("Ver meu treino")')
   );
   await test.step(s(prefix, 'Verifica que o registro foi bem-sucedido'), () =>
-    expect(page.locator('body')).not.toContainText(/Entrar na Arena/i)
+    expect(page.locator(LANDING_SELECTOR)).not.toBeVisible()
   );
 
   // Salva credenciais no console, em arquivo e no .env.local
@@ -176,13 +182,13 @@ export async function runRegisterTrainerTest(page: Page, prefix = 'register') {
 
   await test.step(s(prefix, 'Abre a página inicial'), () => page.goto('/'));
 
-  const isLoggedIn = await page.locator('text=/Entrar na Arena/i').isVisible({ timeout: 3000 }).then(v => !v).catch(() => false);
-  if (isLoggedIn) {
+  const isOnLandingTrainer = await page.locator(LANDING_SELECTOR).isVisible({ timeout: 3000 }).catch(() => false);
+  if (!isOnLandingTrainer) {
     await test.step(s(prefix, 'Sessão ativa detectada — fazendo logout'), () => logout(page));
   }
 
-  await test.step(s(prefix, 'Clica em "Criar conta"'), () =>
-    page.click('button:has-text("Criar conta")')
+  await test.step(s(prefix, 'Clica em "COMEÇAR AGORA"'), () =>
+    page.click(LANDING_SELECTOR)
   );
 
   // Step 1 — Identificação básica
@@ -257,7 +263,7 @@ export async function runRegisterTrainerTest(page: Page, prefix = 'register') {
     await btn.click();
   });
   await test.step(s(prefix, 'Verifica que o registro foi bem-sucedido'), () =>
-    expect(page.locator('body')).not.toContainText(/Entrar na Arena/i)
+    expect(page.locator(LANDING_SELECTOR)).not.toBeVisible()
   );
 
   // Salva credenciais no console, em arquivo e no .env.local
@@ -298,8 +304,8 @@ export async function runDeleteAccountTest(page: Page, email: string, password: 
     page.click('[data-testid="btn-confirm-delete-account"]')
   );
 
-  await test.step(s(prefix, 'Verifica retorno à tela de login'), () =>
-    page.waitForSelector('text=/Entrar na Arena/i', { timeout: 15000 })
+  await test.step(s(prefix, 'Verifica retorno à tela inicial'), () =>
+    page.waitForSelector(LANDING_SELECTOR, { timeout: 15000 })
   );
 }
 

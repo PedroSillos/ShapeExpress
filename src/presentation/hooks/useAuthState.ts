@@ -65,7 +65,7 @@ export const useAuthState = () => {
   useEffect(() => {
     const fallbackTimer = setTimeout(() => {
       setInitialLoading(false);
-      setRestoredTab("login");
+      setRestoredTab("landing");
     }, 5000);
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -88,7 +88,7 @@ export const useAuthState = () => {
         setToken(null);
         setCurrentUser(null);
         setIsLoggedIn(false);
-        setRestoredTab("login");
+        setRestoredTab("landing");
       }
       setInitialLoading(false);
     });

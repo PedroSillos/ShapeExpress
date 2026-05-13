@@ -44,6 +44,7 @@ npm run dev
 | `npm run build` | Build de produção |
 | `npm run lint` | Verificação TypeScript (`tsc --noEmit`) |
 | `npm run clean` | Remove dist, cache, logs e build Android |
+| `npm run android` | Android |
 | `npm run test:web` | Testes web: register atleta + register treinador + login atleta + login treinador + delete atleta + delete treinador (headless) |
 | `npm run test:web:headed` | Mesmo que acima, browser visível |
 | `npm run test:android` | Só o build Android |

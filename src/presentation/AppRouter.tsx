@@ -3,6 +3,7 @@ import { Student, UserProfile, WorkoutTemplate, WorkoutSession, BodyAssessment }
 import { DEFAULT_PROFILE } from '../constants';
 
 // Screens
+import { LandingView } from './screens/auth/LandingView';
 import { LoginView } from './screens/auth/LoginView';
 import { RegisterView } from './screens/auth/RegisterView';
 import { ForgotPasswordView } from './screens/auth/ForgotPasswordView';
@@ -84,7 +85,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     createAssessment, updateAssessment, deleteAssessment,
   } = dataSync;
 
-  if (!isLoggedIn && activeTab !== 'login' && activeTab !== 'forgot-password' && activeTab !== 'register') {
+  if (!isLoggedIn && activeTab !== 'landing' && activeTab !== 'login' && activeTab !== 'forgot-password' && activeTab !== 'register') {
     return null;
   }
 
@@ -130,6 +131,13 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
   );
 
   switch (activeTab) {
+    case 'landing':
+      return (
+        <LandingView
+          onStart={() => setActiveTab('register')}
+          onLogin={() => setActiveTab('login')}
+        />
+      );
     case 'login':
       return (
         <LoginView
@@ -142,6 +150,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           }}
           onForgotPassword={() => setActiveTab('forgot-password')}
           onRegister={() => setActiveTab('register')}
+          onBack={() => setActiveTab('landing')}
         />
       );
     case 'register':
