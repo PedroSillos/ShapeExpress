@@ -105,7 +105,7 @@ export default function App() {
   }, [isLoggedIn, activeTab, recommendedCommunities.length]);
 
   useEffect(() => {
-    if (!isLoggedIn && activeTab !== 'landing' && activeTab !== 'login' && activeTab !== 'forgot-password' && activeTab !== 'register') {
+    if (!isLoggedIn && activeTab !== 'landing' && activeTab !== 'welcome' && activeTab !== 'login' && activeTab !== 'forgot-password' && activeTab !== 'register') {
       setActiveTab('landing');
     }
   }, [isLoggedIn, activeTab]);

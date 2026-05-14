@@ -7,6 +7,7 @@ import { LandingView } from './screens/auth/LandingView';
 import { LoginView } from './screens/auth/LoginView';
 import { RegisterView } from './screens/auth/RegisterView';
 import { ForgotPasswordView } from './screens/auth/ForgotPasswordView';
+import { WelcomeView } from './screens/auth/WelcomeView';
 import { DashboardView } from './screens/DashboardView';
 import { CalendarView } from './screens/CalendarView';
 import { WorkoutsView } from './screens/WorkoutsView';
@@ -85,7 +86,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     createAssessment, updateAssessment, deleteAssessment,
   } = dataSync;
 
-  if (!isLoggedIn && activeTab !== 'landing' && activeTab !== 'login' && activeTab !== 'forgot-password' && activeTab !== 'register') {
+  if (!isLoggedIn && activeTab !== 'landing' && activeTab !== 'welcome' && activeTab !== 'login' && activeTab !== 'forgot-password' && activeTab !== 'register') {
     return null;
   }
 
@@ -134,8 +135,15 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     case 'landing':
       return (
         <LandingView
-          onStart={() => setActiveTab('register')}
+          onStart={() => setActiveTab('welcome')}
           onLogin={() => setActiveTab('login')}
+        />
+      );
+    case 'welcome':
+      return (
+        <WelcomeView
+          onBack={() => setActiveTab('landing')}
+          onContinue={() => setActiveTab('register')}
         />
       );
     case 'login':
