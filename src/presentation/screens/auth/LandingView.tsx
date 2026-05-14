@@ -7,7 +7,7 @@ interface LandingViewProps {
 
 export function LandingView({ onStart, onLogin }: LandingViewProps) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-between py-16 px-6">
+    <div className="h-screen flex flex-col items-center justify-between py-16 px-6 overflow-hidden">
       <div className="flex-1 flex items-center justify-center">
         <Logo size="lg" />
       </div>

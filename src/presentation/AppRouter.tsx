@@ -4,10 +4,10 @@ import { DEFAULT_PROFILE } from '../constants';
 
 // Screens
 import { LandingView } from './screens/auth/LandingView';
+import { WelcomeView } from './screens/auth/WelcomeView';
 import { LoginView } from './screens/auth/LoginView';
 import { RegisterView } from './screens/auth/RegisterView';
 import { ForgotPasswordView } from './screens/auth/ForgotPasswordView';
-import { WelcomeView } from './screens/auth/WelcomeView';
 import { DashboardView } from './screens/DashboardView';
 import { CalendarView } from './screens/CalendarView';
 import { WorkoutsView } from './screens/WorkoutsView';
