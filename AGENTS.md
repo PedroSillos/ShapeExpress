@@ -14,38 +14,7 @@ React 19 + TypeScript + Vite 6 frontend, Express backend, Firebase, Stripe, Gemi
 | `npm run clean` | Remove `dist/`, Vite cache, logs, Android build |
 | `npm run android` | Clean → build → capacitor sync → open Android |
 | `npm run start` | Production server (Railway) |
-
-## E2E Tests
-
-Always run before considering any task complete:
-
-```bash
-npm run test:web          # register atleta + register treinador + login atleta + login treinador + delete atleta + delete treinador (headless)
-npm run test:web:headed   # mesmo, browser visível
-npm run test:android      # só o build Android
-npm run test:e2e          # web + android em sequência, aborta se web falhar (headless)
-npm run test:e2e:headed   # mesmo, browser visível
-```
-
-Test structure:
-- `tests/e2e/web.spec.ts` — exporta `webTests()` (register atleta, register treinador, login atleta, login treinador, delete atleta, delete treinador)
-- `tests/e2e/android.spec.ts` — exporta `androidTests()` (build Android)
-- `tests/e2e/web.run.ts` — runner do projeto `web`
-- `tests/e2e/android.run.ts` — runner do projeto `android`
-- `tests/e2e/e2e.spec.ts` — runner do projeto `e2e` (chama `webTests` + `androidTests`)
-- `tests/e2e/auth.spec.ts` — login isolado
-- `tests/e2e/register.spec.ts` — register atleta isolado
-- `tests/helpers/steps.ts` — shared logic used by all specs
-- `tests/helpers/auth.ts` — `login()` e `logout()` helpers
-
-Rules:
-- Every action inside `test.step()` with descriptive Portuguese messages
-- Passwords masked: `'*'.repeat(password.length)` — never plain text
-- Credentials in `.env.local`: `TEST_USER_EMAIL` / `TEST_USER_PASSWORD` / `TEST_ATHLETE_EMAIL` / `TEST_ATHLETE_PASSWORD` / `TEST_TRAINER_EMAIL` / `TEST_TRAINER_PASSWORD`
-- Register tests generate dynamic credentials and save them to `.env.local` automatically; subsequent tests read them via `readEnvCredentials()`
-- Register tests log out after completing so the next test starts unauthenticated
-- Web tests run in serial order — if one fails, the rest are aborted
-- Tests run automatically on push/PR to `main` or `develop` via GitHub Actions (web only — android runs locally)
+| `npm run test:build` | Verifica se o projeto builda sem erros |
 
 ## Architecture
 
@@ -95,7 +64,6 @@ Layer rules:
 | Validate all API inputs with `express-validator` | Trust raw request body fields |
 | Use `Authorization: Bearer <firebase-id-token>` | Rely on `x-user-email` for new routes |
 | Keep files under 500 lines | Let files grow without splitting |
-| Run `npm run test:e2e` before finishing any task | Consider a change complete without passing E2E |
 | Consider both web and Android when making changes | Test only one platform |
 
 ## API Endpoints

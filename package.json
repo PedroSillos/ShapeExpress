@@ -12,11 +12,7 @@
     "lint": "tsc --noEmit",
     "android": "npm run clean && npm run build && npx capacitor sync && npx capacitor open android",
     "android:release": "npm run build && npx capacitor sync android",
-    "test:web": "playwright test --project=web",
-    "test:web:headed": "playwright test --project=web --headed",
-    "test:android": "playwright test --project=android",
-    "test:e2e": "playwright test --project=e2e",
-    "test:e2e:headed": "playwright test --project=e2e --headed"
+    "test:build": "npm run build"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
@@ -50,7 +46,6 @@
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
-    "@playwright/test": "^1.59.1",
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",

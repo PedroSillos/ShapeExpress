@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { initializeAuth, browserLocalPersistence, signOut } from 'firebase/auth';
+import { initializeAuth, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getFirebaseErrorMessage } from './utils/firebaseErrors';
@@ -67,7 +67,3 @@ async function testConnection() {
 }
 testConnection();
 
-// Expose signOut for E2E tests
-if (import.meta.env.DEV || import.meta.env.VITE_E2E === 'true') {
-  (window as any).__testSignOut = () => signOut(auth);
-}
