@@ -30,6 +30,7 @@ import { BodyAssessmentView as NewAssessmentView } from './screens/BodyAssessmen
 import { SettingsGoalView } from './screens/SettingsGoalView';
 import { SettingsNotificationsView } from './screens/SettingsNotificationsView';
 import { HelpView } from './screens/HelpView';
+import { generateFirstWorkoutAI } from '../data/services/aiService';
 
 
 interface AppRouterProps {
@@ -143,7 +144,43 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       return (
         <WelcomeView
           onBack={() => setActiveTab('landing')}
-          onContinue={() => setActiveTab('register')}
+          onContinue={async (answers) => {
+            const a = answers as any;
+            if (a.skipWorkout) {
+              setActiveTab('dashboard');
+              return;
+            }
+            const sports: string[] = a.sports ?? [];
+            const now = new Date();
+            const end = new Date(now); end.setMonth(end.getMonth() + 3);
+            try {
+              const ai = await generateFirstWorkoutAI({
+                sports,
+                objective: a.objective,
+                experience: Object.values(a.experiences ?? {})[0] as string | undefined,
+                location: a.location,
+              });
+              if (ai && ai.exercises?.length > 0) {
+                const template = {
+                  id: `first-${Date.now()}`,
+                  userId: userProfile?.email ?? '',
+                  name: ai.name,
+                  category: 'basic' as const,
+                  startDate: now.toISOString(),
+                  endDate: end.toISOString(),
+                  exercises: ai.exercises,
+                  exerciseIds: ai.exercises.map((e: any) => e.exerciseId),
+                };
+                try { const p = JSON.parse(localStorage.getItem('pending-templates') ?? '[]'); p.push(template); localStorage.setItem('pending-templates', JSON.stringify(p)); } catch {}
+                workout.startWorkout(template);
+                return;
+              }
+            } catch { /* fallback below */ }
+            // Fallback: static generation
+            const { generateFirstWorkout } = await import('../domain/use-cases/generateFirstWorkout');
+            const template = generateFirstWorkout(sports, userProfile?.email ?? '');
+            workout.startWorkout(template);
+          }}
         />
       );
     case 'login':

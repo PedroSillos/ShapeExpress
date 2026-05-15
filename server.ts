@@ -109,6 +109,57 @@ async function startServer() {
     body('userCommunityIds').optional().isArray({ max: 200 }),
   ];
 
+  // AI Generate First Workout Endpoint
+  app.post('/api/ai/generate-first-workout', authMiddleware, [
+    body('sports').isArray({ min: 1, max: 10 }),
+    body('objective').optional().trim().isLength({ max: 200 }).escape(),
+    body('experience').optional().trim().isLength({ max: 50 }).escape(),
+    body('location').optional().isIn(['Casa', 'Academia']),
+  ], async (req: express.Request, res: express.Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+    if (!genAI) return res.status(500).json({ error: 'AI não configurado.' });
+
+    const { sports, objective, experience, location } = req.body;
+
+    const prompt = `Você é um personal trainer especialista. Crie um treino inicial para um atleta com o seguinte perfil:
+- Modalidades: ${sports.join(', ')}
+- Objetivo: ${objective || 'Não informado'}
+- Experiência: ${experience || 'Iniciante'}
+- Local de treino: ${location || 'Academia'}
+
+Retorne APENAS um JSON válido (sem markdown, sem explicações) com esta estrutura exata:
+{
+  "name": "nome do treino",
+  "exercises": [
+    { "exerciseId": "ID", "numSets": 3, "sets": "10", "rest": "1 min" }
+  ]
+}
+
+Use APENAS estes IDs de exercícios disponíveis:
+1=Supino Reto, 2=Agachamento Livre, 3=Remada Curvada, 4=Desenvolvimento Militar, 5=Rosca Direta,
+6=Levantamento Terra, 7=Leg Press, 8=Puxada Alta, 9=Flexão de Braços, 10=Afundo,
+11=Prancha Abdominal, 13=Rosca com Halter, 14=Kettlebell Swing, 19=Cadeira Extensora,
+20=Mesa Flexora, 21=Stiff, 22=Elevação Pélvica, 25=Gêmeos em Pé, 26=Encolhimento,
+27=Remada Cavalinho, 28=Elevação Lateral, 29=Crucifixo Inverso, 30=Tríceps Pulley,
+31=Tríceps Testa, 33=Abdominal Supra, 35=Giro Russo, 36=Corrida, 37=Ciclismo, 38=Pular Corda.
+
+Escolha 5 a 8 exercícios adequados ao perfil. Para exercícios em casa use IDs: 9,10,11,14,33,35,38.`;
+
+    try {
+      const response = await genAI.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      });
+      const text = (response.text || '').replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(text);
+      res.json(parsed);
+    } catch (error: any) {
+      console.error('Generate workout error:', error);
+      res.status(500).json({ error: 'Erro ao gerar treino.' });
+    }
+  });
+
   // AI Coach Endpoint (server-side Gemini)
   app.post('/api/ai/coach-advice', authMiddleware, validateCoachAdvice, async (req, res) => {
     const errors = validationResult(req);

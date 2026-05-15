@@ -57,15 +57,20 @@ export function generateAvatarUrl(avatar: typeof SPORT_AVATARS[number]): string 
   
   if (!ctx) return '';
   
-  // Background
-  ctx.fillStyle = avatar.color;
+  // Background — white or black based on contrast with the avatar color
+  const hex = avatar.color.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  // Complementary color (maximum contrast)
+  ctx.fillStyle = `rgb(${255 - r}, ${255 - g}, ${255 - b})`;
   ctx.fillRect(0, 0, 400, 400);
-  
-  // Single emoji
-  ctx.font = '200px Arial';
+
+  // Single emoji — centered
+  ctx.font = '220px serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(avatar.emoji, 200, 200);
+  ctx.fillText(avatar.emoji, 200, 210);
   
   return canvas.toDataURL('image/png');
 }

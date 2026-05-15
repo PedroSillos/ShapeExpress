@@ -14,6 +14,21 @@ const callBackendAI = async (endpoint: string, body: any): Promise<any> => {
   return response.json();
 };
 
+export async function generateFirstWorkoutAI(onboardingAnswers: {
+  sports: string[];
+  objective?: string;
+  experience?: string;
+  location?: string;
+}): Promise<{ name: string; exercises: { exerciseId: string; numSets: number; sets: string; rest: string }[] } | null> {
+  try {
+    const data = await callBackendAI('/api/ai/generate-first-workout', onboardingAnswers);
+    return data;
+  } catch (error) {
+    console.error('Generate first workout error:', error);
+    return null;
+  }
+}
+
 export async function getAICoachAdvice(
   userProfile: UserProfile,
   sessions: WorkoutSession[],
