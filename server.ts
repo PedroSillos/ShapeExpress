@@ -144,7 +144,7 @@ Use APENAS estes IDs de exercícios disponíveis:
 27=Remada Cavalinho, 28=Elevação Lateral, 29=Crucifixo Inverso, 30=Tríceps Pulley,
 31=Tríceps Testa, 33=Abdominal Supra, 35=Giro Russo, 36=Corrida, 37=Ciclismo, 38=Pular Corda.
 
-Escolha 5 a 8 exercícios adequados ao perfil. Para exercícios em casa use IDs: 9,10,11,14,33,35,38.`;
+Escolha de 1 a 5 exercícios adequados ao perfil. Para exercícios em casa use IDs: 9,10,11,14,33,35,38.`;
 
     try {
       const response = await genAI.models.generateContent({

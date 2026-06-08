@@ -25,7 +25,7 @@ export function generateFirstWorkout(sports: string[], userEmail: string): Worko
   for (const sport of sports) {
     const ids = SPORT_EXERCISE_IDS[sport] ?? DEFAULT_IDS;
     for (const id of ids) {
-      if (!seen.has(id) && exerciseIds.length < 8) {
+      if (!seen.has(id) && exerciseIds.length < 5) {
         seen.add(id);
         exerciseIds.push(id);
       }
