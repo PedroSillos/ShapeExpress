@@ -10,7 +10,12 @@ export const useWorkoutState = (
   userProfile: UserProfile | null,
 ) => {
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
-  const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);
+  const [templates, setTemplates] = useState<WorkoutTemplate[]>(() => {
+    try {
+      const pending = JSON.parse(localStorage.getItem('pending-templates') ?? '[]');
+      return pending as WorkoutTemplate[];
+    } catch { return []; }
+  });
   const [activeWorkout, setActiveWorkout] = useState<WorkoutSession | null>(null);
   const [lastCompletedSession, setLastCompletedSession] = useState<WorkoutSession | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | null>(null);

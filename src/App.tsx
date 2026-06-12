@@ -106,7 +106,7 @@ export default function App() {
 
   useEffect(() => {
     if (!isLoggedIn && activeTab !== 'landing' && activeTab !== 'welcome' && activeTab !== 'login' && activeTab !== 'forgot-password' && activeTab !== 'register') {
-      setActiveTab('landing');
+      if (!localStorage.getItem('welcome-done')) setActiveTab('landing');
     }
   }, [isLoggedIn, activeTab]);
 

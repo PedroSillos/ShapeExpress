@@ -87,10 +87,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     createAssessment, updateAssessment, deleteAssessment,
   } = dataSync;
 
-  if (!isLoggedIn && activeTab !== 'landing' && activeTab !== 'welcome' && activeTab !== 'login' && activeTab !== 'forgot-password' && activeTab !== 'register') {
-    return null;
-  }
-
   if (activeWorkout) return (
     <ActiveWorkoutView
       session={activeWorkout}
@@ -147,6 +143,44 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onContinue={async (answers) => {
             const a = answers as any;
             if (a.skipWorkout) {
+              try { localStorage.setItem('welcome-answers', JSON.stringify(answers)); } catch {}
+              localStorage.setItem('welcome-done', '1');
+              // Generate workout in background and store locally
+              const sports: string[] = a.sports ?? [];
+              const now = new Date();
+              const end = new Date(now); end.setMonth(end.getMonth() + 3);
+              (async () => {
+                try {
+                  const ai = await generateFirstWorkoutAI({
+                    sports,
+                    objective: a.objective,
+                    experience: Object.values(a.experiences ?? {})[0] as string | undefined,
+                    location: a.location,
+                  });
+                  if (ai && ai.exercises?.length > 0) {
+                    const template = {
+                      id: `first-${Date.now()}`,
+                      userId: userProfile?.email ?? 'guest',
+                      name: ai.name,
+                      category: 'basic' as const,
+                      startDate: now.toISOString(),
+                      endDate: end.toISOString(),
+                      exercises: ai.exercises,
+                      exerciseIds: ai.exercises.map((e: any) => e.exerciseId),
+                    };
+                    const p = JSON.parse(localStorage.getItem('pending-templates') ?? '[]');
+                    p.push(template);
+                    localStorage.setItem('pending-templates', JSON.stringify(p));
+                    return;
+                  }
+                } catch {}
+                // Fallback: static generation
+                const { generateFirstWorkout } = await import('../domain/use-cases/generateFirstWorkout');
+                const template = generateFirstWorkout(sports, userProfile?.email ?? 'guest');
+                const p = JSON.parse(localStorage.getItem('pending-templates') ?? '[]');
+                p.push(template);
+                localStorage.setItem('pending-templates', JSON.stringify(p));
+              })();
               setActiveTab('dashboard');
               return;
             }
@@ -172,6 +206,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
                   exerciseIds: ai.exercises.map((e: any) => e.exerciseId),
                 };
                 try { const p = JSON.parse(localStorage.getItem('pending-templates') ?? '[]'); p.push(template); localStorage.setItem('pending-templates', JSON.stringify(p)); } catch {}
+                localStorage.setItem('welcome-done', '1');
                 workout.startWorkout(template);
                 return;
               }
@@ -179,6 +214,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             // Fallback: static generation
             const { generateFirstWorkout } = await import('../domain/use-cases/generateFirstWorkout');
             const template = generateFirstWorkout(sports, userProfile?.email ?? '');
+            localStorage.setItem('welcome-done', '1');
             workout.startWorkout(template);
           }}
         />
@@ -202,7 +238,19 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       return (
         <RegisterView
           onRegister={async (p: any) => {
-            const data = await api.register(p);
+            const pending = (() => { try { return JSON.parse(localStorage.getItem('welcome-answers') ?? 'null'); } catch { return null; } })();
+            const merged = pending ? {
+              ...p,
+              objective: pending.objective ?? p.objective,
+              height: pending.height ? Number(pending.height) : p.height,
+              initialWeight: pending.weight ? Number(pending.weight) : p.initialWeight,
+              birthDate: pending.birthDate ?? p.birthDate,
+              avatarUrl: pending.avatarUrl ?? p.avatarUrl,
+              hasPersonal: pending.hasPersonal ?? p.hasPersonal,
+              weeklyGoal: pending.weeklyGoal ?? p.weeklyGoal,
+            } : p;
+            const data = await api.register(merged);
+            localStorage.removeItem('welcome-answers');
             setUserProfile(data.user);
             const defaultTab = localStorage.getItem('app-default-tab') || 'dashboard';
             setActiveTab(defaultTab as any);
