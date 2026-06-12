@@ -114,11 +114,7 @@ export default function App() {
 
   const switchTab = (tab: string, initialTab?: any, initialRankingType?: any) => {
     let targetTab = tab;
-    if (tab === 'leaderboard') {
-      setCommunityInitialTab('ranking');
-      setCommunityInitialRankingType('global');
-      targetTab = 'community';
-    } else if (tab === 'community') {
+    if (tab === 'community') {
       setCommunityInitialTab(initialTab || 'feed');
       setCommunityInitialRankingType(initialRankingType || 'community');
     }

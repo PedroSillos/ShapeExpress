@@ -104,9 +104,9 @@ export function WorkoutsView({
   }, [onCreateWorkout]);
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6 pb-20 pt-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Meus Treinos</h2>
+        <h2 className="text-xl font-bold">Treinos</h2>
         <button onClick={onCreateWorkout} className="p-2 bg-brand-red/10 text-brand-red rounded-full"><Plus size={20} /></button>
       </div>
 

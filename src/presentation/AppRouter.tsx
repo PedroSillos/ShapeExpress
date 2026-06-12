@@ -30,6 +30,7 @@ import { BodyAssessmentView as NewAssessmentView } from './screens/BodyAssessmen
 import { SettingsGoalView } from './screens/SettingsGoalView';
 import { SettingsNotificationsView } from './screens/SettingsNotificationsView';
 import { HelpView } from './screens/HelpView';
+import { LeaderboardView } from './screens/LeaderboardView';
 import { generateFirstWorkoutAI } from '../data/services/aiService';
 
 
@@ -62,6 +63,9 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     communityMessages, setCommunityMessages,
     recommendedCommunities, setRecommendedCommunities,
     posts, setPosts,
+    communities, setCommunities,
+    challenges, setChallenges,
+    userChallenges, setUserChallenges,
     communityInitialTab, communityInitialRankingType,
     selectedStudentForWorkouts, setSelectedStudentForWorkouts,
     selectedStudentForEvolution, setSelectedStudentForEvolution,
@@ -416,18 +420,22 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           userProfile={userProfile} userStats={userStats} api={api}
           communityMessages={communityMessages} setCommunityMessages={setCommunityMessages}
           recommendedCommunities={recommendedCommunities} posts={posts} setPosts={setPosts}
+          communities={communities} setCommunities={setCommunities}
+          challenges={challenges} setChallenges={setChallenges}
+          userChallenges={userChallenges} setUserChallenges={setUserChallenges}
           getLeaderboard={api.getLeaderboard}
           initialTab={communityInitialTab} initialRankingType={communityInitialRankingType}
         />
       );
     case 'leaderboard':
       return (
-        <CommunityView
-          userProfile={userProfile} userStats={userStats} api={api}
-          communityMessages={communityMessages} setCommunityMessages={setCommunityMessages}
-          recommendedCommunities={recommendedCommunities} posts={posts} setPosts={setPosts}
+        <LeaderboardView
+          currentUserProfile={userProfile}
+          userStats={userStats}
+          isLoggedIn={isLoggedIn}
           getLeaderboard={api.getLeaderboard}
-          initialTab="ranking" initialRankingType="global"
+          onLogin={() => setActiveTab('login')}
+          onRegister={() => setActiveTab('register')}
         />
       );
     case 'trainers':

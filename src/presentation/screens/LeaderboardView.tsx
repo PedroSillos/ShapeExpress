@@ -1,6 +1,5 @@
 import React from 'react';
-import { Trophy, RefreshCw, Flame } from 'lucide-react';
-import { Card } from '../components/Card';
+import { Flame } from 'lucide-react';
 import { Badge } from '../components/Badge';
 import { LeaderboardEntry, UserProfile, UserStats } from '../../domain/entities';
 import { cn } from '../../utils/cn';
@@ -8,191 +7,114 @@ import { cn } from '../../utils/cn';
 interface LeaderboardViewProps {
   currentUserProfile: UserProfile | null;
   userStats: UserStats;
+  isLoggedIn: boolean;
   getLeaderboard: (league: string) => Promise<LeaderboardEntry[]>;
+  onLogin?: () => void;
+  onRegister?: () => void;
 }
 
-export function LeaderboardView({ currentUserProfile, userStats, getLeaderboard }: LeaderboardViewProps) {
-  const [activeTab, setActiveTab] = React.useState<'global' | 'league' | 'friends'>('global');
-  const [leaderboard, setLeaderboard] = React.useState<LeaderboardEntry[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const userLeague = userStats.league || 'Bronze';
+const MOCK: LeaderboardEntry[] = [
+  { id: 'mock-0', name: 'Ana Silva',      avatarUrl: 'https://picsum.photos/seed/u101/200', xp: 15000, streak: 50, level: 30, rank: 1 },
+  { id: 'mock-1', name: 'Lucas Oliveira', avatarUrl: 'https://picsum.photos/seed/u102/200', xp: 13800, streak: 42, level: 28, rank: 2 },
+  { id: 'mock-2', name: 'Mariana Costa',  avatarUrl: 'https://picsum.photos/seed/u103/200', xp: 12600, streak: 35, level: 26, rank: 3 },
+  { id: 'mock-3', name: 'Pedro Santos',   avatarUrl: 'https://picsum.photos/seed/u104/200', xp: 11000, streak: 30, level: 24, rank: 4 },
+  { id: 'mock-4', name: 'Carla Dias',     avatarUrl: 'https://picsum.photos/seed/u105/200', xp:  9800, streak: 27, level: 22, rank: 5 },
+];
+
+const medalStyle: Record<number, string> = {
+  1: 'bg-yellow-400 text-black border-yellow-300',
+  2: 'bg-slate-400  text-black border-slate-300',
+  3: 'bg-orange-500 text-black border-orange-400',
+};
+
+export function LeaderboardView({ currentUserProfile, userStats, isLoggedIn, getLeaderboard, onLogin, onRegister }: LeaderboardViewProps) {
+  const [leaderboard, setLeaderboard] = React.useState<LeaderboardEntry[]>(MOCK);
 
   React.useEffect(() => {
-    const fetchLeaderboard = async () => {
-      setIsLoading(true);
-      try {
-        const leagueParam = activeTab === 'global' ? 'global' : (activeTab === 'friends' ? 'friends' : userLeague);
-        const data = await getLeaderboard(leagueParam);
-        
-        if (data.length === 0) {
-          // Fallback to mock data for demo if no real data in DB
-          const mockData: LeaderboardEntry[] = Array.from({ length: 10 }).map((_, i) => ({
-            id: `mock-${i}`,
-            name: ['Lucas Oliveira', 'Mariana Costa', 'Pedro Santos', 'Ana Silva', 'João Pereira', 'Carla Dias', 'Bruno Lima', 'Sofia Rocha', 'Tiago Alves', 'Beatriz Cruz'][i],
-            avatarUrl: `https://picsum.photos/seed/user${i + (activeTab === 'global' ? 100 : (activeTab === 'friends' ? 300 : 200))}/200`,
-            xp: 15000 - (i * 1200),
-            streak: 50 - (i * 4),
-            level: 30 - (i * 2),
-            rank: i + 1
-          }));
-          setLeaderboard(mockData);
-        } else {
-          setLeaderboard(data);
-        }
-      } catch (error) {
-        console.error("Error fetching leaderboard:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchLeaderboard();
-  }, [activeTab, userLeague, getLeaderboard]);
+    getLeaderboard('global').then(data => { if (data.length > 0) setLeaderboard(data); }).catch(() => {});
+  }, [getLeaderboard]);
 
-  const getLeagueColor = (league: string) => {
-    switch (league) {
-      case 'Bronze': return 'text-orange-700';
-      case 'Prata': return 'text-slate-400';
-      case 'Ouro': return 'text-yellow-500';
-      case 'Platina': return 'text-cyan-400';
-      case 'Esmeralda': return 'text-emerald-500';
-      case 'Diamante': return 'text-blue-500';
-      default: return 'text-white';
-    }
-  };
+  /* ── NOT LOGGED IN ── */
+  if (!isLoggedIn) {
+    return (
+      <div className="pt-24 pb-32">
+        {/* Podium card */}
+        <div className="rounded-2xl border border-white/10 overflow-hidden">
+          {MOCK.slice(0, 3).map((entry, i) => (
+            <div
+              key={entry.id}
+              className={cn('flex items-center gap-4 px-5 py-6', i < 2 && 'border-b border-white/10', i === 1 && 'bg-white/5')}
+            >
+              <div className={cn('w-11 h-11 rounded-full flex items-center justify-center font-bold text-base border-2 flex-shrink-0', medalStyle[entry.rank])}>
+                {entry.rank}
+              </div>
+              <img src={entry.avatarUrl} alt="" className="w-14 h-14 rounded-full object-cover border-2 border-white/20 flex-shrink-0" referrerPolicy="no-referrer" />
+              <div className="flex-1 h-3.5 bg-white/10 rounded-full" />
+            </div>
+          ))}
+        </div>
 
-  return (
-    <div className="space-y-6 pb-24">
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold">Ranking</h2>
-          <div className="flex bg-white/5 p-1 rounded-xl">
-            <button 
-              onClick={() => setActiveTab('global')}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all",
-                activeTab === 'global' ? "bg-brand-red text-black" : "text-white/40"
-              )}
-            >
-              Global
+        {/* CTA text */}
+        <p className="text-2xl font-semibold text-center leading-snug mt-8">
+          Dispute com outras pessoas<br />nas Ligas!
+        </p>
+
+        {/* Buttons — fixed above navbar */}
+        <div className="fixed bottom-32 left-0 right-0 z-10">
+          <div className="max-w-md mx-auto px-6 space-y-3">
+            <button onClick={onRegister} className="w-full py-5 rounded-2xl bg-sky-400 text-black font-bold uppercase tracking-widest text-sm active:scale-95 transition-transform">
+              Criar Perfil
             </button>
-            <button 
-              onClick={() => setActiveTab('league')}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all",
-                activeTab === 'league' ? "bg-brand-red text-black" : "text-white/40"
-              )}
-            >
-              Liga
-            </button>
-            <button 
-              onClick={() => setActiveTab('friends')}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all",
-                activeTab === 'friends' ? "bg-brand-red text-black" : "text-white/40"
-              )}
-            >
-              Amigos
+            <button onClick={onLogin} className="w-full py-5 rounded-2xl border-2 border-white/20 text-sky-400 font-bold uppercase tracking-widest text-sm active:scale-95 transition-transform">
+              Entrar
             </button>
           </div>
         </div>
-
-        <div className="flex items-center gap-2 px-1">
-          {activeTab === 'league' && <Trophy size={14} className={getLeagueColor(userLeague)} />}
-          <h3 className={cn(
-            "text-[10px] font-bold uppercase tracking-widest",
-            activeTab === 'league' ? getLeagueColor(userLeague) : "text-white/40"
-          )}>
-            {activeTab === 'global' && "Ranking Global"}
-            {activeTab === 'league' && `Liga ${userLeague}`}
-            {activeTab === 'friends' && "Ranking de Amigos"}
-          </h3>
-        </div>
       </div>
+    );
+  }
 
-      {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 space-y-4">
-          <RefreshCw className="animate-spin text-brand-red" size={32} />
-          <p className="text-xs font-bold text-white/40 uppercase tracking-widest">Carregando Ranking...</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {leaderboard.map((entry) => (
-            <Card 
-              key={entry.id} 
-              className={cn(
-                "p-4 flex items-center gap-4 transition-all",
-                entry.id === currentUserProfile?.email ? "border-brand-red/50 bg-brand-red/5" : "bg-white/5"
-              )}
-            >
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 text-xs font-bold">
-                {entry.rank}
-              </div>
-              
-              <img 
-                src={entry.avatarUrl} 
-                alt={entry.name}
-                className="w-10 h-10 rounded-full object-cover border-2 border-white/10"
-                referrerPolicy="no-referrer"
-              />
-              
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-bold truncate">{entry.name}</h4>
-                  {entry.id === currentUserProfile?.email && (
-                    <Badge variant="outline" className="text-[8px] py-0 px-1 border-brand-red text-brand-red">VOCÊ</Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-3 mt-0.5">
-                  <span className="text-[10px] text-white/40 font-medium">Nível {entry.level}</span>
-                  <div className="flex items-center gap-1 text-[10px] text-orange-400 font-bold">
-                    <Flame size={10} />
-                    {entry.streak}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="text-right">
-                <div className="text-sm font-bold">{entry.xp.toLocaleString()}</div>
-                <div className="text-[8px] text-white/40 font-bold uppercase tracking-widest">XP Total</div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
+  /* ── LOGGED IN ── */
+  return (
+    <div className="pt-6 pb-24 space-y-4">
+      <h2 className="text-xl font-bold">Ligas</h2>
 
-      {/* Current User Fixed Bar if not in top 10 */}
-      {!isLoading && !leaderboard.some(e => e.id === currentUserProfile?.email) && (
-        <div className="fixed bottom-24 left-4 right-4 z-10">
-          <Card className="p-4 flex items-center gap-4 bg-brand-red border-none shadow-2xl shadow-brand-red/20">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-black/20 text-xs font-bold text-black">
-              12
+      <div className="rounded-2xl border border-white/10 overflow-hidden">
+        {leaderboard.map((entry, i) => (
+          <div
+            key={entry.id}
+            className={cn(
+              'flex items-center gap-4 px-4 py-3',
+              i < leaderboard.length - 1 && 'border-b border-white/10',
+              i % 2 === 1 && 'bg-white/5',
+              entry.id === currentUserProfile?.email && 'bg-brand-red/10',
+            )}
+          >
+            <div className={cn(
+              'w-9 h-9 rounded-full flex items-center justify-center font-black text-sm border-2 flex-shrink-0',
+              medalStyle[entry.rank] ?? 'bg-white/10 text-white/60 border-white/20',
+            )}>
+              {entry.rank}
             </div>
-            
-            <img 
-              src={currentUserProfile?.avatarUrl} 
-              alt={currentUserProfile?.name}
-              className="w-10 h-10 rounded-full object-cover border-2 border-black/10"
-              referrerPolicy="no-referrer"
-            />
-            
+            <img src={entry.avatarUrl} alt={entry.name} className="w-11 h-11 rounded-full object-cover border-2 border-white/20 flex-shrink-0" referrerPolicy="no-referrer" />
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-bold truncate text-black">{currentUserProfile?.name}</h4>
-              <div className="flex items-center gap-3 mt-0.5">
-                <span className="text-[10px] text-black/60 font-bold">Nível {userStats.level}</span>
-                <div className="flex items-center gap-1 text-[10px] text-black font-bold">
-                  <Flame size={10} />
-                  {userStats.streak}
-                </div>
+              <div className="flex items-center gap-2">
+                <p className="font-bold text-sm truncate">{entry.name}</p>
+                {entry.id === currentUserProfile?.email && (
+                  <Badge variant="outline" className="text-[8px] py-0 px-1 border-brand-red text-brand-red">VOCÊ</Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-[10px] text-white/40">Nível {entry.level}</span>
+                <span className="text-[10px] text-orange-400 font-bold flex items-center gap-0.5"><Flame size={9} />{entry.streak}</span>
               </div>
             </div>
-            
-            <div className="text-right">
-              <div className="text-sm font-bold text-black">{(userStats.xp + (userStats.level - 1) * 1000).toLocaleString()}</div>
-              <div className="text-[8px] text-black/60 font-bold uppercase tracking-widest">XP Total</div>
-            </div>
-          </Card>
-        </div>
-      )}
+            <span className="text-sm font-bold whitespace-nowrap">
+              {entry.xp.toLocaleString()} <span className="text-[10px] text-white/40 font-normal">XP</span>
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

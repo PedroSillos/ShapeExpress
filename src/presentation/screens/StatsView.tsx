@@ -61,7 +61,7 @@ export function StatsView({
 
   if (sessions.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 pt-6">
         {!hideHeader && <h2 className="text-xl font-bold">Estatísticas</h2>}
         <Card className="py-12 flex flex-col items-center text-center space-y-4">
           <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center text-white/20">
@@ -93,7 +93,7 @@ export function StatsView({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-6">
       {!hideHeader && <h2 className="text-xl font-bold">Estatísticas</h2>}
 
       <Card className="h-64">

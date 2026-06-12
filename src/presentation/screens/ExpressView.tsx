@@ -106,7 +106,7 @@ export function ExpressView({
   const showProtocols = selectedFilter === 'Todos' || selectedFilter === 'Protocolos' || filteredProtocols.length > 0;
 
   return (
-    <div className="space-y-6 pb-24">
+    <div className="space-y-6 pb-24 pt-6">
       {/* Header & Search */}
       <div className="space-y-4 sticky top-0 bg-dark-surface/80 backdrop-blur-xl pt-4 pb-2 z-30">
         <div className="flex items-center justify-between px-1">

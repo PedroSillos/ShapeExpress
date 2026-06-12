@@ -4,7 +4,7 @@ import { cn } from '../../utils/cn';
 interface NavButtonProps {
   active: boolean;
   icon: React.ReactNode;
-  label: string;
+  label?: string;
   onClick: () => void;
 }
 
@@ -23,7 +23,6 @@ export function NavButton({ active, icon, label, onClick }: NavButtonProps) {
       )}>
         {icon}
       </div>
-      <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
       {active && (
         <div className="absolute -bottom-2 w-1 h-1 rounded-full bg-brand-red shadow-[0_0_8px_rgba(234,67,53,0.8)]" />
       )}

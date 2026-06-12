@@ -44,7 +44,7 @@ export function StatsContainer({
   };
 
   return (
-    <div className="flex flex-col h-full space-y-6">
+    <div className="flex flex-col h-full space-y-6 pt-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold tracking-tight">
           {subTab === 'stats' ? 'Estatísticas' : 'Evolução'}

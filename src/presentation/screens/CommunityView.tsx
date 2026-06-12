@@ -20,6 +20,12 @@ interface CommunityViewProps {
   recommendedCommunities: Community[];
   posts: Post[];
   setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
+  communities: Community[];
+  setCommunities: React.Dispatch<React.SetStateAction<Community[]>>;
+  challenges: Challenge[];
+  setChallenges: React.Dispatch<React.SetStateAction<Challenge[]>>;
+  userChallenges: UserChallenge[];
+  setUserChallenges: React.Dispatch<React.SetStateAction<UserChallenge[]>>;
   getLeaderboard: (league: string) => Promise<LeaderboardEntry[]>;
   initialTab?: "feed" | "challenges" | "ranking";
   initialRankingType?: "community" | "global" | "league" | "friends";
@@ -27,6 +33,9 @@ interface CommunityViewProps {
 
 export const CommunityView: React.FC<CommunityViewProps> = ({
   userProfile, userStats, api, posts, setPosts,
+  communities: communitiesProp, setCommunities,
+  challenges: challengesProp, setChallenges,
+  userChallenges: userChallengesProp, setUserChallenges,
   initialTab = "feed",
 }) => {
   const [activeTab, setActiveTab] = useState<"feed" | "challenges" | "ranking">(initialTab);
@@ -40,18 +49,16 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
   const [newPostText, setNewPostText] = useState("");
   const [postImageUrl, setPostImageUrl] = useState<string | null>(null);
   const [isPosting, setIsPosting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const [communities, setCommunities] = useState<Community[]>([]);
+  const communities = communitiesProp;
   const [userCommunityIds, setUserCommunityIds] = useState<string[]>([]);
   const [activeCommunity, setActiveCommunity] = useState<Community | null>(null);
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [userChallenges, setUserChallenges] = useState<UserChallenge[]>([]);
+  const challenges = challengesProp;
+  const userChallenges = userChallengesProp;
   const [ranking, setRanking] = useState<Ranking[]>([]);
   const [userCommunityRole, setUserCommunityRole] = useState<string | null>(null);
 
   useEffect(() => { setActiveTab(initialTab); }, [initialTab]);
-  useEffect(() => { loadInitialData(); }, []);
   useEffect(() => { if (activeTab === "feed") loadPosts(); }, [activeTab, feedFilter, activeCommunity]);
   useEffect(() => {
     if (!activeCommunity) { setUserCommunityRole(null); return; }
@@ -61,31 +68,6 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
   }, [activeCommunity?.id]);
 
   const canCreateChallenge = userCommunityRole === "creator" || userCommunityRole === "moderator";
-
-  const loadInitialData = async () => {
-    setIsLoading(true);
-    try {
-      const [postsRes, communitiesRes, challengesRes, userChallengesRes, userCommunitiesRes] = await Promise.all([
-        api.getPosts(),
-        api.getCommunities(),
-        api.getChallenges(),
-        api.getUserChallenges(),
-        api.getUserCommunities ? api.getUserCommunities() : Promise.resolve([]),
-      ]);
-      setPosts(postsRes);
-      setCommunities(communitiesRes);
-      setChallenges(challengesRes);
-      setUserChallenges(userChallengesRes);
-      setUserCommunityIds(userCommunitiesRes);
-      if (communitiesRes.length > 0) {
-        setRanking(await api.getCommunityRanking(communitiesRes[0].id));
-      }
-    } catch (e) {
-      console.error("Failed to load community data:", e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const loadPosts = async () => {
     try {
@@ -196,19 +178,10 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
     }
   };
 
-  if (isLoading) return (
-    <div className="flex-1 flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-white/40 font-bold uppercase tracking-widest">Sincronizando Comunidade...</p>
-      </div>
-    </div>
-  );
-
-  const isMember = activeCommunity ? userCommunityIds.includes(activeCommunity.id) : false;
+const isMember = activeCommunity ? userCommunityIds.includes(activeCommunity.id) : false;
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-dark-bg">
+    <div className="flex-1 flex flex-col h-full bg-dark-bg pt-6">
       <CommunityHeader
         activeCommunity={activeCommunity}
         onBack={() => setActiveCommunity(null)}

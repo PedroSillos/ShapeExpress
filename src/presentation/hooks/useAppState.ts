@@ -36,6 +36,10 @@ export const useAppState = () => {
     setTrainerConnections: students.setTrainerConnections,
     setStudentConnections: students.setStudentConnections,
     setStudents: students.setStudents,
+    setCommunities: community.setCommunities,
+    setPosts: community.setPosts,
+    setChallenges: community.setChallenges,
+    setUserChallenges: community.setUserChallenges,
   });
 
   // Apply the tab restored by Firebase Auth on page load/refresh
