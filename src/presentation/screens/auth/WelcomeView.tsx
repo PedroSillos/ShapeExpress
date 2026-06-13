@@ -419,30 +419,34 @@ export function WelcomeView({ onBack, onContinue }: WelcomeViewProps) {
         </button>
         {!inIntro && (
           <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-            <div className="h-full bg-brand-red rounded-full transition-all duration-500" style={{ width: `${((questionIndex + 1) / questions.length) * 100}%` }} />
+            <div className="h-full red-gradient rounded-full transition-all duration-500" style={{ width: `${((questionIndex + 1) / questions.length) * 100}%` }} />
           </div>
         )}
       </div>
 
       {inIntro ? (
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="relative mb-3" style={{ display: 'inline-grid' }}>
+        <div className="flex-1 flex flex-col items-center justify-center gap-4">
+          <div className="relative" style={{ display: 'inline-grid' }}>
             <p className="text-lg leading-snug px-5 py-4 opacity-0 pointer-events-none select-none" style={{ gridArea: '1/1' }}>
               {INTRO_STEPS[introStep].map((seg, si) => seg.bold ? <strong key={si}>{seg.text}</strong> : <span key={si}>{seg.text}</span>)}
             </p>
             <div className="absolute inset-0 bg-dark-card border border-dark-border rounded-2xl" />
             <p className="text-white text-lg leading-snug px-5 py-4" style={{ gridArea: '1/1', position: 'relative' }}>{introContent}</p>
-            <div className="absolute left-1/2 -translate-x-1/2 -bottom-[10px] w-0 h-0" style={{ borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderTop: '10px solid #2a2a2a' }} />
+            <div className="absolute left-1/2 -translate-x-1/2 -bottom-[10px] w-0 h-0" style={{ borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderTop: `10px solid var(--theme-card)` }} />
           </div>
-          <span className="text-7xl select-none mt-2">⚡</span>
+          <div className="w-28 h-28 rounded-full bg-dark-card flex items-center justify-center mt-2">
+            <span className="text-6xl select-none">⚡</span>
+          </div>
         </div>
       ) : (
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex items-start gap-3 mb-5 shrink-0">
-            <span className="text-5xl select-none shrink-0">⚡</span>
+            <div className="w-14 h-14 rounded-full bg-dark-card flex items-center justify-center shrink-0">
+              <span className="text-3xl select-none">⚡</span>
+            </div>
             <div className="relative bg-dark-card border border-dark-border rounded-2xl px-4 py-3">
               <p className="text-white text-base leading-snug">{question!.balloon(answers)}</p>
-              <div className="absolute left-[-10px] top-4 w-0 h-0" style={{ borderTop: '8px solid transparent', borderBottom: '8px solid transparent', borderRight: '10px solid #2a2a2a' }} />
+              <div className="absolute left-[-10px] top-4 w-0 h-0" style={{ borderTop: '8px solid transparent', borderBottom: '8px solid transparent', borderRight: `10px solid var(--theme-card)` }} />
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
