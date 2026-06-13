@@ -33,16 +33,16 @@ function useTypewriter(segments: Segment[], speed = 30) {
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const SPORTS = [
-  { id: 'Musculação', icon: '🏋️' },
-  { id: 'Halterofilismo', icon: '🏅' },
-  { id: 'Corrida', icon: '🏃' },
-  { id: 'Ciclismo', icon: '🚴' },
-  { id: 'Natação', icon: '🏊' },
-  { id: 'Crossfit', icon: '⚡' },
-  { id: 'Artes Marciais', icon: '🥋' },
-  { id: 'Futebol', icon: '⚽' },
-  { id: 'Basquete', icon: '🏀' },
-  { id: 'Yoga', icon: '🧘' },
+  { id: 'Musculação',    icon: '🏋️', bg: '#b91c1c' },
+  { id: 'Halterofilismo',icon: '🏅', bg: '#a16207' },
+  { id: 'Corrida',       icon: '🏃', bg: '#c2410c' },
+  { id: 'Ciclismo',      icon: '🚴', bg: '#1d4ed8' },
+  { id: 'Natação',       icon: '🏊', bg: '#0e7490' },
+  { id: 'Crossfit',      icon: '⚡', bg: '#374151' },
+  { id: 'Artes Marciais',icon: '🥋', bg: '#7c3aed' },
+  { id: 'Futebol',       icon: '⚽', bg: '#374151' },
+  { id: 'Basquete',      icon: '🏀', bg: '#9a3412' },
+  { id: 'Yoga',          icon: '🧘', bg: '#0f766e' },
 ];
 
 const OBJECTIVES = [
@@ -152,6 +152,25 @@ function OptionCard({ selected, onClick, icon, label, desc, color }: { selected:
         <p className={cn('text-sm font-bold', selected ? 'text-white' : 'text-white/60')}>{label}</p>
         {desc && <p className="text-[10px] text-white/40">{desc}</p>}
       </div>
+    </button>
+  );
+}
+
+// ─── SportCard ────────────────────────────────────────────────────────────────
+
+function SportCard({ selected, onClick, icon, bg, label }: { selected: boolean; onClick: () => void; icon: string; bg: string; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'w-full px-4 py-4 rounded-2xl border-2 flex items-center gap-4 transition-all text-left active:scale-95',
+        selected ? 'border-brand-red bg-brand-red/10' : 'border-dark-border bg-dark-card'
+      )}
+    >
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-2xl" style={{ backgroundColor: bg }}>
+        {icon}
+      </div>
+      <p className={cn('text-base font-bold', selected ? 'text-brand-red' : 'text-white')}>{label}</p>
     </button>
   );
 }
@@ -270,7 +289,7 @@ export function WelcomeView({ onBack, onContinue }: WelcomeViewProps) {
       return (
         <div className="flex flex-col gap-3">
           {SPORTS.map(o => (
-            <OptionCard key={o.id} selected={(answers.sports ?? []).includes(o.id)} onClick={() => toggleSport(o.id)} icon={<span className="text-2xl">{o.icon}</span>} label={o.id} />
+            <SportCard key={o.id} selected={(answers.sports ?? []).includes(o.id)} onClick={() => toggleSport(o.id)} icon={o.icon} bg={o.bg} label={o.id} />
           ))}
         </div>
       );
