@@ -299,7 +299,7 @@ export function WorkoutsView({
                 {mainUserProfile.userType === 'treinador' && onCreateAd && (
                   <button
                     onClick={() => onCreateAd(template)}
-                    className="w-full mt-4 py-3 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl font-bold text-sm hover:bg-emerald-500/20 transition-colors active:scale-95"
+                    className="w-full mt-4 py-3 bg-brand-red/10 text-brand-red border border-brand-red/20 rounded-xl font-bold text-sm hover:bg-brand-red/20 transition-colors active:scale-95"
                   >
                     Criar Anúncio na Loja
                   </button>

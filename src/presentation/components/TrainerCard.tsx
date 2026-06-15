@@ -53,7 +53,7 @@ export function TrainerCard({ trainer, showDistance, onConnect, studentConnectio
             </div>
             
             {isConnected ? (
-              <div className="ml-auto flex items-center gap-1 text-emerald-500">
+              <div className="ml-auto flex items-center gap-1 text-brand-red">
                 <ShieldCheck size={14} />
                 <span className="text-[9px] font-bold uppercase tracking-widest">Conectado</span>
               </div>

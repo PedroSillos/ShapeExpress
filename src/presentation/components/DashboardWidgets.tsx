@@ -78,9 +78,9 @@ export function ProgressScoreWidget({ progressScore }: { progressScore: Progress
         className={cn(
           'absolute top-0 right-0 w-32 h-32 blur-3xl opacity-10 -translate-y-1/2 translate-x-1/2',
           progressScore.classification === 'progresso'
-            ? 'bg-blue-400'
+            ? 'bg-brand-red/20'
             : progressScore.score >= 76
-            ? 'bg-emerald-500'
+            ? 'bg-brand-red'
             : progressScore.score >= 51
             ? 'bg-blue-500'
             : progressScore.score >= 31
@@ -103,7 +103,7 @@ export function ProgressScoreWidget({ progressScore }: { progressScore: Progress
             className={cn(
               'text-[10px] font-bold uppercase tracking-widest flex items-center justify-end gap-1',
               progressScore.trend === 'subindo'
-                ? 'text-emerald-400'
+                ? 'text-brand-red'
                 : progressScore.trend === 'descendo'
                 ? 'text-red-400'
                 : 'text-white/40',

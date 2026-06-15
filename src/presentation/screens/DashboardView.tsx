@@ -167,11 +167,11 @@ export function DashboardView({
         </div>
       </div>
 
-      {/* Mission banner — Duolingo green style */}
+      {/* Mission banner */}
       {currentTemplate ? (
         <button
           onClick={onStartWorkout}
-          className="mx-6 mt-4 w-[calc(100%-3rem)] bg-emerald-600 rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(5,120,60,0.8)]"
+          className="mx-6 mt-4 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(150,10,10,0.6)]"
         >
           <div className="text-left">
             <p className="text-[10px] font-black uppercase tracking-widest text-white/70">
@@ -186,7 +186,7 @@ export function DashboardView({
       ) : (
         <button
           onClick={() => switchTab('workouts')}
-          className="mx-6 mt-4 w-[calc(100%-3rem)] bg-emerald-600 rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(5,120,60,0.8)]"
+          className="mx-6 mt-4 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(150,10,10,0.6)]"
         >
           <div className="text-left">
             <p className="text-[10px] font-black uppercase tracking-widest text-white/70">Comece agora</p>
@@ -236,13 +236,13 @@ export function DashboardView({
               >
                 {/* Glow ring for active */}
                 {isActive && (
-                  <div className="absolute inset-0 rounded-full bg-emerald-400/20 animate-ping scale-150" />
+                  <div className="absolute inset-0 rounded-full bg-brand-red/20 animate-ping scale-150" />
                 )}
                 <div className={cn(
                   'w-18 h-18 rounded-full flex items-center justify-center shadow-lg relative',
                   'w-[72px] h-[72px]',
-                  isActive && 'bg-emerald-500 shadow-[0_6px_0_0_rgba(5,100,50,0.9)]',
-                  isDone && 'bg-emerald-700 shadow-[0_4px_0_0_rgba(5,80,40,0.8)]',
+                  isActive && 'bg-brand-red shadow-[0_6px_0_0_rgba(150,10,10,0.7)]',
+                  isDone && 'bg-brand-red/60 shadow-[0_4px_0_0_rgba(150,10,10,0.4)]',
                   isLocked && 'bg-[#2a3540]',
                 )}>
                   {/* Progress ring */}
