@@ -318,7 +318,7 @@ export function WorkoutDoneScreen({ session, onContinue }: { session: WorkoutSes
 
 // ─── Ready screen ─────────────────────────────────────────────────────────────
 
-function ReadyScreen({ onContinue, onNotReady, loading }: { onContinue: () => void; onNotReady: () => void; loading?: boolean }) {
+function ReadyScreen({ onContinue, onNotReady, loading, skipLoading }: { onContinue: () => void; onNotReady: () => void; loading?: boolean; skipLoading?: boolean }) {
   return (
     <div className="min-h-screen flex flex-col py-6">
       {/* Header — back arrow only, no progress bar */}
@@ -363,10 +363,10 @@ function ReadyScreen({ onContinue, onNotReady, loading }: { onContinue: () => vo
         </button>
         <button
           onClick={onNotReady}
-          disabled={loading}
+          disabled={loading || skipLoading}
           className="w-full py-4 bg-transparent border-2 border-dark-border rounded-2xl text-white/50 font-bold text-xs uppercase tracking-widest active:scale-95 transition-transform disabled:opacity-40"
         >
-          Não estou no local de treino
+          {skipLoading ? 'Gerando treino...' : 'Não estou no local de treino'}
         </button>
       </div>
     </div>
@@ -447,11 +447,14 @@ const toggleSport = (id: string) => {
     return seg.bold ? <strong key={si}>{chars}</strong> : <span key={si}>{chars}</span>;
   });
 
+  const [skipLoading, setSkipLoading] = useState(false);
+
   if (showReady) {
     return <ReadyScreen
       loading={readyLoading}
+      skipLoading={skipLoading}
       onContinue={async () => { setReadyLoading(true); await onContinue(answers); setReadyLoading(false); }}
-      onNotReady={() => onContinue({ ...answers, skipWorkout: true } as any)}
+      onNotReady={async () => { setSkipLoading(true); await onContinue({ ...answers, skipWorkout: true } as any); setSkipLoading(false); }}
     />;
   }
 

@@ -51,6 +51,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     userProfile, setUserProfile,
     userStats,
     userSessions, filteredSessions, filteredTemplates,
+    setTemplates,
     userTrainingProfile, exerciseUserStats, userCalorieProfile,
     assessments,
     notifications, setNotifications,
@@ -149,42 +150,40 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             if (a.skipWorkout) {
               try { localStorage.setItem('welcome-answers', JSON.stringify(answers)); } catch {}
               localStorage.setItem('welcome-done', '1');
-              // Generate workout in background and store locally
               const sports: string[] = a.sports ?? [];
               const now = new Date();
               const end = new Date(now); end.setMonth(end.getMonth() + 3);
-              (async () => {
-                try {
-                  const ai = await generateFirstWorkoutAI({
-                    sports,
-                    objective: a.objective,
-                    experience: Object.values(a.experiences ?? {})[0] as string | undefined,
-                    location: a.location,
-                  });
-                  if (ai && ai.exercises?.length > 0) {
-                    const template = {
-                      id: `first-${Date.now()}`,
-                      userId: userProfile?.email ?? 'guest',
-                      name: ai.name,
-                      category: 'basic' as const,
-                      startDate: now.toISOString(),
-                      endDate: end.toISOString(),
-                      exercises: ai.exercises,
-                      exerciseIds: ai.exercises.map((e: any) => e.exerciseId),
-                    };
-                    const p = JSON.parse(localStorage.getItem('pending-templates') ?? '[]');
-                    p.push(template);
-                    localStorage.setItem('pending-templates', JSON.stringify(p));
-                    return;
-                  }
-                } catch {}
-                // Fallback: static generation
+              let template: WorkoutTemplate | null = null;
+              try {
+                const ai = await generateFirstWorkoutAI({
+                  sports,
+                  objective: a.objective,
+                  experience: Object.values(a.experiences ?? {})[0] as string | undefined,
+                  location: a.location,
+                });
+                if (ai && ai.exercises?.length > 0) {
+                  template = {
+                    id: `first-${Date.now()}`,
+                    userId: 'guest',
+                    name: ai.name,
+                    category: 'basic' as const,
+                    startDate: now.toISOString(),
+                    endDate: end.toISOString(),
+                    exercises: ai.exercises,
+                    exerciseIds: ai.exercises.map((e: any) => e.exerciseId),
+                  };
+                }
+              } catch {}
+              if (!template) {
                 const { generateFirstWorkout } = await import('../domain/use-cases/generateFirstWorkout');
-                const template = generateFirstWorkout(sports, userProfile?.email ?? 'guest');
+                template = generateFirstWorkout(sports, 'guest');
+              }
+              try {
                 const p = JSON.parse(localStorage.getItem('pending-templates') ?? '[]');
                 p.push(template);
                 localStorage.setItem('pending-templates', JSON.stringify(p));
-              })();
+              } catch {}
+              state.setTemplates((prev: WorkoutTemplate[]) => [...prev, template!]);
               state.onShowSuggestProfile?.() ?? setActiveTab('dashboard');
               return;
             }

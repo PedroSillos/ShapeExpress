@@ -141,7 +141,8 @@ export const useWorkoutState = (
 
   const filteredTemplates = useMemo(() => {
     if (userProfile?.userType === "treinador") return templates;
-    return templates.filter((t) => !t.userId || t.userId === userProfile?.email);
+    if (!userProfile) return templates.filter((t) => !t.userId || t.userId === 'guest');
+    return templates.filter((t) => !t.userId || t.userId === userProfile.email);
   }, [templates, userProfile]);
 
   const userSessions = useMemo(
