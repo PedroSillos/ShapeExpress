@@ -20,6 +20,9 @@ import { SheetSelectorModal } from './presentation/components/AppModals';
 import { WorkoutSummaryModal } from './presentation/components/WorkoutSummaryModal';
 import { CreateAdModal } from './presentation/components/CreateAdModal';
 import { Logo } from './presentation/components/Logo';
+import { WorkoutDoneScreen } from './presentation/screens/auth/WelcomeView';
+import { OnboardingStreakScreen } from './presentation/screens/auth/OnboardingStreakScreen';
+import { OnboardingSuggestProfileScreen } from './presentation/screens/auth/OnboardingSuggestProfileScreen';
 
 import { WorkoutTemplate } from './domain/entities';
 
@@ -60,6 +63,8 @@ export default function App() {
   const [selectedStudentForProfile, setSelectedStudentForProfile] = useState<any>(null);
   const [creatingAdTemplate, setCreatingAdTemplate] = useState<WorkoutTemplate | null>(null);
   const [studentTemplates, setStudentTemplates] = useState<WorkoutTemplate[]>([]);
+  const [showOnboardingStreak, setShowOnboardingStreak] = useState(false);
+  const [showSuggestProfile, setShowSuggestProfile] = useState(false);
 
   const dataSync = useDataSync({
     api,
@@ -132,6 +137,37 @@ export default function App() {
     else if (direction === 'right' && ci > 0) { setSwipeDirection(-1); setActiveTab(mainTabs[ci - 1] as any); }
   };
 
+  // Show WorkoutDoneScreen after first onboarding workout
+  const isOnboardingWorkoutDone =
+    lastCompletedSession !== null &&
+    !localStorage.getItem('welcome-done') &&
+    !isLoggedIn;
+
+  if (isOnboardingWorkoutDone && lastCompletedSession) {
+    return (
+      <WorkoutDoneScreen
+        session={lastCompletedSession}
+        onContinue={() => {
+          setLastCompletedSession(null);
+          setShowOnboardingStreak(true);
+        }}
+      />
+    );
+  }
+
+  if (showOnboardingStreak) {
+    return <OnboardingStreakScreen onContinue={() => { localStorage.setItem('welcome-done', '1'); setShowOnboardingStreak(false); setShowSuggestProfile(true); }} />;
+  }
+
+  if (showSuggestProfile) {
+    return (
+      <OnboardingSuggestProfileScreen
+        onCreateProfile={() => { setShowSuggestProfile(false); setActiveTab('register'); }}
+        onSkip={() => { setShowSuggestProfile(false); setActiveTab('dashboard'); }}
+      />
+    );
+  }
+
   if (initialLoading) {
     return (
       <div className="min-h-screen bg-dark-bg flex flex-col items-center justify-center space-y-6">
@@ -145,7 +181,7 @@ export default function App() {
   }
 
   const currentAnimations = document.documentElement.getAttribute('data-animations') || 'enabled';
-  const routerState = { ...appState, switchTab, communityInitialTab, communityInitialRankingType, selectedStudentForProfile, setSelectedStudentForProfile, creatingAdTemplate, setCreatingAdTemplate, studentTemplates, setStudentTemplates };
+  const routerState = { ...appState, switchTab, communityInitialTab, communityInitialRankingType, selectedStudentForProfile, setSelectedStudentForProfile, creatingAdTemplate, setCreatingAdTemplate, studentTemplates, setStudentTemplates, onShowSuggestProfile: () => setShowSuggestProfile(true) };
 
   return (
     <MotionConfig transition={currentAnimations === 'reduced' ? { duration: 0 } : undefined}>

@@ -185,7 +185,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
                 p.push(template);
                 localStorage.setItem('pending-templates', JSON.stringify(p));
               })();
-              setActiveTab('dashboard');
+              state.onShowSuggestProfile?.() ?? setActiveTab('dashboard');
               return;
             }
             const sports: string[] = a.sports ?? [];

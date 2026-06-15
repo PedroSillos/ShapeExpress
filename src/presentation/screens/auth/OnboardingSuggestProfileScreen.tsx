@@ -1,0 +1,45 @@
+interface Props {
+  onCreateProfile: () => void;
+  onSkip: () => void;
+}
+
+export function OnboardingSuggestProfileScreen({ onCreateProfile, onSkip }: Props) {
+  return (
+    <div className="min-h-screen flex flex-col px-6 py-8">
+      {/* Content */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-8">
+        {/* Speech bubble */}
+        <div className="relative bg-[#1c2630] border border-white/10 rounded-2xl px-5 py-4 w-full">
+          <p className="text-white text-lg leading-snug">
+            Não perca o seu progresso! Vamos criar um perfil.
+          </p>
+          <div
+            className="absolute left-1/2 -translate-x-1/2 -bottom-[10px] w-0 h-0"
+            style={{ borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderTop: '10px solid #1c2630' }}
+          />
+        </div>
+
+        {/* Mascot */}
+        <div className="w-40 h-40 rounded-full bg-dark-card border border-dark-border flex items-center justify-center">
+          <span className="text-7xl select-none">⚡</span>
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div className="flex flex-col gap-4 shrink-0">
+        <button
+          onClick={onCreateProfile}
+          className="w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest red-gradient text-black shadow-[0_4px_0_0_rgba(150,10,10,0.6)] active:scale-95 transition-all"
+        >
+          Criar perfil
+        </button>
+        <button
+          onClick={onSkip}
+          className="w-full py-2 font-black text-sm uppercase tracking-widest text-brand-red active:opacity-60 transition-opacity"
+        >
+          Depois
+        </button>
+      </div>
+    </div>
+  );
+}

@@ -130,49 +130,54 @@ export function DashboardView({
 
   return (
     <div className="-mx-6">
-      {/* Top stats bar */}
-      <div className="flex items-center justify-between px-10 py-3 border-b border-white/5 mt-4 mb-2">
-
+      {/* Top stats bar — Duolingo style */}
+      <div className="flex items-center justify-between px-6 py-3 border-b border-white/5 mt-2">
         {/* Sport selector */}
         <div className="flex items-center gap-1">
           {sports.length > 1 && (
-            <button onClick={() => setSportIdx(i => (i - 1 + sports.length) % sports.length)} className="text-white/30 active:text-white transition-colors">
+            <button onClick={() => setSportIdx(i => (i - 1 + sports.length) % sports.length)} className="text-white/30 active:text-white">
               <ChevronLeft size={14} />
             </button>
           )}
-          <span className="text-xl leading-none">{SPORT_EMOJIS[currentSport] ?? '🏋️'}</span>
+          <span className="text-2xl leading-none">{SPORT_EMOJIS[currentSport] ?? '🏋️'}</span>
+          <span className="font-bold text-white text-sm ml-1">{sportLevel}</span>
           {sports.length > 1 && (
-            <button onClick={() => setSportIdx(i => (i + 1) % sports.length)} className="text-white/30 active:text-white transition-colors">
+            <button onClick={() => setSportIdx(i => (i + 1) % sports.length)} className="text-white/30 active:text-white">
               <ChevronRight size={14} />
             </button>
           )}
         </div>
 
-        {/* Sport level */}
-        <div className="flex items-center gap-1">
-          <span className="text-lg leading-none">⭐</span>
-          <span className="font-bold text-white text-sm">{sportLevel}</span>
-        </div>
-
         {/* Streak */}
-        <div className="flex items-center gap-1.5">
-          <Flame size={18} className="text-orange-400" />
-          <span className="font-bold text-orange-400 text-sm">{goalStreak}</span>
+        <div className="flex items-center gap-1">
+          <Flame size={20} className={goalStreak > 0 ? 'text-orange-400' : 'text-white/20'} />
+          <span className={cn('font-black text-sm', goalStreak > 0 ? 'text-orange-400' : 'text-white/30')}>{goalStreak}</span>
         </div>
 
+        {/* XP */}
+        <div className="flex items-center gap-1">
+          <span className="text-lg leading-none">💪</span>
+          <span className="font-black text-sm text-brand-red">{userStats.xp}</span>
+        </div>
+
+        {/* Weekly progress */}
+        <div className="flex items-center gap-1">
+          <span className="text-lg leading-none">⚡</span>
+          <span className="font-black text-sm text-yellow-400">{completedThisWeek}/{userStats.weeklyGoal}</span>
+        </div>
       </div>
 
-      {/* Mission banner */}
+      {/* Mission banner — Duolingo green style */}
       {currentTemplate ? (
         <button
           onClick={onStartWorkout}
-          className="mx-6 mt-4 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform"
+          className="mx-6 mt-4 w-[calc(100%-3rem)] bg-emerald-600 rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(5,120,60,0.8)]"
         >
           <div className="text-left">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">
+            <p className="text-[10px] font-black uppercase tracking-widest text-white/70">
               {completedThisWeek} de {userStats.weeklyGoal} essa semana
             </p>
-            <p className="font-bold text-white text-base leading-tight">{currentTemplate.name}</p>
+            <p className="font-black text-white text-base leading-tight">{currentTemplate.name}</p>
           </div>
           <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
             <Play size={20} fill="white" color="white" />
@@ -181,11 +186,11 @@ export function DashboardView({
       ) : (
         <button
           onClick={() => switchTab('workouts')}
-          className="mx-6 mt-4 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform"
+          className="mx-6 mt-4 w-[calc(100%-3rem)] bg-emerald-600 rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(5,120,60,0.8)]"
         >
           <div className="text-left">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">Comece agora</p>
-            <p className="font-bold text-white text-base leading-tight">Criar primeiro treino</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-white/70">Comece agora</p>
+            <p className="font-black text-white text-base leading-tight">Criar primeiro treino</p>
           </div>
           <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
             <Star size={20} fill="white" color="white" />
@@ -207,7 +212,7 @@ export function DashboardView({
       </div>
 
       {/* Trail map */}
-      <div className="px-6 pb-8 pt-4 flex flex-col items-center gap-2">
+      <div className="px-6 pb-8 pt-6 flex flex-col items-center gap-6">
         {trailNodes.map((node, i) => {
           const pos = NODE_POSITIONS[i % NODE_POSITIONS.length];
           const isActive = node.state === 'active';
@@ -219,55 +224,51 @@ export function DashboardView({
               key={node.template.id}
               className={cn(
                 'w-full flex',
-                pos === 'left' && 'justify-start pl-6',
+                pos === 'left' && 'justify-start pl-4',
                 pos === 'center' && 'justify-center',
-                pos === 'right' && 'justify-end pr-6',
+                pos === 'right' && 'justify-end pr-4',
               )}
             >
               <button
                 onClick={isLocked ? undefined : onStartWorkout}
                 disabled={isLocked}
-                className="relative flex flex-col items-center gap-1 active:scale-95 transition-transform disabled:cursor-default"
+                className="relative flex flex-col items-center gap-2 active:scale-95 transition-transform disabled:cursor-default"
               >
+                {/* Glow ring for active */}
                 {isActive && (
-                  <div className="absolute inset-0 rounded-full bg-brand-red/30 animate-ping scale-125" />
+                  <div className="absolute inset-0 rounded-full bg-emerald-400/20 animate-ping scale-150" />
                 )}
                 <div className={cn(
-                  'w-16 h-16 rounded-full flex items-center justify-center shadow-lg relative',
-                  isActive && 'bg-brand-red shadow-brand-red/40',
-                  isDone && 'bg-emerald-600 shadow-emerald-600/30',
-                  isLocked && 'bg-white/10',
+                  'w-18 h-18 rounded-full flex items-center justify-center shadow-lg relative',
+                  'w-[72px] h-[72px]',
+                  isActive && 'bg-emerald-500 shadow-[0_6px_0_0_rgba(5,100,50,0.9)]',
+                  isDone && 'bg-emerald-700 shadow-[0_4px_0_0_rgba(5,80,40,0.8)]',
+                  isLocked && 'bg-[#2a3540]',
                 )}>
+                  {/* Progress ring */}
                   {isActive && (
-                    <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 64 64">
-                      <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="4" />
-                      <circle cx="32" cy="32" r="28" fill="none" stroke="white" strokeWidth="4"
-                        strokeDasharray={`${2 * Math.PI * 28 * (xpProgressPct / 100)} ${2 * Math.PI * 28}`}
+                    <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 72 72">
+                      <circle cx="36" cy="36" r="32" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="5" />
+                      <circle cx="36" cy="36" r="32" fill="none" stroke="white" strokeWidth="5"
+                        strokeDasharray={`${2 * Math.PI * 32 * (xpProgressPct / 100)} ${2 * Math.PI * 32}`}
                         strokeLinecap="round" />
                     </svg>
                   )}
-                  {isLocked ? <Lock size={24} className="text-white/30" />
-                    : isDone ? <Star size={24} fill="white" color="white" />
-                    : <Star size={28} fill="white" color="white" />}
+                  {isLocked
+                    ? <Lock size={26} className="text-white/20" />
+                    : isDone
+                      ? <Star size={26} fill="white" color="white" />
+                      : <Star size={30} fill="white" color="white" />}
                 </div>
-                <span className={cn(
-                  'text-[10px] font-bold uppercase tracking-wider max-w-[80px] text-center leading-tight',
-                  isActive ? 'text-white' : isDone ? 'text-emerald-400' : 'text-white/20',
-                )}>
-                  {node.template.name}
-                </span>
               </button>
             </div>
           );
         })}
 
         {trailNodes.length > 0 && (
-          <div className="flex justify-center mt-2">
-            <div className="flex flex-col items-center gap-1">
-              <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
-                <Trophy size={28} className="text-white/20" />
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-white/20">Conclusão</span>
+          <div className="flex justify-center">
+            <div className="w-[72px] h-[72px] rounded-full bg-[#2a3540] flex items-center justify-center">
+              <Trophy size={28} className="text-white/20" />
             </div>
           </div>
         )}

@@ -10,21 +10,23 @@ interface NavButtonProps {
 
 export function NavButton({ active, icon, label, onClick }: NavButtonProps) {
   return (
-    <button 
+    <button
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center gap-1.5 transition-all duration-300 relative",
-        active ? "text-brand-red scale-110" : "text-white/20 hover:text-white/40"
+        'flex flex-col items-center gap-1 transition-all duration-200 relative active:scale-90',
+        active ? 'text-brand-red' : 'text-white/30 hover:text-white/50'
       )}
     >
       <div className={cn(
-        "p-2 rounded-xl transition-colors",
-        active ? "bg-brand-red/10" : "bg-transparent"
+        'w-12 h-9 rounded-xl flex items-center justify-center transition-colors',
+        active ? 'bg-brand-red/15' : 'bg-transparent'
       )}>
         {icon}
       </div>
-      {active && (
-        <div className="absolute -bottom-2 w-1 h-1 rounded-full bg-brand-red shadow-[0_0_8px_rgba(234,67,53,0.8)]" />
+      {label && (
+        <span className={cn('text-[9px] font-bold uppercase tracking-widest', active ? 'text-brand-red' : 'text-white/20')}>
+          {label}
+        </span>
       )}
     </button>
   );
