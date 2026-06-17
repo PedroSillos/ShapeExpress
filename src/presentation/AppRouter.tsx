@@ -176,7 +176,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
               } catch {}
               if (!template) {
                 const { generateFirstWorkout } = await import('../domain/use-cases/generateFirstWorkout');
-                template = generateFirstWorkout(sports, 'guest');
+                template = generateFirstWorkout(sports, 'guest', Object.values(a.experiences ?? {})[0] as string | undefined);
               }
               try {
                 const p = JSON.parse(localStorage.getItem('pending-templates') ?? '[]');
@@ -200,7 +200,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
               if (ai && ai.exercises?.length > 0) {
                 const template = {
                   id: `first-${Date.now()}`,
-                  userId: userProfile?.email ?? '',
+                  userId: 'guest',
                   name: ai.name,
                   category: 'basic' as const,
                   startDate: now.toISOString(),
@@ -209,6 +209,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
                   exerciseIds: ai.exercises.map((e: any) => e.exerciseId),
                 };
                 try { const p = JSON.parse(localStorage.getItem('pending-templates') ?? '[]'); p.push(template); localStorage.setItem('pending-templates', JSON.stringify(p)); } catch {}
+                state.setTemplates((prev: WorkoutTemplate[]) => [...prev, template]);
                 localStorage.setItem('welcome-done', '1');
                 workout.startWorkout(template);
                 return;
@@ -216,7 +217,9 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             } catch { /* fallback below */ }
             // Fallback: static generation
             const { generateFirstWorkout } = await import('../domain/use-cases/generateFirstWorkout');
-            const template = generateFirstWorkout(sports, userProfile?.email ?? '');
+            const template = generateFirstWorkout(sports, 'guest', Object.values(a.experiences ?? {})[0] as string | undefined);
+            try { const p = JSON.parse(localStorage.getItem('pending-templates') ?? '[]'); p.push(template); localStorage.setItem('pending-templates', JSON.stringify(p)); } catch {}
+            state.setTemplates((prev: WorkoutTemplate[]) => [...prev, template]);
             localStorage.setItem('welcome-done', '1');
             workout.startWorkout(template);
           }}

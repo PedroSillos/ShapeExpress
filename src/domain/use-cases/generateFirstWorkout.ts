@@ -17,30 +17,40 @@ const SPORT_EXERCISE_IDS: Record<string, string[]> = {
 
 const DEFAULT_IDS = ['1', '2', '3', '4', '5'];
 
-export function generateFirstWorkout(sports: string[], userEmail: string): WorkoutTemplate {
-  // Collect exercise IDs from all selected sports, deduplicated, max 8
+// Exercise IDs preferred for each experience level (within a sport's pool)
+const BEGINNER_SAFE_IDS = new Set(['7', '8', '9', '10', '11', '14', '33', '36', '37', '38']);
+const ADVANCED_IDS = new Set(['6', '2', '1', '4', '21', '3']);
+
+export function generateFirstWorkout(sports: string[], userEmail: string, experience?: string): WorkoutTemplate {
+  const exp = (experience || '').toLowerCase();
+  const isAbsolute = exp.includes('nunca') || exp.includes('never');
+  const isAdvanced = exp.includes('avan');
+
   const seen = new Set<string>();
   const exerciseIds: string[] = [];
 
   for (const sport of sports) {
-    const ids = SPORT_EXERCISE_IDS[sport] ?? DEFAULT_IDS;
+    let ids = SPORT_EXERCISE_IDS[sport] ?? DEFAULT_IDS;
+    // Prefer safe exercises for beginners, heavy compounds for advanced
+    if (isAbsolute) ids = ids.filter(id => BEGINNER_SAFE_IDS.has(id)).concat(ids.filter(id => !BEGINNER_SAFE_IDS.has(id)));
+    else if (isAdvanced) ids = ids.filter(id => ADVANCED_IDS.has(id)).concat(ids.filter(id => !ADVANCED_IDS.has(id)));
     for (const id of ids) {
-      if (!seen.has(id) && exerciseIds.length < 5) {
+      if (!seen.has(id) && exerciseIds.length < 3) {
         seen.add(id);
         exerciseIds.push(id);
       }
     }
   }
 
-  const exercises: WorkoutTemplateExercise[] = exerciseIds.map(id => {
-    const ex = EXERCISES.find(e => e.id === id);
-    return {
-      exerciseId: id,
-      sets: String(ex?.defaultReps ?? 10),
-      numSets: ex?.defaultSets ?? 3,
-      rest: '1 min',
-    };
-  });
+  const reps = isAbsolute ? '8' : isAdvanced ? '13' : exp.includes('intermedi') ? '12' : '10';
+  const rest = '60s';
+
+  const exercises: WorkoutTemplateExercise[] = exerciseIds.map(id => ({
+    exerciseId: id,
+    sets: reps,
+    numSets: 3,
+    rest,
+  }));
 
   const now = new Date();
   const end = new Date(now);

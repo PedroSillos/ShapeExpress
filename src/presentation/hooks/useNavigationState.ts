@@ -12,7 +12,9 @@ export type AppTab =
   | "chat" | "notifications" | "community" | "purchased-products" | "leaderboard";
 
 export const useNavigationState = () => {
-  const [activeTab, setActiveTab] = useState<AppTab>("login");
+  const [activeTab, setActiveTab] = useState<AppTab>(() =>
+    localStorage.getItem('welcome-done') ? 'dashboard' : 'landing'
+  );
   const [swipeDirection, setSwipeDirection] = useState(0);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<BodyAssessment | null>(null);

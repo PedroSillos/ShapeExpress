@@ -52,13 +52,66 @@ export const DEFAULT_CALORIE_PROFILE: UserCalorieProfile = {
   total_calories_burned: 0,
 };
 
+function loadLocal<T>(key: string, fallback: T): T {
+  try { return JSON.parse(localStorage.getItem(key) ?? 'null') ?? fallback; } catch { return fallback; }
+}
+
+function saveLocal<T>(key: string, value: T) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+const LOCAL_STATS_KEY = 'local_stats';
+const LOCAL_TRAINING_PROFILE_KEY = 'local_training_profile';
+const LOCAL_CALORIE_PROFILE_KEY = 'local_calorie_profile';
+const LOCAL_EXERCISE_STATS_KEY = 'local_exercise_stats';
+
+function getGuestDefaultStats(): UserStats {
+  try {
+    const wa = JSON.parse(localStorage.getItem('welcome-answers') ?? 'null');
+    if (wa?.weeklyGoal) return { ...DEFAULT_STATS, weeklyGoal: wa.weeklyGoal };
+  } catch {}
+  return DEFAULT_STATS;
+}
+
 export const useProfileState = (currentUser: { email: string } | null) => {
-  const [userProfile, setUserProfile] = useState<UserProfile>(DEFAULT_PROFILE);
-  const [userStats, setUserStats] = useState<UserStats>(DEFAULT_STATS);
-  const [userTrainingProfile, setUserTrainingProfile] = useState<UserTrainingProfile>(DEFAULT_TRAINING_PROFILE);
-  const [userCalorieProfile, setUserCalorieProfile] = useState<UserCalorieProfile>(DEFAULT_CALORIE_PROFILE);
-  const [exerciseUserStats, setExerciseUserStats] = useState<ExerciseUserStats[]>([]);
+  const isGuest = !currentUser;
+
+  const [userProfile, setUserProfile] = useState<UserProfile>(() =>
+    isGuest ? loadLocal('local_user_profile', DEFAULT_PROFILE) : DEFAULT_PROFILE
+  );
+  const [userStats, setUserStats] = useState<UserStats>(() =>
+    isGuest ? loadLocal(LOCAL_STATS_KEY, getGuestDefaultStats()) : DEFAULT_STATS
+  );
+  const [userTrainingProfile, setUserTrainingProfile] = useState<UserTrainingProfile>(() =>
+    isGuest ? loadLocal(LOCAL_TRAINING_PROFILE_KEY, DEFAULT_TRAINING_PROFILE) : DEFAULT_TRAINING_PROFILE
+  );
+  const [userCalorieProfile, setUserCalorieProfile] = useState<UserCalorieProfile>(() =>
+    isGuest ? loadLocal(LOCAL_CALORIE_PROFILE_KEY, DEFAULT_CALORIE_PROFILE) : DEFAULT_CALORIE_PROFILE
+  );
+  const [exerciseUserStats, setExerciseUserStats] = useState<ExerciseUserStats[]>(() =>
+    isGuest ? loadLocal(LOCAL_EXERCISE_STATS_KEY, []) : []
+  );
   const [assessments, setAssessments] = useState<BodyAssessment[]>([]);
+
+  const setUserStatsAndPersist = (s: UserStats) => {
+    if (!currentUser) saveLocal(LOCAL_STATS_KEY, s);
+    setUserStats(s);
+  };
+
+  const setUserTrainingProfileAndPersist = (p: UserTrainingProfile) => {
+    if (!currentUser) saveLocal(LOCAL_TRAINING_PROFILE_KEY, p);
+    setUserTrainingProfile(p);
+  };
+
+  const setUserCalorieProfileAndPersist = (p: UserCalorieProfile) => {
+    if (!currentUser) saveLocal(LOCAL_CALORIE_PROFILE_KEY, p);
+    setUserCalorieProfile(p);
+  };
+
+  const setExerciseUserStatsAndPersist = (s: ExerciseUserStats[]) => {
+    if (!currentUser) saveLocal(LOCAL_EXERCISE_STATS_KEY, s);
+    setExerciseUserStats(s);
+  };
 
   const getProfile = async () => {
     const email = currentUser?.email;
@@ -106,7 +159,7 @@ export const useProfileState = (currentUser: { email: string } | null) => {
   };
 
   const updateStats = async (s: UserStats) => {
-    if (!currentUser?.email) return;
+    if (!currentUser?.email) { setUserStatsAndPersist(s); return; }
     try {
       await setDoc(doc(db, "stats", currentUser.email), s, { merge: true });
       setUserStats(s);
@@ -114,6 +167,11 @@ export const useProfileState = (currentUser: { email: string } | null) => {
   };
 
   const resetProfileStates = () => {
+    localStorage.removeItem(LOCAL_STATS_KEY);
+    localStorage.removeItem(LOCAL_TRAINING_PROFILE_KEY);
+    localStorage.removeItem(LOCAL_CALORIE_PROFILE_KEY);
+    localStorage.removeItem(LOCAL_EXERCISE_STATS_KEY);
+    localStorage.removeItem('local_user_profile');
     setUserProfile(DEFAULT_PROFILE);
     setUserStats(DEFAULT_STATS);
     setUserTrainingProfile(DEFAULT_TRAINING_PROFILE);
@@ -124,10 +182,14 @@ export const useProfileState = (currentUser: { email: string } | null) => {
 
   return {
     userProfile, setUserProfile,
-    userStats, setUserStats,
-    userTrainingProfile, setUserTrainingProfile,
-    userCalorieProfile, setUserCalorieProfile,
-    exerciseUserStats, setExerciseUserStats,
+    userStats,
+    setUserStats: setUserStatsAndPersist,
+    userTrainingProfile,
+    setUserTrainingProfile: setUserTrainingProfileAndPersist,
+    userCalorieProfile,
+    setUserCalorieProfile: setUserCalorieProfileAndPersist,
+    exerciseUserStats,
+    setExerciseUserStats: setExerciseUserStatsAndPersist,
     assessments, setAssessments,
     getProfile, updateProfile,
     getStats, updateStats,

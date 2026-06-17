@@ -26,12 +26,19 @@ async function migrateLocalDataToFirestore(email: string) {
   try {
     const templates: WorkoutTemplate[] = JSON.parse(localStorage.getItem("pending-templates") ?? "[]");
     const sessions: WorkoutSession[] = JSON.parse(localStorage.getItem("local_sessions") ?? "[]");
+    const localStats = (() => { try { return JSON.parse(localStorage.getItem('local_stats') ?? 'null'); } catch { return null; } })();
     await Promise.all([
       ...templates.map((t) => setDoc(doc(db, "templates", t.id), sanitize({ ...t, userId: email }))),
       ...sessions.map((s) => setDoc(doc(db, "sessions", s.id), sanitize({ ...s, userId: email }))),
+      ...(localStats ? [setDoc(doc(db, "stats", email), { ...localStats, userEmail: email }, { merge: true })] : []),
     ]);
     localStorage.removeItem("pending-templates");
     localStorage.removeItem("local_sessions");
+    localStorage.removeItem("local_stats");
+    localStorage.removeItem("local_training_profile");
+    localStorage.removeItem("local_calorie_profile");
+    localStorage.removeItem("local_exercise_stats");
+    localStorage.removeItem("local_user_profile");
   } catch (e) {
     console.warn("[migrateLocalDataToFirestore] failed:", e);
   }

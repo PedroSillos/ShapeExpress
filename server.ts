@@ -122,29 +122,20 @@ async function startServer() {
 
     const { sports, objective, experience, location } = req.body;
 
-    const prompt = `Você é um personal trainer especialista. Crie um treino inicial para um atleta com o seguinte perfil:
-- Modalidades: ${sports.join(', ')}
-- Objetivo: ${objective || 'Não informado'}
-- Experiência: ${experience || 'Iniciante'}
-- Local de treino: ${location || 'Academia'}
+    const exp = (experience || '').toLowerCase();
+    const difficulty = exp.includes('nunca') || exp.includes('never')
+      ? 'INICIANTE ABSOLUTO: exercicios simples (IDs 9,10,11). sets="8".'
+      : exp.includes('avan')
+        ? 'AVANCADO: exercicios pesados (IDs 6,2,4). sets="13".'
+        : exp.includes('intermedi')
+          ? 'INTERMEDIARIO: exercicios compostos (IDs 1,2,3). sets="12".'
+          : 'INICIANTE: exercicios basicos (IDs 7,8,9). sets="10".';
 
-Retorne APENAS um JSON válido (sem markdown, sem explicações) com esta estrutura exata:
-{
-  "name": "nome do treino",
-  "exercises": [
-    { "exerciseId": "ID", "numSets": 3, "sets": "10", "rest": "1 min" }
-  ]
-}
-
-Use APENAS estes IDs de exercícios disponíveis:
-1=Supino Reto, 2=Agachamento Livre, 3=Remada Curvada, 4=Desenvolvimento Militar, 5=Rosca Direta,
-6=Levantamento Terra, 7=Leg Press, 8=Puxada Alta, 9=Flexão de Braços, 10=Afundo,
-11=Prancha Abdominal, 13=Rosca com Halter, 14=Kettlebell Swing, 19=Cadeira Extensora,
-20=Mesa Flexora, 21=Stiff, 22=Elevação Pélvica, 25=Gêmeos em Pé, 26=Encolhimento,
-27=Remada Cavalinho, 28=Elevação Lateral, 29=Crucifixo Inverso, 30=Tríceps Pulley,
-31=Tríceps Testa, 33=Abdominal Supra, 35=Giro Russo, 36=Corrida, 37=Ciclismo, 38=Pular Corda.
-
-Escolha de 1 a 5 exercícios adequados ao perfil. Para exercícios em casa use IDs: 9,10,11,14,33,35,38.`;
+    const prompt = `Personal trainer: crie treino para modalidade ${sports.join(', ')}, objetivo ${objective || 'condicionamento'}, local ${location || 'Academia'}.
+Nivel: ${difficulty}
+Regras: EXATAMENTE 3 exercicios, numSets=3 em todos, rest="60s" em todos. Casa: apenas IDs 9,10,11,14,33,35,38.
+IDs: 1=Supino,2=Agachamento,3=Remada,4=Dev.Militar,5=Rosca,6=Terra,7=LegPress,8=Puxada,9=Flexao,10=Afundo,11=Prancha,13=RoscaHalter,14=KBSwing,19=Extensora,20=MesaFlexora,21=Stiff,22=ElevPelvica,25=Gemeos,28=ElevLateral,30=TricepsPulley,33=AbdSupra,35=GiroRusso,36=Corrida,37=Ciclismo,38=PularCorda.
+JSON sem markdown: {"name":"nome","exercises":[{"exerciseId":"ID","numSets":3,"sets":"10","rest":"60s"}]}`;
 
     try {
       const response = await genAI.models.generateContent({
@@ -153,6 +144,7 @@ Escolha de 1 a 5 exercícios adequados ao perfil. Para exercícios em casa use I
       });
       const text = (response.text || '').replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(text);
+      parsed.exercises = (parsed.exercises || []).slice(0, 3).map((e: any) => ({ ...e, numSets: 3, rest: '60s' }));
       res.json(parsed);
     } catch (error: any) {
       console.error('Generate workout error:', error);

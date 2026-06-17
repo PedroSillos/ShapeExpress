@@ -65,6 +65,7 @@ export default function App() {
   const [studentTemplates, setStudentTemplates] = useState<WorkoutTemplate[]>([]);
   const [showOnboardingStreak, setShowOnboardingStreak] = useState(false);
   const [showSuggestProfile, setShowSuggestProfile] = useState(false);
+  const [onboardingSession, setOnboardingSession] = useState<typeof lastCompletedSession>(null);
 
   const dataSync = useDataSync({
     api,
@@ -110,10 +111,10 @@ export default function App() {
   }, [isLoggedIn, activeTab, recommendedCommunities.length]);
 
   useEffect(() => {
-    if (!isLoggedIn && activeTab !== 'landing' && activeTab !== 'welcome' && activeTab !== 'login' && activeTab !== 'forgot-password' && activeTab !== 'register') {
+    if (!isLoggedIn && !lastCompletedSession && !activeWorkout && !onboardingSession && activeTab !== 'landing' && activeTab !== 'welcome' && activeTab !== 'login' && activeTab !== 'forgot-password' && activeTab !== 'register') {
       if (!localStorage.getItem('welcome-done')) setActiveTab('landing');
     }
-  }, [isLoggedIn, activeTab]);
+  }, [isLoggedIn, activeTab, lastCompletedSession, activeWorkout, onboardingSession]);
 
   const mainTabs = ['dashboard', 'community', 'workouts', 'stats', userProfile?.userType === 'treinador' ? 'students' : 'express'];
 
@@ -137,18 +138,21 @@ export default function App() {
     else if (direction === 'right' && ci > 0) { setSwipeDirection(-1); setActiveTab(mainTabs[ci - 1] as any); }
   };
 
-  // Show WorkoutDoneScreen after first onboarding workout
-  const isOnboardingWorkoutDone =
-    lastCompletedSession !== null &&
-    !localStorage.getItem('welcome-done') &&
-    !isLoggedIn;
+  // Capture onboarding session once, then clear it from shared state
+  useEffect(() => {
+    if (lastCompletedSession && !isLoggedIn && !localStorage.getItem('welcome-done')) {
+      localStorage.setItem('welcome-done', '1');
+      setOnboardingSession(lastCompletedSession);
+      setLastCompletedSession(null);
+    }
+  }, [lastCompletedSession, isLoggedIn]);
 
-  if (isOnboardingWorkoutDone && lastCompletedSession) {
+  if (onboardingSession) {
     return (
       <WorkoutDoneScreen
-        session={lastCompletedSession}
+        session={onboardingSession}
         onContinue={() => {
-          setLastCompletedSession(null);
+          setOnboardingSession(null);
           setShowOnboardingStreak(true);
         }}
       />
@@ -156,7 +160,7 @@ export default function App() {
   }
 
   if (showOnboardingStreak) {
-    return <OnboardingStreakScreen onContinue={() => { localStorage.setItem('welcome-done', '1'); setShowOnboardingStreak(false); setShowSuggestProfile(true); }} />;
+    return <OnboardingStreakScreen onContinue={() => { setShowOnboardingStreak(false); setShowSuggestProfile(true); }} />;
   }
 
   if (showSuggestProfile) {
@@ -278,7 +282,7 @@ export default function App() {
           userStats={userStats}
           progressionAlerts={progressionAlerts}
           stagnationReports={stagnationReports}
-          onClose={() => { setLastCompletedSession(null); setStagnationReports([]); }}
+          onClose={() => { setLastCompletedSession(null); setStagnationReports([]); setActiveTab('dashboard'); }}
         />
       </div>
     </MotionConfig>
