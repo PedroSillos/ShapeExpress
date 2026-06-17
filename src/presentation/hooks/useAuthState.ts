@@ -15,8 +15,27 @@ import {
   deleteUser,
 } from "firebase/auth";
 import { getFirebaseErrorMessage } from "../../utils/firebaseErrors";
-import type { UserProfile } from "../../domain/entities";
+import type { UserProfile, WorkoutTemplate, WorkoutSession } from "../../domain/entities";
 import { getRandomSportAvatar, generateAvatarUrl } from "../../shared/lib/sportAvatars";
+
+function sanitize<T extends object>(obj: T): T {
+  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as T;
+}
+
+async function migrateLocalDataToFirestore(email: string) {
+  try {
+    const templates: WorkoutTemplate[] = JSON.parse(localStorage.getItem("pending-templates") ?? "[]");
+    const sessions: WorkoutSession[] = JSON.parse(localStorage.getItem("local_sessions") ?? "[]");
+    await Promise.all([
+      ...templates.map((t) => setDoc(doc(db, "templates", t.id), sanitize({ ...t, userId: email }))),
+      ...sessions.map((s) => setDoc(doc(db, "sessions", s.id), sanitize({ ...s, userId: email }))),
+    ]);
+    localStorage.removeItem("pending-templates");
+    localStorage.removeItem("local_sessions");
+  } catch (e) {
+    console.warn("[migrateLocalDataToFirestore] failed:", e);
+  }
+}
 
 // Tracks which token has already been synced to prevent Strict Mode double-invoke
 // Using an object so the reference is stable and mutable across modules
@@ -112,6 +131,7 @@ export const useAuthState = () => {
       setToken(email);
       setCurrentUser({ email });
       setIsLoggedIn(true);
+      await migrateLocalDataToFirestore(email);
       return { token: freshIdToken, user: userDoc || { email, name: email.split("@")[0] } };
     } catch (e: any) {
       if (e.code === "auth/operation-not-allowed") {
@@ -160,6 +180,7 @@ export const useAuthState = () => {
       setToken(email);
       setCurrentUser({ email });
       setIsLoggedIn(true);
+      await migrateLocalDataToFirestore(email);
       return { token: freshIdToken, user: userDoc };
     } catch (e: any) {
       toast.error(getFirebaseErrorMessage(e));
@@ -198,6 +219,7 @@ export const useAuthState = () => {
       setToken(data.email);
       setCurrentUser({ email: data.email });
       setIsLoggedIn(true);
+      await migrateLocalDataToFirestore(data.email);
       return { token: freshIdToken, user: userProfile };
     } catch (e: any) {
       if (e.code === "auth/operation-not-allowed") {

@@ -125,7 +125,12 @@ export const useSyncState = (
             setTemplates(snap.docs.map((d) => ({ id: d.id, ...d.data() } as WorkoutTemplate)));
           }).catch(() => {}),
           getDocs(query(collection(db, "sessions"), where("userId", "==", emailLower))).then((snap) => {
-            setSessions(snap.docs.map((d) => ({ id: d.id, ...d.data() } as WorkoutSession)));
+            const remoteSessions = snap.docs.map((d) => ({ id: d.id, ...d.data() } as WorkoutSession));
+            const localSessions: WorkoutSession[] = (() => { try { return JSON.parse(localStorage.getItem("local_sessions") ?? "[]"); } catch { return []; } })();
+            const remoteIds = new Set(remoteSessions.map((s) => s.id));
+            const onlyLocal = localSessions.filter((s) => !remoteIds.has(s.id));
+            setSessions([...remoteSessions, ...onlyLocal]);
+            if (onlyLocal.length === 0) localStorage.removeItem("local_sessions");
           }).catch(() => {}),
           getDocs(query(collection(db, "users"), where("userType", "==", "treinador"))).then((snap) => {
             if (!snap.empty) setTrainers(snap.docs.map((d) => d.data() as UserProfile));

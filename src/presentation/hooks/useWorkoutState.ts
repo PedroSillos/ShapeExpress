@@ -4,18 +4,38 @@ import { db } from "../../firebase";
 import { doc, setDoc, deleteDoc, collection, query, where, getDocs } from "firebase/firestore";
 import type { WorkoutTemplate, WorkoutSession, UserProfile } from "../../domain/entities";
 
+const LOCAL_SESSIONS_KEY = "local_sessions";
+const LOCAL_TEMPLATES_KEY = "pending-templates";
+
+function loadLocalSessions(): WorkoutSession[] {
+  try { return JSON.parse(localStorage.getItem(LOCAL_SESSIONS_KEY) ?? "[]"); } catch { return []; }
+}
+
+function saveLocalSessions(sessions: WorkoutSession[]) {
+  localStorage.setItem(LOCAL_SESSIONS_KEY, JSON.stringify(sessions));
+}
+
+function loadLocalTemplates(): WorkoutTemplate[] {
+  try { return JSON.parse(localStorage.getItem(LOCAL_TEMPLATES_KEY) ?? "[]"); } catch { return []; }
+}
+
+function saveLocalTemplates(templates: WorkoutTemplate[]) {
+  localStorage.setItem(LOCAL_TEMPLATES_KEY, JSON.stringify(templates));
+}
+
+function sanitize<T extends object>(obj: T): T {
+  return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as T;
+}
+
 export const useWorkoutState = (
   currentUser: { email: string } | null,
   token: string | null,
   userProfile: UserProfile | null,
 ) => {
-  const [sessions, setSessions] = useState<WorkoutSession[]>([]);
-  const [templates, setTemplates] = useState<WorkoutTemplate[]>(() => {
-    try {
-      const pending = JSON.parse(localStorage.getItem('pending-templates') ?? '[]');
-      return pending as WorkoutTemplate[];
-    } catch { return []; }
-  });
+  const [sessions, setSessions] = useState<WorkoutSession[]>(() =>
+    currentUser ? [] : loadLocalSessions()
+  );
+  const [templates, setTemplates] = useState<WorkoutTemplate[]>(() => loadLocalTemplates());
   const [activeWorkout, setActiveWorkout] = useState<WorkoutSession | null>(null);
   const [lastCompletedSession, setLastCompletedSession] = useState<WorkoutSession | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | null>(null);
@@ -42,8 +62,13 @@ export const useWorkoutState = (
   };
 
   const createTemplate = async (t: WorkoutTemplate) => {
+    if (!currentUser) {
+      setTemplates((prev) => { const next = [...prev, t]; saveLocalTemplates(next); return next; });
+      toast.success("Treino criado!");
+      return;
+    }
     try {
-      await setDoc(doc(db, "templates", t.id), t);
+      await setDoc(doc(db, "templates", t.id), sanitize(t));
       setTemplates((prev) => [...prev, t]);
       toast.success("Treino criado!");
     } catch (e: any) {
@@ -52,8 +77,13 @@ export const useWorkoutState = (
   };
 
   const updateTemplate = async (t: WorkoutTemplate) => {
+    if (!currentUser) {
+      setTemplates((prev) => { const next = prev.map((old) => (old.id === t.id ? t : old)); saveLocalTemplates(next); return next; });
+      toast.success("Treino atualizado!");
+      return;
+    }
     try {
-      await setDoc(doc(db, "templates", t.id), t);
+      await setDoc(doc(db, "templates", t.id), sanitize(t));
       setTemplates((prev) => prev.map((old) => (old.id === t.id ? t : old)));
       toast.success("Treino atualizado!");
     } catch (e: any) {
@@ -62,6 +92,11 @@ export const useWorkoutState = (
   };
 
   const deleteTemplate = async (id: string) => {
+    if (!currentUser) {
+      setTemplates((prev) => { const next = prev.filter((t) => t.id !== id); saveLocalTemplates(next); return next; });
+      toast.success("Treino removido.");
+      return;
+    }
     try {
       await deleteDoc(doc(db, "templates", id));
       setTemplates((prev) => prev.filter((t) => t.id !== id));
@@ -85,8 +120,13 @@ export const useWorkoutState = (
   };
 
   const createSession = async (s: WorkoutSession) => {
+    if (!currentUser) {
+      setSessions((prev) => { const next = [s, ...prev]; saveLocalSessions(next); return next; });
+      toast.success("Treino finalizado!");
+      return;
+    }
     try {
-      await setDoc(doc(db, "sessions", s.id), s);
+      await setDoc(doc(db, "sessions", s.id), sanitize(s));
       setSessions((prev) => [s, ...prev]);
       toast.success("Treino finalizado!");
     } catch (e: any) {
@@ -95,8 +135,12 @@ export const useWorkoutState = (
   };
 
   const updateSession = async (s: WorkoutSession) => {
+    if (!currentUser) {
+      setSessions((prev) => { const next = prev.map((old) => (old.id === s.id ? s : old)); saveLocalSessions(next); return next; });
+      return;
+    }
     try {
-      await setDoc(doc(db, "sessions", s.id), s);
+      await setDoc(doc(db, "sessions", s.id), sanitize(s));
       setSessions((prev) => prev.map((old) => (old.id === s.id ? s : old)));
     } catch (e: any) {
       toast.error("Erro ao atualizar sessão: " + e.message);
@@ -104,6 +148,11 @@ export const useWorkoutState = (
   };
 
   const deleteSession = async (id: string) => {
+    if (!currentUser) {
+      setSessions((prev) => { const next = prev.filter((s) => s.id !== id); saveLocalSessions(next); return next; });
+      toast.success("Sessão removida.");
+      return;
+    }
     try {
       await deleteDoc(doc(db, "sessions", id));
       setSessions((prev) => prev.filter((s) => s.id !== id));
@@ -146,18 +195,19 @@ export const useWorkoutState = (
   }, [templates, userProfile]);
 
   const userSessions = useMemo(
-    () => sessions.filter((s) => s.userId === userProfile?.email),
+    () => !userProfile ? sessions : sessions.filter((s) => s.userId === userProfile.email || s.userId === '' || s.userId === 'guest'),
     [sessions, userProfile?.email],
   );
 
   const filteredSessions = useMemo(() => {
-    if (userProfile?.userType === "treinador") {
+    if (!userProfile) return sessions;
+    if (userProfile.userType === "treinador") {
       const studentIds = new Set(templates.filter((t) => t.userId).map((t) => t.userId));
       return sessions.filter(
-        (s) => s.userId === userProfile?.email || (s.userId && studentIds.has(s.userId)),
+        (s) => s.userId === userProfile.email || (s.userId && studentIds.has(s.userId)),
       );
     }
-    return sessions.filter((s) => s.userId === userProfile?.email);
+    return sessions.filter((s) => s.userId === userProfile.email || s.userId === '' || s.userId === 'guest');
   }, [sessions, userProfile, templates]);
 
   const resetWorkoutStates = () => {
