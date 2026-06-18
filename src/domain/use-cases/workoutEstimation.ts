@@ -3,9 +3,31 @@ import {
   UserTrainingProfile, 
   ExerciseUserStats, 
   WorkoutTemplateExercise,
-  UserCalorieProfile
+  UserCalorieProfile,
+  UserProfile,
 } from '../entities';
 import { EXERCISES } from '../../constants';
+
+// Base weight as % of body weight per muscle group and exercise type
+export function estimateInitialWeight(
+  exerciseId: string,
+  userProfile: UserProfile,
+): number {
+  const exercise = EXERCISES.find(e => e.id === exerciseId);
+  if (!exercise || exercise.type === 'cardio' || exercise.type === 'core') return 0;
+
+  // Fixed weight per experience level
+  const weights: Record<string, number> = {
+    'Nunca pratiquei': 20,
+    'Iniciante':       40,
+    'Intermediário':   60,
+    'Avançado':        80,
+  };
+
+  const level = userProfile?.experienceLevel ?? 'Nunca pratiquei';
+  return weights[level] ?? 20;
+}
+
 
 const TYPE_DURATIONS: Record<ExerciseType, number> = {
   compound: 4,

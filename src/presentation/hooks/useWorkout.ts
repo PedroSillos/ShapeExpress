@@ -6,7 +6,7 @@ import {
 } from '../../domain/entities';
 import {
   estimateWorkoutDuration, estimateWorkoutCalories,
-  updateTrainingProfile, updateExerciseStats, updateCalorieProfile,
+  updateTrainingProfile, updateExerciseStats, updateCalorieProfile, estimateInitialWeight,
 } from '../../domain/use-cases/workoutEstimation';
 import { analyzeExerciseStagnation } from '../../domain/use-cases/analyzeStagnation';
 import { EXERCISES } from '../../constants';
@@ -83,7 +83,15 @@ export function useWorkout({
           s.exercises.some(ex => ex.exerciseId === config.exerciseId),
         );
         const lastWeight = lastSessionWithExercise?.exercises
-          .find(ex => ex.exerciseId === config.exerciseId)?.sets[0]?.weight || 0;
+          .find(ex => ex.exerciseId === config.exerciseId)?.sets[0]?.weight
+          ?? estimateInitialWeight(config.exerciseId, (() => {
+            if (userProfile?.experienceLevel) return userProfile;
+            try {
+              const saved = JSON.parse(localStorage.getItem('welcome-answers') ?? '{}');
+              const expFromOnboarding = Object.values(saved.experiences ?? {})[0] as string | undefined;
+              return { ...userProfile, experienceLevel: expFromOnboarding as any };
+            } catch { return userProfile; }
+          })());
 
         return {
           id: Math.random().toString(36).substr(2, 9),

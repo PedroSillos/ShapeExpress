@@ -211,6 +211,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
                 try { const p = JSON.parse(localStorage.getItem('pending-templates') ?? '[]'); p.push(template); localStorage.setItem('pending-templates', JSON.stringify(p)); } catch {}
                 state.setTemplates((prev: WorkoutTemplate[]) => [...prev, template]);
                 localStorage.setItem('welcome-done', '1');
+                try { localStorage.setItem('welcome-answers', JSON.stringify(answers)); } catch {}
                 workout.startWorkout(template);
                 return;
               }
@@ -221,6 +222,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             try { const p = JSON.parse(localStorage.getItem('pending-templates') ?? '[]'); p.push(template); localStorage.setItem('pending-templates', JSON.stringify(p)); } catch {}
             state.setTemplates((prev: WorkoutTemplate[]) => [...prev, template]);
             localStorage.setItem('welcome-done', '1');
+            try { localStorage.setItem('welcome-answers', JSON.stringify(answers)); } catch {}
             workout.startWorkout(template);
           }}
         />

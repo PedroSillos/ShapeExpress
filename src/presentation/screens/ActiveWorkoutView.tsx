@@ -55,6 +55,42 @@ interface ActiveWorkoutViewProps {
   mainUserProfile: UserProfile;
 }
 
+function StepperButton({ label, onStep }: { label: string; onStep: () => void }) {
+  const callbackRef = React.useRef(onStep);
+  React.useEffect(() => { callbackRef.current = onStep; });
+
+  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const iterRef = React.useRef(0);
+  const isTouchRef = React.useRef(false);
+
+  const stop = () => { if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; } };
+
+  const fire = () => {
+    callbackRef.current();
+    iterRef.current = 0;
+    const schedule = () => {
+      iterRef.current++;
+      const delay = Math.max(80, 500 - iterRef.current * 40);
+      timeoutRef.current = setTimeout(() => { callbackRef.current(); schedule(); }, delay);
+    };
+    timeoutRef.current = setTimeout(schedule, 500);
+  };
+
+  return (
+    <button
+      onTouchStart={(e) => { e.preventDefault(); isTouchRef.current = true; fire(); }}
+      onTouchEnd={stop}
+      onMouseDown={(e) => { if (isTouchRef.current) { isTouchRef.current = false; return; } e.preventDefault(); fire(); }}
+      onMouseUp={stop} onMouseLeave={stop}
+      onClick={(e) => e.preventDefault()}
+      onContextMenu={(e) => e.preventDefault()}
+      className="p-3 bg-black/40 border border-white/10 rounded-xl text-white/60 font-bold text-lg active:scale-95 transition-transform shrink-0 select-none"
+    >
+      {label}
+    </button>
+  );
+}
+
 export function ActiveWorkoutView({ 
   session, 
   setSession, 
@@ -69,6 +105,8 @@ export function ActiveWorkoutView({
   assessments,
   mainUserProfile
 }: ActiveWorkoutViewProps) {
+  const sessionRef = React.useRef(session);
+  React.useEffect(() => { sessionRef.current = session; }, [session]);
   const [activeExerciseIndex, setActiveExerciseIndex] = useState(0);
   const [activeSetIndex, setActiveSetIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState(0);
@@ -123,7 +161,7 @@ export function ActiveWorkoutView({
 
   useEffect(() => {
     if (restCountdown === null) return;
-    if (restCountdown <= 0) { setRestCountdown(null); return; }
+    if (restCountdown <= 0) { setRestCountdown(null); goNext(); return; }
     const t = setTimeout(() => setRestCountdown(c => (c ?? 1) - 1), 1000);
     return () => clearTimeout(t);
   }, [restCountdown]);
@@ -182,7 +220,7 @@ export function ActiveWorkoutView({
   };
 
   const updateSet = (setIndex: number, updates: Partial<WorkoutSet>) => {
-    const newExercises = [...session.exercises];
+    const newExercises = [...sessionRef.current.exercises];
     const set = newExercises[activeExerciseIndex].sets[setIndex];
     const wasCompleted = set.completed;
     
@@ -205,7 +243,7 @@ export function ActiveWorkoutView({
       setLastActionTime(Date.now());
     }
 
-    setSession({ ...session, exercises: newExercises });
+    setSession({ ...sessionRef.current, exercises: newExercises });
   };
 
   const deleteSet = (setIndex: number) => {
@@ -217,7 +255,7 @@ export function ActiveWorkoutView({
 
   const currentVolume = useMemo(() => {
     return session.exercises.reduce((acc, ex) => 
-      acc + ex.sets.reduce((sAcc, s) => sAcc + (s.completed ? s.reps * s.weight : 0), 0), 0
+      acc + ex.sets.reduce((sAcc, s) => sAcc + (s.reps * s.weight), 0), 0
     );
   }, [session]);
 
@@ -283,9 +321,8 @@ export function ActiveWorkoutView({
         <div className="w-40 h-40 rounded-full border-4 border-brand-red/30 flex items-center justify-center">
           <span className="text-6xl font-black text-brand-red font-mono">{restCountdown}</span>
         </div>
-        <p className="text-white/30 text-sm">segundos</p>
         <button
-          onClick={() => setRestCountdown(null)}
+          onClick={() => { setRestCountdown(null); goNext(); }}
           className="px-8 py-4 bg-white/5 rounded-2xl font-bold text-white/60 active:scale-95 transition-transform"
         >
           Pular descanso
@@ -518,7 +555,7 @@ export function ActiveWorkoutView({
           {activeExercise ? (
             <>
               {/* Exercise header */}
-              <div className="space-y-1">
+              <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   {exerciseDetails?.youtubeUrl && (
                     <button
@@ -533,7 +570,7 @@ export function ActiveWorkoutView({
                 </div>
                 <div className="flex justify-between items-end">
                   <h3 className="text-2xl font-bold">{exerciseDetails?.name}</h3>
-                  <span className="text-white/40 font-bold text-sm">
+                  <span className="text-white/40 font-bold text-2xl">
                     Série {activeSetIndex + 1}/{activeExercise.sets.length}
                   </span>
                 </div>
@@ -544,24 +581,26 @@ export function ActiveWorkoutView({
                 const set = activeExercise.sets[activeSetIndex];
                 if (!set) return null;
                 return (
-                  <div className="rounded-2xl border border-white/5 overflow-hidden">
+                  <div className="mt-4 rounded-2xl border border-white/5 overflow-hidden">
                     <div className={cn('relative z-10 p-6 space-y-4', set.completed ? 'bg-brand-red/10' : 'bg-white/5')}>
                       <div className="space-y-2">
                         <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">Peso (kg)</p>
-                        <div className="relative">
-                          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"><Scale size={14} /></div>
-                          <input type="number" value={set.weight || ''} onChange={(e) => updateSet(activeSetIndex, { weight: Number(e.target.value) })} className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-9 pr-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none" placeholder="0" />
+                        <div className="flex items-center gap-2 w-full">
+                          <StepperButton label="−" onStep={() => { const w = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].weight; updateSet(activeSetIndex, { weight: Math.max(0, w - 1) }); }} />
+                          <input type="number" value={set.weight || ''} onChange={(e) => updateSet(activeSetIndex, { weight: Number(e.target.value) })} className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none" placeholder="0" />
+                          <StepperButton label="+" onStep={() => { const w = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].weight; updateSet(activeSetIndex, { weight: w + 1 }); }} />
                         </div>
                       </div>
                       <div className="space-y-2">
                         <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">Repetições</p>
-                        <div className="relative">
-                          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"><User size={14} /></div>
-                          <input type="number" value={set.reps || ''} onChange={(e) => updateSet(activeSetIndex, { reps: Number(e.target.value) })} className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-9 pr-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none" placeholder="0" />
+                        <div className="flex items-center gap-2 w-full">
+                          <StepperButton label="−" onStep={() => { const r = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].reps; updateSet(activeSetIndex, { reps: Math.max(0, r - 1) }); }} />
+                          <input type="number" value={set.reps || ''} onChange={(e) => updateSet(activeSetIndex, { reps: Number(e.target.value) })} className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none" placeholder="0" />
+                          <StepperButton label="+" onStep={() => { const r = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].reps; updateSet(activeSetIndex, { reps: r + 1 }); }} />
                         </div>
                       </div>
-                      <button onClick={() => updateSet(activeSetIndex, { completed: !set.completed })} className={cn('w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm transition-colors', set.completed ? 'bg-brand-red text-black' : 'bg-white/10 text-white/60')}>
-                        <CheckCircle2 size={18} fill={set.completed ? 'currentColor' : 'none'} />
+                      <button disabled={!set.completed && !(set.weight > 0 && set.reps > 0)} onClick={() => updateSet(activeSetIndex, { completed: !set.completed })} className={cn('w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50', set.completed || (set.weight > 0 && set.reps > 0) ? 'bg-brand-red text-black' : 'bg-white/10 text-white/60')}>
+                        <CheckCircle2 size={18} fill={set.completed ? '#E53E3E' : 'none'} stroke={set.completed ? '#000' : 'currentColor'} />
                         {set.completed ? 'Série Concluída' : 'Concluir Série'}
                       </button>
                     </div>
@@ -592,9 +631,10 @@ export function ActiveWorkoutView({
             <ChevronLeft size={20} />
           </button>
           <button
+            disabled={!activeExercise?.sets[activeSetIndex]?.completed}
             onClick={goNext}
             className={cn(
-              'p-3 rounded-xl font-bold',
+              'p-3 rounded-xl font-bold disabled:opacity-20',
               isLastStep ? 'bg-brand-red text-black px-5 text-xs' : 'bg-white/5'
             )}
           >

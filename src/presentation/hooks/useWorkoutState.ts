@@ -36,7 +36,13 @@ export const useWorkoutState = (
     currentUser ? [] : loadLocalSessions()
   );
   const [templates, setTemplates] = useState<WorkoutTemplate[]>(() => loadLocalTemplates());
-  const [activeWorkout, setActiveWorkout] = useState<WorkoutSession | null>(null);
+  const [activeWorkout, setActiveWorkoutRaw] = useState<WorkoutSession | null>(() => {
+    try { const s = localStorage.getItem('active-workout'); return s ? JSON.parse(s) : null; } catch { return null; }
+  });
+  const setActiveWorkout = (s: WorkoutSession | null) => {
+    setActiveWorkoutRaw(s);
+    try { s ? localStorage.setItem('active-workout', JSON.stringify(s)) : localStorage.removeItem('active-workout'); } catch {}
+  };
   const [lastCompletedSession, setLastCompletedSession] = useState<WorkoutSession | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | null>(null);
   const [editingSession, setEditingSession] = useState<WorkoutSession | null>(null);
