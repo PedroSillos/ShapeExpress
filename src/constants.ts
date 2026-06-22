@@ -12,7 +12,7 @@ export const EXERCISES: Exercise[] = [
   // Peito
   {
     id: "1",
-    name: "Supino Reto",
+    name: "Supino reto",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito médio",
     defaultSets: 3,
@@ -24,7 +24,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "16",
-    name: "Supino Inclinado",
+    name: "Supino inclinado",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito superior",
     defaultSets: 3,
@@ -36,7 +36,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "17",
-    name: "Supino Declinado",
+    name: "Supino declinado",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito inferior",
     defaultSets: 3,
@@ -48,7 +48,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "18",
-    name: "Crucifixo Reto",
+    name: "Crucifixo reto",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito médio",
     defaultSets: 3,
@@ -60,7 +60,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "9",
-    name: "Flexão de Braços",
+    name: "Flexão de braços",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito médio",
     defaultSets: 3,
@@ -74,7 +74,7 @@ export const EXERCISES: Exercise[] = [
   // Pernas
   {
     id: "2",
-    name: "Agachamento Livre",
+    name: "Agachamento livre",
     muscleGroup: "Pernas",
     muscleSubgroup: "Quadríceps",
     defaultSets: 4,
@@ -86,7 +86,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "7",
-    name: "Leg Press",
+    name: "Leg press",
     muscleGroup: "Pernas",
     muscleSubgroup: "Quadríceps",
     defaultSets: 3,
@@ -98,7 +98,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "19",
-    name: "Cadeira Extensora",
+    name: "Cadeira extensora",
     muscleGroup: "Pernas",
     muscleSubgroup: "Quadríceps",
     defaultSets: 3,
@@ -110,7 +110,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "20",
-    name: "Mesa Flexora",
+    name: "Mesa flexora",
     muscleGroup: "Pernas",
     muscleSubgroup: "Posterior",
     defaultSets: 3,
@@ -134,7 +134,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "22",
-    name: "Elevação Pélvica",
+    name: "Elevação pélvica",
     muscleGroup: "Pernas",
     muscleSubgroup: "Glúteos",
     defaultSets: 3,
@@ -146,7 +146,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "23",
-    name: "Cadeira Adutora",
+    name: "Cadeira adutora",
     muscleGroup: "Pernas",
     muscleSubgroup: "Adutor",
     defaultSets: 3,
@@ -158,7 +158,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "24",
-    name: "Cadeira Abdutora",
+    name: "Cadeira abdutora",
     muscleGroup: "Pernas",
     muscleSubgroup: "Abdutor",
     defaultSets: 3,
@@ -170,7 +170,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "25",
-    name: "Gêmeos em Pé",
+    name: "Gêmeos em pé",
     muscleGroup: "Pernas",
     muscleSubgroup: "Panturrilha",
     defaultSets: 4,
@@ -194,7 +194,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "12",
-    name: "Alongamento de Isquiotibiais",
+    name: "Alongamento de isquiotibiais",
     muscleGroup: "Pernas",
     muscleSubgroup: "Posterior",
     defaultSets: 2,
@@ -208,7 +208,7 @@ export const EXERCISES: Exercise[] = [
   // Costas
   {
     id: "3",
-    name: "Remada Curvada",
+    name: "Remada curvada",
     muscleGroup: "Costas",
     muscleSubgroup: "Dorsal",
     defaultSets: 3,
@@ -220,7 +220,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "6",
-    name: "Levantamento Terra",
+    name: "Levantamento terra",
     muscleGroup: "Costas",
     muscleSubgroup: "Lombar",
     defaultSets: 3,
@@ -232,7 +232,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "8",
-    name: "Puxada Alta",
+    name: "Puxada alta",
     muscleGroup: "Costas",
     muscleSubgroup: "Dorsal",
     defaultSets: 3,
@@ -256,7 +256,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "27",
-    name: "Remada Cavalinho",
+    name: "Remada cavalinho",
     muscleGroup: "Costas",
     muscleSubgroup: "Dorsal",
     defaultSets: 3,
@@ -268,7 +268,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "15",
-    name: "Remada com Elástico",
+    name: "Remada com elástico",
     muscleGroup: "Costas",
     muscleSubgroup: "Dorsal",
     defaultSets: 3,
@@ -282,7 +282,7 @@ export const EXERCISES: Exercise[] = [
   // Ombros
   {
     id: "4",
-    name: "Desenvolvimento Militar",
+    name: "Desenvolvimento militar",
     muscleGroup: "Ombros",
     muscleSubgroup: "Deltoide Anterior",
     defaultSets: 3,
@@ -294,7 +294,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "28",
-    name: "Elevação Lateral",
+    name: "Elevação lateral",
     muscleGroup: "Ombros",
     muscleSubgroup: "Deltoide Lateral",
     defaultSets: 3,
@@ -306,7 +306,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "29",
-    name: "Crucifixo Inverso",
+    name: "Crucifixo inverso",
     muscleGroup: "Ombros",
     muscleSubgroup: "Deltoide Posterior",
     defaultSets: 3,
@@ -320,7 +320,7 @@ export const EXERCISES: Exercise[] = [
   // Braços
   {
     id: "5",
-    name: "Rosca Direta",
+    name: "Rosca direta",
     muscleGroup: "Braços",
     muscleSubgroup: "Bíceps",
     defaultSets: 3,
@@ -332,7 +332,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "13",
-    name: "Rosca com Halter",
+    name: "Rosca com halter",
     muscleGroup: "Braços",
     muscleSubgroup: "Bíceps",
     defaultSets: 3,
@@ -344,7 +344,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "30",
-    name: "Tríceps Pulley",
+    name: "Tríceps pulley",
     muscleGroup: "Braços",
     muscleSubgroup: "Tríceps",
     defaultSets: 3,
@@ -356,7 +356,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "31",
-    name: "Tríceps Testa",
+    name: "Tríceps testa",
     muscleGroup: "Braços",
     muscleSubgroup: "Tríceps",
     defaultSets: 3,
@@ -368,7 +368,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "32",
-    name: "Rosca Inversa",
+    name: "Rosca inversa",
     muscleGroup: "Braços",
     muscleSubgroup: "Antebraço",
     defaultSets: 3,
@@ -382,7 +382,7 @@ export const EXERCISES: Exercise[] = [
   // Core
   {
     id: "11",
-    name: "Prancha Abdominal",
+    name: "Prancha abdominal",
     muscleGroup: "Core",
     muscleSubgroup: "Abdominais",
     defaultSets: 3,
@@ -394,7 +394,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "33",
-    name: "Abdominal Supra",
+    name: "Abdominal supra",
     muscleGroup: "Core",
     muscleSubgroup: "Abdominais",
     defaultSets: 3,
@@ -406,7 +406,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "34",
-    name: "Abdominal Infra",
+    name: "Abdominal infra",
     muscleGroup: "Core",
     muscleSubgroup: "Abdominais",
     defaultSets: 3,
@@ -418,7 +418,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "35",
-    name: "Giro Russo",
+    name: "Giro russo",
     muscleGroup: "Core",
     muscleSubgroup: "Oblíquos",
     defaultSets: 3,
@@ -432,7 +432,7 @@ export const EXERCISES: Exercise[] = [
   // Peito — novos
   {
     id: "39",
-    name: "Supino Reto com Halteres",
+    name: "Supino reto com halteres",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito médio",
     defaultSets: 3,
@@ -443,7 +443,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "40",
-    name: "Supino Inclinado com Halteres",
+    name: "Supino inclinado com halteres",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito superior",
     defaultSets: 3,
@@ -454,7 +454,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "41",
-    name: "Supino Declinado com Halteres",
+    name: "Supino declinado com halteres",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito inferior",
     defaultSets: 3,
@@ -465,7 +465,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "42",
-    name: "Crucifixo Inclinado",
+    name: "Crucifixo inclinado",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito superior",
     defaultSets: 3,
@@ -487,7 +487,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "44",
-    name: "Chest Press",
+    name: "Chest press",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito médio",
     defaultSets: 3,
@@ -498,7 +498,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "45",
-    name: "Peck Deck",
+    name: "Peck deck",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito médio",
     defaultSets: 3,
@@ -509,7 +509,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "46",
-    name: "Supino Articulado",
+    name: "Supino articulado",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito médio",
     defaultSets: 3,
@@ -520,7 +520,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "47",
-    name: "Crossover Alto",
+    name: "Crossover alto",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito inferior",
     defaultSets: 3,
@@ -531,7 +531,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "48",
-    name: "Crossover Médio",
+    name: "Crossover médio",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito médio",
     defaultSets: 3,
@@ -542,7 +542,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "49",
-    name: "Crossover Baixo",
+    name: "Crossover baixo",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito superior",
     defaultSets: 3,
@@ -553,7 +553,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "50",
-    name: "Flexão Inclinada",
+    name: "Flexão inclinada",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito inferior",
     defaultSets: 3,
@@ -564,7 +564,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "51",
-    name: "Flexão Declinada",
+    name: "Flexão declinada",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito superior",
     defaultSets: 3,
@@ -575,7 +575,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "52",
-    name: "Flexão Arqueiro",
+    name: "Flexão arqueiro",
     muscleGroup: "Peito",
     muscleSubgroup: "Peito médio",
     defaultSets: 3,
@@ -599,7 +599,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "54",
-    name: "Barra Fixa Pronada",
+    name: "Barra fixa pronada",
     muscleGroup: "Costas",
     muscleSubgroup: "Dorsal",
     defaultSets: 3,
@@ -610,7 +610,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "55",
-    name: "Barra Fixa Supinada",
+    name: "Barra fixa supinada",
     muscleGroup: "Costas",
     muscleSubgroup: "Dorsal",
     defaultSets: 3,
@@ -621,7 +621,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "56",
-    name: "Barra Neutra",
+    name: "Barra neutra",
     muscleGroup: "Costas",
     muscleSubgroup: "Dorsal",
     defaultSets: 3,
@@ -632,7 +632,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "57",
-    name: "Puxada Articulada",
+    name: "Puxada articulada",
     muscleGroup: "Costas",
     muscleSubgroup: "Dorsal",
     defaultSets: 3,
@@ -643,7 +643,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "58",
-    name: "Remada Máquina",
+    name: "Remada máquina",
     muscleGroup: "Costas",
     muscleSubgroup: "Dorsal",
     defaultSets: 3,
@@ -665,7 +665,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "60",
-    name: "Remada Unilateral",
+    name: "Remada unilateral",
     muscleGroup: "Costas",
     muscleSubgroup: "Dorsal",
     defaultSets: 3,
@@ -676,7 +676,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "61",
-    name: "Remada Serrote",
+    name: "Remada serrote",
     muscleGroup: "Costas",
     muscleSubgroup: "Dorsal",
     defaultSets: 3,
@@ -687,7 +687,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "62",
-    name: "Remada Baixa",
+    name: "Remada baixa",
     muscleGroup: "Costas",
     muscleSubgroup: "Dorsal",
     defaultSets: 3,
@@ -698,7 +698,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "63",
-    name: "Remada Sentado",
+    name: "Remada sentado",
     muscleGroup: "Costas",
     muscleSubgroup: "Dorsal",
     defaultSets: 3,
@@ -709,7 +709,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "64",
-    name: "Pullover na Polia",
+    name: "Pullover na polia",
     muscleGroup: "Costas",
     muscleSubgroup: "Dorsal",
     defaultSets: 3,
@@ -722,7 +722,7 @@ export const EXERCISES: Exercise[] = [
   // Ombros — novos
   {
     id: "65",
-    name: "Desenvolvimento Atrás da Nuca",
+    name: "Desenvolvimento atrás da nuca",
     muscleGroup: "Ombros",
     muscleSubgroup: "Deltoide Anterior",
     defaultSets: 3,
@@ -733,7 +733,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "66",
-    name: "Desenvolvimento Sentado",
+    name: "Desenvolvimento sentado",
     muscleGroup: "Ombros",
     muscleSubgroup: "Deltoide Anterior",
     defaultSets: 3,
@@ -744,7 +744,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "67",
-    name: "Elevação Frontal",
+    name: "Elevação frontal",
     muscleGroup: "Ombros",
     muscleSubgroup: "Deltoide Anterior",
     defaultSets: 3,
@@ -755,7 +755,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "68",
-    name: "Desenvolvimento Máquina",
+    name: "Desenvolvimento máquina",
     muscleGroup: "Ombros",
     muscleSubgroup: "Deltoide Anterior",
     defaultSets: 3,
@@ -766,7 +766,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "69",
-    name: "Elevação Lateral Inclinada",
+    name: "Elevação lateral inclinada",
     muscleGroup: "Ombros",
     muscleSubgroup: "Deltoide Lateral",
     defaultSets: 3,
@@ -777,7 +777,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "70",
-    name: "Elevação Lateral Unilateral",
+    name: "Elevação lateral unilateral",
     muscleGroup: "Ombros",
     muscleSubgroup: "Deltoide Lateral",
     defaultSets: 3,
@@ -788,7 +788,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "71",
-    name: "Elevação Lateral Atrás do Corpo",
+    name: "Elevação lateral atrás do corpo",
     muscleGroup: "Ombros",
     muscleSubgroup: "Deltoide Lateral",
     defaultSets: 3,
@@ -799,7 +799,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "72",
-    name: "Elevação Lateral Máquina",
+    name: "Elevação lateral máquina",
     muscleGroup: "Ombros",
     muscleSubgroup: "Deltoide Lateral",
     defaultSets: 3,
@@ -810,7 +810,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "73",
-    name: "Face Pull",
+    name: "Face pull",
     muscleGroup: "Ombros",
     muscleSubgroup: "Deltoide Posterior",
     defaultSets: 3,
@@ -821,7 +821,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "74",
-    name: "Peck Deck Inverso",
+    name: "Peck deck inverso",
     muscleGroup: "Ombros",
     muscleSubgroup: "Deltoide Posterior",
     defaultSets: 3,
@@ -834,7 +834,7 @@ export const EXERCISES: Exercise[] = [
   // Trapézio — novos
   {
     id: "75",
-    name: "Encolhimento com Barra",
+    name: "Encolhimento com barra",
     muscleGroup: "Costas",
     muscleSubgroup: "Trapézio",
     defaultSets: 3,
@@ -845,7 +845,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "76",
-    name: "High Pull",
+    name: "High pull",
     muscleGroup: "Costas",
     muscleSubgroup: "Trapézio",
     defaultSets: 3,
@@ -856,7 +856,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "77",
-    name: "Encolhimento na Polia",
+    name: "Encolhimento na polia",
     muscleGroup: "Costas",
     muscleSubgroup: "Trapézio",
     defaultSets: 3,
@@ -867,7 +867,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "78",
-    name: "Encolhimento Máquina",
+    name: "Encolhimento máquina",
     muscleGroup: "Costas",
     muscleSubgroup: "Trapézio",
     defaultSets: 3,
@@ -880,7 +880,7 @@ export const EXERCISES: Exercise[] = [
   // Bíceps — novos
   {
     id: "79",
-    name: "Rosca W",
+    name: "Rosca w",
     muscleGroup: "Braços",
     muscleSubgroup: "Bíceps",
     defaultSets: 3,
@@ -891,7 +891,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "80",
-    name: "Rosca Drag",
+    name: "Rosca drag",
     muscleGroup: "Braços",
     muscleSubgroup: "Bíceps",
     defaultSets: 3,
@@ -902,7 +902,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "81",
-    name: "Rosca Alternada",
+    name: "Rosca alternada",
     muscleGroup: "Braços",
     muscleSubgroup: "Bíceps",
     defaultSets: 3,
@@ -913,7 +913,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "82",
-    name: "Rosca Concentrada",
+    name: "Rosca concentrada",
     muscleGroup: "Braços",
     muscleSubgroup: "Bíceps",
     defaultSets: 3,
@@ -924,7 +924,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "83",
-    name: "Rosca Martelo",
+    name: "Rosca martelo",
     muscleGroup: "Braços",
     muscleSubgroup: "Bíceps",
     defaultSets: 3,
@@ -935,7 +935,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "84",
-    name: "Rosca Inclinada",
+    name: "Rosca inclinada",
     muscleGroup: "Braços",
     muscleSubgroup: "Bíceps",
     defaultSets: 3,
@@ -946,7 +946,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "85",
-    name: "Rosca na Polia Baixa",
+    name: "Rosca na polia baixa",
     muscleGroup: "Braços",
     muscleSubgroup: "Bíceps",
     defaultSets: 3,
@@ -957,7 +957,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "86",
-    name: "Rosca Unilateral",
+    name: "Rosca unilateral",
     muscleGroup: "Braços",
     muscleSubgroup: "Bíceps",
     defaultSets: 3,
@@ -968,7 +968,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "87",
-    name: "Rosca Scott Máquina",
+    name: "Rosca Scott máquina",
     muscleGroup: "Braços",
     muscleSubgroup: "Bíceps",
     defaultSets: 3,
@@ -979,7 +979,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "88",
-    name: "Rosca Scott Barra",
+    name: "Rosca Scott barra",
     muscleGroup: "Braços",
     muscleSubgroup: "Bíceps",
     defaultSets: 3,
@@ -990,7 +990,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "89",
-    name: "Rosca Scott Halter",
+    name: "Rosca Scott halter",
     muscleGroup: "Braços",
     muscleSubgroup: "Bíceps",
     defaultSets: 3,
@@ -1003,7 +1003,7 @@ export const EXERCISES: Exercise[] = [
   // Tríceps — novos
   {
     id: "90",
-    name: "Tríceps Francês",
+    name: "Tríceps francês",
     muscleGroup: "Braços",
     muscleSubgroup: "Tríceps",
     defaultSets: 3,
@@ -1014,7 +1014,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "91",
-    name: "Francês Unilateral",
+    name: "Francês unilateral",
     muscleGroup: "Braços",
     muscleSubgroup: "Tríceps",
     defaultSets: 3,
@@ -1036,7 +1036,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "93",
-    name: "Tríceps Corda",
+    name: "Tríceps corda",
     muscleGroup: "Braços",
     muscleSubgroup: "Tríceps",
     defaultSets: 3,
@@ -1047,7 +1047,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "94",
-    name: "Tríceps Barra Reta",
+    name: "Tríceps barra reta",
     muscleGroup: "Braços",
     muscleSubgroup: "Tríceps",
     defaultSets: 3,
@@ -1058,7 +1058,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "95",
-    name: "Tríceps Inverso",
+    name: "Tríceps inverso",
     muscleGroup: "Braços",
     muscleSubgroup: "Tríceps",
     defaultSets: 3,
@@ -1069,7 +1069,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "96",
-    name: "Extensão Acima da Cabeça",
+    name: "Extensão acima da cabeça",
     muscleGroup: "Braços",
     muscleSubgroup: "Tríceps",
     defaultSets: 3,
@@ -1080,7 +1080,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "97",
-    name: "Tríceps Máquina",
+    name: "Tríceps máquina",
     muscleGroup: "Braços",
     muscleSubgroup: "Tríceps",
     defaultSets: 3,
@@ -1102,7 +1102,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "99",
-    name: "Mergulho no Banco",
+    name: "Mergulho no banco",
     muscleGroup: "Braços",
     muscleSubgroup: "Tríceps",
     defaultSets: 3,
@@ -1115,7 +1115,7 @@ export const EXERCISES: Exercise[] = [
   // Antebraço — novos
   {
     id: "100",
-    name: "Rosca Punho",
+    name: "Rosca punho",
     muscleGroup: "Braços",
     muscleSubgroup: "Antebraço",
     defaultSets: 3,
@@ -1126,7 +1126,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "101",
-    name: "Rosca Punho Inversa",
+    name: "Rosca punho inversa",
     muscleGroup: "Braços",
     muscleSubgroup: "Antebraço",
     defaultSets: 3,
@@ -1137,7 +1137,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "102",
-    name: "Farmer Walk",
+    name: "Farmer walk",
     muscleGroup: "Braços",
     muscleSubgroup: "Antebraço",
     defaultSets: 3,
@@ -1148,7 +1148,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "103",
-    name: "Dead Hang",
+    name: "Dead hang",
     muscleGroup: "Braços",
     muscleSubgroup: "Antebraço",
     defaultSets: 3,
@@ -1159,7 +1159,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "104",
-    name: "Extensão de Punho",
+    name: "Extensão de punho",
     muscleGroup: "Braços",
     muscleSubgroup: "Antebraço",
     defaultSets: 3,
@@ -1183,7 +1183,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "106",
-    name: "Abdominal Máquina",
+    name: "Abdominal máquina",
     muscleGroup: "Core",
     muscleSubgroup: "Abdominais",
     defaultSets: 3,
@@ -1194,7 +1194,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "107",
-    name: "Elevação de Pernas",
+    name: "Elevação de pernas",
     muscleGroup: "Core",
     muscleSubgroup: "Abdominais",
     defaultSets: 3,
@@ -1205,7 +1205,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "108",
-    name: "Elevação de Joelhos",
+    name: "Elevação de joelhos",
     muscleGroup: "Core",
     muscleSubgroup: "Abdominais",
     defaultSets: 3,
@@ -1227,7 +1227,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "110",
-    name: "Prancha Lateral",
+    name: "Prancha lateral",
     muscleGroup: "Core",
     muscleSubgroup: "Oblíquos",
     defaultSets: 3,
@@ -1238,7 +1238,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "111",
-    name: "Dead Bug",
+    name: "Dead bug",
     muscleGroup: "Core",
     muscleSubgroup: "Abdominais",
     defaultSets: 3,
@@ -1249,7 +1249,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "112",
-    name: "Hollow Hold",
+    name: "Hollow hold",
     muscleGroup: "Core",
     muscleSubgroup: "Abdominais",
     defaultSets: 3,
@@ -1262,7 +1262,7 @@ export const EXERCISES: Exercise[] = [
   // Quadríceps — novos
   {
     id: "113",
-    name: "Front Squat",
+    name: "Front squat",
     muscleGroup: "Pernas",
     muscleSubgroup: "Quadríceps",
     defaultSets: 4,
@@ -1273,7 +1273,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "114",
-    name: "Hack Machine",
+    name: "Hack machine",
     muscleGroup: "Pernas",
     muscleSubgroup: "Quadríceps",
     defaultSets: 3,
@@ -1341,7 +1341,7 @@ export const EXERCISES: Exercise[] = [
   // Posterior de coxa — novos
   {
     id: "120",
-    name: "Levantamento Terra Romeno",
+    name: "Levantamento terra Romeno",
     muscleGroup: "Pernas",
     muscleSubgroup: "Posterior",
     defaultSets: 3,
@@ -1352,7 +1352,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "121",
-    name: "Good Morning",
+    name: "Good morning",
     muscleGroup: "Pernas",
     muscleSubgroup: "Posterior",
     defaultSets: 3,
@@ -1363,7 +1363,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "122",
-    name: "Flexora Sentada",
+    name: "Flexora sentada",
     muscleGroup: "Pernas",
     muscleSubgroup: "Posterior",
     defaultSets: 3,
@@ -1374,7 +1374,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "123",
-    name: "Stiff com Halteres",
+    name: "Stiff com halteres",
     muscleGroup: "Pernas",
     muscleSubgroup: "Posterior",
     defaultSets: 3,
@@ -1387,7 +1387,7 @@ export const EXERCISES: Exercise[] = [
   // Glúteos — novos
   {
     id: "124",
-    name: "Hip Thrust",
+    name: "Hip thrust",
     muscleGroup: "Pernas",
     muscleSubgroup: "Glúteos",
     defaultSets: 3,
@@ -1398,7 +1398,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "125",
-    name: "Agachamento Sumô",
+    name: "Agachamento sumô",
     muscleGroup: "Pernas",
     muscleSubgroup: "Glúteos",
     defaultSets: 3,
@@ -1409,7 +1409,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "126",
-    name: "Glúteo Máquina",
+    name: "Glúteo máquina",
     muscleGroup: "Pernas",
     muscleSubgroup: "Glúteos",
     defaultSets: 3,
@@ -1420,7 +1420,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "127",
-    name: "Abdução Máquina",
+    name: "Abdução máquina",
     muscleGroup: "Pernas",
     muscleSubgroup: "Glúteos",
     defaultSets: 3,
@@ -1431,7 +1431,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "128",
-    name: "Coice na Polia",
+    name: "Coice na polia",
     muscleGroup: "Pernas",
     muscleSubgroup: "Glúteos",
     defaultSets: 3,
@@ -1442,7 +1442,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "129",
-    name: "Abdução na Polia",
+    name: "Abdução na polia",
     muscleGroup: "Pernas",
     muscleSubgroup: "Glúteos",
     defaultSets: 3,
@@ -1477,7 +1477,7 @@ export const EXERCISES: Exercise[] = [
   // Adutores — novos
   {
     id: "132",
-    name: "Passada Lateral",
+    name: "Passada lateral",
     muscleGroup: "Pernas",
     muscleSubgroup: "Adutor",
     defaultSets: 3,
@@ -1490,7 +1490,7 @@ export const EXERCISES: Exercise[] = [
   // Abdutores — novos
   {
     id: "133",
-    name: "Abdução Unilateral",
+    name: "Abdução unilateral",
     muscleGroup: "Pernas",
     muscleSubgroup: "Abdutor",
     defaultSets: 3,
@@ -1501,7 +1501,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "134",
-    name: "Caminhada Lateral",
+    name: "Caminhada lateral",
     muscleGroup: "Pernas",
     muscleSubgroup: "Abdutor",
     defaultSets: 3,
@@ -1512,7 +1512,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "135",
-    name: "Monster Walk",
+    name: "Monster walk",
     muscleGroup: "Pernas",
     muscleSubgroup: "Abdutor",
     defaultSets: 3,
@@ -1525,7 +1525,7 @@ export const EXERCISES: Exercise[] = [
   // Panturrilhas — novos
   {
     id: "136",
-    name: "Panturrilha em Pé Máquina",
+    name: "Panturrilha em pé máquina",
     muscleGroup: "Pernas",
     muscleSubgroup: "Panturrilha",
     defaultSets: 4,
@@ -1547,7 +1547,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "138",
-    name: "Panturrilha Sentada",
+    name: "Panturrilha sentada",
     muscleGroup: "Pernas",
     muscleSubgroup: "Panturrilha",
     defaultSets: 4,
@@ -1558,7 +1558,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "139",
-    name: "Panturrilha no Leg Press",
+    name: "Panturrilha no leg press",
     muscleGroup: "Pernas",
     muscleSubgroup: "Panturrilha",
     defaultSets: 4,
@@ -1569,7 +1569,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "140",
-    name: "Elevação Unilateral",
+    name: "Elevação unilateral",
     muscleGroup: "Pernas",
     muscleSubgroup: "Panturrilha",
     defaultSets: 3,
@@ -1580,7 +1580,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "141",
-    name: "Saltos Pliométricos",
+    name: "Saltos pliométricos",
     muscleGroup: "Pernas",
     muscleSubgroup: "Panturrilha",
     defaultSets: 3,
@@ -1593,7 +1593,7 @@ export const EXERCISES: Exercise[] = [
   // Full Body
   {
     id: "14",
-    name: "Kettlebell Swing",
+    name: "Kettlebell swing",
     muscleGroup: "Full Body",
     defaultSets: 3,
     defaultReps: 20,
@@ -1628,7 +1628,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "38",
-    name: "Pular Corda",
+    name: "Pular corda",
     muscleGroup: "Full Body",
     defaultSets: 3,
     defaultReps: 120,
@@ -1715,7 +1715,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   // Athlete Achievements
   {
     id: "a1",
-    name: "Primeiro Treino",
+    name: "Primeiro treino",
     description: "Complete seu primeiro treino.",
     category: "Consistency",
     criteria: "1 treino",
@@ -1727,7 +1727,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "a2",
-    name: "Streak 7 Dias",
+    name: "Streak 7 dias",
     description: "Treine por 7 dias seguidos.",
     category: "Consistency",
     criteria: "7 dias",
@@ -1738,7 +1738,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "a3",
-    name: "PR no Supino",
+    name: "PR no supino",
     description: "Bata seu recorde pessoal no Supino.",
     category: "Strength",
     criteria: "Novo recorde",
@@ -1761,7 +1761,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "a5",
-    name: "Atleta Focado",
+    name: "Atleta focado",
     description: "Complete 10 treinos no total.",
     category: "Consistency",
     criteria: "10 treinos",
@@ -1785,7 +1785,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   // Trainer Achievements
   {
     id: "t1",
-    name: "Primeiro Aluno",
+    name: "Primeiro aluno",
     description: "Conecte-se com seu primeiro aluno.",
     category: "Engagement",
     criteria: "1 aluno",
@@ -1796,7 +1796,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "t2",
-    name: "Mestre dos Treinos",
+    name: "Mestre dos treinos",
     description: "Crie 10 templates de treino.",
     category: "Mentorship",
     criteria: "10 templates",
@@ -1807,7 +1807,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "t3",
-    name: "Treinador Popular",
+    name: "Treinador popular",
     description: "Tenha 10 alunos ativos simultaneamente.",
     category: "Community",
     criteria: "10 alunos",
@@ -1818,7 +1818,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "t4",
-    name: "Feedback Constante",
+    name: "Feedback constante",
     description: "Envie 20 mensagens para seus alunos.",
     category: "Engagement",
     criteria: "20 mensagens",
@@ -1829,7 +1829,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "t5",
-    name: "Alunos Focados",
+    name: "Alunos focados",
     description: "Seus alunos completaram 50 treinos no total.",
     category: "Mentorship",
     criteria: "50 treinos",
@@ -1840,7 +1840,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "t6",
-    name: "Treinador de Elite",
+    name: "Treinador de elite",
     description: "5 alunos atingiram streak de 7 dias.",
     category: "Mentorship",
     criteria: "5 alunos",
@@ -1853,7 +1853,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   // Challenge Achievements
   {
     id: "c1",
-    name: "Desafiante Iniciante",
+    name: "Desafiante iniciante",
     description: "Complete seu primeiro desafio.",
     category: "Challenges",
     criteria: "1 desafio",
@@ -1865,7 +1865,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "c2",
-    name: "Competidor Nato",
+    name: "Competidor nato",
     description: "Complete 10 desafios no total.",
     category: "Challenges",
     criteria: "10 desafios",
@@ -1876,7 +1876,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "c3",
-    name: "Rei do Cardio",
+    name: "Rei do cardio",
     description: "Complete 5 desafios da categoria Cardio.",
     category: "Challenges",
     criteria: "5 desafios",
@@ -1887,7 +1887,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "c4",
-    name: "Força Bruta",
+    name: "Força bruta",
     description: "Complete 5 desafios da categoria Força.",
     category: "Challenges",
     criteria: "5 desafios",
@@ -1898,7 +1898,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: "c5",
-    name: "Consistência de Ferro",
+    name: "Consistência de ferro",
     description: "Complete 5 desafios da categoria Consistência.",
     category: "Challenges",
     criteria: "5 desafios",

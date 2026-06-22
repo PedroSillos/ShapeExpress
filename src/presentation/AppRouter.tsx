@@ -114,8 +114,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       templates={filteredTemplates}
       userProfile={userTrainingProfile}
       exerciseStats={exerciseUserStats}
-      calorieProfile={userCalorieProfile}
-      assessments={assessments}
       mainUserProfile={userProfile}
     />
   );
@@ -139,8 +137,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       templates={filteredTemplates}
       userProfile={userTrainingProfile}
       exerciseStats={exerciseUserStats}
-      calorieProfile={userCalorieProfile}
-      assessments={assessments}
       mainUserProfile={userProfile}
     />
   );

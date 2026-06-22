@@ -392,9 +392,7 @@ export function WelcomeView({ onBack, onContinue }: WelcomeViewProps) {
   const [answers, setAnswers] = useState<Answers>({});
   const [offlineError, setOfflineError] = useState(false);
   const [birthDateError, setBirthDateError] = useState<string | null>(null);
-  const [birthDay, setBirthDay] = useState('');
-  const [birthMonth, setBirthMonth] = useState('');
-  const [birthYear, setBirthYear] = useState('');
+
   const [showReady, setShowReady] = useState(false);
   const [readyLoading, setReadyLoading] = useState(false);
   const { count, done, skipToEnd } = useTypewriter(INTRO_STEPS[introStep]);
@@ -579,48 +577,22 @@ const toggleSport = (id: string) => {
 
     if (type === 'birthDate') {
       const today = new Date();
-      const maxYear = today.getFullYear() - 18;
-      const minYear = today.getFullYear() - 90;
-      const daysInMonth = birthYear && birthMonth ? new Date(Number(birthYear), Number(birthMonth), 0).getDate() : 31;
-
-      const handleDateChange = (y: string, m: string, d: string) => {
-        if (y) setBirthYear(y);
-        if (m) setBirthMonth(m);
-        if (d) setBirthDay(d);
-        const fy = y || birthYear, fm = m || birthMonth, fd = d || birthDay;
-        if (fy && fm && fd) {
-          set('birthDate', `${fy}-${fm.padStart(2, '0')}-${fd.padStart(2, '0')}`);
-          setBirthDateError(null);
-        } else {
-          set('birthDate', undefined);
-        }
-      };
+      const maxDate = `${today.getFullYear() - 18}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const minDate = `${today.getFullYear() - 90}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const inputRef = { current: null as HTMLInputElement | null };
 
       return (
-        <div className="flex flex-col items-center gap-3 w-full">
-          <div className="flex gap-2 w-full">
-            <select value={birthDay} onChange={e => handleDateChange('', '', e.target.value)}
-              className="flex-1 bg-dark-card border-2 border-dark-border rounded-2xl py-4 text-white text-center font-bold outline-none focus:border-brand-red">
-              <option value="">Dia</option>
-              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(d => (
-                <option key={d} value={String(d)}>{d}</option>
-              ))}
-            </select>
-            <select value={birthMonth} onChange={e => handleDateChange('', e.target.value, '')}
-              className="flex-1 bg-dark-card border-2 border-dark-border rounded-2xl py-4 text-white text-center font-bold outline-none focus:border-brand-red">
-              <option value="">Mês</option>
-              {['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'].map((m, i) => (
-                <option key={i} value={String(i + 1)}>{m}</option>
-              ))}
-            </select>
-            <select value={birthYear} onChange={e => handleDateChange(e.target.value, '', '')}
-              className="flex-[1.5] bg-dark-card border-2 border-dark-border rounded-2xl py-4 text-white text-center font-bold outline-none focus:border-brand-red">
-              <option value="">Ano</option>
-              {Array.from({ length: maxYear - minYear + 1 }, (_, i) => maxYear - i).map(y => (
-                <option key={y} value={String(y)}>{y}</option>
-              ))}
-            </select>
-          </div>
+        <div className="flex flex-col items-center gap-3 w-full" onClick={() => (inputRef.current as any)?.showPicker?.()}>
+          <input
+            ref={inputRef}
+            type="date"
+            value={answers.birthDate || ''}
+            min={minDate}
+            max={maxDate}
+            onKeyDown={e => e.preventDefault()}
+            onChange={e => { set('birthDate', e.target.value || undefined); setBirthDateError(null); }}
+            className={`w-full bg-dark-card border-2 border-dark-border rounded-2xl py-4 px-4 text-center font-bold outline-none focus:border-brand-red [color-scheme:dark] ${answers.birthDate ? 'text-white' : 'text-white/30'}`}
+          />
           {birthDateError && <p className="text-sm text-red-400 text-center">{birthDateError}</p>}
         </div>
       );

@@ -167,3 +167,9 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
+
+/* Chrome-like tab: curved outer corners at bottom-left and bottom-right */
+.tab-active {
+  position: relative;
+  z-index: 1;
+}
