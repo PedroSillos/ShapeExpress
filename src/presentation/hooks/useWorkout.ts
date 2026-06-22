@@ -1,4 +1,5 @@
 import { parseISO, subWeeks, isWithinInterval, differenceInWeeks, format } from 'date-fns';
+import React from 'react';
 import {
   WorkoutTemplate, WorkoutSession, WorkoutSheet, UserProfile, UserStats,
   UserTrainingProfile, ExerciseUserStats, UserCalorieProfile, BodyAssessment,
@@ -43,6 +44,9 @@ export function useWorkout({
   setUserTrainingProfile, setExerciseUserStats, setUserCalorieProfile,
   createSession, updateStats,
 }: UseWorkoutParams) {
+
+  const activeWorkoutRef = React.useRef(activeWorkout);
+  React.useEffect(() => { activeWorkoutRef.current = activeWorkout; }, [activeWorkout]);
 
   const startWorkout = (template: WorkoutTemplate, sheetIndex?: number) => {
     let sheets: WorkoutSheet[] = [];
@@ -114,6 +118,7 @@ export function useWorkout({
   };
 
   const finishWorkout = (metrics: { avgSetDuration: number; avgRestDuration: number; totalDuration: number }) => {
+    const activeWorkout = activeWorkoutRef.current;
     if (!activeWorkout) return;
 
     const completedSets = activeWorkout.exercises.reduce((acc, ex) => acc + ex.sets.filter(s => s.completed).length, 0);

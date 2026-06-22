@@ -17,7 +17,6 @@ import { LogoutModal } from './presentation/components/AppModals';
 import { DeleteTemplateModal } from './presentation/components/AppModals';
 import { WorkoutSelectorModal } from './presentation/components/AppModals';
 import { SheetSelectorModal } from './presentation/components/AppModals';
-import { WorkoutSummaryModal } from './presentation/components/WorkoutSummaryModal';
 import { CreateAdModal } from './presentation/components/CreateAdModal';
 import { Logo } from './presentation/components/Logo';
 import { WorkoutDoneScreen } from './presentation/screens/auth/WelcomeView';
@@ -152,7 +151,7 @@ export default function App() {
 
   // Capture onboarding session once, then clear it from shared state
   useEffect(() => {
-    if (lastCompletedSession && !isLoggedIn && !localStorage.getItem('welcome-done')) {
+    if (lastCompletedSession && !isLoggedIn) {
       localStorage.setItem('welcome-done', '1');
       localStorage.removeItem('onboarding-workout-pending');
       setOnboardingSession(lastCompletedSession);
@@ -168,6 +167,15 @@ export default function App() {
           setOnboardingSession(null);
           setShowOnboardingStreak(true);
         }}
+      />
+    );
+  }
+
+  if (lastCompletedSession) {
+    return (
+      <WorkoutDoneScreen
+        session={lastCompletedSession}
+        onContinue={() => { setLastCompletedSession(null); setStagnationReports([]); setActiveTab('dashboard'); }}
       />
     );
   }
@@ -299,13 +307,6 @@ export default function App() {
           onConfirm={(id) => { dataSync.deleteTemplate(id); setDeletingTemplateId(null); }}
         />
 
-        <WorkoutSummaryModal
-          session={lastCompletedSession}
-          userStats={userStats}
-          progressionAlerts={progressionAlerts}
-          stagnationReports={stagnationReports}
-          onClose={() => { setLastCompletedSession(null); setStagnationReports([]); setActiveTab('dashboard'); }}
-        />
       </div>
     </MotionConfig>
   );

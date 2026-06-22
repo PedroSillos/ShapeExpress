@@ -284,30 +284,33 @@ export function WorkoutDoneScreen({ session, onContinue }: { session: WorkoutSes
     : 0;
 
   return (
-    <div className="h-screen overflow-hidden flex flex-col items-center justify-between py-10 px-4">
-      <div className="flex-1 flex flex-col items-center justify-center gap-6">
-        <div className="w-44 h-44 rounded-full bg-dark-card border border-dark-border flex items-center justify-center">
-          <span className="text-8xl select-none">🎉</span>
+    <div className="h-screen flex flex-col items-center justify-between py-16 px-8 overflow-hidden bg-dark-surface">
+      <div className="flex-1 flex flex-col items-center justify-center gap-6 w-full">
+        <div className="w-36 h-36 rounded-full bg-dark-card flex items-center justify-center">
+          <span className="text-7xl select-none">🏆</span>
         </div>
-        <p className="text-3xl font-black text-yellow-400 text-center">Treino concluído!</p>
-        <div className="flex gap-3 w-full">
-          <div className="flex-1 rounded-2xl border-2 border-yellow-500 bg-dark-card p-3 flex flex-col items-center gap-1">
-            <p className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">XP Total</p>
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold red-text-gradient">Treino concluído!</h1>
+          <p className="text-white/40 text-base">Você superou seus limites hoje.</p>
+        </div>
+        <div className="flex gap-3 w-full mt-2">
+          <div className="flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-1">
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">XP</p>
             <p className="text-2xl font-black text-white">⚡ {session.xpEarned}</p>
           </div>
-          <div className="flex-1 rounded-2xl border-2 border-brand-red bg-dark-card p-3 flex flex-col items-center gap-1">
-            <p className="text-[10px] font-black text-brand-red uppercase tracking-widest">Média Peso</p>
+          <div className="flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-1">
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Peso médio</p>
             <p className="text-2xl font-black text-white">💪 {avgWeight}kg</p>
           </div>
-          <div className="flex-1 rounded-2xl border-2 border-blue-400 bg-dark-card p-3 flex flex-col items-center gap-1">
-            <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Tempo</p>
+          <div className="flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-1">
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Tempo</p>
             <p className="text-2xl font-black text-white">⏱️ {durationLabel}</p>
           </div>
         </div>
       </div>
       <button
         onClick={onContinue}
-        className="w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest red-gradient text-black shadow-[0_4px_0_0_rgba(150,10,10,0.6)] active:scale-95 transition-all"
+        className="w-full py-4 red-gradient rounded-2xl text-black font-black text-sm uppercase tracking-widest shadow-[0_4px_0_0_rgba(150,10,10,0.6)] active:scale-95 transition-all"
       >
         Continuar
       </button>

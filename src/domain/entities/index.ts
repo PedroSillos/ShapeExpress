@@ -91,6 +91,7 @@ export interface WorkoutSet {
   weight: number;
   completed: boolean;
   rest?: string;
+  corrected?: boolean;
 }
 
 export interface ExerciseSession {

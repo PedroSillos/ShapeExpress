@@ -3,60 +3,35 @@ import { cn } from '../../../utils/cn';
 const DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 export function OnboardingStreakScreen({ onContinue }: { onContinue: () => void }) {
-  const today = new Date().getDay(); // 0=Sun … 6=Sat
+  const today = new Date().getDay();
 
-  // Reorder so today is first
   const orderedDays = [...Array(7)].map((_, i) => {
     const idx = (today + i) % 7;
     return { label: DAYS[idx], isToday: i === 0 };
   });
 
   return (
-    <div className="h-screen overflow-hidden flex flex-col px-6 py-8">
-      {/* Speech bubble */}
-      <div className="relative bg-[#1c2630] border border-white/10 rounded-2xl px-5 py-4 mb-0">
-        <p className="text-white text-lg leading-snug">
-          Sua ofensiva começou! Treine todos os dias pra criar o hábito.
-        </p>
-        <div
-          className="absolute left-1/2 -translate-x-1/2 -bottom-[10px] w-0 h-0"
-          style={{ borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderTop: '10px solid #1c2630' }}
-        />
-      </div>
-
-      {/* Mascot + flame */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-2">
-        <div className="relative flex items-end justify-center mb-2">
-          {/* Flame shape */}
-          <div className="text-[120px] leading-none select-none">🔥</div>
-          {/* Mascot overlay */}
-          <div className="absolute bottom-2 text-[56px] select-none">⚡</div>
+    <div className="h-screen flex flex-col items-center justify-between py-16 px-8 overflow-hidden bg-dark-surface">
+      <div className="flex-1 flex flex-col items-center justify-center gap-6 w-full">
+        <div className="w-36 h-36 rounded-full bg-dark-card flex items-center justify-center">
+          <span className="text-7xl select-none">🔥</span>
         </div>
-
-        {/* Streak number */}
-        <p className="text-[96px] font-black leading-none text-orange-400 select-none">1</p>
-        <p className="text-2xl font-black text-orange-400">dia de ofensiva</p>
-
-        {/* Week strip */}
-        <div className="flex gap-3 mt-6 items-start">
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold red-text-gradient">1 dia de ofensiva</h1>
+          <p className="text-white/40 text-base">Treine todos os dias pra criar o hábito.</p>
+        </div>
+        <div className="flex w-full justify-between mt-2">
           {orderedDays.map(({ label, isToday }) => (
             <div key={label} className="flex flex-col items-center gap-2">
-              <p className={cn('text-xs font-black', isToday ? 'text-orange-400' : 'text-white/30')}>
-                {label}
-              </p>
-              <div className={cn(
-                'w-10 h-10 rounded-full flex items-center justify-center',
-                isToday ? 'bg-orange-400' : 'bg-white/10'
-              )}>
+              <p className={cn('text-xs font-black', isToday ? 'text-brand-red' : 'text-white/30')}>{label}</p>
+              <div className={cn('w-10 h-10 rounded-full flex items-center justify-center', isToday ? 'bg-brand-red' : 'bg-dark-card border border-dark-border')}>
                 {isToday && <span className="text-white text-base font-black">✓</span>}
               </div>
             </div>
           ))}
         </div>
       </div>
-
-      {/* Buttons */}
-      <div className="flex gap-3 shrink-0">
+      <div className="w-full flex gap-3">
         <button
           onClick={() => {
             if (navigator.share) {
@@ -71,7 +46,7 @@ export function OnboardingStreakScreen({ onContinue }: { onContinue: () => void 
         </button>
         <button
           onClick={onContinue}
-          className="flex-1 py-4 rounded-2xl font-black text-sm uppercase tracking-widest red-gradient text-black shadow-[0_4px_0_0_rgba(150,10,10,0.6)] active:scale-95 transition-all"
+          className="flex-1 py-4 red-gradient rounded-2xl text-black font-black text-sm uppercase tracking-widest shadow-[0_4px_0_0_rgba(150,10,10,0.6)] active:scale-95 transition-all"
         >
           Vou me dedicar
         </button>
