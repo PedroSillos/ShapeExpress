@@ -104,6 +104,18 @@ export default function App() {
     api.getStudentTemplates(selectedStudentForWorkouts.email).then(setStudentTemplates);
   }, [selectedStudentForWorkouts?.email]);
 
+  // If app was closed during onboarding workout, clean up and restart from landing
+  useEffect(() => {
+    if (localStorage.getItem('onboarding-workout-pending')) {
+      localStorage.removeItem('onboarding-workout-pending');
+      localStorage.removeItem('welcome-done');
+      localStorage.removeItem('welcome-answers');
+      localStorage.removeItem('pending-templates');
+      setTemplates([]);
+      setActiveTab('landing');
+    }
+  }, []);
+
   useEffect(() => {
     if (isLoggedIn && activeTab === 'community' && recommendedCommunities.length === 0) {
       api.getRecommendedCommunities().then(setRecommendedCommunities);
@@ -142,6 +154,7 @@ export default function App() {
   useEffect(() => {
     if (lastCompletedSession && !isLoggedIn && !localStorage.getItem('welcome-done')) {
       localStorage.setItem('welcome-done', '1');
+      localStorage.removeItem('onboarding-workout-pending');
       setOnboardingSession(lastCompletedSession);
       setLastCompletedSession(null);
     }
@@ -186,6 +199,15 @@ export default function App() {
 
   const currentAnimations = document.documentElement.getAttribute('data-animations') || 'enabled';
   const routerState = { ...appState, switchTab, communityInitialTab, communityInitialRankingType, selectedStudentForProfile, setSelectedStudentForProfile, creatingAdTemplate, setCreatingAdTemplate, studentTemplates, setStudentTemplates, onShowSuggestProfile: () => setShowSuggestProfile(true) };
+
+  if (activeTab === 'landing' || activeTab === 'welcome' || activeTab === 'login' || activeTab === 'register' || activeTab === 'forgot-password') {
+    return (
+      <MotionConfig transition={currentAnimations === 'reduced' ? { duration: 0 } : undefined}>
+        <Toaster position="top-center" richColors />
+        <AppRouter state={routerState} workout={workout} dataSync={dataSync} />
+      </MotionConfig>
+    );
+  }
 
   return (
     <MotionConfig transition={currentAnimations === 'reduced' ? { duration: 0 } : undefined}>

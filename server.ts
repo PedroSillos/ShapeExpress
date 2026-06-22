@@ -115,12 +115,15 @@ async function startServer() {
     body('objective').optional().trim().isLength({ max: 200 }).escape(),
     body('experience').optional().trim().isLength({ max: 50 }).escape(),
     body('location').optional().isIn(['Casa', 'Academia']),
+    body('height').optional().isInt({ min: 100, max: 250 }),
+    body('weight').optional().isInt({ min: 30, max: 300 }),
+    body('age').optional().isInt({ min: 10, max: 100 }),
   ], async (req: express.Request, res: express.Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
     if (!genAI) return res.status(500).json({ error: 'AI não configurado.' });
 
-    const { sports, objective, experience, location } = req.body;
+    const { sports, objective, experience, location, height, weight, age } = req.body;
 
     const exp = (experience || '').toLowerCase();
     const difficulty = exp.includes('nunca') || exp.includes('never')
@@ -131,7 +134,7 @@ async function startServer() {
           ? 'INTERMEDIARIO: exercicios compostos (IDs 1,2,3). sets="12".'
           : 'INICIANTE: exercicios basicos (IDs 7,8,9). sets="10".';
 
-    const prompt = `Personal trainer: crie treino para modalidade ${sports.join(', ')}, objetivo ${objective || 'condicionamento'}, local ${location || 'Academia'}.
+    const prompt = `Personal trainer: crie treino para modalidade ${sports.join(', ')}, objetivo ${objective || 'condicionamento'}, local ${location || 'Academia'}${height ? `, altura ${height}cm` : ''}${weight ? `, peso ${weight}kg` : ''}${age ? `, idade ${age} anos` : ''}.
 Nivel: ${difficulty}
 Regras: EXATAMENTE 3 exercicios, numSets=3 em todos, rest="60s" em todos. Casa: apenas IDs 9,10,11,14,33,35,38.
 IDs: 1=Supino,2=Agachamento,3=Remada,4=Dev.Militar,5=Rosca,6=Terra,7=LegPress,8=Puxada,9=Flexao,10=Afundo,11=Prancha,13=RoscaHalter,14=KBSwing,19=Extensora,20=MesaFlexora,21=Stiff,22=ElevPelvica,25=Gemeos,28=ElevLateral,30=TricepsPulley,33=AbdSupra,35=GiroRusso,36=Corrida,37=Ciclismo,38=PularCorda.

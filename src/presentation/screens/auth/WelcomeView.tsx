@@ -117,6 +117,9 @@ type Answers = {
   source?: string;
   experiences?: Record<string, string>;
   weeklyGoal?: number;
+  height?: number;
+  weight?: number;
+  birthDate?: string;
   notifications?: boolean;
 };
 
@@ -124,12 +127,12 @@ type Answers = {
 type QuestionId =
   | 'sports' | 'objective' | 'source'
   | `experience:${string}`
-  | 'weeklyGoal' | 'notifications' | 'preview';
+  | 'weeklyGoal' | 'height' | 'weight' | 'birthDate' | 'notifications' | 'preview';
 
 interface DynQuestion {
   id: QuestionId;
   balloon: (answers: Answers) => React.ReactNode;
-  type: 'sports-multi' | 'cards-icon' | 'cards-list' | 'experience' | 'weekly-goal' | 'notifications' | 'preview';
+  type: 'sports-multi' | 'cards-icon' | 'cards-list' | 'experience' | 'weekly-goal' | 'height' | 'weight' | 'birthDate' | 'notifications' | 'preview';
   sportKey?: string;
 }
 
@@ -148,6 +151,9 @@ function buildQuestions(answers: Answers): DynQuestion[] {
     ...experienceQuestions,
     { id: 'objective',     balloon: (a: Answers) => <>Você quer praticar <strong style={{ textTransform: 'lowercase' }}>{(a.sports ?? [])[0] ?? 'isso'}</strong> para...</>,  type: 'cards-icon' },
     { id: 'weeklyGoal',    balloon: () => 'Qual vai ser a sua meta semanal?',                     type: 'weekly-goal' },
+    { id: 'height',        balloon: () => 'Qual a sua altura?',                                   type: 'height' },
+    { id: 'weight',        balloon: () => 'Qual o seu peso?',                                     type: 'weight' },
+    { id: 'birthDate',     balloon: () => 'Qual a sua data de nascimento?',                        type: 'birthDate' },
     { id: 'notifications', balloon: () => 'Eu vou lembrar você de treinar até virar um hábito!',        type: 'notifications' },
     { id: 'preview',       balloon: () => 'Veja o que você vai conseguir fazer em 3 meses!',             type: 'preview' },
   ] as DynQuestion[];
@@ -190,12 +196,6 @@ function CheckboxCard({ selected, onClick, icon, label }: { selected: boolean; o
     >
       <span className="text-3xl shrink-0 w-10 text-center">{icon}</span>
       <p className={cn('text-base font-bold flex-1', selected ? 'text-brand-red' : 'text-white')}>{label}</p>
-      <div className={cn(
-        'w-6 h-6 rounded-lg border-2 shrink-0 flex items-center justify-center transition-all',
-        selected ? 'border-brand-red bg-brand-red' : 'border-white/20 bg-transparent'
-      )}>
-        {selected && <span className="text-white text-xs font-black">✓</span>}
-      </div>
     </button>
   );
 }
@@ -264,7 +264,6 @@ function SportCard({ selected, onClick, icon, bg, label }: { selected: boolean; 
         {icon}
       </div>
       <p className={cn('text-base font-bold flex-1', selected ? 'text-white' : 'text-white/70')}>{label}</p>
-      {selected && <div className="w-5 h-5 rounded-full bg-brand-red flex items-center justify-center shrink-0"><span className="text-[10px] text-white font-bold">✓</span></div>}
     </button>
   );
 }
@@ -285,7 +284,7 @@ export function WorkoutDoneScreen({ session, onContinue }: { session: WorkoutSes
     : 0;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-between py-10 px-4">
+    <div className="h-screen overflow-hidden flex flex-col items-center justify-between py-10 px-4">
       <div className="flex-1 flex flex-col items-center justify-center gap-6">
         <div className="w-44 h-44 rounded-full bg-dark-card border border-dark-border flex items-center justify-center">
           <span className="text-8xl select-none">🎉</span>
@@ -318,12 +317,12 @@ export function WorkoutDoneScreen({ session, onContinue }: { session: WorkoutSes
 
 // ─── Ready screen ─────────────────────────────────────────────────────────────
 
-function ReadyScreen({ onContinue, onNotReady, loading, skipLoading }: { onContinue: () => void; onNotReady: () => void; loading?: boolean; skipLoading?: boolean }) {
+function ReadyScreen({ onContinue, onNotReady, onBack, loading, skipLoading }: { onContinue: () => void; onNotReady: () => void; onBack: () => void; loading?: boolean; skipLoading?: boolean }) {
   return (
-    <div className="min-h-screen flex flex-col py-6">
+    <div className="h-screen overflow-hidden flex flex-col pt-6 pb-12 px-8">
       {/* Header — back arrow only, no progress bar */}
       <div className="shrink-0 mb-4">
-        <button onClick={onNotReady} className="p-1 text-white/60 active:scale-95 transition-transform">
+        <button onClick={onBack} className="p-1 text-white/60 active:scale-95 transition-transform">
           <ArrowLeft size={24} />
         </button>
       </div>
@@ -351,22 +350,29 @@ function ReadyScreen({ onContinue, onNotReady, loading, skipLoading }: { onConti
       <div className="flex flex-col gap-3 shrink-0">
         <button
           onClick={onContinue}
-          disabled={loading}
+          disabled={loading || skipLoading}
           className={cn(
-            'w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest active:scale-95 transition-all',
-            loading
-              ? 'bg-dark-card text-white/40 pointer-events-none border-2 border-dark-border'
-              : 'red-gradient text-black shadow-[0_4px_0_0_rgba(150,10,10,0.6)]'
+            'w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all',
+            loading ? 'bg-dark-card text-white/40 border-2 border-dark-border' : 'red-gradient text-black shadow-[0_4px_0_0_rgba(150,10,10,0.6)] active:scale-95',
+            skipLoading && 'opacity-0 pointer-events-none'
           )}
         >
-          {loading ? 'Gerando treino...' : 'Continuar'}
+          {loading
+            ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin inline-block" />Gerando treino...</span>
+            : 'Continuar'}
         </button>
         <button
           onClick={onNotReady}
           disabled={loading || skipLoading}
-          className="w-full py-4 bg-transparent border-2 border-dark-border rounded-2xl text-white/50 font-bold text-xs uppercase tracking-widest active:scale-95 transition-transform disabled:opacity-40"
+          className={cn(
+            'w-full py-4 bg-transparent border-2 border-dark-border rounded-2xl text-white/50 font-bold text-xs uppercase tracking-widest transition-all',
+            skipLoading ? 'text-white/70' : 'active:scale-95',
+            loading && 'opacity-0 pointer-events-none'
+          )}
         >
-          {skipLoading ? 'Gerando treino...' : 'Não estou no local de treino'}
+          {skipLoading
+            ? <span className="flex items-center justify-center gap-2"><span className="w-3 h-3 border-2 border-white/20 border-t-white/60 rounded-full animate-spin inline-block" />Gerando treino...</span>
+            : 'Não estou no local de treino'}
         </button>
       </div>
     </div>
@@ -384,6 +390,8 @@ export function WelcomeView({ onBack, onContinue }: WelcomeViewProps) {
   const [introStep, setIntroStep] = useState(0);
   const [questionIndex, setQuestionIndex] = useState(-1);
   const [answers, setAnswers] = useState<Answers>({});
+  const [offlineError, setOfflineError] = useState(false);
+  const [birthDateError, setBirthDateError] = useState<string | null>(null);
   const [showReady, setShowReady] = useState(false);
   const [readyLoading, setReadyLoading] = useState(false);
   const { count, done, skipToEnd } = useTypewriter(INTRO_STEPS[introStep]);
@@ -424,6 +432,16 @@ const toggleSport = (id: string) => {
       setQuestionIndex(0); return;
     }
     if (!hasAnswer) return;
+    if (question?.id === 'sports' && !navigator.onLine) { setOfflineError(true); return; }
+    setOfflineError(false);
+    if (question?.id === 'birthDate' && answers.birthDate) {
+      const birth = new Date(answers.birthDate);
+      const today = new Date();
+      const age = today.getFullYear() - birth.getFullYear() - (today < new Date(today.getFullYear(), birth.getMonth(), birth.getDate()) ? 1 : 0);
+      if (age < 18) { setBirthDateError('Você precisa ter pelo menos 18 anos para usar o Shape Express.'); return; }
+      if (age > 90) { setBirthDateError('Data de nascimento inválida.'); return; }
+      setBirthDateError(null);
+    }
     // Rebuild questions with latest answers to handle personalCode skip
     const qs = buildQuestions(answers);
     if (questionIndex < qs.length - 1) { setQuestionIndex(questionIndex + 1); return; }
@@ -453,6 +471,7 @@ const toggleSport = (id: string) => {
     return <ReadyScreen
       loading={readyLoading}
       skipLoading={skipLoading}
+      onBack={() => setShowReady(false)}
       onContinue={async () => { setReadyLoading(true); await onContinue(answers); setReadyLoading(false); }}
       onNotReady={async () => { setSkipLoading(true); await onContinue({ ...answers, skipWorkout: true } as any); setSkipLoading(false); }}
     />;
@@ -521,6 +540,96 @@ const toggleSport = (id: string) => {
       );
     }
 
+    if (type === 'height') {
+      return (
+        <div className="flex items-center justify-center gap-3">
+          <input
+            type="number"
+            min={100}
+            max={250}
+            placeholder="170"
+            value={answers.height ?? ''}
+            onChange={e => set('height', e.target.value ? Number(e.target.value) : undefined)}
+            className="w-36 text-center text-4xl font-black bg-dark-card border-2 border-dark-border rounded-2xl py-5 text-white focus:border-brand-red outline-none"
+          />
+          <span className="text-2xl font-bold text-white/50">cm</span>
+        </div>
+      );
+    }
+
+    if (type === 'weight') {
+      return (
+        <div className="flex items-center justify-center gap-3">
+          <input
+            type="number"
+            min={30}
+            max={300}
+            placeholder="70"
+            value={answers.weight ?? ''}
+            onChange={e => set('weight', e.target.value ? Number(e.target.value) : undefined)}
+            className="w-36 text-center text-4xl font-black bg-dark-card border-2 border-dark-border rounded-2xl py-5 text-white focus:border-brand-red outline-none"
+          />
+          <span className="text-2xl font-bold text-white/50">kg</span>
+        </div>
+      );
+    }
+
+    if (type === 'birthDate') {
+      const today = new Date();
+      const maxYear = today.getFullYear() - 18;
+      const minYear = today.getFullYear() - 90;
+      const parts = answers.birthDate?.split('-');
+      const selYear = parts?.[0] ?? '';
+      const selMonth = parts?.[1] ? String(Number(parts[1])) : '';
+      const selDay = parts?.[2] ? String(Number(parts[2])) : '';
+      const daysInMonth = selYear && selMonth ? new Date(Number(selYear), Number(selMonth), 0).getDate() : 31;
+
+      const updateDate = (y: string, m: string, d: string) => {
+        if (!y || !m || !d) { set('birthDate', undefined); setBirthDateError(null); return; }
+        const val = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+        set('birthDate', val);
+        setBirthDateError(null);
+      };
+
+      return (
+        <div className="flex flex-col items-center gap-3 w-full">
+          <div className="flex gap-2 w-full">
+            <select
+              value={selDay}
+              onChange={e => updateDate(selYear, selMonth, e.target.value)}
+              className="flex-1 bg-dark-card border-2 border-dark-border rounded-2xl py-4 text-white text-center font-bold outline-none focus:border-brand-red"
+            >
+              <option value="">Dia</option>
+              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(d => (
+                <option key={d} value={String(d)}>{d}</option>
+              ))}
+            </select>
+            <select
+              value={selMonth}
+              onChange={e => updateDate(selYear, e.target.value, selDay)}
+              className="flex-1 bg-dark-card border-2 border-dark-border rounded-2xl py-4 text-white text-center font-bold outline-none focus:border-brand-red"
+            >
+              <option value="">Mês</option>
+              {['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'].map((m, i) => (
+                <option key={i} value={String(i + 1)}>{m}</option>
+              ))}
+            </select>
+            <select
+              value={selYear}
+              onChange={e => updateDate(e.target.value, selMonth, selDay)}
+              className="flex-[1.5] bg-dark-card border-2 border-dark-border rounded-2xl py-4 text-white text-center font-bold outline-none focus:border-brand-red"
+            >
+              <option value="">Ano</option>
+              {Array.from({ length: maxYear - minYear + 1 }, (_, i) => maxYear - i).map(y => (
+                <option key={y} value={String(y)}>{y}</option>
+              ))}
+            </select>
+          </div>
+          {birthDateError && <p className="text-sm text-red-400 text-center">{birthDateError}</p>}
+        </div>
+      );
+    }
+
     if (type === 'preview') {
       const benefits = OBJECTIVE_BENEFITS[answers.objective ?? ''] ?? DEFAULT_BENEFITS;
       const items = [
@@ -573,7 +682,7 @@ const toggleSport = (id: string) => {
   };
 
   return (
-    <div className="h-screen flex flex-col py-6 overflow-hidden">
+    <div className="h-screen flex flex-col pt-6 pb-12 px-8 overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button onClick={handleBack} className="p-1 text-white/60 active:scale-95 transition-transform shrink-0">
@@ -587,17 +696,21 @@ const toggleSport = (id: string) => {
       </div>
 
       {inIntro ? (
-        <div className="flex-1 flex flex-col items-center justify-center gap-4">
-          <div className="relative" style={{ display: 'inline-grid' }}>
-            <p className="text-lg leading-snug px-5 py-4 opacity-0 pointer-events-none select-none" style={{ gridArea: '1/1' }}>
-              {INTRO_STEPS[introStep].map((seg, si) => seg.bold ? <strong key={si}>{seg.text}</strong> : <span key={si}>{seg.text}</span>)}
-            </p>
-            <div className="absolute inset-0 bg-dark-card border border-dark-border rounded-2xl" />
-            <p className="text-white text-lg leading-snug px-5 py-4" style={{ gridArea: '1/1', position: 'relative' }}>{introContent}</p>
-            <div className="absolute left-1/2 -translate-x-1/2 -bottom-[10px] w-0 h-0" style={{ borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderTop: `10px solid var(--theme-card)` }} />
-          </div>
-          <div className="w-28 h-28 rounded-full bg-dark-card flex items-center justify-center mt-2">
+        <div className="flex-1 relative">
+          {/* Icon fixed at vertical center */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full bg-dark-card flex items-center justify-center">
             <span className="text-6xl select-none">⚡</span>
+          </div>
+          {/* Bubble anchored above the icon */}
+          <div className="absolute left-0 right-0" style={{ bottom: 'calc(50% + 56px + 16px)' }}>
+            <div className="relative w-full" style={{ display: 'inline-grid' }}>
+              <p className="text-lg leading-snug px-5 py-4 opacity-0 pointer-events-none select-none text-center" style={{ gridArea: '1/1' }}>
+                {INTRO_STEPS[introStep].map((seg, si) => seg.bold ? <strong key={si}>{seg.text}</strong> : <span key={si}>{seg.text}</span>)}
+              </p>
+              <div className="absolute inset-0 bg-dark-card border border-dark-border rounded-2xl" />
+              <p className="text-white text-lg leading-snug px-5 py-4 text-center" style={{ gridArea: '1/1', position: 'relative' }}>{introContent}</p>
+              <div className="absolute left-1/2 -translate-x-1/2 -bottom-[10px] w-0 h-0" style={{ borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderTop: `10px solid var(--theme-card)` }} />
+            </div>
           </div>
         </div>
       ) : (
@@ -630,6 +743,16 @@ const toggleSport = (id: string) => {
       >
         {question?.id === 'weeklyGoal' ? 'Vou cumprir a meta' : 'Continuar'}
       </button>
+      {offlineError && (
+        <p className="text-center text-sm text-red-400 mt-2 shrink-0">
+          Parece que você está offline. Tente de novo mais tarde.
+        </p>
+      )}
+      {birthDateError && (
+        <p className="text-center text-sm text-red-400 mt-2 shrink-0">
+          {birthDateError}
+        </p>
+      )}
     </div>
   );
 }

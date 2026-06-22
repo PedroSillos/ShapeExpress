@@ -19,6 +19,9 @@ export async function generateFirstWorkoutAI(onboardingAnswers: {
   objective?: string;
   experience?: string;
   location?: string;
+  height?: number;
+  weight?: number;
+  age?: number;
 }): Promise<{ name: string; exercises: { exerciseId: string; numSets: number; sets: string; rest: string }[] } | null> {
   try {
     const data = await callBackendAI('/api/ai/generate-first-workout', onboardingAnswers);

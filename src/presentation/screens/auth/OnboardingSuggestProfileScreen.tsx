@@ -5,7 +5,7 @@ interface Props {
 
 export function OnboardingSuggestProfileScreen({ onCreateProfile, onSkip }: Props) {
   return (
-    <div className="min-h-screen flex flex-col px-6 py-8">
+    <div className="h-screen overflow-hidden flex flex-col px-6 py-8">
       {/* Content */}
       <div className="flex-1 flex flex-col items-center justify-center gap-8">
         {/* Speech bubble */}

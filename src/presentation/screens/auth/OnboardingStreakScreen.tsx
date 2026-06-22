@@ -12,7 +12,7 @@ export function OnboardingStreakScreen({ onContinue }: { onContinue: () => void 
   });
 
   return (
-    <div className="min-h-screen flex flex-col px-6 py-8">
+    <div className="h-screen overflow-hidden flex flex-col px-6 py-8">
       {/* Speech bubble */}
       <div className="relative bg-[#1c2630] border border-white/10 rounded-2xl px-5 py-4 mb-0">
         <p className="text-white text-lg leading-snug">

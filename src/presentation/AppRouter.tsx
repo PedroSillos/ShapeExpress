@@ -97,7 +97,19 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       session={activeWorkout}
       setSession={setActiveWorkout}
       onFinish={finishWorkout}
-      onCancel={() => setActiveWorkout(null)}
+      onCancel={() => {
+        if (localStorage.getItem('onboarding-workout-pending')) {
+          localStorage.removeItem('onboarding-workout-pending');
+          localStorage.removeItem('welcome-done');
+          localStorage.removeItem('welcome-answers');
+          localStorage.removeItem('pending-templates');
+          state.setTemplates([]);
+          setActiveWorkout(null);
+          setActiveTab('landing');
+        } else {
+          setActiveWorkout(null);
+        }
+      }}
       sessions={userSessions}
       templates={filteredTemplates}
       userProfile={userTrainingProfile}
@@ -160,6 +172,9 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
                   objective: a.objective,
                   experience: Object.values(a.experiences ?? {})[0] as string | undefined,
                   location: a.location,
+                  height: a.height,
+                  weight: a.weight,
+                  age: a.birthDate ? new Date().getFullYear() - new Date(a.birthDate).getFullYear() : undefined,
                 });
                 if (ai && ai.exercises?.length > 0) {
                   template = {
@@ -196,6 +211,9 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
                 objective: a.objective,
                 experience: Object.values(a.experiences ?? {})[0] as string | undefined,
                 location: a.location,
+                height: a.height,
+                weight: a.weight,
+                age: a.birthDate ? new Date().getFullYear() - new Date(a.birthDate).getFullYear() : undefined,
               });
               if (ai && ai.exercises?.length > 0) {
                 const template = {
@@ -211,6 +229,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
                 try { const p = JSON.parse(localStorage.getItem('pending-templates') ?? '[]'); p.push(template); localStorage.setItem('pending-templates', JSON.stringify(p)); } catch {}
                 state.setTemplates((prev: WorkoutTemplate[]) => [...prev, template]);
                 localStorage.setItem('welcome-done', '1');
+                localStorage.setItem('onboarding-workout-pending', '1');
                 try { localStorage.setItem('welcome-answers', JSON.stringify(answers)); } catch {}
                 workout.startWorkout(template);
                 return;
@@ -222,6 +241,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             try { const p = JSON.parse(localStorage.getItem('pending-templates') ?? '[]'); p.push(template); localStorage.setItem('pending-templates', JSON.stringify(p)); } catch {}
             state.setTemplates((prev: WorkoutTemplate[]) => [...prev, template]);
             localStorage.setItem('welcome-done', '1');
+            localStorage.setItem('onboarding-workout-pending', '1');
             try { localStorage.setItem('welcome-answers', JSON.stringify(answers)); } catch {}
             workout.startWorkout(template);
           }}

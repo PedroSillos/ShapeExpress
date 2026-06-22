@@ -5,7 +5,7 @@ interface LandingViewProps {
 
 export function LandingView({ onStart, onLogin }: LandingViewProps) {
   return (
-    <div className="h-screen flex flex-col items-center justify-between py-16 px-6 overflow-hidden bg-dark-surface">
+    <div className="h-screen flex flex-col items-center justify-between py-16 px-8 overflow-hidden bg-dark-surface">
       <div className="flex-1 flex flex-col items-center justify-center gap-6">
         <div className="w-36 h-36 rounded-full bg-dark-card flex items-center justify-center">
           <span className="text-7xl select-none">⚡</span>
