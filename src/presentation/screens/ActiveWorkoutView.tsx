@@ -223,10 +223,14 @@ export function ActiveWorkoutView({
     const newExercises = [...sessionRef.current.exercises];
     const set = newExercises[activeExerciseIndex].sets[setIndex];
     const wasCompleted = set.completed;
-    
+
+    // If user changes weight or reps on a completed set, uncheck it
+    const isValueChange = ('weight' in updates || 'reps' in updates) && wasCompleted;
+
     newExercises[activeExerciseIndex].sets[setIndex] = {
       ...set,
-      ...updates
+      ...updates,
+      ...(isValueChange ? { completed: false } : {}),
     };
 
     if (!wasCompleted && updates.completed) {
@@ -255,7 +259,7 @@ export function ActiveWorkoutView({
 
   const currentVolume = useMemo(() => {
     return session.exercises.reduce((acc, ex) => 
-      acc + ex.sets.reduce((sAcc, s) => sAcc + (s.reps * s.weight), 0), 0
+      acc + ex.sets.reduce((sAcc, s) => sAcc + (s.completed ? s.reps * s.weight : 0), 0), 0
     );
   }, [session]);
 

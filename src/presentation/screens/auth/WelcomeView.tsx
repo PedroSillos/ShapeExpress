@@ -392,6 +392,9 @@ export function WelcomeView({ onBack, onContinue }: WelcomeViewProps) {
   const [answers, setAnswers] = useState<Answers>({});
   const [offlineError, setOfflineError] = useState(false);
   const [birthDateError, setBirthDateError] = useState<string | null>(null);
+  const [birthDay, setBirthDay] = useState('');
+  const [birthMonth, setBirthMonth] = useState('');
+  const [birthYear, setBirthYear] = useState('');
   const [showReady, setShowReady] = useState(false);
   const [readyLoading, setReadyLoading] = useState(false);
   const { count, done, skipToEnd } = useTypewriter(INTRO_STEPS[introStep]);
@@ -578,47 +581,40 @@ const toggleSport = (id: string) => {
       const today = new Date();
       const maxYear = today.getFullYear() - 18;
       const minYear = today.getFullYear() - 90;
-      const parts = answers.birthDate?.split('-');
-      const selYear = parts?.[0] ?? '';
-      const selMonth = parts?.[1] ? String(Number(parts[1])) : '';
-      const selDay = parts?.[2] ? String(Number(parts[2])) : '';
-      const daysInMonth = selYear && selMonth ? new Date(Number(selYear), Number(selMonth), 0).getDate() : 31;
+      const daysInMonth = birthYear && birthMonth ? new Date(Number(birthYear), Number(birthMonth), 0).getDate() : 31;
 
-      const updateDate = (y: string, m: string, d: string) => {
-        if (!y || !m || !d) { set('birthDate', undefined); setBirthDateError(null); return; }
-        const val = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
-        set('birthDate', val);
-        setBirthDateError(null);
+      const handleDateChange = (y: string, m: string, d: string) => {
+        if (y) setBirthYear(y);
+        if (m) setBirthMonth(m);
+        if (d) setBirthDay(d);
+        const fy = y || birthYear, fm = m || birthMonth, fd = d || birthDay;
+        if (fy && fm && fd) {
+          set('birthDate', `${fy}-${fm.padStart(2, '0')}-${fd.padStart(2, '0')}`);
+          setBirthDateError(null);
+        } else {
+          set('birthDate', undefined);
+        }
       };
 
       return (
         <div className="flex flex-col items-center gap-3 w-full">
           <div className="flex gap-2 w-full">
-            <select
-              value={selDay}
-              onChange={e => updateDate(selYear, selMonth, e.target.value)}
-              className="flex-1 bg-dark-card border-2 border-dark-border rounded-2xl py-4 text-white text-center font-bold outline-none focus:border-brand-red"
-            >
+            <select value={birthDay} onChange={e => handleDateChange('', '', e.target.value)}
+              className="flex-1 bg-dark-card border-2 border-dark-border rounded-2xl py-4 text-white text-center font-bold outline-none focus:border-brand-red">
               <option value="">Dia</option>
               {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(d => (
                 <option key={d} value={String(d)}>{d}</option>
               ))}
             </select>
-            <select
-              value={selMonth}
-              onChange={e => updateDate(selYear, e.target.value, selDay)}
-              className="flex-1 bg-dark-card border-2 border-dark-border rounded-2xl py-4 text-white text-center font-bold outline-none focus:border-brand-red"
-            >
+            <select value={birthMonth} onChange={e => handleDateChange('', e.target.value, '')}
+              className="flex-1 bg-dark-card border-2 border-dark-border rounded-2xl py-4 text-white text-center font-bold outline-none focus:border-brand-red">
               <option value="">Mês</option>
               {['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'].map((m, i) => (
                 <option key={i} value={String(i + 1)}>{m}</option>
               ))}
             </select>
-            <select
-              value={selYear}
-              onChange={e => updateDate(e.target.value, selMonth, selDay)}
-              className="flex-[1.5] bg-dark-card border-2 border-dark-border rounded-2xl py-4 text-white text-center font-bold outline-none focus:border-brand-red"
-            >
+            <select value={birthYear} onChange={e => handleDateChange(e.target.value, '', '')}
+              className="flex-[1.5] bg-dark-card border-2 border-dark-border rounded-2xl py-4 text-white text-center font-bold outline-none focus:border-brand-red">
               <option value="">Ano</option>
               {Array.from({ length: maxYear - minYear + 1 }, (_, i) => maxYear - i).map(y => (
                 <option key={y} value={String(y)}>{y}</option>
