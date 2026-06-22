@@ -453,34 +453,41 @@ export function ActiveWorkoutView({
                       )}
                       style={i === activeExerciseIndex ? { paddingTop: '0.625rem', paddingBottom: '1.5rem' } : { paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
                     >
-                      {i === activeExerciseIndex
-                        ? `${EXERCISES.find(e => e.id === ex.exerciseId)?.name} · ${activeSetIndex + 1}/${activeExercise.sets.length}`
-                        : EXERCISES.find(e => e.id === ex.exerciseId)?.name}
+                      {EXERCISES.find(e => e.id === ex.exerciseId)?.name}
                     </button>
                   ))}
                 </div>
                 {/* Info card — physically attached to active tab */}
-                <div className="rounded-b-2xl rounded-tr-2xl bg-brand-red px-4 py-2 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-lg font-bold text-black">{exerciseDetails?.name}</p>
-                      <p className="text-xs text-black/50 font-bold">Série {activeSetIndex + 1}/{activeExercise.sets.length}</p>
-                    </div>
-                    {exerciseDetails?.youtubeUrl && (
-                      <button
-                        onClick={() => setShowVideoModal(true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-black/20 rounded-full text-sm font-bold text-black shrink-0"
-                      >
-                        <Play size={14} fill="currentColor" />
-                        Ver vídeo
-                      </button>
+                <div className="rounded-b-2xl rounded-tr-2xl bg-brand-red/80 px-4 pt-2 pb-3 space-y-2">
+                  {exerciseDetails?.youtubeUrl && (
+                    <button
+                      onClick={() => setShowVideoModal(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-black/70 rounded-full text-sm font-bold text-brand-red shrink-0 self-start"
+                    >
+                      <Play size={14} fill="currentColor" />
+                      Ver vídeo
+                    </button>
+                  )}
+                  <div className="flex gap-2">
+                    <Badge className="bg-black/70 text-brand-red text-xs px-3 py-1 rounded-full font-bold">{exerciseDetails?.muscleGroup}</Badge>
+                    {exerciseDetails?.muscleSubgroup && (
+                      <Badge className="bg-black/60 text-brand-red/70 text-xs px-3 py-1 rounded-full font-bold">{exerciseDetails?.muscleSubgroup}</Badge>
                     )}
                   </div>
-                  <div className="flex gap-2">
-                    <Badge className="bg-black/20 text-black text-xs px-3 py-1 rounded-full font-bold">{exerciseDetails?.muscleGroup}</Badge>
-                    {exerciseDetails?.muscleSubgroup && (
-                      <Badge className="bg-black/10 text-black/60 text-xs px-3 py-1 rounded-full font-bold">{exerciseDetails?.muscleSubgroup}</Badge>
-                    )}
+                  {/* Series sub-tabs */}
+                  <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+                    {activeExercise.sets.map((_, si) => (
+                      <button
+                        key={si}
+                        onClick={() => setActiveSetIndex(si)}
+                        className={cn(
+                          'px-6 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors',
+                          si === activeSetIndex ? 'bg-black/70 text-brand-red' : 'bg-black/50 text-brand-red/50'
+                        )}
+                      >
+                        {si + 1}/{activeExercise.sets.length}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
