@@ -27,11 +27,12 @@ const TOTAL = STEPS.length;
 interface RegisterViewProps {
   onRegister: (p: UserProfile) => void;
   onBack: () => void;
+  onGoToLogin?: () => void;
   api: any;
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
-export function RegisterView({ onRegister, onBack, api }: RegisterViewProps) {
+export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterViewProps) {
   const [step, setStep] = useState<Step>('method');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,6 +43,7 @@ export function RegisterView({ onRegister, onBack, api }: RegisterViewProps) {
   const [otp, setOtp] = useState('');
   const [confirmationResult, setConfirmationResult] = useState<any>(null);
   const [error, setError] = useState('');
+  const [emailExists, setEmailExists] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const recaptchaRef = React.useRef<HTMLDivElement>(null);
 
@@ -68,16 +70,11 @@ export function RegisterView({ onRegister, onBack, api }: RegisterViewProps) {
     }
   };
 
-  const handleEmailContinue = async () => {
+  const handleEmailContinue = () => {
     if (!email.trim()) { setError('Informe seu e-mail.'); return; }
     if (!isValidEmail(email)) { setError('E-mail inválido.'); return; }
-    setIsLoading(true);
-    try {
-      const exists = await api.checkEmailExists(email);
-      if (exists) { setError('E-mail já cadastrado.'); setIsLoading(false); return; }
-    } catch { /* ignore network errors */ }
-    setIsLoading(false);
     setError('');
+    setEmailExists(false);
     setStep('password');
   };
 
@@ -131,7 +128,12 @@ export function RegisterView({ onRegister, onBack, api }: RegisterViewProps) {
         worksInGym: false,
       } as any);
     } catch (e: any) {
-      setError(e.message || 'Erro ao criar conta.');
+      if (e?.code === 'auth/email-already-in-use') {
+        setStep('email');
+        setEmailExists(true);
+      } else {
+        setError(e.message || 'Erro ao criar conta.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -276,12 +278,24 @@ export function RegisterView({ onRegister, onBack, api }: RegisterViewProps) {
             autoFocus
             type="email"
             value={email}
-            onChange={e => { setEmail(e.target.value); setError(''); }}
+            onChange={e => { setEmail(e.target.value); setError(''); setEmailExists(false); }}
             placeholder="seuemail@exemplo.com"
             className="w-full bg-dark-card border-2 border-dark-border rounded-2xl py-4 px-5 text-white text-base outline-none focus:border-brand-red transition-colors"
           />
-          {error && <p className="text-red-400 text-sm -mt-3">{error}</p>}
-          <ContinueBtn label="Continuar" onClick={handleEmailContinue} disabled={!email.trim()} />
+          {emailExists ? (
+            <div className="flex flex-col gap-3 -mt-3">
+              <p className="text-red-400 text-sm">Este e-mail já está cadastrado.</p>
+              <button
+                onClick={() => (onGoToLogin ?? onBack)()}
+                className="w-full py-4 rounded-2xl border-2 border-brand-red text-brand-red font-bold text-sm uppercase tracking-widest active:scale-95 transition-all"
+              >
+                Fazer login
+              </button>
+            </div>
+          ) : (
+            error && <p className="text-red-400 text-sm -mt-3">{error}</p>
+          )}
+          {!emailExists && <ContinueBtn label="Continuar" onClick={handleEmailContinue} disabled={!email.trim()} />}
         </div>
       </Shell>
     ),

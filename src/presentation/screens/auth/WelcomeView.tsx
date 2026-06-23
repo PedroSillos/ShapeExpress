@@ -285,9 +285,7 @@ export function WorkoutDoneScreen({ session, onContinue }: { session: WorkoutSes
   const allWeights = session.exercises.flatMap(ex =>
     ex.sets.filter(s => s.completed && s.weight > 0).map(s => s.weight)
   );
-  const avgWeight = allWeights.length > 0
-    ? Math.round(allWeights.reduce((a, b) => a + b, 0) / allWeights.length)
-    : 0;
+  const maxWeight = allWeights.length > 0 ? Math.max(...allWeights) : 0;
 
   return (
     <div className="h-screen flex flex-col items-center justify-between py-16 px-8 overflow-hidden bg-dark-surface">
@@ -308,7 +306,7 @@ export function WorkoutDoneScreen({ session, onContinue }: { session: WorkoutSes
           <div className="w-0 flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-2">
             <p className="text-sm font-bold text-white/70 uppercase tracking-widest">Peso</p>
             <span className="text-2xl leading-none">💪</span>
-            <p className="text-lg font-semibold text-white/70">{avgWeight} KG</p>
+            <p className="text-lg font-semibold text-white/70">{maxWeight} KG</p>
           </div>
           <div className="w-0 flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-2">
             <p className="text-sm font-bold text-white/70 uppercase tracking-widest">Tempo</p>

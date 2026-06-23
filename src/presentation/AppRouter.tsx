@@ -280,6 +280,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             setActiveTab(defaultTab as any);
           }}
           onBack={() => setActiveTab('login')}
+          onGoToLogin={() => setActiveTab('login')}
           api={api}
         />
       );

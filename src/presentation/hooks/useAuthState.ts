@@ -11,7 +11,6 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
-  fetchSignInMethodsForEmail,
   deleteUser,
   RecaptchaVerifier,
   signInWithPhoneNumber,
@@ -231,19 +230,10 @@ export const useAuthState = () => {
     } catch (e: any) {
       if (e.code === "auth/operation-not-allowed") {
         toast.error("O login por Email/Senha não está habilitado no console do Firebase.");
-      } else {
+      } else if (e.code !== "auth/email-already-in-use") {
         toast.error(getFirebaseErrorMessage(e));
       }
-      throw new Error(getFirebaseErrorMessage(e));
-    }
-  };
-
-  const checkEmailExists = async (email: string) => {
-    try {
-      const methods = await fetchSignInMethodsForEmail(auth, email);
-      return methods.length > 0;
-    } catch (e) {
-      return false;
+      throw e;
     }
   };
 
@@ -367,6 +357,6 @@ export const useAuthState = () => {
     restoredTab,
     fetchWithAuth,
     login, loginWithGoogle, loginWithPhone, confirmPhoneLogin, register,
-    checkEmailExists, forgotPassword, logout, deleteAccount,
+    checkEmailExists: undefined, forgotPassword, logout, deleteAccount,
   };
 };
