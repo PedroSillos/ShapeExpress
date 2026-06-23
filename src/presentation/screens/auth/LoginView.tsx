@@ -88,7 +88,7 @@ export function LoginView({ onLogin, onForgotPassword, onBack, api }: LoginViewP
                 type="text"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); if (error) setError(''); }}
-                placeholder="E-mail ou nome de usuário"
+                placeholder="E-mail, telefone ou nome de usuário"
                 className="w-full bg-dark-card px-4 py-4 text-base text-white placeholder:text-white/30 focus:outline-none border-b border-dark-border caret-brand-red"
               />
               <div className="relative bg-dark-card">
@@ -160,12 +160,6 @@ export function LoginView({ onLogin, onForgotPassword, onBack, api }: LoginViewP
       <div className="flex-1" />
 
       <div className="space-y-4">
-        {!isPhoneOtp && (
-          <button onClick={switchMode} className="w-full text-center text-sm font-bold text-brand-red uppercase tracking-widest py-2">
-            {mode === 'email' ? 'Usar número de telefone' : 'Usar e-mail'}
-          </button>
-        )}
-
         {mode === 'email' && (
           <button
             onClick={async () => { try { await api.loginWithGoogle(); } catch {} }}
