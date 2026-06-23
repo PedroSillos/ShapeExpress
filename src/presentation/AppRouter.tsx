@@ -1,4 +1,5 @@
 import { toast } from 'sonner';
+import { useRef } from 'react';
 import { Student, UserProfile, WorkoutTemplate, WorkoutSession, BodyAssessment } from '../domain/entities';
 import { DEFAULT_PROFILE } from '../constants';
 
@@ -80,6 +81,12 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     calculatedStreak, personalRecords,
     api, switchTab,
   } = state;
+
+  const previousTabRef = useRef<string>('landing');
+  if (activeTab !== 'login' && activeTab !== 'register' && activeTab !== 'forgot-password') {
+    previousTabRef.current = activeTab;
+    try { localStorage.setItem('previous-tab', activeTab); } catch {}
+  }
 
   const {
     startWorkout, finishWorkout,
@@ -255,7 +262,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           }}
           onForgotPassword={() => setActiveTab('forgot-password')}
           onRegister={() => setActiveTab('register')}
-          onBack={() => setActiveTab('landing')}
+          onBack={() => setActiveTab((localStorage.getItem('previous-tab') || 'landing') as any)}
         />
       );
     case 'register':

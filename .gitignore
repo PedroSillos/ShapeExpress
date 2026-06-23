@@ -9,6 +9,7 @@ coverage/
 # Environment variables
 .env*
 !.env.example
+shapeexpress-firebase-adminsdk*
 
 # Logs
 *.log
