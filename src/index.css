@@ -173,3 +173,7 @@ input[type=number] {
   position: relative;
   z-index: 1;
 }
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
