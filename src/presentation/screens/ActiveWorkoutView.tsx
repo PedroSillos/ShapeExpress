@@ -600,7 +600,7 @@ export function ActiveWorkoutView({
       </AnimatePresence>
 
       {/* Footer */}
-      <div className="p-6 glass border-t border-white/10 flex justify-center items-center">
+      <div className="py-3 px-6 glass border-t border-white/10 flex justify-center items-center">
         <div className="flex items-center gap-3">
           <button
             disabled={isFirstStep}
