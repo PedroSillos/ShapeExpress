@@ -102,11 +102,12 @@ const EXPERIENCE_LEVELS = [
 ];
 
 const WEEKLY_GOALS = [
-  { value: 2, label: '2x por semana', intensity: 'Tranquilo' },
-  { value: 3, label: '3x por semana', intensity: 'Regular' },
-  { value: 4, label: '4x por semana', intensity: 'Intenso' },
-  { value: 5, label: '5x por semana', intensity: 'Puxado' },
-  { value: 6, label: '6x por semana', intensity: 'Pesado' },
+  { value: 2, label: 'por semana', intensity: 'Tranquilo', emoji: 'Ⅱ' },
+  { value: 3, label: 'por semana', intensity: 'Regular',   emoji: 'Ⅲ' },
+  { value: 4, label: 'por semana', intensity: 'Intenso',   emoji: 'Ⅳ' },
+  { value: 5, label: 'por semana', intensity: 'Puxado',    emoji: 'Ⅴ' },
+  { value: 6, label: 'por semana', intensity: 'Pesado',    emoji: 'Ⅵ' },
+  { value: 7, label: 'por semana', intensity: 'Extremo',   emoji: 'Ⅶ' },
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -168,16 +169,19 @@ function getAnswer(answers: Answers, q: DynQuestion): unknown {
 
 // ─── GoalCard ───────────────────────────────────────────────────────────────
 
-function GoalCard({ selected, onClick, label, intensity }: { selected: boolean; onClick: () => void; label: string; intensity: string }) {
+function GoalCard({ selected, onClick, label, intensity, emoji }: { selected: boolean; onClick: () => void; label: string; intensity: string; emoji: string }) {
   return (
     <button
       onClick={onClick}
       className={cn(
-        'w-full px-4 py-4 rounded-2xl border-2 flex items-center justify-between transition-all text-left active:scale-95',
+        'w-full px-4 py-5 rounded-2xl border-2 flex items-center justify-between transition-all text-left active:scale-95',
         selected ? 'border-brand-red bg-dark-card' : 'border-dark-border bg-dark-card'
       )}
     >
-      <p className={cn('text-base font-bold', selected ? 'text-brand-red' : 'text-white')}>{label}</p>
+      <div className="flex items-center gap-3">
+        <span className={cn('text-2xl leading-none flex items-center', selected ? 'text-brand-red' : 'text-white/70')}>{emoji}</span>
+        <p className={cn('text-base font-bold', selected ? 'text-brand-red' : 'text-white/70')}>{label}</p>
+      </div>
       <p className={cn('text-sm font-semibold', selected ? 'text-brand-red/70' : 'text-white/40')}>{intensity}</p>
     </button>
   );
@@ -194,8 +198,10 @@ function CheckboxCard({ selected, onClick, icon, label }: { selected: boolean; o
         selected ? 'border-brand-red bg-dark-card' : 'border-dark-border bg-dark-card'
       )}
     >
-      <span className="text-3xl shrink-0 w-10 text-center">{icon}</span>
-      <p className={cn('text-base font-bold flex-1', selected ? 'text-brand-red' : 'text-white')}>{label}</p>
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-white/5 text-3xl">
+        {icon}
+      </div>
+      <p className={cn('text-base font-bold flex-1', selected ? 'text-brand-red' : 'text-white/70')}>{label}</p>
     </button>
   );
 }
@@ -242,7 +248,7 @@ function OptionCard({ selected, onClick, icon, label, desc }: { selected: boolea
         </div>
       )}
       <div className="flex-1">
-        <p className={cn('text-base font-bold', selected ? 'text-brand-red' : 'text-white')}>{label}</p>
+        <p className={cn('text-base font-bold', selected ? 'text-brand-red' : 'text-white/70')}>{label}</p>
         {desc && <p className="text-xs text-white/40 mt-0.5">{desc}</p>}
       </div>
     </button>
@@ -541,7 +547,7 @@ const toggleSport = (id: string) => {
       return (
         <div className="flex flex-col gap-3">
           {WEEKLY_GOALS.map(g => (
-            <GoalCard key={g.value} selected={answers.weeklyGoal === g.value} onClick={() => set('weeklyGoal', g.value)} label={g.label} intensity={g.intensity} />
+            <GoalCard key={g.value} selected={answers.weeklyGoal === g.value} onClick={() => set('weeklyGoal', g.value)} label={g.label} intensity={g.intensity} emoji={g.emoji} />
           ))}
         </div>
       );
