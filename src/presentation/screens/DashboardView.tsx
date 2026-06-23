@@ -13,7 +13,6 @@ import {
   UserProfile,
   ProgressScore,
 } from '../../domain/entities';
-import { AiCoachWidget } from '../components/DashboardWidgets';
 
 interface DashboardViewProps {
   userStats: UserStats;
@@ -33,6 +32,7 @@ interface DashboardViewProps {
   personalRecords: { weight: number; date: string; name: string }[];
   studentConnections?: any[];
   trainers?: UserProfile[];
+  isLoggedIn?: boolean;
 }
 
 const SPORT_EMOJIS: Record<string, string> = {
@@ -89,6 +89,7 @@ export function DashboardView({
   isAiLoading,
   switchTab,
   mainUserProfile,
+  isLoggedIn,
 }: DashboardViewProps) {
   // Sports: from profile or welcome-answers fallback
   const sports = useMemo(() => {
@@ -274,11 +275,7 @@ export function DashboardView({
         )}
       </div>
 
-      {(aiAdvice || isAiLoading) && (
-        <div className="px-6 pb-6">
-          <AiCoachWidget aiAdvice={aiAdvice} isAiLoading={isAiLoading} />
-        </div>
-      )}
+
     </div>
   );
 }

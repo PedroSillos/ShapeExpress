@@ -305,6 +305,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           personalRecords={personalRecords}
           studentConnections={studentConnections}
           trainers={trainers}
+          isLoggedIn={isLoggedIn}
         />
       );
     case 'calendar':

@@ -9,7 +9,6 @@ import { useWeeklyGoal } from './presentation/hooks/useWeeklyGoal';
 import { useChatListener } from './presentation/hooks/useChatListener';
 import { useAiAdvice } from './presentation/hooks/useAiAdvice';
 
-import { AppHeader } from './presentation/AppHeader';
 import { AppNavBar } from './presentation/AppNavBar';
 import { AppRouter } from './presentation/AppRouter';
 
@@ -208,15 +207,6 @@ export default function App() {
     <MotionConfig transition={currentAnimations === 'reduced' ? { duration: 0 } : undefined}>
       <div className="min-h-screen pb-24 max-w-md mx-auto relative overflow-x-hidden">
         <Toaster position="top-center" richColors />
-
-        <AppHeader
-          isLoggedIn={isLoggedIn}
-          userProfile={userProfile}
-          userStats={userStats}
-          notifications={notifications}
-          onNotificationsClick={() => setActiveTab('notifications')}
-          onProfileClick={() => setActiveTab('profile')}
-        />
 
         <main className="flex-1 flex flex-col">
           <AnimatePresence mode="wait" custom={swipeDirection}>
