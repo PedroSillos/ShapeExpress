@@ -300,20 +300,20 @@ export function WorkoutDoneScreen({ session, onContinue }: { session: WorkoutSes
           <p className="text-white/40 text-base">Você superou seus limites hoje.</p>
         </div>
         <div className="flex gap-3 w-full mt-2">
-          <div className="flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-2">
-            <p className="text-sm font-black text-white/40 uppercase tracking-widest">XP</p>
+          <div className="w-0 flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-2">
+            <p className="text-sm font-bold text-white/70 uppercase tracking-widest">XP</p>
             <span className="text-2xl leading-none">⚡</span>
-            <p className="text-lg text-white">{session.xpEarned}</p>
+            <p className="text-lg font-semibold text-white/70">{session.xpEarned}</p>
           </div>
-          <div className="flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-2">
-            <p className="text-sm font-black text-white/40 tracking-widest whitespace-nowrap">Peso médio</p>
+          <div className="w-0 flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-2">
+            <p className="text-sm font-bold text-white/70 uppercase tracking-widest">Peso</p>
             <span className="text-2xl leading-none">💪</span>
-            <p className="text-lg text-white">{avgWeight} KG</p>
+            <p className="text-lg font-semibold text-white/70">{avgWeight} KG</p>
           </div>
-          <div className="flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-2">
-            <p className="text-sm font-black text-white/40 tracking-widest">Tempo</p>
+          <div className="w-0 flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-2">
+            <p className="text-sm font-bold text-white/70 uppercase tracking-widest">Tempo</p>
             <span className="text-2xl leading-none">⏱️</span>
-            <p className="text-lg text-white">{durationLabel}</p>
+            <p className="text-lg font-semibold text-white/70">{durationLabel}</p>
           </div>
         </div>
       </div>
