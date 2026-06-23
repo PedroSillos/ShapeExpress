@@ -189,7 +189,6 @@ export const useAppState = () => {
     // Auth
     isLoggedIn: auth.isLoggedIn,
     setIsLoggedIn: auth.setIsLoggedIn,
-    initialLoading: auth.initialLoading,
     fetchWithAuth: auth.fetchWithAuth,
 
     // Profile

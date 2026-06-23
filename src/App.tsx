@@ -18,7 +18,6 @@ import { DeleteTemplateModal } from './presentation/components/AppModals';
 import { WorkoutSelectorModal } from './presentation/components/AppModals';
 import { SheetSelectorModal } from './presentation/components/AppModals';
 import { CreateAdModal } from './presentation/components/CreateAdModal';
-import { Logo } from './presentation/components/Logo';
 import { WorkoutDoneScreen } from './presentation/screens/auth/WelcomeView';
 import { OnboardingStreakScreen } from './presentation/screens/auth/OnboardingStreakScreen';
 import { OnboardingSuggestProfileScreen } from './presentation/screens/auth/OnboardingSuggestProfileScreen';
@@ -51,7 +50,7 @@ export default function App() {
     notifications,
     userSessions, filteredTemplates,
     progressScore, aiAdvice, isAiLoading, setAiAdvice, setIsAiLoading,
-    api, initialLoading,
+    api,
     selectedStudentForWorkouts,
     recommendedCommunities, setRecommendedCommunities,
   } = appState;
@@ -190,18 +189,6 @@ export default function App() {
         onCreateProfile={() => { setShowSuggestProfile(false); setActiveTab('register'); }}
         onSkip={() => { setShowSuggestProfile(false); setActiveTab('dashboard'); }}
       />
-    );
-  }
-
-  if (initialLoading) {
-    return (
-      <div className="min-h-screen bg-dark-bg flex flex-col items-center justify-center space-y-6">
-        <Logo size="lg" className="animate-pulse" />
-        <div className="flex flex-col items-center space-y-2">
-          <div className="w-12 h-12 border-4 border-brand-red/20 border-t-brand-red rounded-full animate-spin" />
-          <p className="text-white/40 text-xs font-bold uppercase tracking-widest">Carregando Arena...</p>
-        </div>
-      </div>
     );
   }
 

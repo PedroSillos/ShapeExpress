@@ -54,7 +54,6 @@ export const useAuthState = () => {
   const [currentUser, setCurrentUser] = useState<{ email: string } | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem("shape_express_token"));
   const [idToken, setIdToken] = useState<string | null>(null);
-  const [initialLoading, setInitialLoading] = useState(true);
 
   const fetchWithAuth = useCallback(async (
     url: string,
@@ -90,7 +89,6 @@ export const useAuthState = () => {
 
   useEffect(() => {
     const fallbackTimer = setTimeout(() => {
-      setInitialLoading(false);
       setRestoredTab(localStorage.getItem("welcome-done") ? "dashboard" : "landing");
     }, 5000);
 
@@ -116,7 +114,6 @@ export const useAuthState = () => {
         setIsLoggedIn(false);
         setRestoredTab(localStorage.getItem("welcome-done") ? "dashboard" : "landing");
       }
-      setInitialLoading(false);
     });
 
     return () => { unsubscribe(); clearTimeout(fallbackTimer); };
@@ -305,7 +302,6 @@ export const useAuthState = () => {
     currentUser,
     token, setToken,
     idToken,
-    initialLoading,
     restoredTab,
     fetchWithAuth,
     login, loginWithGoogle, register,

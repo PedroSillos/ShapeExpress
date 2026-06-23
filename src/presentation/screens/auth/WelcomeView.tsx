@@ -173,11 +173,11 @@ function GoalCard({ selected, onClick, label, intensity }: { selected: boolean; 
     <button
       onClick={onClick}
       className={cn(
-        'w-full px-5 py-5 rounded-2xl border-2 flex items-center justify-between transition-all text-left active:scale-95',
+        'w-full px-4 py-4 rounded-2xl border-2 flex items-center justify-between transition-all text-left active:scale-95',
         selected ? 'border-brand-red bg-dark-card' : 'border-dark-border bg-dark-card'
       )}
     >
-      <p className={cn('text-lg font-black', selected ? 'text-brand-red' : 'text-white')}>{label}</p>
+      <p className={cn('text-base font-bold', selected ? 'text-brand-red' : 'text-white')}>{label}</p>
       <p className={cn('text-sm font-semibold', selected ? 'text-brand-red/70' : 'text-white/40')}>{intensity}</p>
     </button>
   );
@@ -263,7 +263,7 @@ function SportCard({ selected, onClick, icon, bg, label }: { selected: boolean; 
       <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-2xl" style={{ backgroundColor: bg }}>
         {icon}
       </div>
-      <p className={cn('text-base font-bold flex-1', selected ? 'text-white' : 'text-white/70')}>{label}</p>
+      <p className={cn('text-base font-bold flex-1', selected ? 'text-brand-red' : 'text-white/70')}>{label}</p>
     </button>
   );
 }
@@ -274,7 +274,7 @@ export function WorkoutDoneScreen({ session, onContinue }: { session: WorkoutSes
   const durationSec = session.duration ?? 0;
   const mins = Math.floor(durationSec / 60);
   const secs = durationSec % 60;
-  const durationLabel = `${mins}:${secs.toString().padStart(2, '0')}`;
+  const durationLabel = `${String(mins).padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 
   const allWeights = session.exercises.flatMap(ex =>
     ex.sets.filter(s => s.completed && s.weight > 0).map(s => s.weight)
@@ -294,17 +294,20 @@ export function WorkoutDoneScreen({ session, onContinue }: { session: WorkoutSes
           <p className="text-white/40 text-base">Você superou seus limites hoje.</p>
         </div>
         <div className="flex gap-3 w-full mt-2">
-          <div className="flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-1">
-            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">XP</p>
-            <p className="text-2xl font-black text-white">⚡ {session.xpEarned}</p>
+          <div className="flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-2">
+            <p className="text-sm font-black text-white/40 uppercase tracking-widest">XP</p>
+            <span className="text-2xl leading-none">⚡</span>
+            <p className="text-lg text-white">{session.xpEarned}</p>
           </div>
-          <div className="flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-1">
-            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Peso médio</p>
-            <p className="text-2xl font-black text-white">💪 {avgWeight}kg</p>
+          <div className="flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-2">
+            <p className="text-sm font-black text-white/40 tracking-widest whitespace-nowrap">Peso médio</p>
+            <span className="text-2xl leading-none">💪</span>
+            <p className="text-lg text-white">{avgWeight} KG</p>
           </div>
-          <div className="flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-1">
-            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Tempo</p>
-            <p className="text-2xl font-black text-white">⏱️ {durationLabel}</p>
+          <div className="flex-1 bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col items-center gap-2">
+            <p className="text-sm font-black text-white/40 tracking-widest">Tempo</p>
+            <span className="text-2xl leading-none">⏱️</span>
+            <p className="text-lg text-white">{durationLabel}</p>
           </div>
         </div>
       </div>
@@ -640,7 +643,7 @@ const toggleSport = (id: string) => {
             </button>
             <button
               onClick={() => handleContinueWith('notifications', false)}
-              className="w-full py-4 text-base font-semibold text-white/40 uppercase tracking-widest active:bg-white/5 transition-colors"
+              className="w-full py-4 text-base font-bold text-white/40 uppercase tracking-widest active:bg-white/5 transition-colors"
             >
               Não permitir
             </button>
@@ -691,7 +694,7 @@ const toggleSport = (id: string) => {
               <span className="text-4xl select-none">⚡</span>
             </div>
             <div className="relative bg-dark-card border border-dark-border rounded-2xl px-4 py-3 flex-1">
-              <p className="text-white text-base font-medium leading-snug">{question!.balloon(answers)}</p>
+              <p className="text-white text-base leading-snug">{question!.balloon(answers)}</p>
               <div className="absolute left-[-10px] top-4 w-0 h-0" style={{ borderTop: '8px solid transparent', borderBottom: '8px solid transparent', borderRight: `10px solid var(--theme-card)` }} />
             </div>
           </div>
