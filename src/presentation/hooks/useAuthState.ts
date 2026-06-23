@@ -349,6 +349,20 @@ export const useAuthState = () => {
     }
   };
 
+  const checkEmailExists = async (email: string): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/auth/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      return data?.exists === true;
+    } catch {
+      return false;
+    }
+  };
+
   return {
     isLoggedIn, setIsLoggedIn,
     currentUser,
@@ -357,6 +371,6 @@ export const useAuthState = () => {
     restoredTab,
     fetchWithAuth,
     login, loginWithGoogle, loginWithPhone, confirmPhoneLogin, register,
-    checkEmailExists: undefined, forgotPassword, logout, deleteAccount,
+    checkEmailExists, forgotPassword, logout, deleteAccount,
   };
 };

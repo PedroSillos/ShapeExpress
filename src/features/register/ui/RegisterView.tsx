@@ -70,9 +70,13 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
     }
   };
 
-  const handleEmailContinue = () => {
+  const handleEmailContinue = async () => {
     if (!email.trim()) { setError('Informe seu e-mail.'); return; }
     if (!isValidEmail(email)) { setError('E-mail inválido.'); return; }
+    setIsLoading(true);
+    const exists = await api.checkEmailExists(email);
+    setIsLoading(false);
+    if (exists) { setEmailExists(true); return; }
     setError('');
     setEmailExists(false);
     setStep('password');

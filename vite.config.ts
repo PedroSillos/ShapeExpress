@@ -15,6 +15,9 @@ export default defineConfig(({mode}) => {
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',
       host: '0.0.0.0',
+      proxy: {
+        '/api': 'http://localhost:3000',
+      },
     },
   };
 });

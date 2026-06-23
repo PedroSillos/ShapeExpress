@@ -77,6 +77,26 @@ async function startServer() {
     res.json({ status: 'ok' });
   });
 
+  app.post('/api/auth/check-email',
+    body('email').isEmail().normalizeEmail(),
+    async (req, res) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) { res.status(400).json({ exists: false }); return; }
+      try {
+        await admin.auth().getUserByEmail(req.body.email);
+        res.json({ exists: true });
+      } catch (e: any) {
+        if (e.code === 'auth/user-not-found') {
+          res.json({ exists: false });
+        } else {
+          // Admin not configured or other error — log and fail open
+          console.error('[check-email] error:', e.message);
+          res.status(500).json({ exists: false, error: e.message });
+        }
+      }
+    }
+  );
+
   // Input validation rules
   const validateProtocolId = body('protocolId')
     .trim()
