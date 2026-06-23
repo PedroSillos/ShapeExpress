@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import React from 'react';
 import { ArrowLeft, Eye, EyeOff, Mail } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '../../../utils/cn';
@@ -18,7 +19,7 @@ function GoogleIcon() {
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type Step = 'method' | 'email' | 'password' | 'name';
+type Step = 'method' | 'email' | 'password' | 'name' | 'phone' | 'phone-otp';
 
 const STEPS: Step[] = ['method', 'email', 'password', 'name'];
 const TOTAL = STEPS.length;
@@ -37,16 +38,23 @@ export function RegisterView({ onRegister, onBack, api }: RegisterViewProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [confirmationResult, setConfirmationResult] = useState<any>(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const recaptchaRef = React.useRef<HTMLDivElement>(null);
 
-  const stepIndex = STEPS.indexOf(step);
-  const progress = (stepIndex + 1) / TOTAL;
+  const EMAIL_STEPS: Step[] = ['method', 'email', 'password', 'name'];
+  const PHONE_STEPS: Step[] = ['method', 'phone', 'phone-otp', 'name'];
+  const currentSteps = ['phone', 'phone-otp'].includes(step) ? PHONE_STEPS : EMAIL_STEPS;
+  const stepIndex = currentSteps.indexOf(step);
+  const progress = (stepIndex + 1) / 4;
 
   const goBack = () => {
     if (step === 'method') { onBack(); return; }
     setError('');
-    setStep(STEPS[stepIndex - 1]);
+    setStep(currentSteps[stepIndex - 1]);
   };
 
   const handleGoogle = async () => {
@@ -77,6 +85,27 @@ export function RegisterView({ onRegister, onBack, api }: RegisterViewProps) {
     if (password.length < 8) { setError('A senha deve ter pelo menos 8 caracteres.'); return; }
     setError('');
     setStep('name');
+  };
+
+  const handlePhoneSend = async () => {
+    const fullPhone = `+55${phone.replace(/\D/g, '')}`;
+    if (fullPhone.length < 13) { setError('Número inválido.'); return; }
+    setIsLoading(true); setError('');
+    try {
+      const result = await api.loginWithPhone(fullPhone, recaptchaRef.current!);
+      setConfirmationResult(result);
+      setStep('phone-otp');
+    } catch (e: any) { setError(e.message || 'Erro ao enviar SMS.'); }
+    finally { setIsLoading(false); }
+  };
+
+  const handleOtpConfirm = async () => {
+    if (otp.length < 6) { setError('Insira o código de 6 dígitos.'); return; }
+    setIsLoading(true); setError('');
+    try {
+      await api.confirmPhoneLogin(confirmationResult!, otp);
+    } catch (e: any) { setError(e.message || 'Código inválido.'); }
+    finally { setIsLoading(false); }
   };
 
   const handleFinalize = async () => {
@@ -182,8 +211,59 @@ export function RegisterView({ onRegister, onBack, api }: RegisterViewProps) {
               <Mail size={20} className="text-purple-400" />
               Continuar com E-mail
             </button>
+            <button
+              onClick={() => { setError(''); setStep('phone'); }}
+              className="w-full py-4 rounded-2xl border-2 border-dark-border bg-dark-card flex items-center justify-center gap-3 font-semibold text-sm uppercase tracking-widest text-white active:scale-95 transition-all"
+            >
+              <span className="text-green-400 text-lg">📱</span>
+              Continuar com Telefone
+            </button>
+            <div ref={recaptchaRef} />
             {error && <p className="text-red-400 text-sm text-center">{error}</p>}
           </div>
+        </div>
+      </Shell>
+    ),
+
+    phone: (
+      <Shell>
+        <div className="flex-1 flex flex-col gap-6">
+          <h1 className="text-2xl font-semibold text-white">Qual é o seu número?</h1>
+          <div className="flex border-2 border-dark-border rounded-2xl overflow-hidden bg-dark-card">
+            <span className="flex items-center px-4 text-white/50 text-base border-r border-dark-border select-none">+55</span>
+            <input
+              autoFocus
+              type="tel"
+              value={phone}
+              onChange={e => { setPhone(e.target.value); setError(''); }}
+              placeholder="Telefone"
+              className="flex-1 bg-transparent px-4 py-4 text-white text-base outline-none"
+            />
+          </div>
+          <p className="text-sm text-white/40 -mt-3">Você receberá um SMS para verificar o seu número.</p>
+          {error && <p className="text-red-400 text-sm -mt-3">{error}</p>}
+          <ContinueBtn label="Enviar SMS" onClick={handlePhoneSend} disabled={phone.trim().length === 0} />
+        </div>
+      </Shell>
+    ),
+
+    'phone-otp': (
+      <Shell>
+        <div className="flex-1 flex flex-col gap-6">
+          <h1 className="text-2xl font-semibold text-white">Insira o código</h1>
+          <input
+            autoFocus
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            value={otp}
+            onChange={e => { setOtp(e.target.value.replace(/\D/g, '')); setError(''); }}
+            placeholder="000000"
+            className="w-full bg-dark-card border-2 border-dark-border rounded-2xl py-4 px-5 text-white text-2xl outline-none focus:border-brand-red transition-colors text-center tracking-[0.5em]"
+          />
+          <p className="text-sm text-white/40 -mt-3 text-center">Código enviado para +55 {phone}</p>
+          {error && <p className="text-red-400 text-sm -mt-3">{error}</p>}
+          <ContinueBtn label="Confirmar" onClick={handleOtpConfirm} disabled={otp.length < 6} />
         </div>
       </Shell>
     ),

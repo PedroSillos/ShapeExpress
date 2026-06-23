@@ -61,6 +61,8 @@ export const useAppState = () => {
     // Auth
     login: auth.login,
     loginWithGoogle: auth.loginWithGoogle,
+    loginWithPhone: auth.loginWithPhone,
+    confirmPhoneLogin: auth.confirmPhoneLogin,
     register: auth.register,
     checkEmailExists: auth.checkEmailExists,
     forgotPassword: auth.forgotPassword,

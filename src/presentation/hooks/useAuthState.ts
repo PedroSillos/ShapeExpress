@@ -13,6 +13,9 @@ import {
   signInWithPopup,
   fetchSignInMethodsForEmail,
   deleteUser,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  ConfirmationResult,
 } from "firebase/auth";
 import { getFirebaseErrorMessage } from "../../utils/firebaseErrors";
 import type { UserProfile, WorkoutTemplate, WorkoutSession } from "../../domain/entities";
@@ -297,6 +300,65 @@ export const useAuthState = () => {
     toast.success("Até logo!");
   };
 
+  const loginWithPhone = async (phoneNumber: string, recaptchaContainer: HTMLElement): Promise<ConfirmationResult> => {
+    try {
+      const verifier = new RecaptchaVerifier(auth, recaptchaContainer, { size: 'invisible' });
+      const result = await signInWithPhoneNumber(auth, phoneNumber, verifier);
+      verifier.clear();
+      return result;
+    } catch (e: any) {
+      toast.error(getFirebaseErrorMessage(e));
+      throw new Error(getFirebaseErrorMessage(e));
+    }
+  };
+
+  const confirmPhoneLogin = async (confirmationResult: ConfirmationResult, otp: string) => {
+    try {
+      const userCredential = await confirmationResult.confirm(otp);
+      const freshIdToken = await userCredential.user.getIdToken();
+      tokenStore.idToken = freshIdToken;
+      setIdToken(freshIdToken);
+      const phone = userCredential.user.phoneNumber!;
+      const uid = userCredential.user.uid;
+      const docId = uid;
+      let userDoc: UserProfile | null = null;
+      try {
+        const snap = await getDoc(doc(db, "users", docId));
+        if (snap.exists()) {
+          userDoc = snap.data() as UserProfile;
+        } else {
+          userDoc = {
+            name: phone,
+            email: docId,
+            userType: "atleta",
+            phone,
+            height: 180,
+            initialWeight: 80,
+            objective: "Manutenção",
+            birthDate: "2000-01-01",
+            avatarUrl: generateAvatarUrl(getRandomSportAvatar()),
+            hasPersonal: false,
+          } as any;
+          await setDoc(doc(db, "users", docId), userDoc);
+          await setDoc(doc(db, "stats", docId), {
+            level: 1, xp: 0, streak: 0, bestStreak: 0, weeklyGoal: 3,
+            completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: docId,
+          });
+        }
+      } catch (e) {}
+      toast.success("Bem-vindo!");
+      localStorage.setItem("shape_express_token", docId);
+      setToken(docId);
+      setCurrentUser({ email: docId });
+      setIsLoggedIn(true);
+      await migrateLocalDataToFirestore(docId);
+      return { token: freshIdToken, user: userDoc };
+    } catch (e: any) {
+      toast.error(getFirebaseErrorMessage(e));
+      throw new Error(getFirebaseErrorMessage(e));
+    }
+  };
+
   return {
     isLoggedIn, setIsLoggedIn,
     currentUser,
@@ -304,7 +366,7 @@ export const useAuthState = () => {
     idToken,
     restoredTab,
     fetchWithAuth,
-    login, loginWithGoogle, register,
+    login, loginWithGoogle, loginWithPhone, confirmPhoneLogin, register,
     checkEmailExists, forgotPassword, logout, deleteAccount,
   };
 };

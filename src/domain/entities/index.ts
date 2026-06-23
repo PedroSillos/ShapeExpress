@@ -41,7 +41,11 @@ export type Equipment =
   | "Máquina"
   | "Peso corporal"
   | "Elástico"
-  | "Kettlebell";
+  | "Kettlebell"
+  | "Polia"
+  | "Barra fixa"
+  | "Smith"
+  | "Banco Scott";
 export type ExerciseType = "compound" | "isolation" | "core" | "cardio";
 
 export interface Exercise {
