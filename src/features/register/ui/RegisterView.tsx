@@ -43,7 +43,7 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
   const [otp, setOtp] = useState('');
   const [confirmationResult, setConfirmationResult] = useState<any>(null);
   const [error, setError] = useState('');
-  const [emailExists, setEmailExists] = useState(false);
+  const [emailDuplicate, setEmailDuplicate] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const recaptchaRef = React.useRef<HTMLDivElement>(null);
 
@@ -56,6 +56,7 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
   const goBack = () => {
     if (step === 'method') { onBack(); return; }
     setError('');
+    setEmailDuplicate(false);
     setStep(currentSteps[stepIndex - 1]);
   };
 
@@ -70,15 +71,10 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
     }
   };
 
-  const handleEmailContinue = async () => {
+  const handleEmailContinue = () => {
     if (!email.trim()) { setError('Informe seu e-mail.'); return; }
     if (!isValidEmail(email)) { setError('E-mail inválido.'); return; }
-    setIsLoading(true);
-    const exists = await api.checkEmailExists(email);
-    setIsLoading(false);
-    if (exists) { setEmailExists(true); return; }
     setError('');
-    setEmailExists(false);
     setStep('password');
   };
 
@@ -133,8 +129,8 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
       } as any);
     } catch (e: any) {
       if (e?.code === 'auth/email-already-in-use') {
-        setStep('email');
-        setEmailExists(true);
+        setError('Este e-mail já possui uma conta.\nTente fazer login.');
+        setEmailDuplicate(true);
       } else {
         setError(e.message || 'Erro ao criar conta.');
       }
@@ -282,24 +278,12 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
             autoFocus
             type="email"
             value={email}
-            onChange={e => { setEmail(e.target.value); setError(''); setEmailExists(false); }}
+            onChange={e => { setEmail(e.target.value); setError(''); }}
             placeholder="seuemail@exemplo.com"
             className="w-full bg-dark-card border-2 border-dark-border rounded-2xl py-4 px-5 text-white text-base outline-none focus:border-brand-red transition-colors"
           />
-          {emailExists ? (
-            <div className="flex flex-col gap-3 -mt-3">
-              <p className="text-red-400 text-sm">Este e-mail já está cadastrado.</p>
-              <button
-                onClick={() => (onGoToLogin ?? onBack)()}
-                className="w-full py-4 rounded-2xl border-2 border-brand-red text-brand-red font-bold text-sm uppercase tracking-widest active:scale-95 transition-all"
-              >
-                Fazer login
-              </button>
-            </div>
-          ) : (
-            error && <p className="text-red-400 text-sm -mt-3">{error}</p>
-          )}
-          {!emailExists && <ContinueBtn label="Continuar" onClick={handleEmailContinue} disabled={!email.trim()} />}
+          {error && <p className="text-red-400 text-sm -mt-3">{error}</p>}
+          <ContinueBtn label="Continuar" onClick={handleEmailContinue} disabled={!email.trim()} />
         </div>
       </Shell>
     ),
@@ -339,7 +323,7 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
             <input
               type="text"
               value={firstName}
-              onChange={e => { setFirstName(e.target.value); setError(''); }}
+              onChange={e => { setFirstName(e.target.value); setError(''); setEmailDuplicate(false); }}
               placeholder="Nome"
               className="w-full bg-transparent py-4 px-5 text-white text-base outline-none rounded-t-2xl"
             />
@@ -351,8 +335,20 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
               className="w-full bg-transparent py-4 px-5 text-white text-base outline-none rounded-b-2xl"
             />
           </div>
-          {error && <p className="text-red-400 text-sm -mt-3">{error}</p>}
-          <ContinueBtn label="Criar perfil" onClick={handleFinalize} disabled={!firstName.trim()} />
+          {error && <p className="text-red-400 text-sm -mt-3 font-medium text-center whitespace-pre-line">{error}</p>}
+          <ContinueBtn
+            label={emailDuplicate ? "Voltar" : "Criar perfil"}
+            onClick={emailDuplicate ? () => { setEmailDuplicate(false); setError(''); setStep('email'); } : handleFinalize}
+            disabled={!emailDuplicate && !firstName.trim()}
+          />
+          {emailDuplicate && (
+            <button
+              onClick={() => (onGoToLogin ?? onBack)()}
+              className="w-full py-4 rounded-2xl bg-dark-card border-2 border-dark-border text-brand-red font-bold text-sm uppercase tracking-widest active:scale-95 transition-all"
+            >
+              Fazer login
+            </button>
+          )}
         </div>
       </Shell>
     ),
