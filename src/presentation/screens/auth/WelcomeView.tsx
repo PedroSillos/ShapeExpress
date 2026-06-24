@@ -316,7 +316,7 @@ function OptionCard({ selected, onClick, icon, label, desc }: { selected: boolea
     >
       {icon && (
         <div className={cn(
-          'w-12 h-12 rounded-xl overflow-hidden shrink-0',
+          'w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shrink-0',
           selected ? 'bg-white/10' : 'bg-white/5'
         )}>
           {icon}
@@ -426,7 +426,7 @@ function ReadyScreen({ onContinue, onNotReady, onBack, loading, skipLoading }: {
         </div>
 
         {/* Mascot */}
-        <img src="/shapinho.png" alt="Shapinho" className="w-56 h-56 rounded-3xl aspect-square object-contain" />
+        <img src="/shapinho.png" alt="Shapinho" className="w-32 h-32 object-contain" />
       </div>
 
       {/* Buttons */}
@@ -750,10 +750,10 @@ const toggleSport = (id: string) => {
         <div className="flex-1 relative">
           {/* Icon fixed at vertical center */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <img src="/shapinho.png" alt="Shapinho" className="w-52 h-52 rounded-3xl aspect-square object-contain" />
+            <img src="/shapinho.png" alt="Shapinho" className="w-32 h-32 object-contain" />
           </div>
           {/* Bubble anchored above the icon */}
-          <div className="absolute left-0 right-0" style={{ bottom: 'calc(50% + 56px + 16px)' }}>
+          <div className="absolute left-0 right-0" style={{ bottom: 'calc(50% + 56px + 32px)' }}>
             <div className="relative w-full" style={{ display: 'inline-grid' }}>
               <p className="text-lg leading-snug px-5 py-4 opacity-0 pointer-events-none select-none text-center" style={{ gridArea: '1/1' }}>
                 {INTRO_STEPS[introStep].map((seg, si) => seg.bold ? <strong key={si}>{seg.text}</strong> : <span key={si}>{seg.text}</span>)}
@@ -767,7 +767,7 @@ const toggleSport = (id: string) => {
       ) : (
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex items-center gap-3 mb-5 shrink-0">
-            <img src="/shapinho.png" alt="Shapinho" className="w-[88px] h-[88px] rounded-2xl shrink-0 aspect-square object-contain" />
+            <img src="/shapinho.png" alt="Shapinho" className="w-16 h-16 shrink-0 object-contain" />
             <div className="relative bg-dark-card border border-dark-border rounded-2xl px-4 py-3 flex-1">
               <p className="text-white text-base leading-snug">{question!.balloon(answers)}</p>
               <div className="absolute left-[-10px] top-4 w-0 h-0" style={{ borderTop: '8px solid transparent', borderBottom: '8px solid transparent', borderRight: `10px solid var(--theme-card)` }} />

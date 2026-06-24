@@ -16,7 +16,7 @@ export function OnboardingSuggestProfileScreen({ onCreateProfile, onSkip }: Prop
             style={{ borderLeft: '10px solid transparent', borderRight: '10px solid transparent', borderTop: '10px solid var(--theme-card)' }}
           />
         </div>
-        <img src="/shapinho.png" alt="Shapinho" className="w-60 h-60 rounded-3xl aspect-square object-contain" />
+        <img src="/shapinho.png" alt="Shapinho" className="w-32 h-32 object-contain" />
       </div>
       <div className="flex flex-col gap-4 shrink-0">
         <button

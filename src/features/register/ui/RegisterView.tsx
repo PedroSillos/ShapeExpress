@@ -191,9 +191,7 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
 
           {/* Mascot centered */}
           <div className="flex-1 flex items-center justify-center">
-            <div className="w-32 h-32 rounded-full bg-dark-card flex items-center justify-center">
-              <span className="text-6xl select-none">⚡</span>
-            </div>
+            <img src="/shapinho.png" alt="Shapinho" className="w-32 h-32 object-contain" />
           </div>
 
           {/* Buttons pinned to bottom */}

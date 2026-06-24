@@ -7,7 +7,7 @@ export function LandingView({ onStart, onLogin }: LandingViewProps) {
   return (
     <div className="h-screen flex flex-col items-center justify-between py-16 px-8 overflow-hidden bg-dark-surface">
       <div className="flex-1 flex flex-col items-center justify-center gap-6">
-        <img src="/shapinho.png" alt="Shapinho" className="w-56 h-56 rounded-3xl aspect-square object-contain" />
+        <img src="/shapinho.png" alt="Shapinho" className="w-32 h-32 object-contain" />
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold red-text-gradient">shape express</h1>
           <p className="text-white/40 text-base">Treine inteligente. Evolua mais rápido.</p>
