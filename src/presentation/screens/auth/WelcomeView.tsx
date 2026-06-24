@@ -84,14 +84,89 @@ const OBJECTIVE_BENEFITS: Record<string, [{ icon: string; bg: string; title: str
 
 const DEFAULT_BENEFITS = OBJECTIVE_BENEFITS['Ganhar massa muscular'];
 
+function InstagramIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <defs>
+        <radialGradient id="ig-grad" cx="30%" cy="107%" r="150%">
+          <stop offset="0%" stopColor="#fdf497" />
+          <stop offset="45%" stopColor="#fd5949" />
+          <stop offset="60%" stopColor="#d6249f" />
+          <stop offset="90%" stopColor="#285AEB" />
+        </radialGradient>
+      </defs>
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#ig-grad)" />
+      <circle cx="12" cy="12" r="4.5" stroke="white" strokeWidth="1.8" fill="none" />
+      <circle cx="17.5" cy="6.5" r="1.2" fill="white" />
+    </svg>
+  );
+}
+
+function FacebookIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#1877F2" />
+      <path d="M13.5 8H15V6h-1.5C12.1 6 11 7.1 11 8.5V10H9.5v2H11v6h2v-6h1.5l.5-2H13V8.5c0-.28.22-.5.5-.5z" fill="white" />
+    </svg>
+  );
+}
+
+function TikTokIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#010101" />
+      <path d="M14.5 6h-1.8v8a1.7 1.7 0 11-1.7-1.7V10.5a3.5 3.5 0 103.5 3.5V9.3a5 5 0 002.5.7V8.3A2.8 2.8 0 0114.5 6z" fill="white" />
+    </svg>
+  );
+}
+
+function FriendIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#7C3AED" />
+      <circle cx="9" cy="9.5" r="2" stroke="white" strokeWidth="1.2" />
+      <circle cx="15" cy="9.5" r="2" stroke="white" strokeWidth="1.2" />
+      <path d="M5 17c0-2 1.8-3.5 4-3.5s4 1.5 4 3.5" stroke="white" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+      <path d="M15 13.5c1.5 0 4 .8 4 3.5" stroke="white" strokeWidth="1.2" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+
+function GoogleColorIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="white" />
+      <path fill="#4285F4" d="M12 11h5.2c.1.4.1.8.1 1.2 0 3.4-2.3 5.8-5.3 5.8A5.5 5.5 0 016.5 12 5.5 5.5 0 0112 6.5c1.5 0 2.7.5 3.6 1.4l-1.5 1.5C13.5 8.8 12.8 8.5 12 8.5A3.5 3.5 0 008.5 12 3.5 3.5 0 0012 15.5c1.8 0 3-1 3.3-2.5H12V11z" />
+    </svg>
+  );
+}
+
+function YouTubeIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#FF0000" />
+      <path d="M16 12l-6.5 3.5V8.5L16 12z" fill="white" />
+    </svg>
+  );
+}
+
+function OtherIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#374151" />
+      <text x="12" y="16.5" textAnchor="middle" fontSize="12" fontWeight="bold" fill="white" fontFamily="sans-serif">?</text>
+    </svg>
+  );
+}
+
 const SOURCES = [
-  { id: 'Instagram', icon: '📸' },
-  { id: 'Facebook', icon: '👍' },
-  { id: 'TikTok', icon: '🎵' },
-  { id: 'Indicação de amigo', icon: '👥' },
-  { id: 'Google', icon: '🔍' },
-  { id: 'YouTube', icon: '▶️' },
-  { id: 'Outro', icon: '💬' },
+  { id: 'Instagram',        icon: <InstagramIcon /> },
+  { id: 'Facebook',         icon: <FacebookIcon /> },
+  { id: 'TikTok',           icon: <TikTokIcon /> },
+  { id: 'Indicação de amigo', icon: <FriendIcon /> },
+  { id: 'Google',           icon: <GoogleColorIcon /> },
+  { id: 'YouTube',          icon: <YouTubeIcon /> },
+  { id: 'Outro',            icon: <OtherIcon /> },
 ];
 
 const EXPERIENCE_LEVELS = [
@@ -241,7 +316,7 @@ function OptionCard({ selected, onClick, icon, label, desc }: { selected: boolea
     >
       {icon && (
         <div className={cn(
-          'w-12 h-12 rounded-xl flex items-center justify-center shrink-0',
+          'w-12 h-12 rounded-xl overflow-hidden shrink-0',
           selected ? 'bg-white/10' : 'bg-white/5'
         )}>
           {icon}
@@ -514,7 +589,7 @@ const toggleSport = (id: string) => {
       return (
         <div className="flex flex-col gap-3">
           {SOURCES.map(o => (
-            <OptionCard key={o.id} selected={answers.source === o.id} onClick={() => set('source', o.id)} icon={<span className="text-2xl">{o.icon}</span>} label={o.id} />
+            <OptionCard key={o.id} selected={answers.source === o.id} onClick={() => set('source', o.id)} icon={o.icon} label={o.id} />
           ))}
         </div>
       );
