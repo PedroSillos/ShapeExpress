@@ -351,9 +351,7 @@ function ReadyScreen({ onContinue, onNotReady, onBack, loading, skipLoading }: {
         </div>
 
         {/* Mascot */}
-        <div className="w-36 h-36 rounded-full bg-dark-card border border-dark-border flex items-center justify-center">
-          <span className="text-7xl select-none">⚡</span>
-        </div>
+        <img src="/shapinho.png" alt="Shapinho" className="w-56 h-56 rounded-3xl aspect-square object-contain" />
       </div>
 
       {/* Buttons */}
@@ -676,8 +674,8 @@ const toggleSport = (id: string) => {
       {inIntro ? (
         <div className="flex-1 relative">
           {/* Icon fixed at vertical center */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 rounded-full bg-dark-card flex items-center justify-center">
-            <span className="text-6xl select-none">⚡</span>
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <img src="/shapinho.png" alt="Shapinho" className="w-52 h-52 rounded-3xl aspect-square object-contain" />
           </div>
           {/* Bubble anchored above the icon */}
           <div className="absolute left-0 right-0" style={{ bottom: 'calc(50% + 56px + 16px)' }}>
@@ -693,10 +691,8 @@ const toggleSport = (id: string) => {
         </div>
       ) : (
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex items-start gap-3 mb-5 shrink-0">
-            <div className="w-16 h-16 rounded-full bg-dark-card border border-dark-border flex items-center justify-center shrink-0">
-              <span className="text-4xl select-none">⚡</span>
-            </div>
+          <div className="flex items-center gap-3 mb-5 shrink-0">
+            <img src="/shapinho.png" alt="Shapinho" className="w-[88px] h-[88px] rounded-2xl shrink-0 aspect-square object-contain" />
             <div className="relative bg-dark-card border border-dark-border rounded-2xl px-4 py-3 flex-1">
               <p className="text-white text-base leading-snug">{question!.balloon(answers)}</p>
               <div className="absolute left-[-10px] top-4 w-0 h-0" style={{ borderTop: '8px solid transparent', borderBottom: '8px solid transparent', borderRight: `10px solid var(--theme-card)` }} />
