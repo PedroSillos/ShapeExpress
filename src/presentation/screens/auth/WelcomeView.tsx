@@ -34,51 +34,17 @@ function useTypewriter(segments: Segment[], speed = 30) {
 
 function MusculacaoIcon() {
   return (
-    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="#b91c1c" />
-      {/* bar */}
-      <rect x="10" y="11.2" width="4" height="1.6" rx="0.8" fill="white" />
-      {/* left plate */}
-      <rect x="8.6" y="9.5" width="1.6" height="5" rx="0.8" fill="white" />
-      {/* right plate */}
-      <rect x="13.8" y="9.5" width="1.6" height="5" rx="0.8" fill="white" />
-      {/* left collar */}
-      <rect x="7.5" y="10.4" width="1.2" height="3.2" rx="0.6" fill="white" />
-      {/* right collar */}
-      <rect x="15.3" y="10.4" width="1.2" height="3.2" rx="0.6" fill="white" />
-      {/* left end cap */}
-      <rect x="6.5" y="10.9" width="1.1" height="2.2" rx="0.55" fill="white" />
-      {/* right end cap */}
-      <rect x="16.4" y="10.9" width="1.1" height="2.2" rx="0.55" fill="white" />
-    </svg>
+    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#b91c1c' }}>
+      <img src="/icon-musculacao.svg" className="w-3/4 h-3/4 object-contain" />
+    </div>
   );
 }
 
 function HalterofilismoIcon() {
   return (
-    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="#a16207" />
-      <g transform="scale(0.78) translate(3.1, 3.1)">
-      {/* head */}
-      <circle cx="12" cy="10.5" r="1.4" stroke="white" strokeWidth="1.2" fill="none" />
-      {/* neck */}
-      <line x1="12" y1="11.9" x2="12" y2="13" stroke="white" strokeWidth="1.1" strokeLinecap="round" />
-      {/* arms reaching up to barbell */}
-      <path d="M12 13 L8.5 7.8 M12 13 L15.5 7.8" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
-      {/* torso down to legs */}
-      <path d="M12 13 L12 17" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
-      {/* legs wide stance */}
-      <path d="M12 17 L9.5 19 M12 17 L14.5 19" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
-      {/* barbell bar */}
-      <line x1="6.5" y1="7.2" x2="17.5" y2="7.2" stroke="white" strokeWidth="1.1" strokeLinecap="round" />
-      {/* left plates */}
-      <rect x="4.7" y="5" width="2" height="4.2" rx="0.7" fill="white" />
-      <rect x="3.2" y="5.6" width="1.5" height="3" rx="0.6" fill="white" />
-      {/* right plates */}
-      <rect x="17.3" y="5" width="2" height="4.2" rx="0.7" fill="white" />
-      <rect x="19.3" y="5.6" width="1.5" height="3" rx="0.6" fill="white" />
-      </g>
-    </svg>
+    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#a16207' }}>
+      <img src="/icon-halterofilismo.svg" className="w-3/4 h-3/4 object-contain" />
+    </div>
   );
 }
 
@@ -99,13 +65,9 @@ function CorridaIcon() {
 
 function CiclismoIcon() {
   return (
-    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="#1d4ed8" />
-      <circle cx="7.5" cy="15" r="3" stroke="white" strokeWidth="1.5" fill="none" />
-      <circle cx="16.5" cy="15" r="3" stroke="white" strokeWidth="1.5" fill="none" />
-      <path d="M7.5 15l4-6h3l2 6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      <circle cx="14.5" cy="7.5" r="1.2" fill="white" />
-    </svg>
+    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1d4ed8' }}>
+      <img src="/icon-ciclismo.svg" className="w-3/4 h-3/4 object-contain" />
+    </div>
   );
 }
 
