@@ -14,17 +14,13 @@ export const SPORT_AVATARS = [
   
   // Combat Sports
   { id: 'boxing', emoji: '🥊', name: 'Boxe', color: '#DC2626' },
-  { id: 'martial-arts', emoji: '🥋', name: 'Artes Marciais', color: '#7C3AED' },
   
   // Ball Sports
-  { id: 'soccer', emoji: '⚽', name: 'Futebol', color: '#22C55E' },
-  { id: 'basketball', emoji: '🏀', name: 'Basquete', color: '#F97316' },
   { id: 'volleyball', emoji: '🏐', name: 'Vôlei', color: '#EAB308' },
   { id: 'tennis', emoji: '🎾', name: 'Tênis', color: '#84CC16' },
   
   // Other Sports
   { id: 'climbing', emoji: '🧗', name: 'Escalada', color: '#8B5CF6' },
-  { id: 'yoga', emoji: '🧘', name: 'Yoga', color: '#A855F7' },
   { id: 'skateboarding', emoji: '🛹', name: 'Skate', color: '#6366F1' },
 ] as const;
 

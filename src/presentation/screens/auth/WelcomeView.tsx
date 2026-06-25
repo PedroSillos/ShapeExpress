@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Bell } from 'lucide-react';
 import { cn } from '../../../utils/cn';
+import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
+import iconHalterofilismo from '@/src/assets/icons/icon-halterofilismo.svg';
+import iconCorrida from '@/src/assets/icons/icon-corrida.svg';
+import iconCiclismo from '@/src/assets/icons/icon-ciclismo.svg';
+import iconNatacao from '@/src/assets/icons/icon-natacao.svg';
+import iconCrossfit from '@/src/assets/icons/icon-crossfit.svg';
+import iconTriatlo from '@/src/assets/icons/icon-triatlo.svg';
 import { WorkoutSession } from '../../../domain/entities';
 
 // ─── Typewriter ───────────────────────────────────────────────────────────────
@@ -35,7 +42,7 @@ function useTypewriter(segments: Segment[], speed = 30) {
 function MusculacaoIcon() {
   return (
     <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#b91c1c' }}>
-      <img src="/icon-musculacao.svg" className="w-3/4 h-3/4 object-contain" />
+      <img src={iconMusculacao} className="w-3/4 h-3/4 object-contain" />
     </div>
   );
 }
@@ -43,7 +50,7 @@ function MusculacaoIcon() {
 function HalterofilismoIcon() {
   return (
     <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#a16207' }}>
-      <img src="/icon-halterofilismo.svg" className="w-3/4 h-3/4 object-contain" />
+      <img src={iconHalterofilismo} className="w-3/4 h-3/4 object-contain" />
     </div>
   );
 }
@@ -51,7 +58,7 @@ function HalterofilismoIcon() {
 function CorridaIcon() {
   return (
     <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#c2410c' }}>
-      <img src="/icon-corrida.svg" className="w-3/4 h-3/4 object-contain" />
+      <img src={iconCorrida} className="w-3/4 h-3/4 object-contain" />
     </div>
   );
 }
@@ -59,74 +66,32 @@ function CorridaIcon() {
 function CiclismoIcon() {
   return (
     <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1d4ed8' }}>
-      <img src="/icon-ciclismo.svg" className="w-3/4 h-3/4 object-contain" />
+      <img src={iconCiclismo} className="w-3/4 h-3/4 object-contain" />
     </div>
   );
 }
 
 function NatacaoIcon() {
   return (
-    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="#0e7490" />
-      <circle cx="15" cy="7" r="1.8" fill="white" />
-      <path d="M5 14c1.5-2 3-3 5-2l3-3 4 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      <path d="M4 17c1 1 2 1 3 0s2-1 3 0 2 1 3 0 2-1 3 0" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-    </svg>
+    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#0e7490' }}>
+      <img src={iconNatacao} className="w-3/4 h-3/4 object-contain" />
+    </div>
   );
 }
 
 function CrossfitIcon() {
   return (
-    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="#374151" />
-      <path d="M12 5v14M5 12h14" stroke="white" strokeWidth="2" strokeLinecap="round" />
-      <path d="M7.5 7.5l9 9M16.5 7.5l-9 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
+    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#374151' }}>
+      <img src={iconCrossfit} className="w-3/4 h-3/4 object-contain" />
+    </div>
   );
 }
 
-function ArtesMarciaisIcon() {
+function TriatloIcon() {
   return (
-    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="#7c3aed" />
-      <circle cx="12" cy="7" r="2" fill="white" />
-      <path d="M12 9v5" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M9 11l3 3 3-3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      <path d="M10 14l-2 4M14 14l2 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M8 10l-2-2M16 10l2-2" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function FutebolIcon() {
-  return (
-    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="#374151" />
-      <circle cx="12" cy="12" r="6" stroke="white" strokeWidth="1.5" fill="none" />
-      <polygon points="12,7 13.5,10 17,10.5 14.5,13 15.3,16.5 12,15 8.7,16.5 9.5,13 7,10.5 10.5,10" fill="white" />
-    </svg>
-  );
-}
-
-function BasqueteIcon() {
-  return (
-    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="#9a3412" />
-      <circle cx="12" cy="12" r="5.5" stroke="white" strokeWidth="1.5" fill="none" />
-      <path d="M12 6.5v11M6.5 12h11" stroke="white" strokeWidth="1.2" />
-      <path d="M8 7.5c2 2 2 5 0 7M16 7.5c-2 2-2 5 0 7" stroke="white" strokeWidth="1.2" fill="none" />
-    </svg>
-  );
-}
-
-function YogaIcon() {
-  return (
-    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="#0f766e" />
-      <circle cx="12" cy="6.5" r="1.8" fill="white" />
-      <path d="M12 9c-2 1-4 3-4 5h3l1 4 1-4h3c0-2-2-4-4-5z" fill="white" />
-      <path d="M8 14l-3 2M16 14l3 2" stroke="white" strokeWidth="1.3" strokeLinecap="round" />
-    </svg>
+    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#2d3f4f' }}>
+      <img src={iconTriatlo} className="w-3/4 h-3/4 object-contain" />
+    </div>
   );
 }
 
@@ -137,10 +102,7 @@ const SPORTS = [
   { id: 'Ciclismo',      icon: <CiclismoIcon />,       bg: '#1d4ed8' },
   { id: 'Natação',       icon: <NatacaoIcon />,        bg: '#0e7490' },
   { id: 'Crossfit',      icon: <CrossfitIcon />,       bg: '#374151' },
-  { id: 'Artes Marciais',icon: <ArtesMarciaisIcon />,  bg: '#7c3aed' },
-  { id: 'Futebol',       icon: <FutebolIcon />,        bg: '#374151' },
-  { id: 'Basquete',      icon: <BasqueteIcon />,       bg: '#9a3412' },
-  { id: 'Yoga',          icon: <YogaIcon />,           bg: '#0f766e' },
+  { id: 'Triatlo',       icon: <TriatloIcon />,        bg: '#2d3f4f' },
 ];
 
 const OBJECTIVES = [

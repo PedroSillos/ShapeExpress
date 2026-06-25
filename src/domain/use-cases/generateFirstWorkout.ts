@@ -9,10 +9,7 @@ const SPORT_EXERCISE_IDS: Record<string, string[]> = {
   'Ciclismo':       ['37', '7', '19', '25'],                      // Ciclismo, LegPress, Extensora, Gêmeos
   'Natação':        ['8', '3', '28', '11', '9'],                  // Puxada, Remada, Elev.Lateral, Prancha, Flexão
   'Crossfit':       ['14', '2', '1', '11', '38', '9'],            // KBSwing, Agachamento, Supino, Prancha, PularCorda, Flexão
-  'Artes Marciais': ['9', '11', '35', '10', '38'],                // Flexão, Prancha, GiroRusso, Afundo, PularCorda
-  'Futebol':        ['36', '10', '7', '25', '11'],                // Corrida, Afundo, LegPress, Gêmeos, Prancha
-  'Basquete':       ['36', '10', '7', '28', '11'],                // Corrida, Afundo, LegPress, Elev.Lateral, Prancha
-  'Yoga':           ['11', '12', '35', '33'],                     // Prancha, Alongamento, GiroRusso, AbdSupra
+
 };
 
 const DEFAULT_IDS = ['1', '2', '3', '4', '5'];

@@ -37,8 +37,7 @@ interface DashboardViewProps {
 
 const SPORT_EMOJIS: Record<string, string> = {
   'Musculação': '🏋️', 'Halterofilismo': '🏅', 'Corrida': '🏃',
-  'Ciclismo': '🚴', 'Natação': '🏊', 'Crossfit': '⚡',
-  'Artes Marciais': '🥋', 'Futebol': '⚽', 'Basquete': '🏀', 'Yoga': '🧘',
+  'Ciclismo': '🚴', 'Natação': '🏊', 'Crossfit': '⚡', 'Triatlo': '🏅',
 };
 
 const XP_PER_LEVEL = 500;
