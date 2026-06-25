@@ -32,17 +32,160 @@ function useTypewriter(segments: Segment[], speed = 30) {
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
+function MusculacaoIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#b91c1c" />
+      {/* bar */}
+      <rect x="10" y="11.2" width="4" height="1.6" rx="0.8" fill="white" />
+      {/* left plate */}
+      <rect x="8.6" y="9.5" width="1.6" height="5" rx="0.8" fill="white" />
+      {/* right plate */}
+      <rect x="13.8" y="9.5" width="1.6" height="5" rx="0.8" fill="white" />
+      {/* left collar */}
+      <rect x="7.5" y="10.4" width="1.2" height="3.2" rx="0.6" fill="white" />
+      {/* right collar */}
+      <rect x="15.3" y="10.4" width="1.2" height="3.2" rx="0.6" fill="white" />
+      {/* left end cap */}
+      <rect x="6.5" y="10.9" width="1.1" height="2.2" rx="0.55" fill="white" />
+      {/* right end cap */}
+      <rect x="16.4" y="10.9" width="1.1" height="2.2" rx="0.55" fill="white" />
+    </svg>
+  );
+}
+
+function HalterofilismoIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#a16207" />
+      <g transform="scale(0.78) translate(3.1, 3.1)">
+      {/* head */}
+      <circle cx="12" cy="10.5" r="1.4" stroke="white" strokeWidth="1.2" fill="none" />
+      {/* neck */}
+      <line x1="12" y1="11.9" x2="12" y2="13" stroke="white" strokeWidth="1.1" strokeLinecap="round" />
+      {/* arms reaching up to barbell */}
+      <path d="M12 13 L8.5 7.8 M12 13 L15.5 7.8" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
+      {/* torso down to legs */}
+      <path d="M12 13 L12 17" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
+      {/* legs wide stance */}
+      <path d="M12 17 L9.5 19 M12 17 L14.5 19" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
+      {/* barbell bar */}
+      <line x1="6.5" y1="7.2" x2="17.5" y2="7.2" stroke="white" strokeWidth="1.1" strokeLinecap="round" />
+      {/* left plates */}
+      <rect x="4.7" y="5" width="2" height="4.2" rx="0.7" fill="white" />
+      <rect x="3.2" y="5.6" width="1.5" height="3" rx="0.6" fill="white" />
+      {/* right plates */}
+      <rect x="17.3" y="5" width="2" height="4.2" rx="0.7" fill="white" />
+      <rect x="19.3" y="5.6" width="1.5" height="3" rx="0.6" fill="white" />
+      </g>
+    </svg>
+  );
+}
+
+function CorridaIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#c2410c" />
+      <g transform="translate(6.1, 5.7) scale(0.53)">
+        {/* directions_run — Material Design verified path */}
+        <path
+          d="M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z"
+          fill="white"
+        />
+      </g>
+    </svg>
+  );
+}
+
+function CiclismoIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#1d4ed8" />
+      <circle cx="7.5" cy="15" r="3" stroke="white" strokeWidth="1.5" fill="none" />
+      <circle cx="16.5" cy="15" r="3" stroke="white" strokeWidth="1.5" fill="none" />
+      <path d="M7.5 15l4-6h3l2 6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <circle cx="14.5" cy="7.5" r="1.2" fill="white" />
+    </svg>
+  );
+}
+
+function NatacaoIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#0e7490" />
+      <circle cx="15" cy="7" r="1.8" fill="white" />
+      <path d="M5 14c1.5-2 3-3 5-2l3-3 4 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M4 17c1 1 2 1 3 0s2-1 3 0 2 1 3 0 2-1 3 0" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+
+function CrossfitIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#374151" />
+      <path d="M12 5v14M5 12h14" stroke="white" strokeWidth="2" strokeLinecap="round" />
+      <path d="M7.5 7.5l9 9M16.5 7.5l-9 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function ArtesMarciaisIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#7c3aed" />
+      <circle cx="12" cy="7" r="2" fill="white" />
+      <path d="M12 9v5" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M9 11l3 3 3-3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M10 14l-2 4M14 14l2 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M8 10l-2-2M16 10l2-2" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function FutebolIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#374151" />
+      <circle cx="12" cy="12" r="6" stroke="white" strokeWidth="1.5" fill="none" />
+      <polygon points="12,7 13.5,10 17,10.5 14.5,13 15.3,16.5 12,15 8.7,16.5 9.5,13 7,10.5 10.5,10" fill="white" />
+    </svg>
+  );
+}
+
+function BasqueteIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#9a3412" />
+      <circle cx="12" cy="12" r="5.5" stroke="white" strokeWidth="1.5" fill="none" />
+      <path d="M12 6.5v11M6.5 12h11" stroke="white" strokeWidth="1.2" />
+      <path d="M8 7.5c2 2 2 5 0 7M16 7.5c-2 2-2 5 0 7" stroke="white" strokeWidth="1.2" fill="none" />
+    </svg>
+  );
+}
+
+function YogaIcon() {
+  return (
+    <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#0f766e" />
+      <circle cx="12" cy="6.5" r="1.8" fill="white" />
+      <path d="M12 9c-2 1-4 3-4 5h3l1 4 1-4h3c0-2-2-4-4-5z" fill="white" />
+      <path d="M8 14l-3 2M16 14l3 2" stroke="white" strokeWidth="1.3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 const SPORTS = [
-  { id: 'Musculação',    icon: '🏋️', bg: '#b91c1c' },
-  { id: 'Halterofilismo',icon: '🏅', bg: '#a16207' },
-  { id: 'Corrida',       icon: '🏃', bg: '#c2410c' },
-  { id: 'Ciclismo',      icon: '🚴', bg: '#1d4ed8' },
-  { id: 'Natação',       icon: '🏊', bg: '#0e7490' },
-  { id: 'Crossfit',      icon: '⚡', bg: '#374151' },
-  { id: 'Artes Marciais',icon: '🥋', bg: '#7c3aed' },
-  { id: 'Futebol',       icon: '⚽', bg: '#374151' },
-  { id: 'Basquete',      icon: '🏀', bg: '#9a3412' },
-  { id: 'Yoga',          icon: '🧘', bg: '#0f766e' },
+  { id: 'Musculação',    icon: <MusculacaoIcon />,     bg: '#b91c1c' },
+  { id: 'Halterofilismo',icon: <HalterofilismoIcon />, bg: '#a16207' },
+  { id: 'Corrida',       icon: <CorridaIcon />,        bg: '#c2410c' },
+  { id: 'Ciclismo',      icon: <CiclismoIcon />,       bg: '#1d4ed8' },
+  { id: 'Natação',       icon: <NatacaoIcon />,        bg: '#0e7490' },
+  { id: 'Crossfit',      icon: <CrossfitIcon />,       bg: '#374151' },
+  { id: 'Artes Marciais',icon: <ArtesMarciaisIcon />,  bg: '#7c3aed' },
+  { id: 'Futebol',       icon: <FutebolIcon />,        bg: '#374151' },
+  { id: 'Basquete',      icon: <BasqueteIcon />,       bg: '#9a3412' },
+  { id: 'Yoga',          icon: <YogaIcon />,           bg: '#0f766e' },
 ];
 
 const OBJECTIVES = [
@@ -332,7 +475,7 @@ function OptionCard({ selected, onClick, icon, label, desc }: { selected: boolea
 
 // ─── SportCard ────────────────────────────────────────────────────────────────
 
-function SportCard({ selected, onClick, icon, bg, label }: { selected: boolean; onClick: () => void; icon: string; bg: string; label: string }) {
+function SportCard({ selected, onClick, icon, label }: { selected: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
   return (
     <button
       onClick={onClick}
@@ -341,7 +484,7 @@ function SportCard({ selected, onClick, icon, bg, label }: { selected: boolean; 
         selected ? 'border-brand-red bg-brand-red/10' : 'border-dark-border bg-dark-card'
       )}
     >
-      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-2xl" style={{ backgroundColor: bg }}>
+      <div className={cn('w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shrink-0', selected ? 'bg-white/10' : 'bg-white/5')}>
         {icon}
       </div>
       <p className={cn('text-base font-bold flex-1', selected ? 'text-brand-red' : 'text-white/70')}>{label}</p>
@@ -569,7 +712,7 @@ const toggleSport = (id: string) => {
       return (
         <div className="flex flex-col gap-3">
           {SPORTS.map(o => (
-            <SportCard key={o.id} selected={(answers.sports ?? []).includes(o.id)} onClick={() => toggleSport(o.id)} icon={o.icon} bg={o.bg} label={o.id} />
+            <SportCard key={o.id} selected={(answers.sports ?? []).includes(o.id)} onClick={() => toggleSport(o.id)} icon={o.icon} label={o.id} />
           ))}
         </div>
       );
