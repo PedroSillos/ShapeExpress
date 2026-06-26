@@ -15,6 +15,12 @@ import iconFriend from '@/src/assets/icons/icon-friend.svg';
 import iconGoogleColor from '@/src/assets/icons/icon-google-color.svg';
 import iconYoutube from '@/src/assets/icons/icon-youtube.svg';
 import iconOther from '@/src/assets/icons/icon-other.svg';
+import iconMassaMuscular from '@/src/assets/icons/icon-massa-muscular.svg';
+import iconEmagrecer from '@/src/assets/icons/icon-emagrecer.svg';
+import iconCondicionamento from '@/src/assets/icons/icon-condicionamento.svg';
+import iconSaude from '@/src/assets/icons/icon-saude.svg';
+import iconForca from '@/src/assets/icons/icon-forca.svg';
+import iconEstresse from '@/src/assets/icons/icon-estresse.svg';
 import { WorkoutSession } from '../../../domain/entities';
 
 // ─── Typewriter ───────────────────────────────────────────────────────────────
@@ -113,12 +119,12 @@ const SPORTS = [
 ];
 
 const OBJECTIVES = [
-  { id: 'Ganhar massa muscular',      icon: '💪' },
-  { id: 'Emagrecer',                   icon: '🔥' },
-  { id: 'Melhorar condicionamento',    icon: '⚡' },
-  { id: 'Saúde e mobilidade',           icon: '❤️' },
-  { id: 'Aumento de força',            icon: '🏆' },
-  { id: 'Reduzir estresse',            icon: '🧠' },
+  { id: 'Ganhar massa muscular',      icon: <img src={iconMassaMuscular} className="w-7 h-7" /> },
+  { id: 'Emagrecer',                   icon: <img src={iconEmagrecer} className="w-7 h-7" /> },
+  { id: 'Melhorar condicionamento',    icon: <img src={iconCondicionamento} className="w-7 h-7" /> },
+  { id: 'Saúde e mobilidade',           icon: <img src={iconSaude} className="w-7 h-7" /> },
+  { id: 'Aumento de força',            icon: <img src={iconForca} className="w-7 h-7" /> },
+  { id: 'Reduzir estresse',            icon: <img src={iconEstresse} className="w-7 h-7" /> },
 ];
 
 // Maps objective -> 2 specific benefits shown on the preview screen
@@ -256,7 +262,7 @@ function GoalCard({ selected, onClick, label, intensity, emoji }: { selected: bo
 
 // ─── CheckboxCard ───────────────────────────────────────────────────────────
 
-function CheckboxCard({ selected, onClick, icon, label }: { selected: boolean; onClick: () => void; icon: string; label: string }) {
+function CheckboxCard({ selected, onClick, icon, label }: { selected: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
   return (
     <button
       onClick={onClick}
