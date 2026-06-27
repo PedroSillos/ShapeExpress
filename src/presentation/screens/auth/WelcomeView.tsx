@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Bell, Dumbbell, Flame, Activity, Heart, Zap, Brain } from 'lucide-react';
+import { ArrowLeft, Bell } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
 import iconHalterofilismo from '@/src/assets/icons/icon-halterofilismo.svg';
@@ -16,6 +16,12 @@ import iconFriend from '@/src/assets/icons/icon-friend.svg';
 import iconGoogleColor from '@/src/assets/icons/icon-google-color.svg';
 import iconYoutube from '@/src/assets/icons/icon-youtube.svg';
 import iconOther from '@/src/assets/icons/icon-other.svg';
+import iconMassaMuscular from '@/src/assets/icons/icon-massa-muscular.svg';
+import iconEmagrecer from '@/src/assets/icons/icon-emagrecer.svg';
+import iconCondicionamento from '@/src/assets/icons/icon-condicionamento.svg';
+import iconSaude from '@/src/assets/icons/icon-saude.svg';
+import iconForca from '@/src/assets/icons/icon-forca.svg';
+import iconEstresse from '@/src/assets/icons/icon-estresse.svg';
 import iconMuscle from '@/src/assets/icons/icon-muscle.svg';
 import iconFlame from '@/src/assets/icons/icon-flame.svg';
 import iconScale from '@/src/assets/icons/icon-scale.svg';
@@ -102,12 +108,12 @@ const SPORTS = [
 ];
 
 const OBJECTIVES = [
-  { id: 'Ganhar massa muscular',      icon: <Dumbbell size={28} /> },
-  { id: 'Emagrecer',                   icon: <Flame size={28} /> },
-  { id: 'Melhorar condicionamento',    icon: <Activity size={28} /> },
-  { id: 'Saúde e mobilidade',           icon: <Heart size={28} /> },
-  { id: 'Aumento de força',            icon: <Zap size={28} /> },
-  { id: 'Reduzir estresse',            icon: <Brain size={28} /> },
+  { id: 'Ganhar massa muscular',      icon: <img src={iconMusculacao} className="w-full h-full object-contain brightness-0 invert" />,      bg: '#dc2626' },
+  { id: 'Emagrecer',                   icon: <img src={iconEmagrecer} className="w-full h-full object-contain brightness-0 invert" />,        bg: '#c2410c' },
+  { id: 'Melhorar condicionamento',    icon: <img src={iconCondicionamento} className="w-full h-full object-contain brightness-0 invert" />,  bg: '#0e7490' },
+  { id: 'Saúde e mobilidade',           icon: <img src={iconSaude} className="w-full h-full object-contain brightness-0 invert" />,           bg: '#0f766e' },
+  { id: 'Aumento de força',            icon: <img src={iconForca} className="w-full h-full object-contain brightness-0 invert" />,            bg: '#1d4ed8' },
+  { id: 'Reduzir estresse',            icon: <img src={iconEstresse} className="w-full h-full object-contain brightness-0 invert" />,         bg: '#7c3aed' },
 ];
 
 // Maps objective -> 2 specific benefits shown on the preview screen
@@ -245,7 +251,7 @@ function GoalCard({ selected, onClick, label, intensity, emoji }: { selected: bo
 
 // ─── CheckboxCard ───────────────────────────────────────────────────────────
 
-function CheckboxCard({ selected, onClick, icon, label }: { selected: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+function CheckboxCard({ selected, onClick, icon, label, bg }: { selected: boolean; onClick: () => void; icon: React.ReactNode; label: string; bg?: string }) {
   return (
     <button
       onClick={onClick}
@@ -254,7 +260,10 @@ function CheckboxCard({ selected, onClick, icon, label }: { selected: boolean; o
         selected ? 'border-brand-red bg-dark-card' : 'border-dark-border bg-dark-card'
       )}
     >
-      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-white/5 text-3xl">
+      <div
+        className={cn('w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shrink-0 p-1.5 text-white', !bg && 'bg-white/5')}
+        style={bg ? { background: bg } : undefined}
+      >
         {icon}
       </div>
       <p className={cn('text-base font-bold flex-1', selected ? 'text-brand-red' : 'text-white/70')}>{label}</p>
@@ -566,7 +575,7 @@ const toggleSport = (id: string) => {
       return (
         <div className="flex flex-col gap-3">
           {OBJECTIVES.map(o => (
-            <CheckboxCard key={o.id} selected={answers.objective === o.id} onClick={() => set('objective', o.id)} icon={o.icon} label={o.id} />
+            <CheckboxCard key={o.id} selected={answers.objective === o.id} onClick={() => set('objective', o.id)} icon={o.icon} label={o.id} bg={o.bg} />
           ))}
         </div>
       );
