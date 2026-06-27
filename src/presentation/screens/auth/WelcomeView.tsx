@@ -426,7 +426,7 @@ function ReadyScreen({ onContinue, onNotReady, onBack, loading, skipLoading }: {
     <div className="h-screen overflow-hidden flex flex-col pt-6 pb-12 px-8">
       {/* Header — back arrow only, no progress bar */}
       <div className="shrink-0 mb-4">
-        <button onClick={onBack} className="p-1 text-white/60 active:scale-95 transition-transform">
+        <button onClick={onBack} className="p-1 text-white/40 active:scale-95 transition-transform">
           <ArrowLeft size={24} />
         </button>
       </div>
@@ -755,7 +755,7 @@ const toggleSport = (id: string) => {
     <div className="h-screen flex flex-col pt-6 pb-12 px-8 overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={handleBack} className="p-1 text-white/60 active:scale-95 transition-transform shrink-0">
+        <button onClick={handleBack} className="p-1 text-white/40 active:scale-95 transition-transform shrink-0">
           <ArrowLeft size={24} />
         </button>
         {!inIntro && (

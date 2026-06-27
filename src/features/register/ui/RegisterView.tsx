@@ -138,7 +138,7 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
     <div className="min-h-screen flex flex-col px-6 pt-6 pb-10 bg-dark-bg">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8 shrink-0">
-        <button onClick={goBack} className="text-white/60 active:scale-95 transition-transform">
+        <button onClick={goBack} className="text-white/40 active:scale-95 transition-transform">
           <ArrowLeft size={24} />
         </button>
         <div className="flex-1 h-2.5 bg-white/10 rounded-full overflow-hidden">
