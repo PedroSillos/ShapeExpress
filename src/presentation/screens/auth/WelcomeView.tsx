@@ -8,6 +8,7 @@ import iconCiclismo from '@/src/assets/icons/icon-ciclismo.svg';
 import iconNatacao from '@/src/assets/icons/icon-natacao.svg';
 import iconCrossfit from '@/src/assets/icons/icon-crossfit.svg';
 import iconTriatlo from '@/src/assets/icons/icon-triatlo.svg';
+import iconYoga from '@/src/assets/icons/icon-yoga.svg';
 import iconInstagram from '@/src/assets/icons/icon-instagram.svg';
 import iconFacebook from '@/src/assets/icons/icon-facebook.svg';
 import iconTiktok from '@/src/assets/icons/icon-tiktok.svg';
@@ -21,6 +22,17 @@ import iconCondicionamento from '@/src/assets/icons/icon-condicionamento.svg';
 import iconSaude from '@/src/assets/icons/icon-saude.svg';
 import iconForca from '@/src/assets/icons/icon-forca.svg';
 import iconEstresse from '@/src/assets/icons/icon-estresse.svg';
+import iconMuscle from '@/src/assets/icons/icon-muscle.svg';
+import iconFlame from '@/src/assets/icons/icon-flame.svg';
+import iconScale from '@/src/assets/icons/icon-scale.svg';
+import iconRun from '@/src/assets/icons/icon-run.svg';
+import iconZap from '@/src/assets/icons/icon-zap.svg';
+import iconMedal from '@/src/assets/icons/icon-medal.svg';
+import iconHeart from '@/src/assets/icons/icon-heart.svg';
+import iconMeditation from '@/src/assets/icons/icon-meditation.svg';
+import iconTrophy from '@/src/assets/icons/icon-trophy.svg';
+import iconBrain from '@/src/assets/icons/icon-brain.svg';
+import iconAlarm from '@/src/assets/icons/icon-alarm.svg';
 import { WorkoutSession } from '../../../domain/entities';
 
 // ─── Typewriter ───────────────────────────────────────────────────────────────
@@ -62,7 +74,7 @@ function MusculacaoIcon() {
 
 function HalterofilismoIcon() {
   return (
-    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#a16207' }}>
+    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#881337' }}>
       <img src={iconHalterofilismo} className="w-3/4 h-3/4 object-contain" />
     </div>
   );
@@ -70,7 +82,7 @@ function HalterofilismoIcon() {
 
 function CorridaIcon() {
   return (
-    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#c2410c' }}>
+    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#15803d' }}>
       <img src={iconCorrida} className="w-3/4 h-3/4 object-contain" />
     </div>
   );
@@ -78,7 +90,7 @@ function CorridaIcon() {
 
 function CiclismoIcon() {
   return (
-    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#1d4ed8' }}>
+    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#0d9488' }}>
       <img src={iconCiclismo} className="w-3/4 h-3/4 object-contain" />
     </div>
   );
@@ -86,7 +98,7 @@ function CiclismoIcon() {
 
 function NatacaoIcon() {
   return (
-    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#0e7490' }}>
+    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#2563eb' }}>
       <img src={iconNatacao} className="w-3/4 h-3/4 object-contain" />
     </div>
   );
@@ -94,7 +106,7 @@ function NatacaoIcon() {
 
 function CrossfitIcon() {
   return (
-    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#374151' }}>
+    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#c2410c' }}>
       <img src={iconCrossfit} className="w-3/4 h-3/4 object-contain" />
     </div>
   );
@@ -102,20 +114,29 @@ function CrossfitIcon() {
 
 function TriatloIcon() {
   return (
-    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#2d3f4f' }}>
+    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#a16207' }}>
       <img src={iconTriatlo} className="w-3/4 h-3/4 object-contain" />
+    </div>
+  );
+}
+
+function YogaIcon() {
+  return (
+    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#7c3aed' }}>
+      <img src={iconYoga} className="w-3/4 h-3/4 object-contain" />
     </div>
   );
 }
 
 const SPORTS = [
   { id: 'Musculação',    icon: <MusculacaoIcon />,     bg: '#b91c1c' },
-  { id: 'Halterofilismo',icon: <HalterofilismoIcon />, bg: '#a16207' },
-  { id: 'Corrida',       icon: <CorridaIcon />,        bg: '#c2410c' },
-  { id: 'Ciclismo',      icon: <CiclismoIcon />,       bg: '#1d4ed8' },
-  { id: 'Natação',       icon: <NatacaoIcon />,        bg: '#0e7490' },
-  { id: 'Crossfit',      icon: <CrossfitIcon />,       bg: '#374151' },
-  { id: 'Triatlo',       icon: <TriatloIcon />,        bg: '#2d3f4f' },
+  { id: 'Crossfit',      icon: <CrossfitIcon />,       bg: '#c2410c' },
+  { id: 'Corrida',       icon: <CorridaIcon />,        bg: '#15803d' },
+  { id: 'Yoga',          icon: <YogaIcon />,           bg: '#7c3aed' },
+  { id: 'Natação',       icon: <NatacaoIcon />,        bg: '#2563eb' },
+  { id: 'Ciclismo',      icon: <CiclismoIcon />,       bg: '#0d9488' },
+  { id: 'Halterofilismo',icon: <HalterofilismoIcon />, bg: '#881337' },
+  { id: 'Triatlo',       icon: <TriatloIcon />,        bg: '#a16207' },
 ];
 
 const OBJECTIVES = [
@@ -130,28 +151,28 @@ const OBJECTIVES = [
 // Maps objective -> 2 specific benefits shown on the preview screen
 const OBJECTIVE_BENEFITS: Record<string, [{ icon: string; bg: string; title: string; desc: string }, { icon: string; bg: string; title: string; desc: string }]> = {
   'Ganhar massa muscular': [
-    { icon: '💪', bg: '#b91c1c', title: 'Aumentar o volume muscular', desc: 'Treinos progressivos focados em hipertrofia' },
-    { icon: '🔥', bg: '#c2410c', title: 'Ganhar força real', desc: 'Exercícios compostos que transformam o corpo' },
+    { icon: iconMuscle, bg: '#b91c1c', title: 'Aumentar o volume muscular', desc: 'Treinos progressivos focados em hipertrofia' },
+    { icon: iconFlame, bg: '#c2410c', title: 'Ganhar força real', desc: 'Exercícios compostos que transformam o corpo' },
   ],
   'Emagrecer': [
-    { icon: '⚖️', bg: '#0e7490', title: 'Queimar gordura', desc: 'Treinos de alta intensidade que aceleram o metabolismo' },
-    { icon: '🏃', bg: '#c2410c', title: 'Melhorar o condicionamento', desc: 'Mais disposição no dia a dia' },
+    { icon: iconScale, bg: '#0e7490', title: 'Queimar gordura', desc: 'Treinos de alta intensidade que aceleram o metabolismo' },
+    { icon: iconRun, bg: '#c2410c', title: 'Melhorar o condicionamento', desc: 'Mais disposição no dia a dia' },
   ],
   'Melhorar condicionamento': [
-    { icon: '⚡', bg: '#374151', title: 'Mais fôlego', desc: 'Treinos cardía que aumentam sua resistência' },
-    { icon: '🏅', bg: '#a16207', title: 'Evoluir semana a semana', desc: 'Progresso visível em poucas semanas' },
+    { icon: iconZap, bg: '#374151', title: 'Mais fôlego', desc: 'Treinos cardía que aumentam sua resistência' },
+    { icon: iconMedal, bg: '#a16207', title: 'Evoluir semana a semana', desc: 'Progresso visível em poucas semanas' },
   ],
   'Saúde e mobilidade': [
-    { icon: '❤️', bg: '#0f766e', title: 'Corpo mais saudável', desc: 'Exercícios que melhoram postura e flexibilidade' },
-    { icon: '🧘', bg: '#7c3aed', title: 'Menos dores e tensão', desc: 'Movimentos que aliviam o estresse físico' },
+    { icon: iconHeart, bg: '#0f766e', title: 'Corpo mais saudável', desc: 'Exercícios que melhoram postura e flexibilidade' },
+    { icon: iconMeditation, bg: '#7c3aed', title: 'Menos dores e tensão', desc: 'Movimentos que aliviam o estresse físico' },
   ],
   'Aumento de força': [
-    { icon: '🏆', bg: '#1d4ed8', title: 'Ficar mais forte', desc: 'Progressão de carga para força máxima' },
-    { icon: '💪', bg: '#b91c1c', title: 'Superar seus limites', desc: 'Bata recordes pessoais toda semana' },
+    { icon: iconTrophy, bg: '#1d4ed8', title: 'Ficar mais forte', desc: 'Progressão de carga para força máxima' },
+    { icon: iconMuscle, bg: '#b91c1c', title: 'Superar seus limites', desc: 'Bata recordes pessoais toda semana' },
   ],
   'Reduzir estresse': [
-    { icon: '🧠', bg: '#7c3aed', title: 'Aliviar a mente', desc: 'Exercícios que liberam endorfina e bem-estar' },
-    { icon: '🏃', bg: '#0e7490', title: 'Dormir melhor', desc: 'Atividade física regular melhora o sono' },
+    { icon: iconBrain, bg: '#7c3aed', title: 'Aliviar a mente', desc: 'Exercícios que liberam endorfina e bem-estar' },
+    { icon: iconRun, bg: '#0e7490', title: 'Dormir melhor', desc: 'Atividade física regular melhora o sono' },
   ],
 };
 
@@ -683,14 +704,14 @@ const toggleSport = (id: string) => {
       const benefits = OBJECTIVE_BENEFITS[answers.objective ?? ''] ?? DEFAULT_BENEFITS;
       const items = [
         ...benefits,
-        { icon: '⏰', bg: '#d97706', title: 'Criar o hábito de se exercitar', desc: 'Lembretes inteligentes, desafios e muito mais' },
+        { icon: iconAlarm, bg: '#d97706', title: 'Criar o hábito de se exercitar', desc: 'Lembretes inteligentes, desafios e muito mais' },
       ];
       return (
         <div className="flex flex-col gap-6 pt-2">
           {items.map((item, i) => (
             <div key={i} className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 text-2xl" style={{ backgroundColor: item.bg }}>
-                {item.icon}
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0" style={{ backgroundColor: item.bg }}>
+                <img src={item.icon} width={28} height={28} />
               </div>
               <div className="flex-1 pt-1">
                 <p className="text-white font-bold text-base leading-snug">{item.title}</p>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Smartphone, ShieldCheck, Clock, Instagram, RefreshCw, TrendingUp, Scale, Target, Camera, ChevronLeft, User } from 'lucide-react';
+import iconCalendar from '@/src/assets/icons/icon-calendar.svg';
 import { Card } from '../components/Card';
 import { UserProfile } from '../../domain/entities';
 import { isValidEmail, isValidPhone, isValidDate } from '../../utils/validation';
@@ -222,7 +223,7 @@ export function EditProfileView({ userProfile, onSave, onCancel, api }: EditProf
                 setFormData(prev => ({...prev, birthDate: ''}));
               }
             }}
-            icon={<CalendarIcon size={18} />} 
+            icon={<img src={iconCalendar} width={18} height={18} className="opacity-20" />} 
             type="date" 
           />
         </div>
@@ -240,24 +241,3 @@ export function EditProfileView({ userProfile, onSave, onCancel, api }: EditProf
   );
 }
 
-function CalendarIcon({ size, className }: { size?: number, className?: string }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width={size || 24} 
-      height={size || 24} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-      <line x1="16" y1="2" x2="16" y2="6" />
-      <line x1="8" y1="2" x2="8" y2="6" />
-      <line x1="3" y1="10" x2="21" y2="10" />
-    </svg>
-  );
-}
