@@ -179,13 +179,13 @@ const OBJECTIVE_BENEFITS: Record<string, [{ icon: string; bg: string; title: str
 const DEFAULT_BENEFITS = OBJECTIVE_BENEFITS['Ganhar massa muscular'];
 
 const SOURCES = [
-  { id: 'Instagram',          icon: <img src={iconInstagram} className="w-full h-full" /> },
-  { id: 'Facebook',           icon: <img src={iconFacebook} className="w-full h-full" /> },
-  { id: 'TikTok',             icon: <img src={iconTiktok} className="w-full h-full" /> },
-  { id: 'Indicação de amigo', icon: <img src={iconFriend} className="w-full h-full" /> },
-  { id: 'Google',             icon: <img src={iconGoogleColor} className="w-full h-full" /> },
-  { id: 'YouTube',            icon: <img src={iconYoutube} className="w-full h-full" /> },
-  { id: 'Outro',              icon: <img src={iconOther} className="w-full h-full" /> },
+  { id: 'Instagram',          icon: <img src={iconInstagram} className="w-full h-full brightness-0 invert" />,          bg: 'linear-gradient(135deg, #f9ce34, #ee2a7b, #6228d7)' },
+  { id: 'Facebook',           icon: <img src={iconFacebook} className="w-full h-full brightness-0 invert" />,           bg: '#1877f2' },
+  { id: 'TikTok',             icon: <img src={iconTiktok} className="w-full h-full brightness-0 invert" />,             bg: '#010101' },
+  { id: 'Indicação de amigo', icon: <img src={iconFriend} className="w-full h-full brightness-0 invert" />,             bg: '#7c3aed' },
+  { id: 'Google',             icon: <img src={iconGoogleColor} className="w-full h-full" />,                            bg: '#ffffff' },
+  { id: 'YouTube',            icon: <img src={iconYoutube} className="w-full h-full brightness-0 invert" />,            bg: '#ff0000' },
+  { id: 'Outro',              icon: <img src={iconOther} className="w-full h-full brightness-0 invert" />,              bg: '#374151' },
 ];
 
 const EXPERIENCE_LEVELS = [
@@ -324,7 +324,7 @@ function SignalBars({ filled, selected }: { filled: number; selected: boolean })
 
 // ─── OptionCard ───────────────────────────────────────────────────────────────
 
-function OptionCard({ selected, onClick, icon, label, desc }: { selected: boolean; onClick: () => void; icon?: React.ReactNode; label: string; desc?: string }) {
+function OptionCard({ selected, onClick, icon, label, desc, iconBg }: { selected: boolean; onClick: () => void; icon?: React.ReactNode; label: string; desc?: string; iconBg?: string }) {
   return (
     <button
       onClick={onClick}
@@ -334,10 +334,13 @@ function OptionCard({ selected, onClick, icon, label, desc }: { selected: boolea
       )}
     >
       {icon && (
-        <div className={cn(
-          'w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shrink-0',
-          selected ? 'bg-white/10' : 'bg-white/5'
-        )}>
+        <div
+          className={cn(
+            'w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shrink-0 p-2',
+            !iconBg && (selected ? 'bg-white/10' : 'bg-white/5')
+          )}
+          style={iconBg ? { background: iconBg } : undefined}
+        >
           {icon}
         </div>
       )}
@@ -608,7 +611,7 @@ const toggleSport = (id: string) => {
       return (
         <div className="flex flex-col gap-3">
           {SOURCES.map(o => (
-            <OptionCard key={o.id} selected={answers.source === o.id} onClick={() => set('source', o.id)} icon={o.icon} label={o.id} />
+            <OptionCard key={o.id} selected={answers.source === o.id} onClick={() => set('source', o.id)} icon={o.icon} label={o.id} iconBg={o.bg} />
           ))}
         </div>
       );
