@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Bell } from 'lucide-react';
+import { ArrowLeft, Bell, Dumbbell, Flame, Activity, Heart, Zap, Brain } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
 import iconHalterofilismo from '@/src/assets/icons/icon-halterofilismo.svg';
@@ -16,12 +16,6 @@ import iconFriend from '@/src/assets/icons/icon-friend.svg';
 import iconGoogleColor from '@/src/assets/icons/icon-google-color.svg';
 import iconYoutube from '@/src/assets/icons/icon-youtube.svg';
 import iconOther from '@/src/assets/icons/icon-other.svg';
-import iconMassaMuscular from '@/src/assets/icons/icon-massa-muscular.svg';
-import iconEmagrecer from '@/src/assets/icons/icon-emagrecer.svg';
-import iconCondicionamento from '@/src/assets/icons/icon-condicionamento.svg';
-import iconSaude from '@/src/assets/icons/icon-saude.svg';
-import iconForca from '@/src/assets/icons/icon-forca.svg';
-import iconEstresse from '@/src/assets/icons/icon-estresse.svg';
 import iconMuscle from '@/src/assets/icons/icon-muscle.svg';
 import iconFlame from '@/src/assets/icons/icon-flame.svg';
 import iconScale from '@/src/assets/icons/icon-scale.svg';
@@ -65,87 +59,55 @@ function useTypewriter(segments: Segment[], speed = 30) {
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 function MusculacaoIcon() {
-  return (
-    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#b91c1c' }}>
-      <img src={iconMusculacao} className="w-3/4 h-3/4 object-contain" />
-    </div>
-  );
+  return <img src={iconMusculacao} className="w-full h-full object-contain brightness-0 invert" />;
 }
 
 function HalterofilismoIcon() {
-  return (
-    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#881337' }}>
-      <img src={iconHalterofilismo} className="w-3/4 h-3/4 object-contain" />
-    </div>
-  );
+  return <img src={iconHalterofilismo} className="w-full h-full object-contain brightness-0 invert" />;
 }
 
 function CorridaIcon() {
-  return (
-    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#15803d' }}>
-      <img src={iconCorrida} className="w-3/4 h-3/4 object-contain" />
-    </div>
-  );
+  return <img src={iconCorrida} className="w-full h-full object-contain brightness-0 invert" />;
 }
 
 function CiclismoIcon() {
-  return (
-    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#0d9488' }}>
-      <img src={iconCiclismo} className="w-3/4 h-3/4 object-contain" />
-    </div>
-  );
+  return <img src={iconCiclismo} className="w-full h-full object-contain brightness-0 invert" />;
 }
 
 function NatacaoIcon() {
-  return (
-    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#2563eb' }}>
-      <img src={iconNatacao} className="w-3/4 h-3/4 object-contain" />
-    </div>
-  );
+  return <img src={iconNatacao} className="w-full h-full object-contain brightness-0 invert" />;
 }
 
 function CrossfitIcon() {
-  return (
-    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#c2410c' }}>
-      <img src={iconCrossfit} className="w-3/4 h-3/4 object-contain" />
-    </div>
-  );
+  return <img src={iconCrossfit} className="w-full h-full object-contain brightness-0 invert" />;
 }
 
 function TriatloIcon() {
-  return (
-    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#a16207' }}>
-      <img src={iconTriatlo} className="w-3/4 h-3/4 object-contain" />
-    </div>
-  );
+  return <img src={iconTriatlo} className="w-full h-full object-contain brightness-0 invert" />;
 }
 
 function YogaIcon() {
-  return (
-    <div className="w-full h-full rounded-xl flex items-center justify-center" style={{ backgroundColor: '#7c3aed' }}>
-      <img src={iconYoga} className="w-3/4 h-3/4 object-contain" />
-    </div>
-  );
+  return <img src={iconYoga} className="w-full h-full object-contain brightness-0 invert" />;
 }
 
 const SPORTS = [
-  { id: 'Musculação',    icon: <MusculacaoIcon />,     bg: '#b91c1c' },
-  { id: 'Crossfit',      icon: <CrossfitIcon />,       bg: '#c2410c' },
-  { id: 'Corrida',       icon: <CorridaIcon />,        bg: '#15803d' },
-  { id: 'Yoga',          icon: <YogaIcon />,           bg: '#7c3aed' },
+  { id: 'Musculação',    icon: <MusculacaoIcon />,     bg: '#dc2626' },
+  { id: 'Crossfit',      icon: <CrossfitIcon />,       bg: '#ea580c' },
+  { id: 'Corrida',       icon: <CorridaIcon />,        bg: '#ca8a04' },
+  { id: 'Yoga',          icon: <YogaIcon />,           bg: '#16a34a' },
   { id: 'Natação',       icon: <NatacaoIcon />,        bg: '#2563eb' },
-  { id: 'Ciclismo',      icon: <CiclismoIcon />,       bg: '#0d9488' },
-  { id: 'Halterofilismo',icon: <HalterofilismoIcon />, bg: '#881337' },
-  { id: 'Triatlo',       icon: <TriatloIcon />,        bg: '#a16207' },
+  { id: 'Ciclismo',      icon: <CiclismoIcon />,       bg: '#0891b2' },
+  { id: 'Halterofilismo',icon: <HalterofilismoIcon />, bg: '#7c3aed' },
+  { id: 'Triatlo',       icon: <TriatloIcon />,        bg: '#db2777' },
 ];
 
 const OBJECTIVES = [
-  { id: 'Ganhar massa muscular',      icon: <img src={iconMassaMuscular} className="w-7 h-7" /> },
-  { id: 'Emagrecer',                   icon: <img src={iconEmagrecer} className="w-7 h-7" /> },
-  { id: 'Melhorar condicionamento',    icon: <img src={iconCondicionamento} className="w-7 h-7" /> },
-  { id: 'Saúde e mobilidade',           icon: <img src={iconSaude} className="w-7 h-7" /> },
-  { id: 'Aumento de força',            icon: <img src={iconForca} className="w-7 h-7" /> },
-  { id: 'Reduzir estresse',            icon: <img src={iconEstresse} className="w-7 h-7" /> },
+  { id: 'Ganhar massa muscular',      icon: <Dumbbell size={28} /> },
+  { id: 'Emagrecer',                   icon: <Flame size={28} /> },
+  { id: 'Melhorar condicionamento',    icon: <Activity size={28} /> },
+  { id: 'Saúde e mobilidade',           icon: <Heart size={28} /> },
+  { id: 'Aumento de força',            icon: <Zap size={28} /> },
+  { id: 'Reduzir estresse',            icon: <Brain size={28} /> },
 ];
 
 // Maps objective -> 2 specific benefits shown on the preview screen
@@ -354,7 +316,7 @@ function OptionCard({ selected, onClick, icon, label, desc, iconBg }: { selected
 
 // ─── SportCard ────────────────────────────────────────────────────────────────
 
-function SportCard({ selected, onClick, icon, label }: { selected: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+function SportCard({ selected, onClick, icon, label, bg }: { selected: boolean; onClick: () => void; icon: React.ReactNode; label: string; bg?: string }) {
   return (
     <button
       onClick={onClick}
@@ -363,7 +325,10 @@ function SportCard({ selected, onClick, icon, label }: { selected: boolean; onCl
         selected ? 'border-brand-red bg-brand-red/10' : 'border-dark-border bg-dark-card'
       )}
     >
-      <div className={cn('w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shrink-0', selected ? 'bg-white/10' : 'bg-white/5')}>
+      <div
+        className={cn('w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shrink-0 p-1.5', !bg && (selected ? 'bg-white/10' : 'bg-white/5'))}
+        style={bg ? { background: bg } : undefined}
+      >
         {icon}
       </div>
       <p className={cn('text-base font-bold flex-1', selected ? 'text-brand-red' : 'text-white/70')}>{label}</p>
@@ -591,7 +556,7 @@ const toggleSport = (id: string) => {
       return (
         <div className="flex flex-col gap-3">
           {SPORTS.map(o => (
-            <SportCard key={o.id} selected={(answers.sports ?? []).includes(o.id)} onClick={() => toggleSport(o.id)} icon={o.icon} label={o.id} />
+            <SportCard key={o.id} selected={(answers.sports ?? []).includes(o.id)} onClick={() => toggleSport(o.id)} icon={o.icon} label={o.id} bg={o.bg} />
           ))}
         </div>
       );
