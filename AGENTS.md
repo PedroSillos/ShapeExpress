@@ -99,25 +99,14 @@ Chat is Firestore-only — no WebSocket. Messages at `messages/{roomId}/msgs/{ms
 - Naming: `PascalCase` components/types, `camelCase` functions, `UPPER_SNAKE_CASE` constants
 - SRP: one component/hook/service per file
 
-### Icon Card Template
+### Icon Template
 
 Use this pattern for icon cards (onboarding, selections, lists):
 
-```tsx
-// Container
-<div
-  className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shrink-0 p-1.5"
-  style={{ background: bg }}
->
-  {/* SVG from src/assets/icons/ — preferred over Lucide for custom icons */}
-  <img src={iconFoo} className="w-full h-full object-contain brightness-0 invert" />
-</div>
-```
-
-- Icon source: prefer `src/assets/icons/*.svg` with `brightness-0 invert` (white on colored bg)
-- Background: use a solid hex color per item (`bg` prop), not Tailwind bg classes
-- Container: always `w-12 h-12 rounded-xl overflow-hidden p-1.5`
-- Fallback (no bg): `bg-white/5` via `cn(!bg && 'bg-white/5')`
+- Icon source: prefer `src/assets/icons/*.svg` with `brightness-0 invert` (white on colored bg). If does not exist, use lucide.dev/
+- Background: prefer solid hex color per item (`bg` prop), not Tailwind bg classes
+- Container: prefer `w-12 h-12 rounded-xl overflow-hidden p-1.5`
+- Fallback (no bg): prefer `bg-white/5` via `cn(!bg && 'bg-white/5')`
 
 ### Commit Types
 

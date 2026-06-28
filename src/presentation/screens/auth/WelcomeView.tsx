@@ -33,6 +33,14 @@ import iconMeditation from '@/src/assets/icons/icon-meditation.svg';
 import iconTrophy from '@/src/assets/icons/icon-trophy.svg';
 import iconBrain from '@/src/assets/icons/icon-brain.svg';
 import iconAlarm from '@/src/assets/icons/icon-alarm.svg';
+import iconCalendar from '@/src/assets/icons/icon-calendar.svg';
+import iconMoon from '@/src/assets/icons/icon-moon.svg';
+import iconRoman2 from '@/src/assets/icons/icon-roman-2.svg';
+import iconRoman3 from '@/src/assets/icons/icon-roman-3.svg';
+import iconRoman4 from '@/src/assets/icons/icon-roman-4.svg';
+import iconRoman5 from '@/src/assets/icons/icon-roman-5.svg';
+import iconRoman6 from '@/src/assets/icons/icon-roman-6.svg';
+import iconRoman7 from '@/src/assets/icons/icon-roman-7.svg';
 import { WorkoutSession } from '../../../domain/entities';
 
 // ─── Typewriter ───────────────────────────────────────────────────────────────
@@ -119,28 +127,28 @@ const OBJECTIVES = [
 // Maps objective -> 2 specific benefits shown on the preview screen
 const OBJECTIVE_BENEFITS: Record<string, [{ icon: string; bg: string; title: string; desc: string }, { icon: string; bg: string; title: string; desc: string }]> = {
   'Ganhar massa muscular': [
-    { icon: iconMuscle, bg: '#b91c1c', title: 'Aumentar o volume muscular', desc: 'Treinos progressivos focados em hipertrofia' },
-    { icon: iconFlame, bg: '#c2410c', title: 'Ganhar força real', desc: 'Exercícios compostos que transformam o corpo' },
+    { icon: iconMusculacao, bg: '#b91c1c', title: 'Aumentar o volume muscular', desc: 'Treinos progressivos focados em hipertrofia' },
+    { icon: iconForca,     bg: '#c2410c', title: 'Ganhar força real', desc: 'Exercícios compostos que transformam o corpo' },
   ],
   'Emagrecer': [
-    { icon: iconScale, bg: '#0e7490', title: 'Queimar gordura', desc: 'Treinos de alta intensidade que aceleram o metabolismo' },
-    { icon: iconRun, bg: '#c2410c', title: 'Melhorar o condicionamento', desc: 'Mais disposição no dia a dia' },
+    { icon: iconFlame, bg: '#0e7490', title: 'Queimar gordura', desc: 'Treinos de alta intensidade que aceleram o metabolismo' },
+    { icon: iconRun,   bg: '#c2410c', title: 'Melhorar o condicionamento', desc: 'Mais disposição no dia a dia' },
   ],
   'Melhorar condicionamento': [
-    { icon: iconZap, bg: '#374151', title: 'Mais fôlego', desc: 'Treinos cardía que aumentam sua resistência' },
+    { icon: iconZap,   bg: '#374151', title: 'Mais fôlego', desc: 'Treinos cardía que aumentam sua resistência' },
     { icon: iconMedal, bg: '#a16207', title: 'Evoluir semana a semana', desc: 'Progresso visível em poucas semanas' },
   ],
   'Saúde e mobilidade': [
-    { icon: iconHeart, bg: '#0f766e', title: 'Corpo mais saudável', desc: 'Exercícios que melhoram postura e flexibilidade' },
+    { icon: iconHeart,      bg: '#0f766e', title: 'Corpo mais saudável', desc: 'Exercícios que melhoram postura e flexibilidade' },
     { icon: iconMeditation, bg: '#7c3aed', title: 'Menos dores e tensão', desc: 'Movimentos que aliviam o estresse físico' },
   ],
   'Aumento de força': [
-    { icon: iconTrophy, bg: '#1d4ed8', title: 'Ficar mais forte', desc: 'Progressão de carga para força máxima' },
-    { icon: iconMuscle, bg: '#b91c1c', title: 'Superar seus limites', desc: 'Bata recordes pessoais toda semana' },
+    { icon: iconForca,  bg: '#1d4ed8', title: 'Ficar mais forte', desc: 'Progressão de carga para força máxima' },
+    { icon: iconTrophy, bg: '#b91c1c', title: 'Superar seus limites', desc: 'Bata recordes pessoais toda semana' },
   ],
   'Reduzir estresse': [
-    { icon: iconBrain, bg: '#7c3aed', title: 'Aliviar a mente', desc: 'Exercícios que liberam endorfina e bem-estar' },
-    { icon: iconRun, bg: '#0e7490', title: 'Dormir melhor', desc: 'Atividade física regular melhora o sono' },
+    { icon: iconBrain,      bg: '#7c3aed', title: 'Aliviar a mente', desc: 'Exercícios que liberam endorfina e bem-estar' },
+    { icon: iconMoon,       bg: '#0e7490', title: 'Dormir melhor', desc: 'Atividade física regular melhora o sono' },
   ],
 };
 
@@ -164,12 +172,12 @@ const EXPERIENCE_LEVELS = [
 ];
 
 const WEEKLY_GOALS = [
-  { value: 2, label: 'por semana', intensity: 'Tranquilo', emoji: 'Ⅱ' },
-  { value: 3, label: 'por semana', intensity: 'Regular',   emoji: 'Ⅲ' },
-  { value: 4, label: 'por semana', intensity: 'Intenso',   emoji: 'Ⅳ' },
-  { value: 5, label: 'por semana', intensity: 'Puxado',    emoji: 'Ⅴ' },
-  { value: 6, label: 'por semana', intensity: 'Pesado',    emoji: 'Ⅵ' },
-  { value: 7, label: 'por semana', intensity: 'Extremo',   emoji: 'Ⅶ' },
+  { value: 2, label: 'por semana', intensity: 'Tranquilo', icon: iconRoman2, bg: '#0f766e' },
+  { value: 3, label: 'por semana', intensity: 'Regular',   icon: iconRoman3, bg: '#1d4ed8' },
+  { value: 4, label: 'por semana', intensity: 'Intenso',   icon: iconRoman4, bg: '#a16207' },
+  { value: 5, label: 'por semana', intensity: 'Puxado',    icon: iconRoman5, bg: '#c2410c' },
+  { value: 6, label: 'por semana', intensity: 'Pesado',    icon: iconRoman6, bg: '#b91c1c' },
+  { value: 7, label: 'por semana', intensity: 'Extremo',   icon: iconRoman7, bg: '#7f1d1d' },
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -231,17 +239,19 @@ function getAnswer(answers: Answers, q: DynQuestion): unknown {
 
 // ─── GoalCard ───────────────────────────────────────────────────────────────
 
-function GoalCard({ selected, onClick, label, intensity, emoji }: { selected: boolean; onClick: () => void; label: string; intensity: string; emoji: string }) {
+function GoalCard({ selected, onClick, label, intensity, icon, bg }: { selected: boolean; onClick: () => void; label: string; intensity: string; icon: string; bg: string }) {
   return (
     <button
       onClick={onClick}
       className={cn(
-        'w-full px-4 py-5 rounded-2xl border-2 flex items-center justify-between transition-all text-left active:scale-95',
+        'w-full px-4 py-4 rounded-2xl border-2 flex items-center justify-between transition-all text-left active:scale-95',
         selected ? 'border-brand-red bg-dark-card' : 'border-dark-border bg-dark-card'
       )}
     >
       <div className="flex items-center gap-3">
-        <span className={cn('text-2xl leading-none flex items-center', selected ? 'text-brand-red' : 'text-white/70')}>{emoji}</span>
+        <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shrink-0 p-1.5" style={{ backgroundColor: bg }}>
+          <img src={icon} className="w-full h-full object-contain brightness-0 invert" />
+        </div>
         <p className={cn('text-base font-bold', selected ? 'text-brand-red' : 'text-white/70')}>{label}</p>
       </div>
       <p className={cn('text-sm font-semibold', selected ? 'text-brand-red/70' : 'text-white/40')}>{intensity}</p>
@@ -414,7 +424,7 @@ function ReadyScreen({ onContinue, onNotReady, onBack, loading, skipLoading }: {
         <div className="relative bg-dark-card border border-dark-border rounded-2xl px-5 py-4 w-full">
           <p className="text-white text-lg leading-snug text-center">
             Certo! Vamos para o seu{' '}
-            <span className="text-brand-red font-black">primeiro treino</span>?
+            <span className="text-brand-red font-bold">primeiro treino</span>?
           </p>
           {/* Downward triangle pointing to mascot */}
           <div className="absolute left-1/2 -translate-x-1/2 -bottom-[10px] w-0 h-0"
@@ -431,7 +441,7 @@ function ReadyScreen({ onContinue, onNotReady, onBack, loading, skipLoading }: {
           onClick={onContinue}
           disabled={loading || skipLoading}
           className={cn(
-            'w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all',
+            'w-full py-4 rounded-2xl font-bold text-sm uppercase tracking-widest transition-all',
             loading ? 'bg-dark-card text-white/40 border-2 border-dark-border' : 'red-gradient text-black shadow-[0_4px_0_0_rgba(150,10,10,0.6)] active:scale-95',
             skipLoading && 'opacity-0 pointer-events-none'
           )}
@@ -444,7 +454,7 @@ function ReadyScreen({ onContinue, onNotReady, onBack, loading, skipLoading }: {
           onClick={onNotReady}
           disabled={loading || skipLoading}
           className={cn(
-            'w-full py-4 bg-transparent border-2 border-dark-border rounded-2xl text-white/50 font-bold text-xs uppercase tracking-widest transition-all',
+            'w-full py-4 bg-transparent border-2 border-dark-border rounded-2xl text-white/50 font-semibold text-xs uppercase tracking-widest transition-all',
             skipLoading ? 'text-white/70' : 'active:scale-95',
             loading && 'opacity-0 pointer-events-none'
           )}
@@ -614,7 +624,7 @@ const toggleSport = (id: string) => {
       return (
         <div className="flex flex-col gap-3">
           {WEEKLY_GOALS.map(g => (
-            <GoalCard key={g.value} selected={answers.weeklyGoal === g.value} onClick={() => set('weeklyGoal', g.value)} label={g.label} intensity={g.intensity} emoji={g.emoji} />
+            <GoalCard key={g.value} selected={answers.weeklyGoal === g.value} onClick={() => set('weeklyGoal', g.value)} label={g.label} intensity={g.intensity} icon={g.icon} bg={g.bg} />
           ))}
         </div>
       );
@@ -681,14 +691,14 @@ const toggleSport = (id: string) => {
       const benefits = OBJECTIVE_BENEFITS[answers.objective ?? ''] ?? DEFAULT_BENEFITS;
       const items = [
         ...benefits,
-        { icon: iconAlarm, bg: '#d97706', title: 'Criar o hábito de se exercitar', desc: 'Lembretes inteligentes, desafios e muito mais' },
+        { icon: iconCalendar, bg: '#d97706', title: 'Criar o hábito de se exercitar', desc: 'Lembretes inteligentes, desafios e muito mais' },
       ];
       return (
         <div className="flex flex-col gap-6 pt-2">
           {items.map((item, i) => (
             <div key={i} className="flex items-start gap-4">
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0" style={{ backgroundColor: item.bg }}>
-                <img src={item.icon} width={28} height={28} />
+                <img src={item.icon} width={28} height={28} className="brightness-0 invert" />
               </div>
               <div className="flex-1 pt-1">
                 <p className="text-white font-bold text-base leading-snug">{item.title}</p>
@@ -704,19 +714,19 @@ const toggleSport = (id: string) => {
       return (
         <div className="bg-dark-card border border-dark-border rounded-3xl p-6 flex flex-col items-center gap-5">
           <Bell size={40} className="text-white/40" />
-          <p className="text-white text-lg font-bold text-center leading-snug">
+          <p className="text-white text-lg font-normal text-center leading-snug">
             Permitir que o <strong>Shape Express</strong> envie notificações?
           </p>
           <div className="w-full flex flex-col divide-y divide-dark-border rounded-2xl overflow-hidden border border-dark-border">
             <button
               onClick={() => handleContinueWith('notifications', true)}
-              className="w-full py-4 text-base font-black text-brand-red uppercase tracking-widest active:bg-white/5 transition-colors"
+              className="w-full py-4 text-base font-semibold text-brand-red uppercase tracking-widest active:bg-white/5 transition-colors"
             >
               Permitir
             </button>
             <button
               onClick={() => handleContinueWith('notifications', false)}
-              className="w-full py-4 text-base font-bold text-white/40 uppercase tracking-widest active:bg-white/5 transition-colors"
+              className="w-full py-4 text-base font-semibold text-white/40 uppercase tracking-widest active:bg-white/5 transition-colors"
             >
               Não permitir
             </button>
