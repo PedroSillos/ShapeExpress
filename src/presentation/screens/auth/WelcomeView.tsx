@@ -24,7 +24,6 @@ import iconForca from '@/src/assets/icons/icon-forca.svg';
 import iconEstresse from '@/src/assets/icons/icon-estresse.svg';
 import iconFlame from '@/src/assets/icons/icon-flame.svg';
 import iconScale from '@/src/assets/icons/icon-scale.svg';
-import iconRun from '@/src/assets/icons/icon-run.svg';
 import iconZap from '@/src/assets/icons/icon-zap.svg';
 import iconMedal from '@/src/assets/icons/icon-medal.svg';
 import iconHeart from '@/src/assets/icons/icon-heart.svg';
@@ -130,7 +129,7 @@ const OBJECTIVE_BENEFITS: Record<string, [{ icon: string; bg: string; title: str
   ],
   'Emagrecer': [
     { icon: iconFlame, bg: '#0e7490', title: 'Queimar gordura', desc: 'Treinos de alta intensidade que aceleram o metabolismo' },
-    { icon: iconRun,   bg: '#c2410c', title: 'Melhorar o condicionamento', desc: 'Mais disposição no dia a dia' },
+    { icon: iconCorrida, bg: '#c2410c', title: 'Melhorar o condicionamento', desc: 'Mais disposição no dia a dia' },
   ],
   'Melhorar condicionamento': [
     { icon: iconZap,   bg: '#374151', title: 'Mais fôlego', desc: 'Treinos cardía que aumentam sua resistência' },

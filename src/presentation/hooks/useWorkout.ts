@@ -11,6 +11,7 @@ import {
 } from '../../domain/use-cases/workoutEstimation';
 import { analyzeExerciseStagnation } from '../../domain/use-cases/analyzeStagnation';
 import { EXERCISES } from '../../constants';
+import { getInputMode } from '../../domain/use-cases/exerciseInputMode';
 
 interface UseWorkoutParams {
   api: any;
@@ -105,7 +106,17 @@ export function useWorkout({
             const reps = repsArray[i] !== undefined && !isNaN(repsArray[i]) ? repsArray[i] : (repsArray[0] || 10);
             const restArray = config.rest.split(',').map((s: string) => s.trim());
             const rest = restArray[i] !== undefined ? restArray[i] : (restArray[0] || '1 min');
-            return { id: `${Date.now()}-${i}`, reps, weight: lastWeight, completed: false, rest };
+            const exerciseData = EXERCISES.find(e => e.id === config.exerciseId);
+            const inputMode = getInputMode(exerciseData ?? { inputMode: undefined } as any);
+            const isDuration = inputMode === 'duration_distance' || inputMode === 'duration_only';
+            return {
+              id: `${Date.now()}-${i}`,
+              reps: isDuration ? 0 : reps,
+              weight: isDuration || inputMode === 'reps_only' ? 0 : lastWeight,
+              completed: false,
+              rest,
+              ...(isDuration ? { durationSeconds: 0 } : {}),
+            };
           }),
         };
       }),
@@ -128,7 +139,12 @@ export function useWorkout({
     const completedSession: WorkoutSession = {
       ...activeWorkout,
       totalVolume: activeWorkout.exercises.reduce(
-        (acc, ex) => acc + ex.sets.reduce((sAcc, s) => sAcc + (s.completed ? s.reps * s.weight : 0), 0), 0,
+        (acc, ex) => {
+          const exerciseData = EXERCISES.find(e => e.id === ex.exerciseId);
+          const inputMode = getInputMode(exerciseData ?? { inputMode: undefined } as any);
+          if (inputMode !== 'weight_reps') return acc;
+          return acc + ex.sets.reduce((sAcc, s) => sAcc + (s.completed ? s.reps * s.weight : 0), 0);
+        }, 0,
       ),
       duration: metrics.totalDuration,
       xpEarned: calculatedXp,

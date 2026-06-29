@@ -10,6 +10,8 @@ import {
   Scale,
   Trash2,
   Clock,
+  Square,
+  RotateCcw,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -21,6 +23,7 @@ import {
   UserProfile,
   WorkoutSet
 } from '../../domain/entities';
+import { getInputMode, isSetReadyToComplete } from '../../domain/use-cases/exerciseInputMode';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { ProgressBar } from '../components/ProgressBar';
@@ -99,6 +102,38 @@ export function ActiveWorkoutView({
   const [showConfirmCancel, setShowConfirmCancel] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showConfirmDeleteSet, setShowConfirmDeleteSet] = useState(false);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [timerRemaining, setTimerRemaining] = useState<number | null>(null);
+  const timerRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Stop timer whenever active set changes
+  React.useEffect(() => {
+    setTimerRunning(false);
+    setTimerRemaining(null);
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+  }, [activeExerciseIndex, activeSetIndex]);
+
+  // Countdown interval
+  React.useEffect(() => {
+    if (timerRunning) {
+      timerRef.current = setInterval(() => {
+        setTimerRemaining(prev => {
+          if (prev === null || prev <= 1) {
+            clearInterval(timerRef.current!);
+            timerRef.current = null;
+            setTimerRunning(false);
+            // auto-complete the set
+            updateSet(activeSetIndex, { completed: true });
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    }
+    return () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } };
+  }, [timerRunning]);
   const activeExercise = session.exercises && session.exercises.length > 0 ? session.exercises[activeExerciseIndex] : null;
   const exerciseDetails = activeExercise ? EXERCISES.find(e => e.id === activeExercise.exerciseId) : null;
   
@@ -158,12 +193,16 @@ export function ActiveWorkoutView({
   const addSet = () => {
     const newExercises = [...session.exercises];
     const lastSet = activeExercise.sets[activeExercise.sets.length - 1];
+    const inputMode = getInputMode(exerciseDetails ?? { inputMode: undefined } as any);
+    const isDuration = inputMode === 'duration_distance' || inputMode === 'duration_only';
     newExercises[activeExerciseIndex].sets.push({
       id: Date.now().toString(),
-      reps: lastSet?.reps || 10,
-      weight: lastSet?.weight || 0,
+      reps: isDuration ? 0 : (lastSet?.reps || 10),
+      weight: isDuration || inputMode === 'reps_only' ? 0 : (lastSet?.weight || 0),
       completed: false,
-      rest: lastSet?.rest || '1 min'
+      rest: lastSet?.rest || '1 min',
+      ...(isDuration ? { durationSeconds: lastSet?.durationSeconds || 0 } : {}),
+      ...(inputMode === 'duration_distance' ? { distanceMeters: lastSet?.distanceMeters } : {}),
     });
     setSession({ ...session, exercises: newExercises });
   };
@@ -424,7 +463,7 @@ export function ActiveWorkoutView({
           </div>
         )}
 
-        {showVideoModal && exerciseDetails?.youtubeUrl && (
+        {showVideoModal && exerciseDetails && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center p-6">
             <motion.div 
               initial={{ opacity: 0 }}
@@ -506,15 +545,19 @@ export function ActiveWorkoutView({
                   })}
                 </div>
                 <div className="mt-3 rounded-2xl bg-white/5 border border-white/5 px-4 pt-2 pb-3 space-y-2">
-                  {exerciseDetails?.youtubeUrl && (
-                    <button
-                      onClick={() => setShowVideoModal(true)}
-                      className="w-full flex items-center justify-center gap-2 py-3 bg-black/40 border border-white/10 rounded-xl text-sm font-bold text-white/60"
-                    >
-                      <Play size={14} fill="currentColor" />
-                      Ver vídeo
-                    </button>
-                  )}
+                  <button
+                    onClick={() => {
+                      if (exerciseDetails?.youtubeUrl) {
+                        setShowVideoModal(true);
+                      } else {
+                        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent((exerciseDetails?.name ?? '') + ' como fazer exercício')}`, '_blank');
+                      }
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-black/40 border border-white/10 rounded-xl text-sm font-bold text-white/60"
+                  >
+                    <Play size={14} fill="currentColor" />
+                    Ver vídeo
+                  </button>
                   <div className="flex gap-2">
                     <Badge className="bg-black/40 text-white/60 text-xs px-3 py-1 rounded-full font-bold">{exerciseDetails?.muscleGroup}</Badge>
                     {exerciseDetails?.muscleSubgroup && (
@@ -550,33 +593,140 @@ export function ActiveWorkoutView({
                 if (!set) return null;
                 return (
                   <>
-                    {/* Weight/reps card */}
-                    <div className="rounded-2xl border border-white/5 overflow-hidden">
-                      <div className={cn('relative z-10 p-6 space-y-4', set.completed ? 'bg-brand-red/10' : 'bg-white/5')}>
-                        {activeExercise.sets.length > 1 && (
-                          <button onClick={() => setShowConfirmDeleteSet(true)} className="absolute top-3 right-3 p-1.5 bg-white/5 rounded-lg text-white/30 hover:text-white/60 transition-colors">
-                            <Trash2 size={14} />
-                          </button>
-                        )}
-                        <div className="space-y-2">
-                          <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">Peso (kg)</p>
-                          <div className="flex items-center gap-2 w-full">
-                            <StepperButton label="−" onStep={() => { const w = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].weight; updateSet(activeSetIndex, { weight: Math.max(0, w - 1) }); }} />
-                            <input type="number" value={set.weight || ''} onChange={(e) => updateSet(activeSetIndex, { weight: Number(e.target.value) })} className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none" placeholder="0" />
-                            <StepperButton label="+" onStep={() => { const w = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].weight; updateSet(activeSetIndex, { weight: w + 1 }); }} />
+                    {/* Set inputs — conditional by inputMode */}
+                    {(() => {
+                      const inputMode = getInputMode(exerciseDetails ?? { inputMode: undefined } as any);
+                      const formatDuration = (secs: number) => {
+                        const m = Math.floor(secs / 60);
+                        const s = secs % 60;
+                        return `${m}:${s.toString().padStart(2, '0')}`;
+                      };
+                      const parseDuration = (val: string): number => {
+                        if (val.includes(':')) {
+                          const [m, s] = val.split(':').map(Number);
+                          return (m || 0) * 60 + (s || 0);
+                        }
+                        return Number(val) || 0;
+                      };
+
+                      return (
+                        <div className="rounded-2xl border border-white/5 overflow-hidden">
+                          <div className={cn('relative z-10 p-6 space-y-4', set.completed ? 'bg-brand-red/10' : 'bg-white/5')}>
+                            {activeExercise.sets.length > 1 && (
+                              <button onClick={() => setShowConfirmDeleteSet(true)} className="absolute top-3 right-3 p-1.5 bg-white/5 rounded-lg text-white/30 hover:text-white/60 transition-colors">
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+
+                            {/* weight_reps */}
+                            {(inputMode === 'weight_reps') && (
+                              <>
+                                <div className="space-y-2">
+                                  <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">Peso (kg)</p>
+                                  <div className="flex items-center gap-2 w-full">
+                                    <StepperButton label="−" onStep={() => { const w = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].weight; updateSet(activeSetIndex, { weight: Math.max(0, w - 1) }); }} />
+                                    <input type="number" value={set.weight || ''} onChange={(e) => updateSet(activeSetIndex, { weight: Number(e.target.value) })} className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none" placeholder="0" />
+                                    <StepperButton label="+" onStep={() => { const w = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].weight; updateSet(activeSetIndex, { weight: w + 1 }); }} />
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">Repetições</p>
+                                  <div className="flex items-center gap-2 w-full">
+                                    <StepperButton label="−" onStep={() => { const r = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].reps; updateSet(activeSetIndex, { reps: Math.max(0, r - 1) }); }} />
+                                    <input type="number" value={set.reps || ''} onChange={(e) => updateSet(activeSetIndex, { reps: Number(e.target.value) })} className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none" placeholder="0" />
+                                    <StepperButton label="+" onStep={() => { const r = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].reps; updateSet(activeSetIndex, { reps: r + 1 }); }} />
+                                  </div>
+                                </div>
+                              </>
+                            )}
+
+                            {/* reps_only */}
+                            {inputMode === 'reps_only' && (
+                              <div className="space-y-2">
+                                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">Repetições</p>
+                                <div className="flex items-center gap-2 w-full">
+                                  <StepperButton label="−" onStep={() => { const r = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].reps; updateSet(activeSetIndex, { reps: Math.max(0, r - 1) }); }} />
+                                  <input type="number" value={set.reps || ''} onChange={(e) => updateSet(activeSetIndex, { reps: Number(e.target.value) })} className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none" placeholder="0" />
+                                  <StepperButton label="+" onStep={() => { const r = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].reps; updateSet(activeSetIndex, { reps: r + 1 }); }} />
+                                </div>
+                              </div>
+                            )}
+
+                            {/* duration fields — shared between duration_distance, duration_only */}
+                            {(inputMode === 'duration_distance' || inputMode === 'duration_only') && (
+                              <div className="space-y-2">
+                                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">
+                                  {timerRunning || (timerRemaining !== null && timerRemaining > 0) ? 'Tempo restante' : 'Duração (min:ss)'}
+                                </p>
+                                <div className="flex items-center gap-2 w-full">
+                                  {/* Reset to target */}
+                                  <button
+                                    onTouchStart={(e) => e.preventDefault()}
+                                    onClick={() => {
+                                      setTimerRunning(false);
+                                      setTimerRemaining(null);
+                                    }}
+                                    className="p-3 bg-black/40 border border-white/10 rounded-xl text-white/60 active:scale-95 transition-transform shrink-0"
+                                  >
+                                    <RotateCcw size={20} />
+                                  </button>
+                                  {/* Display: countdown when running, editable target when stopped */}
+                                  {timerRunning || (timerRemaining !== null && timerRemaining > 0) ? (
+                                    <div className={cn(
+                                      'min-w-0 flex-1 rounded-xl py-4 px-3 text-center font-bold text-2xl font-mono border',
+                                      (timerRemaining ?? 0) <= 10 ? 'text-brand-red border-brand-red/30 bg-brand-red/10' : 'text-white border-white/10 bg-black/40'
+                                    )}>
+                                      {formatDuration(timerRemaining ?? 0)}
+                                    </div>
+                                  ) : (
+                                    <input
+                                      type="text"
+                                      value={set.durationSeconds ? formatDuration(set.durationSeconds) : ''}
+                                      onChange={(e) => updateSet(activeSetIndex, { durationSeconds: parseDuration(e.target.value) })}
+                                      className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400"
+                                      placeholder="0:00"
+                                    />
+                                  )}
+                                  {/* Start / stop */}
+                                  <button
+                                    onTouchStart={(e) => e.preventDefault()}
+                                    onClick={() => {
+                                      if (timerRunning) {
+                                        setTimerRunning(false);
+                                      } else {
+                                        const target = set.durationSeconds ?? 0;
+                                        if (target <= 0) return;
+                                        if (timerRemaining === null || timerRemaining <= 0) setTimerRemaining(target);
+                                        setTimerRunning(true);
+                                      }
+                                    }}
+                                    className={cn(
+                                      'p-3 border rounded-xl active:scale-95 transition-transform shrink-0',
+                                      timerRunning ? 'bg-brand-red/20 border-brand-red text-brand-red' : 'bg-black/40 border-white/10 text-white/60'
+                                    )}
+                                  >
+                                    {timerRunning ? <Square size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* distance — only for duration_distance */}
+                            {inputMode === 'duration_distance' && (
+                              <div className="space-y-2">
+                                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">Distância (m)</p>
+                                <div className="flex items-center gap-2 w-full">
+                                  <StepperButton label="−" onStep={() => { const d = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].distanceMeters ?? 0; updateSet(activeSetIndex, { distanceMeters: Math.max(0, d - 100) }); }} />
+                                  <input type="number" value={set.distanceMeters ?? ''} onChange={(e) => updateSet(activeSetIndex, { distanceMeters: Number(e.target.value) })} className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none" placeholder="0" />
+                                  <StepperButton label="+" onStep={() => { const d = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].distanceMeters ?? 0; updateSet(activeSetIndex, { distanceMeters: d + 100 }); }} />
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <div className="space-y-2">
-                          <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">Repetições</p>
-                          <div className="flex items-center gap-2 w-full">
-                            <StepperButton label="−" onStep={() => { const r = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].reps; updateSet(activeSetIndex, { reps: Math.max(0, r - 1) }); }} />
-                            <input type="number" value={set.reps || ''} onChange={(e) => updateSet(activeSetIndex, { reps: Number(e.target.value) })} className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none" placeholder="0" />
-                            <StepperButton label="+" onStep={() => { const r = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].reps; updateSet(activeSetIndex, { reps: r + 1 }); }} />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <button disabled={set.completed || !(set.weight > 0 && set.reps > 0)} onClick={() => {
+                      );
+                    })()}
+                    <button disabled={set.completed || !isSetReadyToComplete(set, getInputMode(exerciseDetails ?? { inputMode: undefined } as any))} onClick={() => {
                       updateSet(activeSetIndex, { completed: true });
                       if (set.corrected) {
                         // Find next incomplete set in the flat step list after current position
@@ -587,7 +737,7 @@ export function ActiveWorkoutView({
                           setActiveSetIndex(flatSteps[nextIncomplete].si);
                         }
                       }
-                    }} className={cn('mt-3 w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm transition-colors disabled:cursor-not-allowed', set.completed ? 'bg-white/5 text-white/40' : set.weight > 0 && set.reps > 0 ? 'bg-brand-red text-black' : 'bg-white/10 text-white/60 opacity-50')}>
+                    }} className={cn('mt-3 w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm transition-colors disabled:cursor-not-allowed', set.completed ? 'bg-white/5 text-white/40' : isSetReadyToComplete(set, getInputMode(exerciseDetails ?? { inputMode: undefined } as any)) ? 'bg-brand-red text-black' : 'bg-white/10 text-white/60 opacity-50')}>
                       <CheckCircle2 size={18} fill={set.completed ? 'currentColor' : 'none'} stroke="currentColor" />
                       {set.completed ? 'Série concluída' : set.corrected ? 'Corrigir série' : 'Concluir série'}
                     </button>

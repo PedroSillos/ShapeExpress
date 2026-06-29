@@ -3,19 +3,20 @@ import { EXERCISES } from '../../constants';
 
 // Exercise IDs per sport — mapped to existing EXERCISES in constants.ts
 const SPORT_EXERCISE_IDS: Record<string, string[]> = {
-  'Musculação':     ['1', '2', '3', '4', '5', '7', '8', '30'],   // Supino, Agachamento, Remada, Dev.Militar, Rosca, LegPress, Puxada, Tríceps
-  'Halterofilismo': ['6', '2', '21', '4', '3', '1'],              // Terra, Agachamento, Stiff, Dev.Militar, Remada, Supino
-  'Corrida':        ['36', '10', '25', '11'],                     // Corrida, Afundo, Gêmeos, Prancha
-  'Ciclismo':       ['37', '7', '19', '25'],                      // Ciclismo, LegPress, Extensora, Gêmeos
-  'Natação':        ['8', '3', '28', '11', '9'],                  // Puxada, Remada, Elev.Lateral, Prancha, Flexão
-  'Crossfit':       ['14', '2', '1', '11', '38', '9'],            // KBSwing, Agachamento, Supino, Prancha, PularCorda, Flexão
-
+  'Musculação':     ['1', '2', '3', '4', '5', '7', '8', '30'],
+  'Halterofilismo': ['6', '2', '21', '4', '3', '1'],
+  'Corrida':        ['36', '41', '40', '10', '25'],
+  'Ciclismo':       ['37', '7', '19', '25'],
+  'Natação':        ['42', '43', '44', '45', '39'],
+  'Crossfit':       ['14', '2', '1', '11', '38', '9'],
+  'Yoga':           ['142', '143', '144', '145', '146', '12'],
+  'Triatlo':        ['36', '37', '42', '11', '10'],
 };
 
 const DEFAULT_IDS = ['1', '2', '3', '4', '5'];
 
 // Exercise IDs preferred for each experience level (within a sport's pool)
-const BEGINNER_SAFE_IDS = new Set(['7', '8', '9', '10', '11', '14', '33', '36', '37', '38']);
+const BEGINNER_SAFE_IDS = new Set(['7', '8', '9', '10', '11', '14', '33', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45']);
 const ADVANCED_IDS = new Set(['6', '2', '1', '4', '21', '3']);
 
 export function generateFirstWorkout(sports: string[], userEmail: string, experience?: string): WorkoutTemplate {

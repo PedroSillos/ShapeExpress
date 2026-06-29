@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../utils/cn';
 import { EXERCISES } from '../../constants';
 import { WorkoutSheet, WorkoutTemplateExercise, Exercise, MuscleGroup, MuscleSubgroup, ExerciseCategory, Equipment } from '../../domain/entities';
+import { getInputMode } from '../../domain/use-cases/exerciseInputMode';
 
 interface ConfigureExercisesViewProps {
   sheets: WorkoutSheet[];
@@ -172,84 +173,148 @@ export function ConfigureExercisesView({
           </div>
         </div>
 
-        {/* Reps Selection */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-brand-red/10 flex items-center justify-center text-brand-red">
-              <TrendingUp size={16} />
-            </div>
-            <h4 className="font-bold uppercase text-xs tracking-widest">Séries / Repetições</h4>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            {repOptions.map(option => {
-              const isSelected = option === 'Personalizado' ? isCustomReps : currentConfig.sets === option;
-              return (
-                <button
-                  key={option}
-                  onClick={() => {
-                    if (option === 'Personalizado') {
-                      if (!isCustomReps) {
-                        const baseVal = currentConfig.sets.includes('–') ? currentConfig.sets.split('–')[1] : currentConfig.sets;
-                        updateConfig({ sets: Array(currentConfig.numSets).fill(baseVal || '10').join(',') });
-                      }
-                    } else {
-                      updateConfig({ sets: option });
-                    }
-                  }}
-                  className={cn(
-                    "py-4 rounded-2xl font-bold text-sm transition-all relative overflow-hidden",
-                    isSelected 
-                      ? "bg-brand-red text-black shadow-[0_0_15px_rgba(229,62,62,0.3)]" 
-                      : "bg-dark-card border border-dark-border text-white/40"
-                  )}
-                >
-                  {option}
-                  {isSelected && <motion.div layoutId="rep-glow" className="absolute inset-0 bg-white/10" />}
-                </button>
-              );
-            })}
-          </div>
+        {/* Reps / Duration — conditional by inputMode */}
+        {(() => {
+          const inputMode = getInputMode(exercise ?? { inputMode: undefined } as any);
+          const isDuration = inputMode === 'duration_distance' || inputMode === 'duration_only';
 
-          <AnimatePresence>
-            {isCustomReps && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden space-y-3"
-              >
-                <div className="grid grid-cols-3 gap-2">
-                  {Array.from({ length: currentConfig.numSets }).map((_, i) => {
-                    const repsArray = currentConfig.sets.split(',').map(s => s.trim());
-                    const currentVal = repsArray[i] !== undefined ? repsArray[i] : (repsArray[0] || '10');
-                    
+          if (isDuration) {
+            // For cardio/duration exercises: configure duration per set (in seconds)
+            const durationOptions = ['30s', '1 min', '2 min', '5 min', '10 min', '30 min', 'Personalizado'];
+            const isCustomDuration = !durationOptions.slice(0, 6).includes(currentConfig.sets);
+            return (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-brand-red/10 flex items-center justify-center text-brand-red">
+                    <TrendingUp size={16} />
+                  </div>
+                  <h4 className="font-bold uppercase text-xs tracking-widest">Duração por Série</h4>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {durationOptions.map(option => {
+                    const isSelected = option === 'Personalizado' ? isCustomDuration : currentConfig.sets === option;
                     return (
-                      <div key={i} className="flex flex-col items-center gap-1 bg-dark-card border border-white/5 rounded-xl p-2">
-                        <span className="text-[8px] text-white/20 font-bold uppercase">Série {i + 1}</span>
-                        <input 
-                          type="text"
-                          inputMode="numeric"
-                          value={currentVal}
-                          onChange={(e) => {
-                            const newReps = [...repsArray];
-                            while (newReps.length < currentConfig.numSets) {
-                              newReps.push(newReps[newReps.length - 1] || '10');
-                            }
-                            newReps[i] = e.target.value;
-                            updateConfig({ sets: newReps.join(',') });
-                          }}
-                          className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-center font-bold text-sm text-brand-red"
-                        />
-                      </div>
+                      <button
+                        key={option}
+                        onClick={() => {
+                          if (option === 'Personalizado') {
+                            if (!isCustomDuration) updateConfig({ sets: '60' });
+                          } else {
+                            updateConfig({ sets: option });
+                          }
+                        }}
+                        className={cn(
+                          "py-4 rounded-2xl font-bold text-sm transition-all relative overflow-hidden",
+                          isSelected
+                            ? "bg-brand-red text-black shadow-[0_0_15px_rgba(229,62,62,0.3)]"
+                            : "bg-dark-card border border-dark-border text-white/40"
+                        )}
+                      >
+                        {option}
+                        {isSelected && <motion.div layoutId="rep-glow" className="absolute inset-0 bg-white/10" />}
+                      </button>
                     );
                   })}
                 </div>
-                <p className="text-[8px] text-white/20 text-center uppercase font-bold tracking-widest">Repetições individuais por série</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                <AnimatePresence>
+                  {isCustomDuration && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={currentConfig.sets}
+                        onChange={(e) => updateConfig({ sets: e.target.value })}
+                        placeholder="ex: 45s ou 1:30"
+                        className="w-full bg-dark-card border border-white/5 rounded-xl p-3 focus:ring-0 focus:outline-none text-center font-bold text-sm text-brand-red"
+                      />
+                      <p className="text-[8px] text-white/20 text-center uppercase font-bold tracking-widest mt-2">Duração personalizada por série</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          }
+
+          // weight_reps or reps_only
+          return (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-brand-red/10 flex items-center justify-center text-brand-red">
+                  <TrendingUp size={16} />
+                </div>
+                <h4 className="font-bold uppercase text-xs tracking-widest">
+                  {inputMode === 'reps_only' ? 'Repetições por Série' : 'Séries / Repetições'}
+                </h4>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {repOptions.map(option => {
+                  const isSelected = option === 'Personalizado' ? isCustomReps : currentConfig.sets === option;
+                  return (
+                    <button
+                      key={option}
+                      onClick={() => {
+                        if (option === 'Personalizado') {
+                          if (!isCustomReps) {
+                            const baseVal = currentConfig.sets.includes('–') ? currentConfig.sets.split('–')[1] : currentConfig.sets;
+                            updateConfig({ sets: Array(currentConfig.numSets).fill(baseVal || '10').join(',') });
+                          }
+                        } else {
+                          updateConfig({ sets: option });
+                        }
+                      }}
+                      className={cn(
+                        "py-4 rounded-2xl font-bold text-sm transition-all relative overflow-hidden",
+                        isSelected
+                          ? "bg-brand-red text-black shadow-[0_0_15px_rgba(229,62,62,0.3)]"
+                          : "bg-dark-card border border-dark-border text-white/40"
+                      )}
+                    >
+                      {option}
+                      {isSelected && <motion.div layoutId="rep-glow" className="absolute inset-0 bg-white/10" />}
+                    </button>
+                  );
+                })}
+              </div>
+              <AnimatePresence>
+                {isCustomReps && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden space-y-3"
+                  >
+                    <div className="grid grid-cols-3 gap-2">
+                      {Array.from({ length: currentConfig.numSets }).map((_, i) => {
+                        const repsArray = currentConfig.sets.split(',').map(s => s.trim());
+                        const currentVal = repsArray[i] !== undefined ? repsArray[i] : (repsArray[0] || '10');
+                        return (
+                          <div key={i} className="flex flex-col items-center gap-1 bg-dark-card border border-white/5 rounded-xl p-2">
+                            <span className="text-[8px] text-white/20 font-bold uppercase">Série {i + 1}</span>
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              value={currentVal}
+                              onChange={(e) => {
+                                const newReps = [...repsArray];
+                                while (newReps.length < currentConfig.numSets) {
+                                  newReps.push(newReps[newReps.length - 1] || '10');
+                                }
+                                newReps[i] = e.target.value;
+                                updateConfig({ sets: newReps.join(',') });
+                              }}
+                              className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-center font-bold text-sm text-brand-red"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <p className="text-[8px] text-white/20 text-center uppercase font-bold tracking-widest">Repetições individuais por série</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })()}
 
         {/* Rest Selection */}
         <div className="space-y-4">

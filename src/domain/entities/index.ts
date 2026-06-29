@@ -48,6 +48,12 @@ export type Equipment =
   | "Banco Scott";
 export type ExerciseType = "compound" | "isolation" | "core" | "cardio";
 
+export type ExerciseInputMode =
+  | "weight_reps"       // musculação padrão
+  | "reps_only"         // peso corporal sem carga
+  | "duration_distance" // corrida, natação, ciclismo
+  | "duration_only";    // alongamento, cardio sem métrica
+
 export interface Exercise {
   id: string;
   name: string;
@@ -59,6 +65,7 @@ export interface Exercise {
   equipment: Equipment;
   type: ExerciseType;
   youtubeUrl?: string;
+  inputMode?: ExerciseInputMode;
 }
 
 export interface UserTrainingProfile {
@@ -96,6 +103,9 @@ export interface WorkoutSet {
   completed: boolean;
   rest?: string;
   corrected?: boolean;
+  durationSeconds?: number;
+  distanceMeters?: number;
+  speedKmh?: number;
 }
 
 export interface ExerciseSession {
