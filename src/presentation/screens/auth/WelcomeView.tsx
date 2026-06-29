@@ -39,6 +39,7 @@ import iconRoman5 from '@/src/assets/icons/icon-roman-5.svg';
 import iconRoman6 from '@/src/assets/icons/icon-roman-6.svg';
 import iconRoman7 from '@/src/assets/icons/icon-roman-7.svg';
 import { WorkoutSession } from '../../../domain/entities';
+import { requestNotificationPermission } from '@/src/data/services/notificationService';
 
 // ─── Typewriter ───────────────────────────────────────────────────────────────
 
@@ -716,7 +717,10 @@ const toggleSport = (id: string) => {
           </p>
           <div className="w-full flex flex-col divide-y divide-dark-border rounded-2xl overflow-hidden border border-dark-border">
             <button
-              onClick={() => handleContinueWith('notifications', true)}
+              onClick={async () => {
+                const granted = await requestNotificationPermission();
+                handleContinueWith('notifications', granted);
+              }}
               className="w-full py-4 text-base font-semibold text-brand-red uppercase tracking-widest active:bg-white/5 transition-colors"
             >
               Permitir
