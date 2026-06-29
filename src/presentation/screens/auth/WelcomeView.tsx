@@ -22,14 +22,12 @@ import iconCondicionamento from '@/src/assets/icons/icon-condicionamento.svg';
 import iconSaude from '@/src/assets/icons/icon-saude.svg';
 import iconForca from '@/src/assets/icons/icon-forca.svg';
 import iconEstresse from '@/src/assets/icons/icon-estresse.svg';
-import iconMuscle from '@/src/assets/icons/icon-muscle.svg';
 import iconFlame from '@/src/assets/icons/icon-flame.svg';
 import iconScale from '@/src/assets/icons/icon-scale.svg';
 import iconRun from '@/src/assets/icons/icon-run.svg';
 import iconZap from '@/src/assets/icons/icon-zap.svg';
 import iconMedal from '@/src/assets/icons/icon-medal.svg';
 import iconHeart from '@/src/assets/icons/icon-heart.svg';
-import iconMeditation from '@/src/assets/icons/icon-meditation.svg';
 import iconTrophy from '@/src/assets/icons/icon-trophy.svg';
 import iconBrain from '@/src/assets/icons/icon-brain.svg';
 import iconAlarm from '@/src/assets/icons/icon-alarm.svg';
@@ -140,7 +138,7 @@ const OBJECTIVE_BENEFITS: Record<string, [{ icon: string; bg: string; title: str
   ],
   'Saúde e mobilidade': [
     { icon: iconHeart,      bg: '#0f766e', title: 'Corpo mais saudável', desc: 'Exercícios que melhoram postura e flexibilidade' },
-    { icon: iconMeditation, bg: '#7c3aed', title: 'Menos dores e tensão', desc: 'Movimentos que aliviam o estresse físico' },
+    { icon: iconYoga, bg: '#7c3aed', title: 'Menos dores e tensão', desc: 'Movimentos que aliviam o estresse físico' },
   ],
   'Aumento de força': [
     { icon: iconForca,  bg: '#1d4ed8', title: 'Ficar mais forte', desc: 'Progressão de carga para força máxima' },

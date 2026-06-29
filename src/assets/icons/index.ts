@@ -30,14 +30,13 @@ export { default as iconGoogle } from './icon-google.svg';
 // UI
 export { default as iconShare } from './icon-share.svg';
 export { default as iconCalendar } from './icon-calendar.svg';
-export { default as iconMuscle } from './icon-muscle.svg';
 export { default as iconFlame } from './icon-flame.svg';
 export { default as iconScale } from './icon-scale.svg';
 export { default as iconRun } from './icon-run.svg';
 export { default as iconZap } from './icon-zap.svg';
 export { default as iconMedal } from './icon-medal.svg';
 export { default as iconHeart } from './icon-heart.svg';
-export { default as iconMeditation } from './icon-meditation.svg';
+export { default as iconYoga } from './icon-yoga.svg';
 export { default as iconTrophy } from './icon-trophy.svg';
 export { default as iconBrain } from './icon-brain.svg';
 export { default as iconAlarm } from './icon-alarm.svg';
