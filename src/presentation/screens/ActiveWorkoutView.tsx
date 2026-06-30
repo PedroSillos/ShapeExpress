@@ -750,7 +750,12 @@ export function ActiveWorkoutView({
       </AnimatePresence>
 
       {/* Footer */}
-      <div className="py-3 px-6 glass border-t border-white/10 flex justify-center items-center">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2, delay: 0.15 }}
+        className="py-3 px-6 glass border-t border-white/10 flex justify-center items-center"
+      >
         <div className="flex items-center gap-3">
           <button
             disabled={isFirstStep}
@@ -771,7 +776,7 @@ export function ActiveWorkoutView({
             {isLastStep ? 'Finalizar' : <ChevronRight size={20} />}
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

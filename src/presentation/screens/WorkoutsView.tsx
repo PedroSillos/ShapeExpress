@@ -104,13 +104,18 @@ export function WorkoutsView({
   }, [onCreateWorkout]);
 
   return (
-    <div className="space-y-6 pb-20 pt-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Treinos</h2>
-        <button onClick={onCreateWorkout} className="p-2 bg-brand-red/10 text-brand-red rounded-full"><Plus size={20} /></button>
-      </div>
+    <div className="pb-20">
+      <h2 className="text-xl font-bold text-center bg-brand-red text-white py-3 -mx-6">Treinos</h2>
+      <div className="space-y-6 pt-4">
+        <button
+          onClick={onCreateWorkout}
+          className="w-full flex items-center justify-center gap-2 py-4 bg-white/5 border border-white/10 rounded-2xl font-bold text-sm text-white/70 active:scale-95 transition-transform"
+        >
+          <Plus size={18} />
+          Criar Treino
+        </button>
 
-      <div className="space-y-4">
+        <div className="space-y-4">
         {templates.length === 0 ? (
           <div className="text-center py-12 space-y-4">
             <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto text-white/20">
@@ -428,6 +433,7 @@ export function WorkoutsView({
           </>
         )}
       </AnimatePresence>
+      </div>
     </div>
   );
 }

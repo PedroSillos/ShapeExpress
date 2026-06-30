@@ -31,7 +31,6 @@ import { BodyAssessmentView as NewAssessmentView } from './screens/BodyAssessmen
 import { SettingsGoalView } from './screens/SettingsGoalView';
 import { SettingsNotificationsView } from './screens/SettingsNotificationsView';
 import { HelpView } from './screens/HelpView';
-import { LeaderboardView } from './screens/LeaderboardView';
 import { generateFirstWorkoutAI } from '../data/services/aiService';
 
 
@@ -446,17 +445,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           userChallenges={userChallenges} setUserChallenges={setUserChallenges}
           getLeaderboard={api.getLeaderboard}
           initialTab={communityInitialTab} initialRankingType={communityInitialRankingType}
-        />
-      );
-    case 'leaderboard':
-      return (
-        <LeaderboardView
-          currentUserProfile={userProfile}
-          userStats={userStats}
-          isLoggedIn={isLoggedIn}
-          getLeaderboard={api.getLeaderboard}
-          onLogin={() => setActiveTab('login')}
-          onRegister={() => setActiveTab('register')}
         />
       );
     case 'trainers':
