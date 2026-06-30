@@ -152,6 +152,13 @@ export default function App() {
     if (lastCompletedSession && !isLoggedIn) {
       localStorage.setItem('welcome-done', '1');
       localStorage.removeItem('onboarding-workout-pending');
+      // Apply weeklyGoal chosen during onboarding to userStats
+      try {
+        const wa = JSON.parse(localStorage.getItem('welcome-answers') ?? 'null');
+        if (wa?.weeklyGoal && wa.weeklyGoal !== userStats.weeklyGoal) {
+          setUserStats({ ...userStats, weeklyGoal: wa.weeklyGoal });
+        }
+      } catch {}
       setOnboardingSession(lastCompletedSession);
       setLastCompletedSession(null);
     }

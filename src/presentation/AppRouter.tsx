@@ -203,6 +203,10 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
                 localStorage.setItem('pending-templates', JSON.stringify(p));
               } catch {}
               state.setTemplates((prev: WorkoutTemplate[]) => [...prev, template!]);
+              // Apply weeklyGoal chosen during onboarding
+              if (a.weeklyGoal) {
+                state.setUserStats({ ...state.userStats, weeklyGoal: a.weeklyGoal });
+              }
               state.onShowSuggestProfile?.() ?? setActiveTab('dashboard');
               return;
             }

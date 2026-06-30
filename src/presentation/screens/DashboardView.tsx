@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { startOfWeek, parseISO, format, subWeeks } from 'date-fns';
-import { Play, Lock, Star, Flame, Trophy, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import {
   UserStats,
@@ -13,6 +13,22 @@ import {
   UserProfile,
   ProgressScore,
 } from '../../domain/entities';
+import iconFlame from '@/src/assets/icons/icon-flame.svg';
+import iconCalendar from '@/src/assets/icons/icon-calendar.svg';
+import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
+import iconHalterofilismo from '@/src/assets/icons/icon-halterofilismo.svg';
+import iconCorrida from '@/src/assets/icons/icon-corrida.svg';
+import iconCiclismo from '@/src/assets/icons/icon-ciclismo.svg';
+import iconNatacao from '@/src/assets/icons/icon-natacao.svg';
+import iconCrossfit from '@/src/assets/icons/icon-crossfit.svg';
+import iconTriatlo from '@/src/assets/icons/icon-triatlo.svg';
+import iconRoman1 from '@/src/assets/icons/icon-roman-1.svg';
+import iconRoman2 from '@/src/assets/icons/icon-roman-2.svg';
+import iconRoman3 from '@/src/assets/icons/icon-roman-3.svg';
+import iconRoman4 from '@/src/assets/icons/icon-roman-4.svg';
+import iconRoman5 from '@/src/assets/icons/icon-roman-5.svg';
+import iconRoman6 from '@/src/assets/icons/icon-roman-6.svg';
+import iconRoman7 from '@/src/assets/icons/icon-roman-7.svg';
 
 interface DashboardViewProps {
   userStats: UserStats;
@@ -35,9 +51,27 @@ interface DashboardViewProps {
   isLoggedIn?: boolean;
 }
 
-const SPORT_EMOJIS: Record<string, string> = {
-  'Musculação': '🏋️', 'Halterofilismo': '🏅', 'Corrida': '🏃',
-  'Ciclismo': '🚴', 'Natação': '🏊', 'Crossfit': '⚡', 'Triatlo': '🏅',
+/** Map sport name -> brand color (matches WelcomeView SPORTS) */
+const SPORT_COLORS: Record<string, string> = {
+  'Musculação':     '#dc2626',
+  'Crossfit':       '#ea580c',
+  'Corrida':        '#ca8a04',
+  'Yoga':           '#16a34a',
+  'Natação':        '#2563eb',
+  'Ciclismo':       '#0891b2',
+  'Halterofilismo': '#7c3aed',
+  'Triatlo':        '#db2777',
+};
+
+/** Map sport name -> SVG icon path */
+const SPORT_ICONS: Record<string, string> = {
+  'Musculação':     iconMusculacao,
+  'Halterofilismo': iconHalterofilismo,
+  'Corrida':        iconCorrida,
+  'Ciclismo':       iconCiclismo,
+  'Natação':        iconNatacao,
+  'Crossfit':       iconCrossfit,
+  'Triatlo':        iconTriatlo,
 };
 
 const XP_PER_LEVEL = 500;
@@ -45,12 +79,24 @@ const XP_PER_LEVEL = 500;
 // Node positions alternating left/center/right for trail effect
 const NODE_POSITIONS = ['left', 'center', 'right', 'center', 'left', 'center', 'right', 'center'] as const;
 
-/** Streak = total workouts in weeks where user met their weekly goal.
- *  Resets to 0 if 7 days pass without meeting the goal. */
+// Roman numeral icons indexed by workout number (1-based)
+const ROMAN_ICONS = [iconRoman1, iconRoman2, iconRoman3, iconRoman4, iconRoman5, iconRoman6, iconRoman7];
+
+/**
+ * Streak = total workouts in the unbroken chain of weeks leading up to now.
+ *
+ * Rules:
+ * - The current week always counts its workouts so far (even if goal not yet met),
+ *   because it's still in progress — it never breaks the streak.
+ * - Every past week must have met the weekly goal to remain in the chain.
+ *   The first past week that falls short ends the streak.
+ * - Example: goal=3, weeks=[3, 3, 2(current)] → streak = 3+3+2 = 8
+ * - Example: goal=3, weeks=[1(current)] → streak = 1
+ */
 function calcGoalStreak(sessions: WorkoutSession[], weeklyGoal: number): number {
   if (sessions.length === 0 || weeklyGoal <= 0) return 0;
 
-  // Group sessions by ISO week (Mon start)
+  // Group sessions by ISO week key (Mon start)
   const byWeek: Record<string, number> = {};
   sessions.forEach(s => {
     try {
@@ -59,23 +105,29 @@ function calcGoalStreak(sessions: WorkoutSession[], weeklyGoal: number): number 
     } catch {}
   });
 
-  // Walk backwards week by week from current week
   let streak = 0;
   let weekCursor = startOfWeek(new Date(), { weekStartsOn: 1 });
 
-  for (let i = 0; i < 104; i++) { // max 2 years back
+  for (let i = 0; i < 104; i++) {
     const key = format(weekCursor, 'yyyy-MM-dd');
     const count = byWeek[key] ?? 0;
+
+    if (i === 0) {
+      // Current week: always add whatever was done so far (may be 0)
+      streak += count;
+      weekCursor = subWeeks(weekCursor, 1);
+      continue;
+    }
+
+    // Past weeks: must have met the goal to continue the chain
     if (count >= weeklyGoal) {
       streak += count;
       weekCursor = subWeeks(weekCursor, 1);
-    } else if (i === 0) {
-      // current week hasn't met goal yet — skip and keep going
-      weekCursor = subWeeks(weekCursor, 1);
     } else {
-      break; // missed a past week — streak ends
+      break;
     }
   }
+
   return streak;
 }
 
@@ -103,11 +155,10 @@ export function DashboardView({
   const [sportIdx, setSportIdx] = useState(0);
   const currentSport = sports[sportIdx] ?? sports[0];
 
-  // XP per sport = total XP divided equally; level per sport from that share
-  const xpPerSport = Math.floor(userStats.xp / sports.length);
-  const sportLevel = Math.max(1, Math.floor(xpPerSport / XP_PER_LEVEL) + 1);
-
   const goalStreak = useMemo(() => calcGoalStreak(sessions, userStats.weeklyGoal), [sessions, userStats.weeklyGoal]);
+
+  // Completed weeks = total streak workouts divided by weekly goal (floor)
+  const completedWeeks = Math.floor(goalStreak / Math.max(1, userStats.weeklyGoal));
 
   const completedThisWeek = useMemo(() => {
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -120,10 +171,18 @@ export function DashboardView({
     : 0;
   const currentTemplate = templates[currentTemplateIdx] ?? null;
 
-  const trailNodes = templates.slice(0, 8).map((t, i) => ({
-    template: t,
-    state: i < currentTemplateIdx ? 'done' : i === currentTemplateIdx ? 'active' : 'locked',
-  }));
+  // Trail: one node per weekly goal slot. Nodes up to completedThisWeek are "done",
+  // the next one is "active" (if goal not yet met), and the rest are "locked".
+  const weeklyGoal = Math.max(1, userStats.weeklyGoal);
+  const trailNodes = Array.from({ length: weeklyGoal }, (_, i) => {
+    const state =
+      i < completedThisWeek ? 'done'
+      : i === completedThisWeek ? 'active'
+      : 'locked';
+    // Pick a template to show for the active node (next workout)
+    const templateForNode = templates[i % Math.max(1, templates.length)] ?? null;
+    return { template: templateForNode, state, index: i };
+  });
 
   const xpProgress = userStats.xp % XP_PER_LEVEL;
   const xpProgressPct = Math.round((xpProgress / XP_PER_LEVEL) * 100);
@@ -139,8 +198,14 @@ export function DashboardView({
               <ChevronLeft size={14} />
             </button>
           )}
-          <span className="text-2xl leading-none">{SPORT_EMOJIS[currentSport] ?? '🏋️'}</span>
-          <span className="font-bold text-white text-sm ml-1">{sportLevel}</span>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0" style={{ backgroundColor: SPORT_COLORS[currentSport] ?? '#dc2626' }}>
+            <img
+              src={SPORT_ICONS[currentSport] ?? iconMusculacao}
+              className="w-full h-full object-contain brightness-0 invert"
+              alt={currentSport}
+            />
+          </div>
+          <span className="font-bold text-sm ml-1" style={{ color: SPORT_COLORS[currentSport] ?? '#dc2626' }}>{completedWeeks}</span>
           {sports.length > 1 && (
             <button onClick={() => setSportIdx(i => (i + 1) % sports.length)} className="text-white/30 active:text-white">
               <ChevronRight size={14} />
@@ -149,21 +214,26 @@ export function DashboardView({
         </div>
 
         {/* Streak */}
-        <div className="flex items-center gap-1">
-          <Flame size={20} className={goalStreak > 0 ? 'text-orange-400' : 'text-white/20'} />
+        <div className="flex items-center gap-1.5">
+          <div className={cn(
+            'w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0',
+            goalStreak > 0 ? 'bg-orange-500' : 'bg-white/10',
+          )}>
+            <img
+              src={iconFlame}
+              className={cn('w-full h-full object-contain brightness-0 invert', goalStreak === 0 && 'opacity-40')}
+              alt="streak"
+            />
+          </div>
           <span className={cn('font-black text-sm', goalStreak > 0 ? 'text-orange-400' : 'text-white/30')}>{goalStreak}</span>
         </div>
 
-        {/* XP */}
-        <div className="flex items-center gap-1">
-          <span className="text-lg leading-none">💪</span>
-          <span className="font-black text-sm text-brand-red">{userStats.xp}</span>
-        </div>
-
         {/* Weekly progress */}
-        <div className="flex items-center gap-1">
-          <span className="text-lg leading-none">⚡</span>
-          <span className="font-black text-sm text-yellow-400">{completedThisWeek}/{userStats.weeklyGoal}</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0 bg-blue-600">
+            <img src={iconCalendar} className="w-full h-full object-contain brightness-0 invert" alt="meta semanal" />
+          </div>
+          <span className="font-black text-sm text-blue-400">{completedThisWeek}/{userStats.weeklyGoal}</span>
         </div>
       </div>
 
@@ -193,7 +263,7 @@ export function DashboardView({
             <p className="font-black text-white text-base leading-tight">Criar primeiro treino</p>
           </div>
           <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-            <Star size={20} fill="white" color="white" />
+            <Play size={20} fill="white" color="white" />
           </div>
         </button>
       )}
@@ -221,7 +291,7 @@ export function DashboardView({
 
           return (
             <div
-              key={node.template.id}
+              key={node.index}
               className={cn(
                 'w-full flex',
                 pos === 'left' && 'justify-start pl-4',
@@ -230,8 +300,8 @@ export function DashboardView({
               )}
             >
               <button
-                onClick={isLocked ? undefined : onStartWorkout}
-                disabled={isLocked}
+                onClick={isActive ? onStartWorkout : undefined}
+                disabled={isLocked || isDone}
                 className="relative flex flex-col items-center gap-2 active:scale-95 transition-transform disabled:cursor-default"
               >
                 {/* Glow ring for active */}
@@ -245,7 +315,7 @@ export function DashboardView({
                   isDone && 'bg-brand-red/60 shadow-[0_4px_0_0_rgba(150,10,10,0.4)]',
                   isLocked && 'bg-[#2a3540]',
                 )}>
-                  {/* Progress ring */}
+                  {/* Progress ring on active node */}
                   {isActive && (
                     <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 72 72">
                       <circle cx="36" cy="36" r="32" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="5" />
@@ -256,22 +326,22 @@ export function DashboardView({
                   )}
                   {isLocked
                     ? <Lock size={26} className="text-white/20" />
-                    : isDone
-                      ? <Star size={26} fill="white" color="white" />
-                      : <Star size={30} fill="white" color="white" />}
+                    : (
+                      <img
+                        src={ROMAN_ICONS[Math.min(node.index, ROMAN_ICONS.length - 1)]}
+                        className={cn(
+                          'w-8 h-8 object-contain brightness-0 invert relative z-10',
+                          (isDone) && 'opacity-70',
+                        )}
+                        alt={`Treino ${node.index + 1}`}
+                      />
+                    )}
                 </div>
               </button>
             </div>
           );
         })}
 
-        {trailNodes.length > 0 && (
-          <div className="flex justify-center">
-            <div className="w-[72px] h-[72px] rounded-full bg-[#2a3540] flex items-center justify-center">
-              <Trophy size={28} className="text-white/20" />
-            </div>
-          </div>
-        )}
       </div>
 
 
