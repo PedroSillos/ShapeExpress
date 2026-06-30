@@ -67,16 +67,16 @@ export const useWorkoutState = (
     }
   };
 
-  const createTemplate = async (t: WorkoutTemplate) => {
+  const createTemplate = async (t: WorkoutTemplate, silent = false) => {
     if (!currentUser) {
       setTemplates((prev) => { const next = [...prev, t]; saveLocalTemplates(next); return next; });
-      toast.success("Treino criado!");
+      if (!silent) toast.success("Treino criado!");
       return;
     }
     try {
       await setDoc(doc(db, "templates", t.id), sanitize(t));
       setTemplates((prev) => [...prev, t]);
-      toast.success("Treino criado!");
+      if (!silent) toast.success("Treino criado!");
     } catch (e: any) {
       toast.error("Erro ao criar treino: " + e.message);
     }

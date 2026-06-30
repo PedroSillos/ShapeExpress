@@ -171,7 +171,9 @@ export function WorkoutsView({
             const hasSheets = template.sheets && template.sheets.length > 0;
             const totalExercises = template.category === 'multicycle'
               ? template.cycles?.reduce((acc, c) => acc + c.sheets.reduce((sAcc, s) => sAcc + (s.exerciseIds?.length || s.exercises?.length || 0), 0), 0)
-              : (template.sheets?.reduce((acc, s) => acc + (s.exerciseIds?.length || s.exercises?.length || 0), 0) || 0);
+              : template.sheets && template.sheets.length > 0
+                ? template.sheets.reduce((acc, s) => acc + (s.exerciseIds?.length || s.exercises?.length || 0), 0)
+                : (template.exerciseIds?.length || template.exercises?.length || 0);
 
             const trainer = template.creatorEmail && template.creatorEmail !== mainUserProfile.email 
               ? trainers.find(t => t.email === template.creatorEmail)
@@ -199,8 +201,12 @@ export function WorkoutsView({
                       {format(parseISO(template.startDate), 'dd/MM/yy')} - {format(parseISO(template.endDate), 'dd/MM/yy')}
                     </p>
                     <p className="text-xs text-white/40">
-                      {template.category === 'multicycle' ? `${template.cycles?.length || 0} Ciclos • ` : `${template.sheets?.length || 0} Vezes por Semana • `}
-                      {totalExercises} Exercícios total
+                      {template.category === 'multicycle'
+                        ? `${template.cycles?.length || 0} Ciclos • `
+                        : template.sheets && template.sheets.length > 0
+                          ? `${template.sheets.length} ${template.sheets.length === 1 ? 'Ficha' : 'Fichas'} • `
+                          : ''}
+                      {totalExercises} {totalExercises === 1 ? 'Exercício' : 'Exercícios'}
                     </p>
                   </div>
                   <div className="relative">
@@ -244,7 +250,7 @@ export function WorkoutsView({
                 </div>
                 
                 {nextSheetInfo && (
-                  <div className="mb-6 p-4 bg-brand-red/5 rounded-2xl border border-brand-red/20 space-y-2 relative group/session">
+                  <div className="mb-4 p-4 bg-brand-red/5 rounded-2xl border border-brand-red/20 space-y-2 relative group/session">
                     <div className="flex justify-between items-center">
                       <p className="text-[10px] text-brand-red font-bold uppercase tracking-widest">Sessão de Hoje</p>
                       {nextSheetInfo.cycleName && (
@@ -296,6 +302,17 @@ export function WorkoutsView({
                     </div>
                   </div>
                 )}
+                {/* Basic template (no sheets): show a direct start button */}
+                {!nextSheetInfo && !hasSheets && template.exercises && template.exercises.length > 0 && (
+                  <button
+                    onClick={() => onStartWorkout(template)}
+                    className="w-full py-3 bg-brand-red rounded-2xl text-white font-bold text-sm shadow-[0_4px_0_0_rgba(150,10,10,0.5)] active:scale-95 transition-transform flex items-center justify-center gap-2 mb-1"
+                  >
+                    <Dumbbell size={16} />
+                    Começar Treino
+                  </button>
+                )}
+
                 {mainUserProfile.userType === 'treinador' && onCreateAd && (
                   <button
                     onClick={() => onCreateAd(template)}

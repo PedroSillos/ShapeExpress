@@ -34,7 +34,7 @@ interface DashboardViewProps {
   userStats: UserStats;
   sessions: WorkoutSession[];
   templates: WorkoutTemplate[];
-  onStartWorkout: () => void;
+  onStartWorkout: (template?: WorkoutTemplate) => void;
   onViewAchievements: () => void;
   userProfile: UserTrainingProfile;
   exerciseStats: ExerciseUserStats[];
@@ -240,7 +240,7 @@ export function DashboardView({
       {/* Mission banner */}
       {currentTemplate ? (
         <button
-          onClick={onStartWorkout}
+          onClick={() => onStartWorkout(currentTemplate)}
           className="mx-6 mt-4 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(150,10,10,0.6)]"
         >
           <div className="text-left">
@@ -300,7 +300,7 @@ export function DashboardView({
               )}
             >
               <button
-                onClick={isActive ? onStartWorkout : undefined}
+                onClick={isActive ? () => onStartWorkout(node.template ?? currentTemplate ?? undefined) : undefined}
                 disabled={isLocked || isDone}
                 className="relative flex flex-col items-center gap-2 active:scale-95 transition-transform disabled:cursor-default"
               >

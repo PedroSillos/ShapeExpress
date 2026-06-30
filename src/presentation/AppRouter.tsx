@@ -208,7 +208,8 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
 
             // api.createTemplate handles both React state update AND localStorage (pending-templates)
             // atomically — do NOT call state.setTemplates or push to localStorage separately.
-            await api.createTemplate(template);
+            // silent=true: the user is about to start the workout, no need for a toast.
+            await api.createTemplate(template, true);
 
             try { localStorage.setItem('welcome-answers', JSON.stringify(answers)); } catch {}
             if (a.weeklyGoal) {
@@ -279,7 +280,18 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           userStats={{ ...userStats, streak: calculatedStreak }}
           sessions={userSessions}
           templates={filteredTemplates}
-          onStartWorkout={() => switchTab('workouts')}
+          onStartWorkout={(template?: WorkoutTemplate) => {
+            if (template) {
+              const hasSheets = template.sheets && template.sheets.length > 0;
+              if (hasSheets && template.sheets!.length > 1) {
+                state.setSelectingSheetTemplate(template);
+              } else {
+                startWorkout(template, hasSheets ? 0 : undefined);
+              }
+            } else {
+              switchTab('workouts');
+            }
+          }}
           onViewAchievements={() => setActiveTab('achievements')}
           userProfile={userTrainingProfile}
           exerciseStats={exerciseUserStats}
