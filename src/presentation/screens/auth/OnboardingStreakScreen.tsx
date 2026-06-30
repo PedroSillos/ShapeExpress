@@ -1,3 +1,4 @@
+import iconFlame from '@/src/assets/icons/icon-flame.svg';
 import iconShare from '@/src/assets/icons/icon-share.svg';
 import { cn } from '../../../utils/cn';
 
@@ -14,12 +15,12 @@ export function OnboardingStreakScreen({ onContinue }: { onContinue: () => void 
   return (
     <div className="h-screen flex flex-col items-center justify-between py-16 px-8 overflow-hidden bg-dark-surface">
       <div className="flex-1 flex flex-col items-center justify-center gap-6 w-full">
-        <div className="w-36 h-36 rounded-full bg-dark-card flex items-center justify-center">
-          <span className="text-7xl select-none">🔥</span>
+        <div className="w-36 h-36 rounded-full flex items-center justify-center p-5" style={{ background: '#E53E3E' }}>
+          <img src={iconFlame} alt="Ofensiva" className="w-full h-full object-contain brightness-0 invert" />
         </div>
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold red-text-gradient">1 dia de ofensiva</h1>
-          <p className="text-white/40 text-base">Treine todos os dias pra criar o hábito.</p>
+          <p className="text-white/40 text-[17px]">Treine todos os dias pra criar o hábito.</p>
         </div>
         <div className="flex w-full justify-between mt-2">
           {orderedDays.map(({ label, isToday }) => (
@@ -41,7 +42,7 @@ export function OnboardingStreakScreen({ onContinue }: { onContinue: () => void 
           }}
           className="w-14 h-14 rounded-2xl bg-dark-card border border-dark-border flex items-center justify-center text-white/60 active:scale-95 transition-transform shrink-0"
         >
-          <img src={iconShare} width={20} height={20} />
+          <img src={iconShare} width={20} height={20} className="brightness-0 invert opacity-80" />
         </button>
         <button
           onClick={onContinue}

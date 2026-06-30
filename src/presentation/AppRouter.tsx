@@ -80,6 +80,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     progressScore, aiAdvice, isAiLoading,
     calculatedStreak, personalRecords,
     api, switchTab,
+    onShowSuggestProfile, onShowStreak,
   } = state;
 
   const previousTabRef = useRef<string>('landing');
@@ -286,7 +287,10 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             const defaultTab = localStorage.getItem('app-default-tab') || 'dashboard';
             setActiveTab(defaultTab as any);
           }}
-          onBack={() => setActiveTab('login')}
+          onBack={() => {
+            const hasOnboardingAnswers = !!localStorage.getItem('welcome-answers');
+            if (hasOnboardingAnswers && onShowSuggestProfile) { onShowSuggestProfile(); } else { setActiveTab('login'); }
+          }}
           onGoToLogin={() => setActiveTab('login')}
           api={api}
         />
