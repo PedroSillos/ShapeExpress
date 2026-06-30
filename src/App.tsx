@@ -66,8 +66,6 @@ export default function App() {
 
   const dataSync = useDataSync({
     api,
-    sessions, templates, assessments,
-    setSessions, setTemplates, setAssessments,
     setUserProfile, setUserStats,
   });
 

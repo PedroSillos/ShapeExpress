@@ -68,12 +68,5 @@ export function generateFirstWorkout(sports: string[], userEmail: string, experi
     exerciseIds,
   };
 
-  // Persist offline for later cloud sync
-  try {
-    const pending = JSON.parse(localStorage.getItem('pending-templates') ?? '[]');
-    pending.push(template);
-    localStorage.setItem('pending-templates', JSON.stringify(pending));
-  } catch { /* ignore */ }
-
   return template;
 }
