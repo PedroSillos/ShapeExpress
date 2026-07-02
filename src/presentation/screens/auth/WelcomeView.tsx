@@ -370,7 +370,7 @@ export function WorkoutDoneScreen({ session, onContinue }: { session: WorkoutSes
     <div className="h-screen flex flex-col items-center justify-between py-16 px-8 overflow-hidden bg-dark-surface">
       <div className="flex-1 flex flex-col items-center justify-center gap-6 w-full">
         <div className="w-36 h-36 rounded-full flex items-center justify-center p-5" style={{ background: '#E53E3E' }}>
-          <img src="/src/assets/icons/icon-trophy.svg" alt="Troféu" className="w-full h-full object-contain brightness-0 invert" />
+          <img src={iconTrophy} alt="Troféu" className="w-full h-full object-contain brightness-0 invert" />
         </div>
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold red-text-gradient">Treino concluído!</h1>
@@ -380,21 +380,21 @@ export function WorkoutDoneScreen({ session, onContinue }: { session: WorkoutSes
           <div className="w-0 flex-1 rounded-2xl p-4 flex flex-col items-center gap-2" style={{ background: '#D4871A' }}>
             <p className="text-sm font-bold text-white/90 uppercase tracking-widest">XP</p>
             <div className="w-12 h-12 rounded-xl overflow-hidden p-1.5 bg-white/20">
-              <img src="/src/assets/icons/icon-zap.svg" alt="XP" className="w-full h-full object-contain brightness-0 invert" />
+              <img src={iconZap} alt="XP" className="w-full h-full object-contain brightness-0 invert" />
             </div>
             <p className="text-lg font-semibold text-white">{session.xpEarned}</p>
           </div>
           <div className="w-0 flex-1 rounded-2xl p-4 flex flex-col items-center gap-2" style={{ background: '#E05C2A' }}>
             <p className="text-sm font-bold text-white/90 uppercase tracking-widest">Peso</p>
             <div className="w-12 h-12 rounded-xl overflow-hidden p-1.5 bg-white/20">
-              <img src="/src/assets/icons/icon-halterofilismo.svg" alt="Peso" className="w-full h-full object-contain brightness-0 invert" />
+              <img src={iconHalterofilismo} alt="Peso" className="w-full h-full object-contain brightness-0 invert" />
             </div>
             <p className="text-lg font-semibold text-white">{maxWeight} KG</p>
           </div>
           <div className="w-0 flex-1 rounded-2xl p-4 flex flex-col items-center gap-2" style={{ background: '#3B7DD8' }}>
             <p className="text-sm font-bold text-white/90 uppercase tracking-widest">Tempo</p>
             <div className="w-12 h-12 rounded-xl overflow-hidden p-1.5 bg-white/20">
-              <img src="/src/assets/icons/icon-alarm.svg" alt="Tempo" className="w-full h-full object-contain brightness-0 invert" />
+              <img src={iconAlarm} alt="Tempo" className="w-full h-full object-contain brightness-0 invert" />
             </div>
             <p className="text-lg font-semibold text-white">{durationLabel}</p>
           </div>
