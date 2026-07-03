@@ -138,7 +138,7 @@ async function startServer() {
 Nivel: ${difficulty}
 Regras: EXATAMENTE 3 exercicios, numSets=3 em todos, rest="60s" em todos. Casa: apenas IDs 9,10,11,14,33,35,38.
 IDs: 1=Supino,2=Agachamento,3=Remada,4=Dev.Militar,5=Rosca,6=Terra,7=LegPress,8=Puxada,9=Flexao,10=Afundo,11=Prancha,13=RoscaHalter,14=KBSwing,19=Extensora,20=MesaFlexora,21=Stiff,22=ElevPelvica,25=Gemeos,28=ElevLateral,30=TricepsPulley,33=AbdSupra,35=GiroRusso,36=Corrida,37=Ciclismo,38=PularCorda.
-JSON sem markdown: {"name":"Primeira Semana — <modalidade>","exercises":[{"exerciseId":"ID","numSets":3,"sets":"10","rest":"60s"}]}`;
+JSON sem markdown: {"name":"Treino Básico: <modalidade>","exercises":[{"exerciseId":"ID","numSets":3,"sets":"10","rest":"60s"}]}`;
 
     try {
       const response = await genAI.models.generateContent({

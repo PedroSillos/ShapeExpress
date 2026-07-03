@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, ChevronLeft, Search, SlidersHorizontal, Play, Check, Plus, Trash2, Edit } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, addMonths, parseISO } from 'date-fns';
@@ -6,6 +6,7 @@ import { cn } from '../../utils/cn';
 import { EXERCISES } from '../../constants';
 import { Card } from '../components/Card';
 import { ConfigureExercisesView } from '../components/ConfigureExercisesView';
+import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
 import { 
   WorkoutTemplate, 
   WorkoutCycle, 
@@ -52,6 +53,15 @@ export function CreateWorkoutView({
     if (initialTemplate?.sheets) return initialTemplate.sheets;
     return [{ id: Math.random().toString(36).substr(2, 9), name: '', order: 0, exerciseIds: [], exercises: [] }];
   });
+
+  const sport = useMemo(() => {
+    if ((userProfile as any)?.sports?.length) return (userProfile as any).sports[0] as string;
+    try {
+      const wa = JSON.parse(localStorage.getItem('welcome-answers') ?? 'null');
+      if (wa?.sports?.length) return wa.sports[0] as string;
+    } catch {}
+    return 'Musculação';
+  }, [userProfile]);
 
   // Draft saving logic
   useEffect(() => {
@@ -299,9 +309,33 @@ export function CreateWorkoutView({
   if (step === 'protocol-info') {
     return (
       <div className="space-y-6 pb-12">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold">{initialTemplate ? 'Editar Treino' : 'Novo Treino'}</h2>
-          <button onClick={onCancel} className="p-2 bg-white/5 rounded-full"><X size={20} /></button>
+        {/* Header */}
+        <div
+          className="relative overflow-hidden -mx-6 mb-6"
+          style={{ background: 'linear-gradient(135deg, #C0392B 0%, #E74C3C 60%, #E05C2A 100%)' }}
+        >
+          <div className="px-6 pt-10 pb-8 flex items-end justify-between">
+            <div className="space-y-1">
+              <h1 className="text-3xl font-black text-white leading-tight">
+                {initialTemplate ? 'Editar treino' : 'Novo treino'}
+              </h1>
+              <p className="text-white/70 text-sm font-semibold">{sport}</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
+                <img src={iconMusculacao} alt="" className="w-12 h-12 brightness-0 invert" />
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={onCancel}
+            className="absolute top-4 left-4 p-2 bg-black/20 rounded-full text-white/70 hover:text-white"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          {/* decorative circles */}
+          <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/5 pointer-events-none" />
+          <div className="absolute top-4 right-12 w-12 h-12 rounded-full bg-white/5 pointer-events-none" />
         </div>
 
         <Card className="space-y-6 p-6">

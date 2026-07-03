@@ -1,5 +1,5 @@
 import { toast } from 'sonner';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Student, UserProfile, WorkoutTemplate, WorkoutSession, BodyAssessment } from '../domain/entities';
 import { DEFAULT_PROFILE } from '../constants';
 
@@ -98,6 +98,59 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     createSession, updateSession, deleteSession,
     createAssessment, updateAssessment, deleteAssessment,
   } = dataSync;
+
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+
+  const handleGenerateWithAI = async () => {
+    if (isGeneratingAI) return;
+    setIsGeneratingAI(true);
+    try {
+      const wa = (() => { try { return JSON.parse(localStorage.getItem('welcome-answers') ?? 'null'); } catch { return null; } })();
+      const sports: string[] = wa?.sports ?? [];
+      const now = new Date();
+      const end = new Date(now); end.setMonth(end.getMonth() + 3);
+      const age = userProfile?.birthDate
+        ? new Date().getFullYear() - new Date(userProfile.birthDate).getFullYear()
+        : undefined;
+
+      let template: WorkoutTemplate | null = null;
+      try {
+        const ai = await generateFirstWorkoutAI({
+          sports,
+          objective: wa?.objective ?? userProfile?.objective,
+          experience: wa?.experiences ? (Object.values(wa.experiences)[0] as string | undefined) : userProfile?.experienceLevel,
+          location: wa?.location ?? userProfile?.trainingLocation,
+          height: userProfile?.height,
+          weight: userProfile?.initialWeight,
+          age,
+        });
+        if (ai && ai.exercises?.length > 0) {
+          template = {
+            id: `ai-${Date.now()}`,
+            userId: userProfile?.email ?? 'user',
+            name: ai.name,
+            category: 'basic' as const,
+            startDate: now.toISOString(),
+            endDate: end.toISOString(),
+            exercises: ai.exercises,
+            exerciseIds: ai.exercises.map((e: any) => e.exerciseId),
+          };
+        }
+      } catch { /* fallback below */ }
+
+      if (!template) {
+        const { generateFirstWorkout } = await import('../domain/use-cases/generateFirstWorkout');
+        const fallback = generateFirstWorkout(sports, userProfile?.email ?? 'user', userProfile?.experienceLevel);
+        template = fallback;
+      }
+
+      await createTemplate(template);
+    } catch (err) {
+      console.error('Generate AI workout error:', err);
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
 
   if (activeWorkout) return (
     <ActiveWorkoutView
@@ -316,6 +369,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           sessions={filteredSessions}
           onStartWorkout={startWorkout}
           onCreateWorkout={() => setActiveTab('create-workout')}
+          onGenerateWithAI={handleGenerateWithAI}
           onEditWorkout={(t: WorkoutTemplate) => { setEditingTemplate(t); setActiveTab('edit-workout'); }}
           onDeleteWorkout={(id: string) => setDeletingTemplateId(id)}
           onGoToStore={() => switchTab('express')}

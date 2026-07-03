@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Plus,
   Dumbbell,
@@ -10,6 +10,8 @@ import {
   X,
   ChevronRight,
   Play,
+  ShoppingBag,
+  Sparkles,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, parseISO } from 'date-fns';
@@ -45,6 +47,7 @@ interface WorkoutsViewProps {
   sessions: WorkoutSession[];
   onStartWorkout: (t: WorkoutTemplate, sheetIndex?: number) => void;
   onCreateWorkout: () => void;
+  onGenerateWithAI: () => void;
   onEditWorkout: (t: WorkoutTemplate) => void;
   onDeleteWorkout: (id: string) => void;
   onGoToStore: () => void;
@@ -83,7 +86,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
-function WorkoutsHeader({ sessionCount }: { sessionCount: number }) {
+function WorkoutsHeader({ sessionCount, sport }: { sessionCount: number; sport: string }) {
   return (
     <div
       className="relative overflow-hidden -mx-6 mb-6"
@@ -91,8 +94,8 @@ function WorkoutsHeader({ sessionCount }: { sessionCount: number }) {
     >
       <div className="px-6 pt-10 pb-8 flex items-end justify-between">
         <div className="space-y-1">
-          <p className="text-white/60 text-xs font-bold uppercase tracking-widest">Shape Express</p>
           <h1 className="text-3xl font-black text-white leading-tight">Treinos</h1>
+          <p className="text-white/70 text-sm font-semibold">{sport}</p>
           {sessionCount > 0 && (
             <div className="flex items-center gap-1.5 mt-2">
               <img src={iconTrophy} alt="" className="w-4 h-4 brightness-0 invert opacity-80" />
@@ -483,6 +486,7 @@ export function WorkoutsView({
   sessions,
   onStartWorkout,
   onCreateWorkout,
+  onGenerateWithAI,
   onEditWorkout,
   onDeleteWorkout,
   onGoToStore,
@@ -500,6 +504,16 @@ export function WorkoutsView({
 }: WorkoutsViewProps) {
   const [openSettingsId, setOpenSettingsId] = useState<string | null>(null);
   const [selectingSheetTemplate, setSelectingSheetTemplate] = useState<WorkoutTemplate | null>(null);
+  const [showCreateMenu, setShowCreateMenu] = useState(false);
+
+  const sport = useMemo(() => {
+    if ((mainUserProfile as any)?.sports?.length) return (mainUserProfile as any).sports[0] as string;
+    try {
+      const wa = JSON.parse(localStorage.getItem('welcome-answers') ?? 'null');
+      if (wa?.sports?.length) return wa.sports[0] as string;
+    } catch {}
+    return 'Musculação';
+  }, [mainUserProfile]);
   const historyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -534,16 +548,15 @@ export function WorkoutsView({
 
   return (
     <div className="pb-24">
-      <WorkoutsHeader sessionCount={sessions.length} />
+      <WorkoutsHeader sessionCount={sessions.length} sport={sport} />
 
       <div className="space-y-6">
         {/* Create workout button */}
         <button
-          onClick={onCreateWorkout}
-          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-black text-sm text-white/60 border border-dashed border-white/15 bg-white/3 active:scale-95 transition-transform hover:border-brand-red/40 hover:text-brand-red/70"
+          onClick={() => setShowCreateMenu(true)}
+          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-black text-sm text-white border border-brand-red/50 bg-brand-red/15 active:scale-95 transition-transform hover:bg-brand-red/25 hover:border-brand-red"
         >
-          <Plus size={17} />
-          Criar Treino
+          Adicionar treino
         </button>
 
         {/* Templates section */}
@@ -555,21 +568,7 @@ export function WorkoutsView({
               </div>
               <div>
                 <p className="text-white/50 font-black text-base">Nenhum treino criado</p>
-                <p className="text-xs text-white/25 mt-1">Crie seu primeiro treino para começar a evoluir.</p>
-              </div>
-              <div className="flex flex-col gap-3 max-w-xs mx-auto">
-                <button
-                  onClick={onCreateWorkout}
-                  className="px-6 py-3 bg-brand-red text-white rounded-2xl font-black text-sm active:scale-95 transition-transform shadow-lg shadow-brand-red/30"
-                >
-                  Criar Meu Primeiro Treino
-                </button>
-                <button
-                  onClick={onGoToStore}
-                  className="px-6 py-3 bg-white/5 text-white/50 rounded-2xl font-bold text-sm active:scale-95 transition-transform border border-white/8"
-                >
-                  Adquirir Treino na Loja
-                </button>
+                <p className="text-xs text-white/25 mt-1">Adicione seu primeiro treino para começar a evoluir.</p>
               </div>
             </div>
           ) : (
@@ -669,6 +668,80 @@ export function WorkoutsView({
                     </div>
                   </button>
                 ))}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Create Workout Bottom Sheet */}
+      <AnimatePresence>
+        {showCreateMenu && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowCreateMenu(false)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              className="fixed inset-0 z-[110] flex items-center justify-center px-4"
+            >
+              <div className="w-full max-w-sm bg-dark-card border border-dark-border rounded-3xl p-5 shadow-2xl">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-base font-black text-white">Adicionar treino</h3>
+                  <button
+                    onClick={() => setShowCreateMenu(false)}
+                    className="p-1.5 text-white/30 hover:text-white"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => { setShowCreateMenu(false); onGoToStore(); }}
+                    className="w-full flex items-center gap-4 p-4 rounded-2xl active:scale-95 transition-transform"
+                    style={{ background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)' }}
+                  >
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#16A34A' }}>
+                      <ShoppingBag size={18} className="text-white" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-bold text-sm text-white">Comprar novo treino</p>
+                      <p className="text-xs text-white/35 mt-0.5">Adquira um treino na loja Express</p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => { setShowCreateMenu(false); onGenerateWithAI(); }}
+                    className="w-full flex items-center gap-4 p-4 rounded-2xl active:scale-95 transition-transform"
+                    style={{ background: 'rgba(124, 58, 237, 0.12)', border: '1px solid rgba(124, 58, 237, 0.25)' }}
+                  >
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#7C3AED' }}>
+                      <Sparkles size={18} className="text-white" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-bold text-sm text-white">Gerar treino com IA</p>
+                      <p className="text-xs text-white/35 mt-0.5">A IA cria um treino personalizado pra você</p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => { setShowCreateMenu(false); onCreateWorkout(); }}
+                    className="w-full flex items-center gap-4 p-4 rounded-2xl bg-brand-red/10 border border-brand-red/20 active:scale-95 transition-transform"
+                  >
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-brand-red shrink-0">
+                      <Plus size={18} className="text-white" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-bold text-sm text-white">Criar treino</p>
+                      <p className="text-xs text-white/35 mt-0.5">Monte seu próprio treino do zero</p>
+                    </div>
+                  </button>
+                </div>
               </div>
             </motion.div>
           </>
