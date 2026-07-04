@@ -35,7 +35,6 @@ interface DashboardViewProps {
   sessions: WorkoutSession[];
   templates: WorkoutTemplate[];
   onStartWorkout: (template?: WorkoutTemplate) => void;
-  onViewAchievements: () => void;
   userProfile: UserTrainingProfile;
   exerciseStats: ExerciseUserStats[];
   calorieProfile: UserCalorieProfile;

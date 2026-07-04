@@ -5,7 +5,6 @@ import { syncState } from "./useAuthState";
 import type {
   UserProfile, UserStats, WorkoutTemplate,
   WorkoutSession, TrainerConnection, Student,
-  Community, Post, Challenge, UserChallenge,
 } from "../../domain/entities";
 
 interface SyncSetters {
@@ -17,10 +16,6 @@ interface SyncSetters {
   setTrainerConnections: (c: TrainerConnection[]) => void;
   setStudentConnections: (c: TrainerConnection[]) => void;
   setStudents: (s: Student[]) => void;
-  setCommunities: (c: Community[]) => void;
-  setPosts: (p: Post[]) => void;
-  setChallenges: (c: Challenge[]) => void;
-  setUserChallenges: (uc: UserChallenge[]) => void;
 }
 
 const buildStudentFromConnections = async (
@@ -100,7 +95,6 @@ export const useSyncState = (
     const {
       setUserProfile, setUserStats, setTemplates, setSessions,
       setTrainers, setTrainerConnections, setStudentConnections, setStudents,
-      setCommunities, setPosts, setChallenges, setUserChallenges,
     } = setters;
 
     const syncAll = async () => {
@@ -134,19 +128,6 @@ export const useSyncState = (
           }).catch(() => {}),
           getDocs(query(collection(db, "users"), where("userType", "==", "treinador"))).then((snap) => {
             if (!snap.empty) setTrainers(snap.docs.map((d) => d.data() as UserProfile));
-          }).catch(() => {}),
-          getDocs(collection(db, "communities")).then((snap) => {
-            setCommunities(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Community)));
-          }).catch(() => {}),
-          getDocs(collection(db, "posts")).then((snap) => {
-            setPosts(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Post))
-              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
-          }).catch(() => {}),
-          getDocs(collection(db, "challenges")).then((snap) => {
-            setChallenges(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Challenge)));
-          }).catch(() => {}),
-          getDocs(query(collection(db, "userChallenges"), where("userId", "==", emailLower))).then((snap) => {
-            setUserChallenges(snap.docs.map((d) => d.data() as UserChallenge));
           }).catch(() => {}),
         ]);
 

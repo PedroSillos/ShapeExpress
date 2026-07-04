@@ -51,12 +51,8 @@ export default function App() {
     progressScore, aiAdvice, isAiLoading, setAiAdvice, setIsAiLoading,
     api,
     selectedStudentForWorkouts,
-    recommendedCommunities, setRecommendedCommunities,
   } = appState;
 
-  // Local state not in useAppState
-  const [communityInitialTab, setCommunityInitialTab] = useState<'feed' | 'challenges' | 'ranking'>('feed');
-  const [communityInitialRankingType, setCommunityInitialRankingType] = useState<'community' | 'global' | 'league' | 'friends'>('community');
   const [selectedStudentForProfile, setSelectedStudentForProfile] = useState<any>(null);
   const [creatingAdTemplate, setCreatingAdTemplate] = useState<WorkoutTemplate | null>(null);
   const [studentTemplates, setStudentTemplates] = useState<WorkoutTemplate[]>([]);
@@ -111,11 +107,6 @@ export default function App() {
     }
   }, []);
 
-  useEffect(() => {
-    if (isLoggedIn && activeTab === 'community' && recommendedCommunities.length === 0) {
-      api.getRecommendedCommunities().then(setRecommendedCommunities);
-    }
-  }, [isLoggedIn, activeTab, recommendedCommunities.length]);
 
   useEffect(() => {
     if (!isLoggedIn && !lastCompletedSession && !activeWorkout && !onboardingSession && activeTab !== 'landing' && activeTab !== 'welcome' && activeTab !== 'login' && activeTab !== 'forgot-password' && activeTab !== 'register') {
@@ -123,14 +114,10 @@ export default function App() {
     }
   }, [isLoggedIn, activeTab, lastCompletedSession, activeWorkout, onboardingSession]);
 
-  const mainTabs = ['dashboard', 'community', 'workouts', 'stats', userProfile?.userType === 'treinador' ? 'students' : 'express'];
+  const mainTabs = ['dashboard', 'workouts', 'stats', userProfile?.userType === 'treinador' ? 'students' : 'express'];
 
-  const switchTab = (tab: string, initialTab?: any, initialRankingType?: any) => {
+  const switchTab = (tab: string) => {
     let targetTab = tab;
-    if (tab === 'community') {
-      setCommunityInitialTab(initialTab || 'feed');
-      setCommunityInitialRankingType(initialRankingType || 'community');
-    }
     if (activeTab === targetTab) return;
     const ci = mainTabs.indexOf(activeTab);
     const ni = mainTabs.indexOf(targetTab);
@@ -197,7 +184,7 @@ export default function App() {
   }
 
   const currentAnimations = document.documentElement.getAttribute('data-animations') || 'enabled';
-  const routerState = { ...appState, switchTab, communityInitialTab, communityInitialRankingType, selectedStudentForProfile, setSelectedStudentForProfile, creatingAdTemplate, setCreatingAdTemplate, studentTemplates, setStudentTemplates, onShowSuggestProfile: () => setShowSuggestProfile(true), onShowStreak: () => { setShowSuggestProfile(false); setShowOnboardingStreak(true); } };
+  const routerState = { ...appState, switchTab, selectedStudentForProfile, setSelectedStudentForProfile, creatingAdTemplate, setCreatingAdTemplate, studentTemplates, setStudentTemplates, onShowSuggestProfile: () => setShowSuggestProfile(true), onShowStreak: () => { setShowSuggestProfile(false); setShowOnboardingStreak(true); } };
 
   if (activeTab === 'landing' || activeTab === 'welcome' || activeTab === 'login' || activeTab === 'register' || activeTab === 'forgot-password') {
     return (

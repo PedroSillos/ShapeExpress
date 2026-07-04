@@ -1,4 +1,4 @@
-import { WorkoutSession, UserProfile, StagnationReport, ProgressScore, Community } from "../../domain/entities";
+import { WorkoutSession, UserProfile, StagnationReport, ProgressScore } from "../../domain/entities";
 import { tokenStore } from "./tokenStore";
 
 const callBackendAI = async (endpoint: string, body: any): Promise<any> => {
@@ -52,27 +52,3 @@ export async function getAICoachAdvice(
   }
 }
 
-export async function getRecommendedCommunities(
-  userProfile: UserProfile,
-  userLevel: number,
-  userLeague: string,
-  communities: Community[],
-  userCommunityIds: string[]
-): Promise<Community[]> {
-  try {
-    const data = await callBackendAI('/api/ai/recommend-communities', {
-      userProfile,
-      userLevel,
-      userLeague,
-      communities,
-      userCommunityIds,
-    });
-    
-    const recommendedIds = data.recommendations || [];
-    return communities.filter(c => recommendedIds.includes(c.id));
-  } catch (error) {
-    console.error('AI Recommendation error:', error);
-    // Fallback: return some popular communities he's not in
-    return communities.filter(c => !userCommunityIds.includes(c.id)).slice(0, 2);
-  }
-}

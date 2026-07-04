@@ -100,15 +100,6 @@ async function startServer() {
     body('stagnationReports').optional().isArray({ max: 50 }),
   ];
 
-  const validateRecommendCommunities = [
-    body('userProfile.name').optional().trim().isLength({ max: 100 }).escape(),
-    body('userProfile.objective').optional().trim().isLength({ max: 200 }).escape(),
-    body('userLevel').optional().isInt({ min: 1, max: 1000 }),
-    body('userLeague').optional().isIn(['Bronze', 'Prata', 'Ouro', 'Platina', 'Esmeralda', 'Diamante']),
-    body('communities').optional().isArray({ max: 200 }),
-    body('userCommunityIds').optional().isArray({ max: 200 }),
-  ];
-
   // AI Generate First Workout Endpoint
   app.post('/api/ai/generate-first-workout', [
     body('sports').isArray({ min: 1, max: 10 }),
@@ -194,51 +185,6 @@ JSON sem markdown: {"name":"Treino Básico: <modalidade>","exercises":[{"exercis
     } catch (error: any) {
       console.error('AI Coach Error:', error);
       res.status(500).json({ error: 'Erro ao gerar conselho. Tente novamente.' });
-    }
-  });
-
-  // AI Community Recommendations Endpoint
-  app.post('/api/ai/recommend-communities', authMiddleware, validateRecommendCommunities, async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    if (!genAI) {
-      return res.status(500).json({ error: 'AI não está configurado.' });
-    }
-
-    const { userProfile, userLevel, userLeague, communities, userCommunityIds } = req.body;
-
-    try {
-      const prompt = `
-      Com base no perfil do atleta abaixo, sugira as 3 comunidades mais adequadas para ele entre as disponíveis.
-      
-      Perfil do Atleta:
-      - Nome: ${userProfile?.name || 'Não informado'}
-      - Objetivo: ${userProfile?.objective || 'Não informado'}
-      - Nível: ${userLevel || 1}
-      - Liga: ${userLeague || 'Iniciante'}
-      
-      Comunidades Disponíveis:
-      ${(communities || []).map((c: any) => `- ID: ${c.id}, Nome: ${c.name}, Descrição: ${c.description}, Tags: ${c.tags}`).join('\n')}
-      
-      Comunidades que ele já participa: ${(userCommunityIds || []).join(', ')}
-      
-      Retorne APENAS um array JSON com os IDs das comunidades recomendadas. Exemplo: ["id1", "id2"]
-      `;
-
-      const response = await genAI.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: [{ role: "user", parts: [{ text: prompt }] }]
-      });
-
-      const text = response.text || "[]";
-      const recommendedIds = JSON.parse(text.match(/\[.*\]/)?.[0] || '[]');
-      res.json({ recommendations: recommendedIds });
-    } catch (error: any) {
-      console.error('AI Community Error:', error);
-      res.status(500).json({ error: 'Erro ao gerar recomendações.' });
     }
   });
 

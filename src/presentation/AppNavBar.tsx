@@ -1,4 +1,4 @@
-import { Users, Dumbbell, BarChart3, Zap, Home } from 'lucide-react';
+import { Dumbbell, BarChart3, Zap, Home } from 'lucide-react';
 import { UserProfile, WorkoutSession } from '../domain/entities';
 import { NavButton } from './components/NavButton';
 
@@ -26,7 +26,7 @@ export function AppNavBar({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-dark-surface">
-      <nav className="max-w-md mx-auto border-t border-white/10 py-3 pb-10 grid grid-cols-5 items-center">
+      <nav className="max-w-md mx-auto border-t border-white/10 py-3 pb-10 grid grid-cols-4 items-center">
         <div className="flex justify-center">
           <NavButton
             active={activeTab === 'dashboard'}
@@ -43,13 +43,6 @@ export function AppNavBar({
         </div>
         <div className="flex justify-center">
           <NavButton
-            active={activeTab === 'community'}
-            icon={<Users size={20} />}
-            onClick={() => switchTab('community')}
-          />
-        </div>
-        <div className="flex justify-center">
-          <NavButton
             active={activeTab === 'stats'}
             icon={<BarChart3 size={20} />}
             onClick={() => switchTab('stats')}
@@ -59,7 +52,7 @@ export function AppNavBar({
           {userProfile?.userType === 'treinador' ? (
             <NavButton
               active={activeTab === 'students'}
-              icon={<Users size={20} />}
+              icon={<Zap size={20} />}
               onClick={onStudentsClick}
             />
           ) : (

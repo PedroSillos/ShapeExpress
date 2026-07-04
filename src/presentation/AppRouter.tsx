@@ -13,11 +13,7 @@ import { DashboardView } from './screens/DashboardView';
 import { CalendarView } from './screens/CalendarView';
 import { WorkoutsView } from './screens/WorkoutsView';
 import { StatsContainer } from './screens/StatsContainer';
-import { AchievementsView } from './screens/AchievementsView';
-import { ProfileView } from './screens/ProfileView';
 import { NotificationsView } from './screens/NotificationsView';
-import { EditProfileView } from './screens/EditProfileView';
-import { CommunityView } from './screens/CommunityView';
 import { ExpressView } from './screens/ExpressView';
 import { PurchasedProductsView } from './screens/PurchasedProductsView';
 import { ExerciseLibraryView } from './screens/ExerciseLibraryView';
@@ -28,9 +24,6 @@ import { StudentEvolutionView } from './screens/StudentEvolutionView';
 import { CreateWorkoutView } from './screens/CreateWorkoutView';
 import { ActiveWorkoutView } from './screens/ActiveWorkoutView';
 import { BodyAssessmentView as NewAssessmentView } from './screens/BodyAssessmentView';
-import { SettingsGoalView } from './screens/SettingsGoalView';
-import { SettingsNotificationsView } from './screens/SettingsNotificationsView';
-import { HelpView } from './screens/HelpView';
 import { generateFirstWorkoutAI } from '../data/services/aiService';
 
 
@@ -61,13 +54,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     trainerConnections,
     activeChatStudent, setActiveChatStudent,
     chatMessages,
-    communityMessages, setCommunityMessages,
-    recommendedCommunities, setRecommendedCommunities,
-    posts, setPosts,
-    communities, setCommunities,
-    challenges, setChallenges,
-    userChallenges, setUserChallenges,
-    communityInitialTab, communityInitialRankingType,
     selectedStudentForWorkouts, setSelectedStudentForWorkouts,
     selectedStudentForEvolution, setSelectedStudentForEvolution,
     selectedStudentForProfile, setSelectedStudentForProfile,
@@ -344,7 +330,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
               switchTab('workouts');
             }
           }}
-          onViewAchievements={() => setActiveTab('achievements')}
           userProfile={userTrainingProfile}
           exerciseStats={exerciseUserStats}
           calorieProfile={userCalorieProfile}
@@ -399,21 +384,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onEditAssessment={(a: BodyAssessment) => { setEditingAssessment(a); setActiveTab('edit-assessment'); }}
         />
       );
-    case 'achievements':
-      return <AchievementsView onBack={() => setActiveTab('profile')} />;
-    case 'profile':
-      return (
-        <ProfileView
-          user={userProfile}
-          trainingProfile={userTrainingProfile}
-          onLogout={() => setShowLogoutConfirm(true)}
-          onEdit={() => setActiveTab('edit-profile')}
-          onSettingsGoal={() => setActiveTab('settings-goal')}
-          onSettingsNotifications={() => setActiveTab('settings-notifications')}
-          onHelp={() => setActiveTab('help')}
-          onDeleteAccount={() => api.deleteAccount()}
-        />
-      );
     case 'notifications':
       return (
         <NotificationsView
@@ -465,15 +435,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           }}
         />
       );
-    case 'edit-profile':
-      return (
-        <EditProfileView
-          userProfile={userProfile}
-          onSave={(p: UserProfile) => { updateProfile(p); setActiveTab('profile'); }}
-          onCancel={() => setActiveTab('profile')}
-          api={api}
-        />
-      );
     case 'evolution':
       return (
         <StatsContainer
@@ -486,19 +447,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onDeleteAssessment={deleteAssessment}
           onEditAssessment={(a: BodyAssessment) => { setEditingAssessment(a); setActiveTab('edit-assessment'); }}
           initialTab="evolution"
-        />
-      );
-    case 'community':
-      return (
-        <CommunityView
-          userProfile={userProfile} userStats={userStats} api={api}
-          communityMessages={communityMessages} setCommunityMessages={setCommunityMessages}
-          recommendedCommunities={recommendedCommunities} posts={posts} setPosts={setPosts}
-          communities={communities} setCommunities={setCommunities}
-          challenges={challenges} setChallenges={setChallenges}
-          userChallenges={userChallenges} setUserChallenges={setUserChallenges}
-          getLeaderboard={api.getLeaderboard}
-          initialTab={communityInitialTab} initialRankingType={communityInitialRankingType}
         />
       );
     case 'trainers':
@@ -641,17 +589,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onBack={() => { setEditingAssessment(null); setActiveTab('stats'); }}
         />
       ) : null;
-    case 'settings-goal':
-      return (
-        <SettingsGoalView
-          onSave={() => { setActiveTab('profile'); }}
-          onCancel={() => setActiveTab('profile')}
-        />
-      );
-    case 'settings-notifications':
-      return <SettingsNotificationsView onSave={() => setActiveTab('profile')} onCancel={() => setActiveTab('profile')} />;
-    case 'help':
-      return <HelpView onBack={() => setActiveTab('profile')} />;
     default:
       return null;
   }

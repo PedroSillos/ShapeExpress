@@ -10,7 +10,6 @@ import { useProgressState } from "./useProgressState";
 import { useStudentsState } from "./useStudentsState";
 import { useNotificationsState } from "./useNotificationsState";
 import { useChatState } from "./useChatState";
-import { useCommunityState } from "./useCommunityState";
 import { useStoreState } from "./useStoreState";
 import { useSyncState } from "./useSyncState";
 
@@ -23,7 +22,6 @@ export const useAppState = () => {
   const students = useStudentsState(auth.currentUser, auth.token);
   const notifs = useNotificationsState(auth.currentUser, auth.isLoggedIn, auth.token);
   const chat = useChatState(auth.currentUser);
-  const community = useCommunityState(auth.currentUser);
   const store = useStoreState(auth.currentUser, auth.idToken);
 
   // Boot sync after login
@@ -36,10 +34,6 @@ export const useAppState = () => {
     setTrainerConnections: students.setTrainerConnections,
     setStudentConnections: students.setStudentConnections,
     setStudents: students.setStudents,
-    setCommunities: community.setCommunities,
-    setPosts: community.setPosts,
-    setChallenges: community.setChallenges,
-    setUserChallenges: community.setUserChallenges,
   });
 
   // Apply the tab restored by Firebase Auth on page load/refresh
@@ -116,41 +110,6 @@ export const useAppState = () => {
     // Chat
     getMessages: chat.getMessages,
     sendMessage: chat.sendMessage,
-
-    // Community
-    getPosts: community.getPosts,
-    createPost: community.createPost,
-    likePost: community.likePost,
-    getPostComments: community.getPostComments,
-    addPostComment: community.addPostComment,
-    getCommunities: community.getCommunities,
-    getUserCommunities: community.getUserCommunities,
-    createCommunity: community.createCommunity,
-    joinCommunity: community.joinCommunity,
-    getCommunityMembers: community.getCommunityMembers,
-    getPendingMembers: community.getPendingMembers,
-    approveMember: community.approveMember,
-    rejectMember: community.rejectMember,
-    updateMemberRole: community.updateMemberRole,
-    banMember: community.banMember,
-    unbanMember: community.unbanMember,
-    getBannedMembers: community.getBannedMembers,
-    updateCommunity: community.updateCommunity,
-    deleteCommunity: community.deleteCommunity,
-    getCommunityRole: community.getCommunityRole,
-    getChallengesByCommunity: community.getChallengesByCommunity,
-    createChallenge: community.createChallenge,
-    deleteChallenge: community.deleteChallenge,
-    getChallenges: community.getChallenges,
-    getUserChallenges: community.getUserChallenges,
-    updateChallengeProgress: community.updateChallengeProgress,
-    cancelChallenge: community.cancelChallenge,
-    getCommunityRanking: community.getCommunityRanking,
-    getCommunityMessages: async (_id: string) => [],
-    sendCommunityMessage: async (_id: string, _c: string) => {},
-    getRecommendedCommunities: async () => [],
-    searchUsers: community.searchUsers,
-    searchCommunities: community.searchCommunities,
 
     // Store
     getProtocols: store.getProtocols,
@@ -270,24 +229,6 @@ export const useAppState = () => {
     setChatMessages: chat.setChatMessages,
     activeChatStudent: chat.activeChatStudent,
     setActiveChatStudent: chat.setActiveChatStudent,
-
-    // Community
-    posts: community.posts,
-    setPosts: community.setPosts,
-    communities: community.communities,
-    setCommunities: community.setCommunities,
-    activeCommunity: community.activeCommunity,
-    setActiveCommunity: community.setActiveCommunity,
-    challenges: community.challenges,
-    setChallenges: community.setChallenges,
-    userChallenges: community.userChallenges,
-    setUserChallenges: community.setUserChallenges,
-    communityRanking: community.communityRanking,
-    setCommunityRanking: community.setCommunityRanking,
-    communityMessages: community.communityMessages,
-    setCommunityMessages: community.setCommunityMessages,
-    recommendedCommunities: community.recommendedCommunities,
-    setRecommendedCommunities: community.setRecommendedCommunities,
 
     // Composed
     api,

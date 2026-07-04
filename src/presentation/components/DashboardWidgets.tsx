@@ -1,4 +1,4 @@
-import { Flame, TrendingUp, Trophy, Award, ChevronRight, Users, Quote, Zap, Target, UserPlus } from 'lucide-react';
+import { Flame, TrendingUp, Trophy, Award, ChevronRight, Quote, Zap, Target, UserPlus } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
@@ -199,40 +199,6 @@ export function MotivationWidget() {
             "A disciplina é a ponte entre metas e realizações. Hoje é o dia de construir mais um degrau."
           </p>
           <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">— Jim Rohn</p>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-// --- CommunityWidget ---
-export function CommunityWidget({ onPress }: { onPress: () => void }) {
-  return (
-    <Card
-      onClick={onPress}
-      className="relative overflow-hidden cursor-pointer hover:bg-white/5 active:scale-[0.98] transition-all group"
-    >
-      <div className="flex justify-between items-center relative z-10">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-orange-400/10 flex items-center justify-center text-orange-400 group-hover:bg-orange-400/20 transition-colors">
-            <Users size={24} />
-          </div>
-          <div>
-            <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">Comunidade</p>
-            <h3 className="font-bold">Ranking Global</h3>
-            <div className="flex items-center gap-1 mt-1">
-              <div className="flex -space-x-2">
-                {[1, 2, 3].map(i => (
-                  <img key={i} src={`https://picsum.photos/seed/${i + 10}/100`} alt="" className="w-5 h-5 rounded-full border border-dark-card" />
-                ))}
-              </div>
-              <span className="text-[10px] text-white/40 font-bold ml-1">+1.2k ativos</span>
-            </div>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="text-xs font-bold text-orange-400">Sua Posição</p>
-          <p className="text-xl font-display font-bold">12º</p>
         </div>
       </div>
     </Card>

@@ -6,7 +6,6 @@ import {
   UserTrainingProfile,
   UserProfile,
 } from "./domain/entities";
-import { Challenge } from "./domain/entities";
 
 export const EXERCISES: Exercise[] = [
   // Peito
@@ -1786,76 +1785,6 @@ export const EXERCISES: Exercise[] = [
     equipment: "Peso corporal",
     type: "core",
     inputMode: "duration_only",
-  },
-];
-
-export const calculateChallengeXP = (
-  difficulty: "easy" | "medium" | "hard" | "epic",
-  durationDays: number,
-): number => {
-  const baseXP = {
-    easy: 50,
-    medium: 150,
-    hard: 300,
-    epic: 500,
-  };
-
-  // Multiplier based on duration
-  const durationMultiplier =
-    durationDays > 7 ? 1.5 : durationDays > 1 ? 1.2 : 1;
-
-  return Math.round(baseXP[difficulty] * durationMultiplier);
-};
-
-export const MOCK_CHALLENGES: Challenge[] = [
-  {
-    id: "c1",
-    title: "Treino Rápido",
-    description: "Complete 1 treino hoje.",
-    type: "frequency",
-    category: "daily",
-    difficulty: "easy",
-    goal: 1,
-    durationDays: 1,
-    rewardXp: calculateChallengeXP("easy", 1),
-    icon: "Zap",
-  },
-  {
-    id: "c2",
-    title: "Maratona de Supino",
-    description: "Levante um total de 5000kg no Supino Reto.",
-    type: "volume",
-    category: "weekly",
-    difficulty: "medium",
-    goal: 5000,
-    durationDays: 7,
-    rewardXp: calculateChallengeXP("medium", 7),
-    icon: "Dumbbell",
-  },
-  {
-    id: "c3",
-    title: "Semana Perfeita",
-    description: "Treine 5 dias nesta semana.",
-    type: "frequency",
-    category: "weekly",
-    difficulty: "hard",
-    goal: 5,
-    durationDays: 7,
-    rewardXp: calculateChallengeXP("hard", 7),
-    icon: "Calendar",
-  },
-  {
-    id: "c4",
-    title: "Desafio da Comunidade: 10k",
-    description: "Corra 10km acumulados.",
-    type: "volume",
-    category: "community",
-    difficulty: "epic",
-    goal: 10,
-    durationDays: 14,
-    rewardXp: calculateChallengeXP("epic", 14),
-    icon: "Trophy",
-    communityId: "mock-community-1",
   },
 ];
 
