@@ -151,13 +151,6 @@ export function useWorkout({
       caloriesBurned: 0,
     };
 
-    // Auto post
-    const workoutName = templates.find(t => t.id === activeWorkout.workoutId)?.name || 'Treino';
-    api.createPost({
-      type: 'workout',
-      content: { text: `${userProfile?.name} concluiu o treino: ${workoutName} 💪`, workoutId: completedSession.id },
-    }).catch((err: any) => console.error('Failed to create automatic post:', err));
-
     // Calories
     const weightKg = assessments.length > 0 ? assessments[0].weight : userProfile?.initialWeight;
     const template = templates.find(t => t.id === activeWorkout.workoutId);
