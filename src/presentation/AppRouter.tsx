@@ -25,6 +25,7 @@ import { CreateWorkoutView } from './screens/CreateWorkoutView';
 import { ActiveWorkoutView } from './screens/ActiveWorkoutView';
 import { BodyAssessmentView as NewAssessmentView } from './screens/BodyAssessmentView';
 import { generateFirstWorkoutAI } from '../data/services/aiService';
+import { ProfileGuestView, ProfileUserView } from '../features/profile';
 
 
 interface AppRouterProps {
@@ -303,8 +304,15 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             setActiveTab(defaultTab as any);
           }}
           onBack={() => {
+            const previousTab = localStorage.getItem('previous-tab') || 'landing';
             const hasOnboardingAnswers = !!localStorage.getItem('welcome-answers');
-            if (hasOnboardingAnswers && onShowSuggestProfile) { onShowSuggestProfile(); } else { setActiveTab('login'); }
+            if (previousTab === 'perfil') {
+              setActiveTab('perfil' as any);
+            } else if (hasOnboardingAnswers && onShowSuggestProfile) {
+              onShowSuggestProfile();
+            } else {
+              setActiveTab('login');
+            }
           }}
           onGoToLogin={() => setActiveTab('login')}
           api={api}
@@ -589,6 +597,35 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onBack={() => { setEditingAssessment(null); setActiveTab('stats'); }}
         />
       ) : null;
+    case 'perfil': {
+      // Sports: from welcome-answers (athletes) or specialties (trainers)
+      const sports: string[] = (() => {
+        try {
+          const wa = JSON.parse(localStorage.getItem('welcome-answers') ?? 'null');
+          if (wa?.sports?.length) return wa.sports as string[];
+        } catch {}
+        if (userProfile?.specialties?.length) return userProfile.specialties;
+        return [];
+      })();
+      // Friends = trainer connections (athletes) + students (trainers)
+      const friendsCount =
+        (studentConnections?.length ?? 0) + (students?.length ?? 0) + (trainers?.length ?? 0);
+      return isLoggedIn ? (
+        <ProfileUserView
+          userProfile={userProfile}
+          userStats={userStats}
+          streak={state.calculatedStreak ?? userStats.streak ?? 0}
+          sports={sports}
+          friendsCount={friendsCount}
+          onAddFriends={() => switchTab(userProfile?.userType === 'treinador' ? 'students' : 'express')}
+        />
+      ) : (
+        <ProfileGuestView
+          onCreateProfile={() => setActiveTab('register')}
+          onLogin={() => setActiveTab('login')}
+        />
+      );
+    }
     default:
       return null;
   }

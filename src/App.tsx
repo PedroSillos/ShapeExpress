@@ -114,22 +114,12 @@ export default function App() {
     }
   }, [isLoggedIn, activeTab, lastCompletedSession, activeWorkout, onboardingSession]);
 
-  const mainTabs = ['dashboard', 'workouts', 'stats', userProfile?.userType === 'treinador' ? 'students' : 'express'];
+  const mainTabs = ['dashboard', 'workouts', 'stats', userProfile?.userType === 'treinador' ? 'students' : 'express', 'perfil'];
 
   const switchTab = (tab: string) => {
-    let targetTab = tab;
-    if (activeTab === targetTab) return;
-    const ci = mainTabs.indexOf(activeTab);
-    const ni = mainTabs.indexOf(targetTab);
-    setSwipeDirection(ci !== -1 && ni !== -1 ? (ni > ci ? 1 : -1) : 0);
-    setActiveTab(targetTab as any); // eslint-disable-line
-  };
-
-  const handleSwipe = (direction: 'left' | 'right') => {
-    if (activeWorkout || !isLoggedIn || !mainTabs.includes(activeTab)) return;
-    const ci = mainTabs.indexOf(activeTab);
-    if (direction === 'left' && ci < mainTabs.length - 1) { setSwipeDirection(1); setActiveTab(mainTabs[ci + 1] as any); }
-    else if (direction === 'right' && ci > 0) { setSwipeDirection(-1); setActiveTab(mainTabs[ci - 1] as any); }
+    if (activeTab === tab) return;
+    setSwipeDirection(0);
+    setActiveTab(tab as any); // eslint-disable-line
   };
 
   // Capture onboarding session once, then clear it from shared state
@@ -201,21 +191,14 @@ export default function App() {
         <Toaster position="top-center" richColors />
 
         <main className="flex-1 flex flex-col">
-          <AnimatePresence mode="wait" custom={swipeDirection}>
+          <AnimatePresence mode="wait">
             <motion.div
               key={activeTab + (activeWorkout ? '-active' : '')}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.1}
-              onDragEnd={(_, info) => {
-                if (info.offset.x < -50) handleSwipe('left');
-                else if (info.offset.x > 50) handleSwipe('right');
-              }}
-              initial={{ opacity: 0, x: swipeDirection * 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -swipeDirection * 50 }}
-              transition={{ duration: 0.2 }}
-              className="flex-1 flex flex-col px-6 touch-pan-y"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="flex-1 flex flex-col px-6"
             >
               <AppRouter state={routerState} workout={workout} dataSync={dataSync} />
             </motion.div>
