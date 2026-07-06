@@ -3,7 +3,7 @@ import type { BodyAssessment, WorkoutSession } from "../../domain/entities";
 
 export type AppTab =
   | "landing" | "welcome"
-  | "dashboard" | "calendar" | "workouts" | "stats" | "achievements"
+  | "dashboard" | "calendar" | "workouts" | "stats"
   | "profile" | "edit-profile" | "evolution" | "trainers"
   | "new-assessment" | "edit-assessment" | "create-workout" | "edit-workout"
   | "login" | "settings-goal" | "settings-notifications"

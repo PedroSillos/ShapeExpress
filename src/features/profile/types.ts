@@ -4,10 +4,3 @@ export interface ProfileStats {
   xp: number;
   level: number;
 }
-
-export interface ProfileAchievement {
-  id: string;
-  label: string;
-  count: number;
-  color: string;
-}

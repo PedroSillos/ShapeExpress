@@ -1,4 +1,4 @@
-import { Flame, TrendingUp, Trophy, Award, ChevronRight, Quote, Zap, Target, UserPlus } from 'lucide-react';
+import { Flame, TrendingUp, Trophy, ChevronRight, Quote, Zap, Target, UserPlus } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
@@ -262,22 +262,3 @@ export function WeeklyGoalWidget({ completed, goal }: { completed: number; goal:
   );
 }
 
-// --- LastAchievementWidget ---
-export function LastAchievementWidget({ onPress }: { onPress: () => void }) {
-  return (
-    <Card
-      onClick={onPress}
-      className="flex items-center gap-4 cursor-pointer hover:bg-white/5 active:scale-[0.98] transition-all group"
-    >
-      <div className="w-12 h-12 rounded-2xl bg-brand-red/10 flex items-center justify-center text-brand-red group-hover:bg-brand-red/20 transition-colors">
-        <Award size={24} />
-      </div>
-      <div className="flex-1">
-        <p className="text-[10px] text-white/40 font-bold uppercase">Última Conquista</p>
-        <h3 className="font-bold">PR no Supino</h3>
-        <p className="text-xs text-brand-red font-medium">+250 XP Desbloqueado</p>
-      </div>
-      <ChevronRight size={16} className="text-white/20 group-hover:text-brand-red transition-colors" />
-    </Card>
-  );
-}

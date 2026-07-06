@@ -1,6 +1,5 @@
-import { Share2, Settings, Flame, Zap, Trophy, Dumbbell, UserPlus } from 'lucide-react';
+import { Settings, Flame, Zap, Trophy, Dumbbell, UserPlus } from 'lucide-react';
 import type { UserProfile, UserStats } from '../../../domain/entities';
-import { cn } from '../../../utils/cn';
 
 // Sport SVG icons — same mapping as DashboardView
 import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
@@ -19,6 +18,34 @@ const SPORT_ICONS: Record<string, string> = {
   'Natação':        iconNatacao,
   'Crossfit':       iconCrossfit,
   'Triatlo':        iconTriatlo,
+};
+
+/** Brand color per sport — mirrors DashboardView SPORT_COLORS */
+const SPORT_COLORS: Record<string, string> = {
+  'Musculação':     '#dc2626',
+  'Crossfit':       '#ea580c',
+  'Corrida':        '#ca8a04',
+  'Yoga':           '#16a34a',
+  'Natação':        '#2563eb',
+  'Ciclismo':       '#0891b2',
+  'Halterofilismo': '#7c3aed',
+  'Triatlo':        '#db2777',
+};
+
+/**
+ * Pre-calculated CSS filters to tint a black SVG to the target color.
+ * Generated via https://codepen.io/sosuke/pen/Pjoqqp (Sovran algorithm).
+ * Each entry targets its SPORT_COLORS value above.
+ */
+const SPORT_FILTERS: Record<string, string> = {
+  '#dc2626': 'brightness(0) saturate(100%) invert(22%) sepia(96%) saturate(2276%) hue-rotate(347deg) brightness(95%) contrast(98%)',
+  '#ea580c': 'brightness(0) saturate(100%) invert(38%) sepia(99%) saturate(1200%) hue-rotate(12deg) brightness(98%) contrast(103%)',
+  '#ca8a04': 'brightness(0) saturate(100%) invert(50%) sepia(88%) saturate(700%) hue-rotate(20deg) brightness(97%) contrast(102%)',
+  '#16a34a': 'brightness(0) saturate(100%) invert(44%) sepia(74%) saturate(490%) hue-rotate(98deg) brightness(94%) contrast(95%)',
+  '#2563eb': 'brightness(0) saturate(100%) invert(30%) sepia(99%) saturate(1200%) hue-rotate(215deg) brightness(97%) contrast(103%)',
+  '#0891b2': 'brightness(0) saturate(100%) invert(36%) sepia(87%) saturate(700%) hue-rotate(175deg) brightness(96%) contrast(97%)',
+  '#7c3aed': 'brightness(0) saturate(100%) invert(25%) sepia(89%) saturate(1800%) hue-rotate(256deg) brightness(90%) contrast(102%)',
+  '#db2777': 'brightness(0) saturate(100%) invert(24%) sepia(95%) saturate(1500%) hue-rotate(316deg) brightness(95%) contrast(98%)',
 };
 
 interface ProfileUserViewProps {
@@ -52,40 +79,6 @@ function StatChip({
   );
 }
 
-// ─── Achievement badge ────────────────────────────────────────────────────────
-function AchievementBadge({
-  icon,
-  count,
-  color,
-  locked = false,
-}: {
-  icon: React.ReactNode;
-  count?: number;
-  color: string;
-  locked?: boolean;
-}) {
-  return (
-    <div className="relative">
-      <div
-        className={cn(
-          'w-16 h-16 rounded-full flex items-center justify-center',
-          locked ? 'bg-white/5' : '',
-        )}
-        style={locked ? undefined : { backgroundColor: color + '22', border: `2px solid ${color}44` }}
-      >
-        <div className={cn('text-2xl', locked && 'opacity-20')}>{icon}</div>
-      </div>
-      {!locked && count !== undefined && (
-        <span
-          className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full text-dark-surface"
-          style={{ backgroundColor: color }}
-        >
-          {count >= 1000 ? `${(count / 1000).toFixed(0)}k` : count}
-        </span>
-      )}
-    </div>
-  );
-}
 
 export function ProfileUserView({
   userProfile,
@@ -111,9 +104,11 @@ export function ProfileUserView({
   const xp = userStats.xp ?? 0;
   const totalWorkouts = userStats.totalWorkouts ?? 0;
 
-  // Primary sport SVG icon for overview row
+  // Primary sport SVG icon + color for overview row
   const primarySport = sports[0] ?? '';
   const sportIconSrc = SPORT_ICONS[primarySport] ?? iconMusculacao;
+  const sportColor = SPORT_COLORS[primarySport] ?? '#dc2626';
+  const sportFilter = SPORT_FILTERS[sportColor] ?? SPORT_FILTERS['#dc2626'];
 
   return (
     <div className="min-h-screen bg-dark-surface flex flex-col">
@@ -121,9 +116,6 @@ export function ProfileUserView({
       <div className="flex items-center justify-between px-4 pt-12 pb-4">
         <h1 className="text-white text-2xl font-extrabold">{displayName}</h1>
         <div className="flex items-center gap-4">
-          <button aria-label="Compartilhar" className="text-white/50 hover:text-white/80 transition-colors">
-            <Share2 size={22} />
-          </button>
           <button
             aria-label="Configurações"
             className="text-white/50 hover:text-white/80 transition-colors"
@@ -156,19 +148,7 @@ export function ProfileUserView({
         </p>
       </div>
 
-      {/* ── Sports tags ── */}
-      {sports.length > 0 && (
-        <div className="px-4 mt-2 flex flex-wrap gap-1.5">
-          {sports.map((s) => (
-            <span
-              key={s}
-              className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-white/5 text-white/60 border border-white/10"
-            >
-              {s}
-            </span>
-          ))}
-        </div>
-      )}
+
 
       {/* ── Stats row: modalidades · amigos ── */}
       <div className="px-4 mt-4 flex items-center justify-around">
@@ -210,13 +190,12 @@ export function ProfileUserView({
           </div>
           {/* SVG ícone da modalidade + nível de experiência */}
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 flex items-center justify-center">
-              <img
-                src={sportIconSrc}
-                alt={primarySport}
-                className="w-full h-full object-contain brightness-0 invert opacity-80"
-              />
-            </div>
+            <img
+              src={sportIconSrc}
+              alt={primarySport}
+              className="w-5 h-5 object-contain"
+              style={{ filter: sportFilter }}
+            />
             <span className="text-white font-bold text-sm">
               {userProfile.experienceLevel ?? 'Iniciante'}
             </span>
@@ -231,33 +210,6 @@ export function ProfileUserView({
             <Zap size={18} className="text-yellow-400" />
             <span className="text-white font-bold text-sm">{xp.toLocaleString('pt-BR')} XP</span>
           </div>
-        </div>
-      </div>
-
-      {/* ── Divider ── */}
-      <div className="mx-4 mt-5 border-t border-white/10" />
-
-      {/* ── Conquistas ── */}
-      <div className="px-4 mt-5">
-        <p className="text-white/40 text-[11px] font-extrabold uppercase tracking-widest mb-3">Conquistas</p>
-        <div className="flex items-center gap-4">
-          {totalWorkouts >= 1 && (
-            <AchievementBadge icon={<Dumbbell size={20} />} count={totalWorkouts} color="#EF4444" />
-          )}
-          {streak >= 1 && (
-            <AchievementBadge icon={<Flame size={20} />} count={streak} color="#FF9600" />
-          )}
-          {xp >= 100 && (
-            <AchievementBadge icon={<Zap size={20} />} count={xp} color="#FFD700" />
-          )}
-          {level >= 5 && (
-            <AchievementBadge icon={<Trophy size={20} />} count={level} color="#9B59B6" />
-          )}
-          {[...Array(Math.max(0, 4 - [totalWorkouts >= 1, streak >= 1, xp >= 100, level >= 5].filter(Boolean).length))].map(
-            (_, i) => (
-              <AchievementBadge key={i} icon={<Trophy size={20} />} color="#fff" locked />
-            ),
-          )}
         </div>
       </div>
 

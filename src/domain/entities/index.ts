@@ -172,18 +172,6 @@ export interface WorkoutTemplate {
   exercises?: WorkoutTemplateExercise[];
 }
 
-export interface Achievement {
-  id: string;
-  name: string;
-  description: string;
-  category: "Consistency" | "Strength" | "Volume" | "Frequency" | "Engagement" | "Mentorship" | "Community" | "Challenges";
-  criteria: string;
-  progress: number;
-  maxProgress: number;
-  unlockedAt?: string;
-  icon: string;
-  xpValue: number;
-}
 
 export type League =
   | "Bronze"
