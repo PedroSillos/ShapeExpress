@@ -91,14 +91,14 @@ export function ProfileUserView({
 }: ProfileUserViewProps) {
   const joinYear = new Date().getFullYear();
 
-  // Name: use filled name; fall back to userType label only if name is truly empty
-  const rawName = userProfile.name?.trim();
-  const fallbackName = userProfile.userType === 'treinador' ? 'Treinador' : 'Atleta';
-  const displayName = rawName || fallbackName;
-
   // @handle: derived from email, shown even while name loads
   // e.g. "pedro.sillos@gmail.com" → "@pedro.sillos"
   const emailHandle = userProfile.email?.split('@')[0]?.trim() ?? '';
+
+  // Name: use filled name; fall back to email prefix, then userType label
+  const rawName = userProfile.name?.trim();
+  const fallbackName = userProfile.userType === 'treinador' ? 'Treinador' : 'Atleta';
+  const displayName = rawName || emailHandle || fallbackName;
 
   const level = userStats.level ?? 1;
   const xp = userStats.xp ?? 0;
@@ -112,13 +112,23 @@ export function ProfileUserView({
 
   return (
     <div className="min-h-screen bg-dark-surface flex flex-col">
-      {/* ── Header ── */}
-      <div className="flex items-center justify-between px-4 pt-12 pb-4">
-        <h1 className="text-white text-2xl font-extrabold">{displayName}</h1>
-        <div className="flex items-center gap-4">
+
+      {/* ── Hero header ── */}
+      <div className="relative overflow-hidden px-5 pt-12 pb-20">
+
+        {/* Top row: name + settings */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-white text-3xl font-extrabold leading-tight">{displayName}</h1>
+            {emailHandle && (
+              <p className="text-white/60 text-sm font-medium mt-0.5">
+                @{emailHandle} · Desde {joinYear}
+              </p>
+            )}
+          </div>
           <button
             aria-label="Configurações"
-            className="text-white/50 hover:text-white/80 transition-colors"
+            className="text-white/70 hover:text-white transition-colors mt-1"
             onClick={onSettings}
           >
             <Settings size={22} />
@@ -126,32 +136,27 @@ export function ProfileUserView({
         </div>
       </div>
 
-      {/* ── Avatar hero ── */}
-      <div className="bg-white/5 mx-4 rounded-2xl overflow-hidden flex items-center justify-center py-8">
+      {/* ── Avatar — overlaps header bottom edge ── */}
+      <div className="flex justify-center -mt-14 z-10">
         {userProfile.avatarUrl ? (
           <img
             src={userProfile.avatarUrl}
             alt={displayName}
-            className="w-28 h-28 rounded-full object-cover ring-4 ring-white/10"
+            className="w-28 h-28 rounded-full object-cover"
+            style={{ boxShadow: `0 0 0 4px ${sportColor}` }}
           />
         ) : (
-          <div className="w-28 h-28 rounded-full bg-white/10 flex items-center justify-center text-4xl font-extrabold text-white/40">
+          <div
+            className="w-28 h-28 rounded-full flex items-center justify-center text-4xl font-extrabold text-white"
+            style={{ backgroundColor: sportColor, boxShadow: `0 0 0 4px ${sportColor}99` }}
+          >
             {displayName.charAt(0).toUpperCase()}
           </div>
         )}
       </div>
 
-      {/* ── @username + year ── */}
-      <div className="px-4 mt-4">
-        <p className="text-white/40 text-xs font-bold uppercase tracking-widest">
-          {emailHandle ? `@${emailHandle} · Desde ${joinYear}` : `Desde ${joinYear}`}
-        </p>
-      </div>
-
-
-
       {/* ── Stats row: modalidades · amigos ── */}
-      <div className="px-4 mt-4 flex items-center justify-around">
+      <div className="px-4 mt-5 flex items-center justify-around">
         <StatChip
           icon={<Dumbbell size={12} />}
           value={sports.length}

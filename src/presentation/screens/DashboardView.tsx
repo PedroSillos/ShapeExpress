@@ -204,7 +204,7 @@ export function DashboardView({
               alt={currentSport}
             />
           </div>
-          <span className="font-bold text-sm ml-1" style={{ color: SPORT_COLORS[currentSport] ?? '#dc2626' }}>{completedWeeks}</span>
+          <span className="font-bold text-sm ml-1" style={{ color: SPORT_COLORS[currentSport] ?? '#dc2626' }}>{completedWeeks + 1}</span>
           {sports.length > 1 && (
             <button onClick={() => setSportIdx(i => (i + 1) % sports.length)} className="text-white/30 active:text-white">
               <ChevronRight size={14} />

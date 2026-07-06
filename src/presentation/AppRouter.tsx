@@ -43,6 +43,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     editingTemplate, setEditingTemplate,
     editingAssessment, setEditingAssessment,
     userProfile, setUserProfile,
+    currentUserEmail,
     userStats,
     userSessions, filteredSessions, filteredTemplates,
     setTemplates,
@@ -612,7 +613,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
         (studentConnections?.length ?? 0) + (students?.length ?? 0) + (trainers?.length ?? 0);
       return isLoggedIn ? (
         <ProfileUserView
-          userProfile={userProfile}
+          userProfile={{ ...userProfile, email: userProfile.email || currentUserEmail || '' }}
           userStats={userStats}
           streak={state.calculatedStreak ?? userStats.streak ?? 0}
           sports={sports}
