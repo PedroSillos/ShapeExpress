@@ -106,7 +106,7 @@ function WorkoutsHeader({ sessionCount, sport }: { sessionCount: number; sport: 
           )}
         </div>
         <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
-          <img src={iconMusculacao} alt="" className="w-12 h-12 brightness-0 invert" />
+          <Dumbbell size={36} className="text-white" />
         </div>
       </div>
       {/* decorative circles */}

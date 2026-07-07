@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import iconZap from '@/src/assets/icons/icon-zap.svg';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
@@ -98,7 +97,7 @@ export function StudentsView({ students, userProfile, onMessage, onReminder, pen
             )}
           </div>
           <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
-            <img src={iconZap} alt="" className="w-12 h-12 brightness-0 invert" />
+            <Users size={36} className="text-white" />
           </div>
         </div>
         <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/5 pointer-events-none" />

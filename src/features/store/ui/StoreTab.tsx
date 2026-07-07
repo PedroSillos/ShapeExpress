@@ -1,9 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { Search, X, Dumbbell, Star } from 'lucide-react';
+import { Search, X, Dumbbell, Star, ShoppingBag } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { StoreItem, StorePurchase } from '@/src/domain/entities';
-import iconMedal from '@/src/assets/icons/icon-medal.svg';
 import iconTrophy from '@/src/assets/icons/icon-trophy.svg';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -202,7 +201,7 @@ export function StoreTab({
             )}
           </div>
           <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
-            <img src={iconMedal} alt="" className="w-12 h-12 brightness-0 invert" />
+            <ShoppingBag size={36} className="text-white" />
           </div>
         </div>
         {tabSwitcher}

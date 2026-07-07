@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import {
   Search, UserPlus, X, RefreshCw,
-  ChevronLeft, Trophy, ShieldCheck, AlertTriangle,
+  ChevronLeft, Trophy, ShieldCheck, AlertTriangle, UserCheck,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { UserProfile } from '@/src/domain/entities';
 import { TrainerCard } from '../components/TrainerCard';
-import iconZap from '@/src/assets/icons/icon-zap.svg';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -77,7 +76,7 @@ export function TrainersScreen({
               )}
             </div>
             <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
-              <img src={iconZap} alt="" className="w-12 h-12 brightness-0 invert" />
+              <UserCheck size={36} className="text-white" />
             </div>
           </div>
           <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/5 pointer-events-none" />

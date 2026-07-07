@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import { WorkoutSession, WorkoutTemplate, UserProfile } from '../../domain/entities';
 import { EXERCISES } from '../../constants';
-import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
+import { BarChart3 } from 'lucide-react';
 import iconHalterofilismo from '@/src/assets/icons/icon-halterofilismo.svg';
 import iconTrophy from '@/src/assets/icons/icon-trophy.svg';
 import iconAlarm from '@/src/assets/icons/icon-alarm.svg';
@@ -30,7 +30,7 @@ function StatsHeader({ sport }: { sport: string }) {
           <p className="text-white/70 text-sm font-semibold">{sport}</p>
         </div>
         <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
-          <img src={iconMusculacao} alt="" className="w-12 h-12 brightness-0 invert" />
+          <BarChart3 size={36} className="text-white" />
         </div>
       </div>
       {/* decorative circles */}
