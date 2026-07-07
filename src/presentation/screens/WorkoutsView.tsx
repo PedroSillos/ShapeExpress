@@ -90,7 +90,7 @@ function WorkoutsHeader({ sessionCount, sport }: { sessionCount: number; sport: 
   return (
     <div
       className="relative overflow-hidden -mx-6 mb-6"
-      style={{ background: 'linear-gradient(135deg, #C0392B 0%, #E74C3C 60%, #E05C2A 100%)' }}
+      style={{ background: 'linear-gradient(135deg, #B45309 0%, #D97706 60%, #F59E0B 100%)' }}
     >
       <div className="px-6 pt-10 pb-8 flex items-end justify-between">
         <div className="space-y-1">

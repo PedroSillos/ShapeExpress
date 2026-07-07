@@ -22,7 +22,7 @@ function StatsHeader({ sport }: { sport: string }) {
   return (
     <div
       className="relative overflow-hidden -mx-6 mb-6"
-      style={{ background: 'linear-gradient(135deg, #C0392B 0%, #E74C3C 60%, #E05C2A 100%)' }}
+      style={{ background: 'linear-gradient(135deg, #6D28D9 0%, #8B5CF6 60%, #A78BFA 100%)' }}
     >
       <div className="px-6 pt-10 pb-8 flex items-end justify-between">
         <div className="space-y-1">

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import iconZap from '@/src/assets/icons/icon-zap.svg';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
@@ -78,6 +79,32 @@ export function StudentsView({ students, userProfile, onMessage, onReminder, pen
 
   return (
     <div className="space-y-6 pb-24">
+      {/* ── Hero Header ─────────────────────────────────────────── */}
+      <div
+        className="relative overflow-hidden -mx-6 mb-6"
+        style={{ background: 'linear-gradient(135deg, #0284C7 0%, #38BDF8 60%, #7DD3FC 100%)' }}
+      >
+        <div className="px-6 pt-10 pb-8 flex items-end justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-black text-white leading-tight">Alunos</h1>
+            <p className="text-white/70 text-sm font-semibold">Controle o desempenho dos seus alunos</p>
+            {students.length > 0 && (
+              <div className="flex items-center gap-1.5 mt-2">
+                <Users size={14} className="text-white/80" />
+                <span className="text-white/80 text-xs font-bold">
+                  {students.length} {students.length === 1 ? 'aluno' : 'alunos'}
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
+            <img src={iconZap} alt="" className="w-12 h-12 brightness-0 invert" />
+          </div>
+        </div>
+        <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute top-4 right-12 w-12 h-12 rounded-full bg-white/5 pointer-events-none" />
+      </div>
+
       {/* Header & Search */}
       <div className="space-y-4 sticky top-0 bg-dark-surface/80 backdrop-blur-xl pt-4 pb-2 z-30">
         <div className="flex items-center justify-between px-1">

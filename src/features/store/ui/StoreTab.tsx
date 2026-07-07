@@ -186,7 +186,7 @@ export function StoreTab({
       {/* Hero Header */}
       <div
         className="relative overflow-hidden -mx-6 mb-6"
-        style={{ background: 'linear-gradient(135deg, #C0392B 0%, #E74C3C 60%, #E05C2A 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #16A34A 0%, #22C55E 60%, #4ADE80 100%)' }}
       >
         <div className="px-6 pt-10 pb-8 flex items-end justify-between">
           <div className="space-y-1">
