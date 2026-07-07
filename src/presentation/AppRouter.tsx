@@ -451,7 +451,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           isLoadingItems={!!isLoadingItems}
           onGoToWorkouts={() => switchTab('workouts')}
           createCheckoutSession={api.createCheckoutSession}
-          onGoToTrainers={() => switchTab('trainers')}
         />
       );
     case 'trainers':
@@ -479,7 +478,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             setNotifications(notifs);
           }}
           studentConnections={studentConnections}
-          onGoToStore={() => switchTab('store')}
         />
       );
     case 'purchased-products':

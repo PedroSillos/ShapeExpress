@@ -5,7 +5,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
-import { cn } from '@/src/utils/cn';
 import { UserProfile } from '@/src/domain/entities';
 import { TrainerCard } from '../components/TrainerCard';
 import iconZap from '@/src/assets/icons/icon-zap.svg';
@@ -25,7 +24,6 @@ export interface TrainersScreenProps {
   onConnect: (code: string) => Promise<void>;
   onDisconnect: (trainerEmail: string) => Promise<void>;
   studentConnections: TrainerConnection[];
-  onGoToStore: () => void;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -36,7 +34,6 @@ export function TrainersScreen({
   onConnect,
   onDisconnect: _onDisconnect,
   studentConnections,
-  onGoToStore,
 }: TrainersScreenProps) {
   const [showConnectPopup, setShowConnectPopup] = useState(false);
   const [connectCode, setConnectCode] = useState('');
@@ -57,40 +54,21 @@ export function TrainersScreen({
 
   // ─── Tab switcher shared between both screens ──────────────────────────────
 
-  const tabSwitcher = (
-    <div className="flex gap-2 px-6 pb-5 pt-3">
-      {(['treinadores', 'loja'] as const).map((tab) => (
-        <button
-          key={tab}
-          onClick={() => { if (tab === 'loja') onGoToStore(); }}
-          className={cn(
-            'flex-1 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all border',
-            tab === 'treinadores'
-              ? 'bg-brand-red border-brand-red text-black shadow-lg shadow-brand-red/20'
-              : 'bg-white/10 border-white/10 text-white/60',
-          )}
-        >
-          {tab === 'treinadores' ? 'Treinadores' : 'Loja'}
-        </button>
-      ))}
-    </div>
-  );
-
   return (
     <div className="pb-24">
       <div className="space-y-6">
         {/* ── Hero Header ─────────────────────────────────────────── */}
         <div
-          className="relative overflow-hidden -mx-6"
-          style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}
+          className="relative overflow-hidden -mx-6 mb-6"
+          style={{ background: 'linear-gradient(135deg, #C0392B 0%, #E74C3C 60%, #E05C2A 100%)' }}
         >
-          <div className="px-6 pt-10 pb-4 flex items-end justify-between">
+          <div className="px-6 pt-10 pb-8 flex items-end justify-between">
             <div className="space-y-1">
-              <h1 className="text-3xl font-black text-white leading-tight">Express</h1>
+              <h1 className="text-3xl font-black text-white leading-tight">Treinadores</h1>
               <p className="text-white/70 text-sm font-semibold">Treinadores &amp; Conexões</p>
               {connectedTrainers.length > 0 && (
                 <div className="flex items-center gap-1.5 mt-2">
-                  <ShieldCheck size={14} className="text-emerald-400" />
+                  <ShieldCheck size={14} className="text-white/80" />
                   <span className="text-white/80 text-xs font-bold">
                     {connectedTrainers.length}{' '}
                     {connectedTrainers.length === 1 ? 'treinador conectado' : 'treinadores conectados'}
@@ -102,7 +80,6 @@ export function TrainersScreen({
               <img src={iconZap} alt="" className="w-12 h-12 brightness-0 invert" />
             </div>
           </div>
-          {tabSwitcher}
           <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/5 pointer-events-none" />
           <div className="absolute top-4 right-12 w-12 h-12 rounded-full bg-white/5 pointer-events-none" />
         </div>

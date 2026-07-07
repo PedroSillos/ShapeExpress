@@ -1,8 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { Search, X, Dumbbell, ShoppingBag, Star } from 'lucide-react';
+import { Search, X, Dumbbell, Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { StoreItem, StorePurchase } from '@/src/domain/entities';
+import iconMedal from '@/src/assets/icons/icon-medal.svg';
+import iconTrophy from '@/src/assets/icons/icon-trophy.svg';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -183,8 +185,8 @@ export function StoreTab({
     <div className="space-y-6">
       {/* Hero Header */}
       <div
-        className="relative overflow-hidden -mx-6 mb-2"
-        style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}
+        className="relative overflow-hidden -mx-6 mb-6"
+        style={{ background: 'linear-gradient(135deg, #C0392B 0%, #E74C3C 60%, #E05C2A 100%)' }}
       >
         <div className="px-6 pt-10 pb-8 flex items-end justify-between">
           <div className="space-y-1">
@@ -192,7 +194,7 @@ export function StoreTab({
             <p className="text-white/70 text-sm font-semibold">Compre treinos de especialistas</p>
             {totalCount > 0 && (
               <div className="flex items-center gap-1.5 mt-2">
-                <ShoppingBag size={14} className="text-white/60" />
+                <img src={iconTrophy} alt="" className="w-4 h-4 brightness-0 invert opacity-80" />
                 <span className="text-white/80 text-xs font-bold">
                   {totalCount} {totalCount === 1 ? 'treino disponível' : 'treinos disponíveis'}
                 </span>
@@ -200,7 +202,7 @@ export function StoreTab({
             )}
           </div>
           <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
-            <ShoppingBag size={36} className="text-white" />
+            <img src={iconMedal} alt="" className="w-12 h-12 brightness-0 invert" />
           </div>
         </div>
         {tabSwitcher}
