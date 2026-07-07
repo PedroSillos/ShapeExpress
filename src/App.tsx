@@ -152,6 +152,10 @@ export default function App() {
 
   const switchTab = (tab: string) => {
     if (activeTab === tab) return;
+    // Route guard: redirect to the correct tab for each user type
+    const isTrainer = userProfile?.userType === 'treinador';
+    if (tab === 'trainers' && isTrainer) tab = 'students';
+    if (tab === 'students' && !isTrainer) tab = 'trainers';
     setSwipeDirection(0);
     setActiveTab(tab as any); // eslint-disable-line
   };

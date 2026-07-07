@@ -520,7 +520,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onSendMessage={async (text: string) => {
             try { await api.sendMessage(activeChatStudent.email, text); } catch (e) { console.error(e); }
           }}
-          onBack={() => setActiveTab(userProfile?.userType === 'treinador' ? 'students' : 'trainers')}
+          onBack={() => switchTab(userProfile?.userType === 'treinador' ? 'students' : 'trainers')}
         />
       ) : null;
     case 'student-workouts':
