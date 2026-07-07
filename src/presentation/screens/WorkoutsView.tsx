@@ -713,7 +713,7 @@ export function WorkoutsView({
                     </div>
                     <div className="text-left">
                       <p className="font-bold text-sm text-white">Comprar novo treino</p>
-                      <p className="text-xs text-white/35 mt-0.5">Adquira um treino na loja Express</p>
+                      <p className="text-xs text-white/35 mt-0.5">Adquira um treino na Loja</p>
                     </div>
                   </button>
                   <button

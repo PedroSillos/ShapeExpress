@@ -1,7 +1,8 @@
 import { toast } from 'sonner';
 import { useRef, useState } from 'react';
-import { Student, UserProfile, WorkoutTemplate, WorkoutSession } from '../domain/entities';
+import { Student, UserProfile, WorkoutTemplate, WorkoutSession, StoreItem, StorePurchase } from '../domain/entities';
 import { DEFAULT_PROFILE } from '../constants';
+import type { PublishPayload } from './hooks/useStoreState';
 
 // Screens
 import { LandingView } from './screens/auth/LandingView';
@@ -63,11 +64,11 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     setDeletingTemplateId,
     setScrollToHistory, scrollToHistory,
     setShowLogoutConfirm,
-    setCreatingAdTemplate,
     progressScore, aiAdvice, isAiLoading,
     calculatedStreak, personalRecords,
     api, switchTab,
     onShowSuggestProfile, onShowStreak,
+    storeItems, myPurchases, myListings, isLoadingItems,
   } = state;
 
   const previousTabRef = useRef<string>('landing');
@@ -88,6 +89,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
   } = dataSync;
 
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [publishingTemplate, setPublishingTemplate] = useState<WorkoutTemplate | null>(null);
 
   const handleGenerateWithAI = async () => {
     if (isGeneratingAI) return;
@@ -366,7 +368,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onGenerateWithAI={handleGenerateWithAI}
           onEditWorkout={(t: WorkoutTemplate) => { setEditingTemplate(t); setActiveTab('edit-workout'); }}
           onDeleteWorkout={(id: string) => setDeletingTemplateId(id)}
-          onGoToStore={() => switchTab('express')}
+          onGoToStore={() => switchTab('store')}
           onEditSession={(s: WorkoutSession) => setEditingSession(s)}
           onDeleteSession={deleteSession}
           scrollToHistory={scrollToHistory}
@@ -377,7 +379,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           assessments={assessments}
           mainUserProfile={userProfile}
           trainers={trainers}
-          onCreateAd={(t: WorkoutTemplate) => setCreatingAdTemplate(t)}
+          onCreateAd={(t: WorkoutTemplate) => setPublishingTemplate(t)}
         />
       );
     case 'stats':
@@ -440,11 +442,17 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           }}
         />
       );
+    case 'store':
     case 'trainers':
     case 'express':
       return (
         <ExpressView
           userProfile={userProfile} trainers={trainers}
+          storeItems={(storeItems as StoreItem[]) ?? []}
+          myPurchases={(myPurchases as StorePurchase[]) ?? []}
+          isLoadingItems={!!isLoadingItems}
+          onGoToWorkouts={() => switchTab('workouts')}
+          createCheckoutSession={api.createCheckoutSession}
           onMessage={(t: Student) => { setActiveChatStudent(t); setActiveTab('chat'); }}
           onConnect={async (code: string) => {
             await api.requestConnection(code);
@@ -466,10 +474,11 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           }}
           studentConnections={studentConnections}
           onViewPurchased={() => switchTab('purchased-products')}
+          initialTab={activeTab === 'store' ? 'loja' : 'treinadores'}
         />
       );
     case 'purchased-products':
-      return <PurchasedProductsView onBack={() => switchTab('express')} />;
+      return <PurchasedProductsView onBack={() => switchTab('store')} />;
     case 'library':
       return <ExerciseLibraryView />;
     case 'students':
@@ -600,7 +609,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           streak={state.calculatedStreak ?? userStats.streak ?? 0}
           sports={sports}
           friendsCount={friendsCount}
-          onAddFriends={() => switchTab(userProfile?.userType === 'treinador' ? 'students' : 'express')}
+          onAddFriends={() => switchTab(userProfile?.userType === 'treinador' ? 'students' : 'trainers')}
         />
       ) : (
         <ProfileGuestView

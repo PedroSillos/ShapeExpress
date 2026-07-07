@@ -117,6 +117,8 @@ export const useAppState = () => {
     getPurchasedProtocols: store.getPurchasedProtocols,
     createCheckoutSession: store.createCheckoutSession,
     verifyCheckoutSession: store.verifyCheckoutSession,
+    publishStoreItem: store.publishItem,
+    unpublishStoreItem: store.unpublishItem,
 
     // Misc
     getLeaderboard: async (_league: string) => [],
@@ -230,6 +232,12 @@ export const useAppState = () => {
     setChatMessages: chat.setChatMessages,
     activeChatStudent: chat.activeChatStudent,
     setActiveChatStudent: chat.setActiveChatStudent,
+
+    // Store
+    storeItems: store.storeItems,
+    myPurchases: store.myPurchases,
+    myListings: store.myListings,
+    isLoadingItems: store.isLoadingItems,
 
     // Composed
     api,

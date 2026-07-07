@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, MotionConfig } from 'motion/react';
-import { Toaster } from 'sonner';
+import { Toaster, toast } from 'sonner';
 
 import { useAppState } from './presentation/hooks/useAppState';
 import { useDataSync } from './presentation/hooks/useDataSync';
@@ -16,7 +16,7 @@ import { LogoutModal } from './presentation/components/AppModals';
 import { DeleteTemplateModal } from './presentation/components/AppModals';
 import { WorkoutSelectorModal } from './presentation/components/AppModals';
 import { SheetSelectorModal } from './presentation/components/AppModals';
-import { CreateAdModal } from './presentation/components/CreateAdModal';
+import { PublishToStoreModal } from './presentation/components/PublishToStoreModal';
 import { WorkoutDoneScreen } from './presentation/screens/auth/WelcomeView';
 import { OnboardingStreakScreen } from './presentation/screens/auth/OnboardingStreakScreen';
 import { OnboardingSuggestProfileScreen } from './presentation/screens/auth/OnboardingSuggestProfileScreen';
@@ -54,7 +54,7 @@ export default function App() {
   } = appState;
 
   const [selectedStudentForProfile, setSelectedStudentForProfile] = useState<any>(null);
-  const [creatingAdTemplate, setCreatingAdTemplate] = useState<WorkoutTemplate | null>(null);
+  const [publishingTemplate, setPublishingTemplate] = useState<WorkoutTemplate | null>(null);
   const [studentTemplates, setStudentTemplates] = useState<WorkoutTemplate[]>([]);
   const [showOnboardingStreak, setShowOnboardingStreak] = useState(false);
   const [showSuggestProfile, setShowSuggestProfile] = useState(false);
@@ -95,6 +95,38 @@ export default function App() {
     api.getStudentTemplates(selectedStudentForWorkouts.email).then(setStudentTemplates);
   }, [selectedStudentForWorkouts?.email]);
 
+  // Detect Stripe redirect query params on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    const success = params.get('success');
+    const canceled = params.get('canceled');
+    const sessionId = params.get('session_id');
+    const itemId = params.get('item_id');
+
+    if (tab === 'store' && (success || canceled)) {
+      window.history.replaceState({}, '', window.location.pathname);
+
+      if (canceled === 'true') {
+        toast('Pagamento cancelado.');
+        setActiveTab('store' as any);
+        return;
+      }
+
+      if (success === 'true' && sessionId && itemId) {
+        setActiveTab('store' as any);
+        api.verifyCheckoutSession(sessionId, itemId)
+          .then(() => {
+            toast.success('Compra realizada! O treino já está disponível em Meus Treinos.');
+          })
+          .catch(() => {
+            toast.error('Erro ao confirmar pagamento. Entre em contato com o suporte.');
+          });
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // If app was closed during onboarding workout, clean up and restart from landing
   useEffect(() => {
     if (localStorage.getItem('onboarding-workout-pending')) {
@@ -114,7 +146,9 @@ export default function App() {
     }
   }, [isLoggedIn, activeTab, lastCompletedSession, activeWorkout, onboardingSession]);
 
-  const mainTabs = ['dashboard', 'workouts', 'stats', userProfile?.userType === 'treinador' ? 'students' : 'express', 'perfil'];
+  const mainTabs = userProfile?.userType === 'treinador'
+    ? ['dashboard', 'workouts', 'stats', 'store', 'students', 'perfil']
+    : ['dashboard', 'workouts', 'stats', 'store', 'trainers', 'perfil'];
 
   const switchTab = (tab: string) => {
     if (activeTab === tab) return;
@@ -174,7 +208,7 @@ export default function App() {
   }
 
   const currentAnimations = document.documentElement.getAttribute('data-animations') || 'enabled';
-  const routerState = { ...appState, switchTab, selectedStudentForProfile, setSelectedStudentForProfile, creatingAdTemplate, setCreatingAdTemplate, studentTemplates, setStudentTemplates, onShowSuggestProfile: () => setShowSuggestProfile(true), onShowStreak: () => { setShowSuggestProfile(false); setShowOnboardingStreak(true); } };
+  const routerState = { ...appState, switchTab, selectedStudentForProfile, setSelectedStudentForProfile, publishingTemplate, setPublishingTemplate: (t: WorkoutTemplate | null) => setPublishingTemplate(t), studentTemplates, setStudentTemplates, onShowSuggestProfile: () => setShowSuggestProfile(true), onShowStreak: () => { setShowSuggestProfile(false); setShowOnboardingStreak(true); } };
 
   if (activeTab === 'landing' || activeTab === 'welcome' || activeTab === 'login' || activeTab === 'register' || activeTab === 'forgot-password') {
     return (
@@ -241,14 +275,17 @@ export default function App() {
         />
 
         <AnimatePresence>
-          {creatingAdTemplate && (
-            <CreateAdModal
-              template={creatingAdTemplate}
-              onClose={() => setCreatingAdTemplate(null)}
-              onSubmit={async (adData: any) => {
-                await api.createProtocol(adData);
-                setCreatingAdTemplate(null);
+          {publishingTemplate && (
+            <PublishToStoreModal
+              initialTemplate={publishingTemplate}
+              templates={filteredTemplates}
+              userProfile={userProfile}
+              onPublish={async (payload) => {
+                const item = await api.publishStoreItem(payload, userProfile);
+                setPublishingTemplate(null);
+                return item;
               }}
+              onClose={() => setPublishingTemplate(null)}
             />
           )}
         </AnimatePresence>

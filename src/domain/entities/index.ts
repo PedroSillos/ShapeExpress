@@ -371,3 +371,60 @@ export interface LeaderboardEntry {
   isFollowing?: boolean;
 }
 
+// ─── Store ────────────────────────────────────────────────────────────────────
+
+/** A single workout template listed for sale in the store */
+export interface StoreWorkout {
+  id: string;
+  type: 'workout';
+  creatorEmail: string;
+  creatorName: string;
+  creatorAvatar?: string;
+  /** Reference to the WorkoutTemplate document id */
+  templateId: string;
+  title: string;
+  description?: string;
+  coverImageUrl?: string;
+  /** Price in BRL cents (e.g. 9700 = R$ 97,00) */
+  price: number;
+  tags: string[];
+  rating: number;
+  salesCount: number;
+  createdAt: string;
+  status: 'draft' | 'published';
+}
+
+/** A bundle of workout templates listed for sale as a program */
+export interface StoreProgram {
+  id: string;
+  type: 'program';
+  creatorEmail: string;
+  creatorName: string;
+  creatorAvatar?: string;
+  /** References to WorkoutTemplate document ids included in this program */
+  templateIds: string[];
+  title: string;
+  description?: string;
+  coverImageUrl?: string;
+  /** Total duration in weeks (e.g. 24 = 6 months) */
+  durationWeeks: number;
+  price: number;
+  tags: string[];
+  rating: number;
+  salesCount: number;
+  createdAt: string;
+  status: 'draft' | 'published';
+}
+
+export type StoreItem = StoreWorkout | StoreProgram;
+
+/** A confirmed purchase recorded after Stripe payment */
+export interface StorePurchase {
+  id: string;
+  buyerEmail: string;
+  itemId: string;
+  itemType: 'workout' | 'program';
+  stripeSessionId: string;
+  purchasedAt: string;
+}
+

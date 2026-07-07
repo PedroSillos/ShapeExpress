@@ -188,77 +188,244 @@ JSON sem markdown: {"name":"Treino Básico: <modalidade>","exercises":[{"exercis
     }
   });
 
-  // Stripe Endpoints
-  // Note: For fully secure external Firebase admin integration, a service account JSON is needed.
-  app.post('/api/checkout/session', authMiddleware, validateProtocolId, async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+  // ── Store Endpoints ────────────────────────────────────────────────────────
+
+  // GET /api/store/items — public, returns all published items
+  app.get('/api/store/items', async (req, res) => {
+    try {
+      const db = admin.firestore();
+      const snap = await db.collection('store_items')
+        .where('status', '==', 'published')
+        .orderBy('createdAt', 'desc')
+        .get();
+      const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      res.json({ items });
+    } catch (error: any) {
+      console.error('store/items error:', error);
+      res.status(500).json({ error: 'Erro ao buscar itens da loja.' });
     }
+  });
+
+  // POST /api/store/publish — trainer publishes a workout or program
+  app.post('/api/store/publish', authMiddleware, [
+    body('type').isIn(['workout', 'program']).withMessage('Tipo inválido'),
+    body('title').trim().isLength({ min: 3, max: 120 }).escape(),
+    body('description').optional().trim().isLength({ max: 500 }).escape(),
+    body('price').isInt({ min: 100, max: 99900 }).withMessage('Preço inválido (entre R$1 e R$999)'),
+    body('tags').isArray({ max: 8 }),
+    body('coverImageUrl').optional().trim().isURL().withMessage('URL de capa inválida'),
+    body('templateId').optional().trim().isLength({ min: 1, max: 100 }),
+    body('templateIds').optional().isArray({ min: 1, max: 20 }),
+    body('durationWeeks').optional().isInt({ min: 1, max: 208 }),
+  ], async (req: any, res: any) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     const email = (req as any).userEmail;
-    const { protocolId } = req.body;
+
+    // Verify the requester is a trainer
+    try {
+      const db = admin.firestore();
+      const userSnap = await db.collection('users').doc(email.toLowerCase()).get();
+      const userData = userSnap.exists ? userSnap.data() : null;
+      if (!userData || userData.userType !== 'treinador') {
+        return res.status(403).json({ error: 'Apenas treinadores podem publicar na loja.' });
+      }
+
+      const { type, title, description, price, tags, coverImageUrl, templateId, templateIds, durationWeeks } = req.body;
+
+      const base = {
+        creatorEmail: email.toLowerCase(),
+        creatorName: userData.name || email,
+        creatorAvatar: userData.avatarUrl || '',
+        title,
+        description: description || '',
+        coverImageUrl: coverImageUrl || '',
+        price,
+        tags: tags || [],
+        rating: 0,
+        salesCount: 0,
+        createdAt: new Date().toISOString(),
+        status: 'published',
+      };
+
+      let data: Record<string, any>;
+      if (type === 'workout') {
+        if (!templateId) return res.status(400).json({ error: 'templateId obrigatório para treino.' });
+        data = { ...base, type: 'workout', templateId };
+      } else {
+        if (!templateIds?.length) return res.status(400).json({ error: 'templateIds obrigatório para programa.' });
+        data = { ...base, type: 'program', templateIds, durationWeeks: durationWeeks || 1 };
+      }
+
+      const ref = await db.collection('store_items').add(data);
+      res.json({ id: ref.id, ...data });
+    } catch (error: any) {
+      console.error('store/publish error:', error);
+      res.status(500).json({ error: 'Erro ao publicar item.' });
+    }
+  });
+
+  // POST /api/store/unpublish/:id — trainer unpublishes their own item
+  app.post('/api/store/unpublish/:id', authMiddleware, async (req: any, res: any) => {
+    const email = (req as any).userEmail;
+    const { id } = req.params;
+    try {
+      const db = admin.firestore();
+      const itemRef = db.collection('store_items').doc(id);
+      const snap = await itemRef.get();
+      if (!snap.exists) return res.status(404).json({ error: 'Item não encontrado.' });
+      if (snap.data()?.creatorEmail !== email.toLowerCase()) {
+        return res.status(403).json({ error: 'Sem permissão para remover este item.' });
+      }
+      await itemRef.update({ status: 'draft' });
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('store/unpublish error:', error);
+      res.status(500).json({ error: 'Erro ao remover item da loja.' });
+    }
+  });
+
+  // ── Stripe Endpoints ───────────────────────────────────────────────────────
+
+  app.post('/api/checkout/session', authMiddleware, [
+    body('itemId').trim().isLength({ min: 1, max: 100 }).withMessage('itemId inválido'),
+  ], async (req: any, res: any) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    const email = (req as any).userEmail;
+    const { itemId } = req.body;
 
     if (!stripe) {
-      return res.status(500).json({ error: 'Stripe não está configurado. Adicione STRIPE_SECRET_KEY nas variáveis de ambiente.' });
+      return res.status(500).json({ error: 'Stripe não está configurado. Adicione STRIPE_SECRET_KEY.' });
     }
 
     try {
-      // Create a checkout session purely via Stripe
+      const db = admin.firestore();
+      const itemSnap = await db.collection('store_items').doc(itemId).get();
+      if (!itemSnap.exists) return res.status(404).json({ error: 'Item não encontrado.' });
+      const item = itemSnap.data()!;
+      if (item.status !== 'published') return res.status(400).json({ error: 'Item não está disponível para venda.' });
+
+      // Prevent buying own items
+      if (item.creatorEmail === email.toLowerCase()) {
+        return res.status(400).json({ error: 'Você não pode comprar seu próprio item.' });
+      }
+
+      // Prevent duplicate purchase
+      const purchaseSnap = await db.collection('store_purchases')
+        .where('buyerEmail', '==', email.toLowerCase())
+        .where('itemId', '==', itemId)
+        .limit(1)
+        .get();
+      if (!purchaseSnap.empty) {
+        return res.status(400).json({ error: 'Você já adquiriu este item.' });
+      }
+
+      const itemLabel = item.type === 'program'
+        ? `Programa: ${item.title}`
+        : `Treino: ${item.title}`;
+
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
-        line_items: [
-          {
-            price_data: {
-              currency: 'brl',
-              product_data: {
-                name: 'Protocolo de Treino', // Mocado na ausência do Admin SDK
-                description: 'Acesso VIP',
-              },
-              unit_amount: 9700, // 97 BRL default
+        line_items: [{
+          price_data: {
+            currency: 'brl',
+            product_data: {
+              name: itemLabel,
+              description: item.description || undefined,
+              images: item.coverImageUrl ? [item.coverImageUrl] : undefined,
             },
-            quantity: 1,
+            unit_amount: item.price,
           },
-        ],
+          quantity: 1,
+        }],
         mode: 'payment',
-        success_url: `${process.env.APP_URL || 'http://localhost:3000'}/?tab=express&success=true&session_id={CHECKOUT_SESSION_ID}&protocol_id=${protocolId}`,
-        cancel_url: `${process.env.APP_URL || 'http://localhost:3000'}/?tab=express&canceled=true`,
+        success_url: `${process.env.APP_URL || 'http://localhost:3000'}/?tab=store&success=true&session_id={CHECKOUT_SESSION_ID}&item_id=${itemId}`,
+        cancel_url: `${process.env.APP_URL || 'http://localhost:3000'}/?tab=store&canceled=true`,
         client_reference_id: email,
-        metadata: {
-          protocolId: protocolId,
-        }
+        metadata: { itemId, buyerEmail: email.toLowerCase() },
       });
 
       res.json({ url: session.url });
     } catch (error: any) {
-      console.error('Stripe error:', error);
+      console.error('Stripe checkout error:', error);
       res.status(500).json({ error: 'Erro ao processar pagamento. Tente novamente.' });
     }
   });
 
-  app.post('/api/checkout/verify', authMiddleware, validateSessionId, async (req, res) => {
+  app.post('/api/checkout/verify', authMiddleware, [
+    body('sessionId').trim().isLength({ min: 1, max: 200 }).withMessage('sessionId inválido'),
+    body('itemId').trim().isLength({ min: 1, max: 100 }).withMessage('itemId inválido'),
+  ], async (req: any, res: any) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     const email = (req as any).userEmail;
-    const { sessionId, protocolId } = req.body;
+    const { sessionId, itemId } = req.body;
 
-    if (!stripe) {
-      return res.status(500).json({ error: 'Stripe não está configurado.' });
-    }
+    if (!stripe) return res.status(500).json({ error: 'Stripe não está configurado.' });
 
     try {
+      const db = admin.firestore();
       const session = await stripe.checkout.sessions.retrieve(sessionId);
-      
-      if (session.payment_status === 'paid') {
-        // Here you would normally update Firestore using Admin SDK. 
-        // We will return success so the client can update via client SDK natively.
-        res.json({ success: true, verified: true });
-      } else {
-        res.status(400).json({ error: 'Pagamento não concluído.' });
+
+      if (session.payment_status !== 'paid') {
+        return res.status(400).json({ error: 'Pagamento não concluído.' });
       }
+
+      // Idempotency: check if purchase already recorded
+      const existingSnap = await db.collection('store_purchases')
+        .where('stripeSessionId', '==', sessionId)
+        .limit(1)
+        .get();
+
+      if (!existingSnap.empty) {
+        return res.json({ success: true, verified: true, alreadyRecorded: true });
+      }
+
+      // Fetch item to copy templates to buyer
+      const itemSnap = await db.collection('store_items').doc(itemId).get();
+      if (!itemSnap.exists) return res.status(404).json({ error: 'Item não encontrado.' });
+      const item = itemSnap.data()!;
+
+      // Record purchase
+      const buyerEmail = email.toLowerCase();
+      const purchaseRef = await db.collection('store_purchases').add({
+        buyerEmail,
+        itemId,
+        itemType: item.type,
+        stripeSessionId: sessionId,
+        purchasedAt: new Date().toISOString(),
+      });
+
+      // Copy template(s) to buyer's templates collection
+      const templateIds: string[] = item.type === 'workout'
+        ? [item.templateId]
+        : (item.templateIds || []);
+
+      await Promise.all(templateIds.map(async (tId: string) => {
+        const tSnap = await db.collection('templates').doc(tId).get();
+        if (!tSnap.exists) return;
+        const tData = tSnap.data()!;
+        const newId = `purchased_${tId}_${buyerEmail.replace(/[@.]/g, '_')}`;
+        await db.collection('templates').doc(newId).set({
+          ...tData,
+          id: newId,
+          userId: buyerEmail,
+          purchasedFrom: item.creatorEmail,
+          purchasedItemId: itemId,
+          purchasedAt: new Date().toISOString(),
+        });
+      }));
+
+      // Increment salesCount on item
+      await db.collection('store_items').doc(itemId).update({
+        salesCount: admin.firestore.FieldValue.increment(1),
+      });
+
+      res.json({ success: true, verified: true, purchaseId: purchaseRef.id });
     } catch (error: any) {
       console.error('Verify error:', error);
       res.status(500).json({ error: 'Erro ao verificar pagamento. Tente novamente.' });
