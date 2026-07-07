@@ -65,7 +65,7 @@ export function TrainersScreen({
           <div className="px-6 pt-10 pb-8 flex items-end justify-between">
             <div className="space-y-1">
               <h1 className="text-3xl font-black text-white leading-tight">Treinadores</h1>
-              <p className="text-white/70 text-sm font-semibold">Treinadores &amp; Conexões</p>
+              <p className="text-white/70 text-sm font-semibold">Conecte-se com especialistas</p>
               {connectedTrainers.length > 0 && (
                 <div className="flex items-center gap-1.5 mt-2">
                   <ShieldCheck size={14} className="text-white/80" />
@@ -87,10 +87,10 @@ export function TrainersScreen({
         {/* ── Connect CTA ───────────────────────────────────────── */}
         <button
           onClick={() => setShowConnectPopup(true)}
-          className="w-full py-4 bg-brand-red text-black rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-brand-red/20 active:scale-[0.98] transition-transform"
+          className="w-full py-3 bg-white/5 border border-white/10 text-white/60 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
         >
-          <UserPlus size={18} />
-          Conectar por Código
+          <UserPlus size={16} />
+          Tem um código de treinador?
         </button>
 
         {/* ── Search ────────────────────────────────────────────── */}
