@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import { useRef, useState } from 'react';
-import { Student, UserProfile, WorkoutTemplate, WorkoutSession, BodyAssessment } from '../domain/entities';
+import { Student, UserProfile, WorkoutTemplate, WorkoutSession } from '../domain/entities';
 import { DEFAULT_PROFILE } from '../constants';
 
 // Screens
@@ -385,12 +385,8 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
         <StatsContainer
           sessions={userSessions}
           templates={filteredTemplates}
-          assessments={assessments}
-          onCreateWorkout={() => setActiveTab('create-workout')}
-          onGoToStore={() => switchTab('express')}
-          onNewAssessment={() => setActiveTab('new-assessment')}
-          onDeleteAssessment={deleteAssessment}
-          onEditAssessment={(a: BodyAssessment) => { setEditingAssessment(a); setActiveTab('edit-assessment'); }}
+          mainUserProfile={userProfile}
+          onGoToWorkouts={() => switchTab('workouts')}
         />
       );
     case 'notifications':
@@ -442,20 +438,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
               }
             }
           }}
-        />
-      );
-    case 'evolution':
-      return (
-        <StatsContainer
-          sessions={userSessions}
-          templates={filteredTemplates}
-          assessments={assessments}
-          onCreateWorkout={() => setActiveTab('create-workout')}
-          onGoToStore={() => switchTab('express')}
-          onNewAssessment={() => setActiveTab('new-assessment')}
-          onDeleteAssessment={deleteAssessment}
-          onEditAssessment={(a: BodyAssessment) => { setEditingAssessment(a); setActiveTab('edit-assessment'); }}
-          initialTab="evolution"
         />
       );
     case 'trainers':

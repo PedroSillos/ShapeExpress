@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft } from 'lucide-react';
-import { Student, WorkoutSession, BodyAssessment, WorkoutTemplate } from '../../domain/entities';
+import { Student, WorkoutSession, WorkoutTemplate } from '../../domain/entities';
 import { StatsContainer } from './StatsContainer';
 
 interface StudentEvolutionViewProps {
@@ -12,7 +12,6 @@ interface StudentEvolutionViewProps {
 
 export function StudentEvolutionView({ student, trainerEmail, api, onBack }: StudentEvolutionViewProps) {
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
-  const [assessments, setAssessments] = useState<BodyAssessment[]>([]);
   const [templates, setTemplates] = useState<WorkoutTemplate[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,26 +20,16 @@ export function StudentEvolutionView({ student, trainerEmail, api, onBack }: Stu
       setLoading(true);
       try {
         const studentEmailLower = student.email.toLowerCase();
-        const [allSessions, allAssessmentsByEmail, allAssessmentsByUserId, allTemplates] = await Promise.all([
+        const [allSessions, allTemplates] = await Promise.all([
           api.queryDocs('sessions', 'userId', '==', studentEmailLower),
-          api.queryDocs('assessments', 'userEmail', '==', studentEmailLower),
-          api.queryDocs('assessments', 'userId', '==', studentEmailLower),
           api.queryDocs('templates', 'userId', '==', studentEmailLower),
         ]);
-
-        const seenIds = new Set<string>();
-        const allAssessments = [...allAssessmentsByEmail, ...allAssessmentsByUserId].filter(a => {
-          if (seenIds.has(a.id)) return false;
-          seenIds.add(a.id);
-          return true;
-        });
 
         const trainerTemplates = allTemplates.filter((t: WorkoutTemplate) => t.creatorEmail === trainerEmail);
         const trainerTemplateIds = new Set(trainerTemplates.map((t: WorkoutTemplate) => t.id));
         const trainerSessions = allSessions.filter((s: WorkoutSession) => trainerTemplateIds.has(s.workoutId));
 
         setSessions(trainerSessions);
-        setAssessments(allAssessments);
         setTemplates(trainerTemplates);
       } catch (error) {
         console.error('Error fetching student evolution data:', error);
@@ -75,13 +64,6 @@ export function StudentEvolutionView({ student, trainerEmail, api, onBack }: Stu
         key="student-evolution-stats"
         sessions={sessions}
         templates={templates}
-        assessments={assessments}
-        onCreateWorkout={() => {}}
-        onGoToStore={() => {}}
-        onNewAssessment={() => {}}
-        onDeleteAssessment={() => {}}
-        onEditAssessment={() => {}}
-        initialTab="stats"
         readOnly
       />
     </div>
