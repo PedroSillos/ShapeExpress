@@ -1,5 +1,4 @@
 import express from 'express';
-import { createServer as createViteServer } from 'vite';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -106,7 +105,7 @@ async function startServer() {
     body('objective').optional().trim().isLength({ max: 200 }).escape(),
     body('experience').optional().trim().isLength({ max: 50 }).escape(),
     body('location').optional().isIn(['Casa', 'Academia']),
-    body('height').optional().isInt({ min: 100, max: 250 }),
+    body('height').optional().isInt({ min: 60, max: 250 }),
     body('weight').optional().isInt({ min: 30, max: 300 }),
     body('age').optional().isInt({ min: 10, max: 100 }),
   ], async (req: express.Request, res: express.Response) => {
@@ -136,12 +135,20 @@ JSON sem markdown: {"name":"Treino Básico: <modalidade>","exercises":[{"exercis
         model: 'gemini-2.0-flash',
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
       });
-      const text = (response.text || '').replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(text);
+      const raw = (response.text || '').trim();
+      // Strip markdown code fences if present
+      const text = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+      let parsed: any;
+      try {
+        parsed = JSON.parse(text);
+      } catch (parseError) {
+        console.error('Generate workout JSON parse error. Raw response:', raw);
+        return res.status(500).json({ error: 'Resposta da IA em formato inválido.' });
+      }
       parsed.exercises = (parsed.exercises || []).slice(0, 3).map((e: any) => ({ ...e, numSets: 3, rest: '60s' }));
       res.json(parsed);
     } catch (error: any) {
-      console.error('Generate workout error:', error);
+      console.error('Generate workout error:', error?.message || error);
       res.status(500).json({ error: 'Erro ao gerar treino.' });
     }
   });
@@ -433,13 +440,10 @@ JSON sem markdown: {"name":"Treino Básico: <modalidade>","exercises":[{"exercis
   });
 
   // Vite middleware for development
-  if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else {
+  // When running via `npm run dev` (Vite standalone + Express separately),
+  // skip creating an internal Vite server — Vite is already running standalone.
+  // In production, serve the built dist folder.
+  if (process.env.NODE_ENV === 'production') {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
@@ -447,8 +451,17 @@ JSON sem markdown: {"name":"Treino Básico: <modalidade>","exercises":[{"exercis
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);
+  });
+
+  server.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`[server] Port ${PORT} already in use. Is another instance running?`);
+    } else {
+      console.error('[server] Fatal error:', err);
+    }
+    process.exit(1);
   });
 }
 

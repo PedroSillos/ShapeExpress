@@ -485,6 +485,8 @@ export function WelcomeView({ onBack, onContinue }: WelcomeViewProps) {
   const [answers, setAnswers] = useState<Answers>({});
   const [offlineError, setOfflineError] = useState(false);
   const [birthDateError, setBirthDateError] = useState<string | null>(null);
+  const [heightError, setHeightError] = useState<string | null>(null);
+  const [weightError, setWeightError] = useState<string | null>(null);
 
   const [showReady, setShowReady] = useState(false);
   const [readyLoading, setReadyLoading] = useState(false);
@@ -535,6 +537,16 @@ const toggleSport = (id: string) => {
       if (age < 18) { setBirthDateError('Você precisa ter pelo menos 18 anos para usar o Shape Express.'); return; }
       if (age > 90) { setBirthDateError('Data de nascimento inválida.'); return; }
       setBirthDateError(null);
+    }
+    if (question?.id === 'height') {
+      const h = answers.height;
+      if (!h || h < 60 || h > 250) { setHeightError('Digite uma altura válida entre 60 e 250 cm.'); return; }
+      setHeightError(null);
+    }
+    if (question?.id === 'weight') {
+      const w = answers.weight;
+      if (!w || w < 30 || w > 300) { setWeightError('Digite um peso válido entre 30 e 300 kg.'); return; }
+      setWeightError(null);
     }
     // Rebuild questions with latest answers to handle personalCode skip
     const qs = buildQuestions(answers);
@@ -636,34 +648,40 @@ const toggleSport = (id: string) => {
 
     if (type === 'height') {
       return (
-        <div className="flex items-center justify-center gap-3">
-          <input
-            type="number"
-            min={100}
-            max={250}
-            placeholder="170"
-            value={answers.height ?? ''}
-            onChange={e => set('height', e.target.value ? Number(e.target.value) : undefined)}
-            className="w-36 text-center text-4xl font-black bg-dark-card border-2 border-dark-border rounded-2xl py-5 text-white focus:border-brand-red outline-none"
-          />
-          <span className="text-2xl font-bold text-white/50">cm</span>
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex items-center justify-center gap-3">
+            <input
+              type="number"
+              min={60}
+              max={250}
+              placeholder="170"
+              value={answers.height ?? ''}
+              onChange={e => { set('height', e.target.value ? Number(e.target.value) : undefined); setHeightError(null); }}
+              className="w-36 text-center text-4xl font-black bg-dark-card border-2 border-dark-border rounded-2xl py-5 text-white focus:border-brand-red outline-none"
+            />
+            <span className="text-2xl font-bold text-white/50">cm</span>
+          </div>
+          {heightError && <p className="text-sm text-red-400 text-center">{heightError}</p>}
         </div>
       );
     }
 
     if (type === 'weight') {
       return (
-        <div className="flex items-center justify-center gap-3">
-          <input
-            type="number"
-            min={30}
-            max={300}
-            placeholder="70"
-            value={answers.weight ?? ''}
-            onChange={e => set('weight', e.target.value ? Number(e.target.value) : undefined)}
-            className="w-36 text-center text-4xl font-black bg-dark-card border-2 border-dark-border rounded-2xl py-5 text-white focus:border-brand-red outline-none"
-          />
-          <span className="text-2xl font-bold text-white/50">kg</span>
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex items-center justify-center gap-3">
+            <input
+              type="number"
+              min={30}
+              max={300}
+              placeholder="70"
+              value={answers.weight ?? ''}
+              onChange={e => { set('weight', e.target.value ? Number(e.target.value) : undefined); setWeightError(null); }}
+              className="w-36 text-center text-4xl font-black bg-dark-card border-2 border-dark-border rounded-2xl py-5 text-white focus:border-brand-red outline-none"
+            />
+            <span className="text-2xl font-bold text-white/50">kg</span>
+          </div>
+          {weightError && <p className="text-sm text-red-400 text-center">{weightError}</p>}
         </div>
       );
     }

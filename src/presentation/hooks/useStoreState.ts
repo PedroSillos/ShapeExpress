@@ -1,10 +1,19 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   collection, query, where, getDocs, doc, setDoc, updateDoc, addDoc,
-  orderBy, Timestamp,
+  Timestamp,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import { StoreItem, StoreWorkout, StorePurchase } from "../../domain/entities";
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Converts a Firestore Timestamp or ISO string to milliseconds. */
+const toMs = (v: unknown): number =>
+  v instanceof Timestamp ? v.toMillis() : new Date(v as string).getTime();
+
+/** Comparator for descending date sort (newest first). */
+const sortByDateDesc = (a: unknown, b: unknown) => toMs(b) - toMs(a);
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,10 +48,13 @@ export const useStoreState = (
       const q = query(
         collection(db, "store_items"),
         where("status", "==", "published"),
-        orderBy("createdAt", "desc"),
       );
       const snap = await getDocs(q);
-      setStoreItems(snap.docs.map((d) => ({ id: d.id, ...d.data() } as StoreItem)));
+      setStoreItems(
+        snap.docs
+          .map((d) => ({ id: d.id, ...d.data() } as StoreItem))
+          .sort((a, b) => sortByDateDesc(a.createdAt, b.createdAt)),
+      );
     } catch (e) {
       console.error("[useStoreState] loadStoreItems:", e);
     } finally {
@@ -58,10 +70,13 @@ export const useStoreState = (
       const q = query(
         collection(db, "store_purchases"),
         where("buyerEmail", "==", currentUser.email.toLowerCase()),
-        orderBy("purchasedAt", "desc"),
       );
       const snap = await getDocs(q);
-      setMyPurchases(snap.docs.map((d) => ({ id: d.id, ...d.data() } as StorePurchase)));
+      setMyPurchases(
+        snap.docs
+          .map((d) => ({ id: d.id, ...d.data() } as StorePurchase))
+          .sort((a, b) => sortByDateDesc(a.purchasedAt, b.purchasedAt)),
+      );
     } catch (e) {
       console.error("[useStoreState] loadMyPurchases:", e);
     } finally {
@@ -76,10 +91,13 @@ export const useStoreState = (
       const q = query(
         collection(db, "store_items"),
         where("creatorEmail", "==", currentUser.email.toLowerCase()),
-        orderBy("createdAt", "desc"),
       );
       const snap = await getDocs(q);
-      setMyListings(snap.docs.map((d) => ({ id: d.id, ...d.data() } as StoreItem)));
+      setMyListings(
+        snap.docs
+          .map((d) => ({ id: d.id, ...d.data() } as StoreItem))
+          .sort((a, b) => sortByDateDesc(a.createdAt, b.createdAt)),
+      );
     } catch (e) {
       console.error("[useStoreState] loadMyListings:", e);
     }
