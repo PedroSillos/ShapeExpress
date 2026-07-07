@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { db } from "../../firebase";
 import { doc, getDoc, getDocs, collection, query, where } from "firebase/firestore";
 import { syncState } from "./useAuthState";
+import { DEFAULT_PROFILE, DEFAULT_STATS } from "./useProfileState";
 import type {
   UserProfile, UserStats, WorkoutTemplate,
   WorkoutSession, TrainerConnection, Student,
@@ -98,6 +99,18 @@ export const useSyncState = (
     } = setters;
 
     const syncAll = async () => {
+      // Reset all user-owned React state before populating from Firestore.
+      // This prevents guest data from flashing in the UI while the async
+      // Firestore reads are still in flight.
+      setUserProfile(DEFAULT_PROFILE);
+      setUserStats(DEFAULT_STATS);
+      setTemplates([]);
+      setSessions([]);
+      setTrainers([]);
+      setTrainerConnections([]);
+      setStudentConnections([]);
+      setStudents([]);
+
       try {
         let profile: UserProfile | null = null;
         try {

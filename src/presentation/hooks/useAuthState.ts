@@ -24,26 +24,52 @@ function sanitize<T extends object>(obj: T): T {
   return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as T;
 }
 
-async function migrateLocalDataToFirestore(email: string) {
-  try {
-    const templates: WorkoutTemplate[] = JSON.parse(localStorage.getItem("pending-templates") ?? "[]");
-    const sessions: WorkoutSession[] = JSON.parse(localStorage.getItem("local_sessions") ?? "[]");
-    const localStats = (() => { try { return JSON.parse(localStorage.getItem('local_stats') ?? 'null'); } catch { return null; } })();
-    await Promise.all([
-      ...templates.map((t) => setDoc(doc(db, "templates", t.id), sanitize({ ...t, userId: email }))),
-      ...sessions.map((s) => setDoc(doc(db, "sessions", s.id), sanitize({ ...s, userId: email }))),
-      ...(localStats ? [setDoc(doc(db, "stats", email), { ...localStats, userEmail: email }, { merge: true })] : []),
-    ]);
-    localStorage.removeItem("pending-templates");
-    localStorage.removeItem("local_sessions");
-    localStorage.removeItem("local_stats");
-    localStorage.removeItem("local_training_profile");
-    localStorage.removeItem("local_calorie_profile");
-    localStorage.removeItem("local_exercise_stats");
-    localStorage.removeItem("local_user_profile");
-  } catch (e) {
-    console.warn("[migrateLocalDataToFirestore] failed:", e);
+/**
+ * Removes all guest-session data from localStorage.
+ * Called after a successful login so the authenticated user loads
+ * only their Firestore data instead of leftover guest data.
+ */
+export function clearLocalGuestData() {
+  const keys = [
+    "pending-templates",
+    "local_sessions",
+    "local_stats",
+    "local_user_profile",
+    "local_training_profile",
+    "local_calorie_profile",
+    "local_exercise_stats",
+    "active-workout",
+  ];
+  keys.forEach((k) => localStorage.removeItem(k));
+}
+
+/**
+ * Uploads all local guest data to Firestore under the given user email,
+ * then wipes the local copies. Called after a successful registration so
+ * data collected during onboarding is persisted to the user's account.
+ */
+async function uploadLocalDataToFirestore(email: string) {
+  const templates: WorkoutTemplate[] = (() => { try { return JSON.parse(localStorage.getItem("pending-templates") ?? "[]"); } catch { return []; } })();
+  const sessions: WorkoutSession[] = (() => { try { return JSON.parse(localStorage.getItem("local_sessions") ?? "[]"); } catch { return []; } })();
+  const localStats = (() => { try { return JSON.parse(localStorage.getItem("local_stats") ?? "null"); } catch { return null; } })();
+
+  // Use allSettled so a single failed write does not abort the others.
+  const results = await Promise.allSettled([
+    ...templates.map((t) => setDoc(doc(db, "templates", t.id), sanitize({ ...t, userId: email }))),
+    // Sessions also need the real userId — guests store them with '' or 'guest'.
+    ...sessions.map((s) => setDoc(doc(db, "sessions", s.id), sanitize({ ...s, userId: email }))),
+    ...(localStats ? [setDoc(doc(db, "stats", email), { ...localStats, userEmail: email }, { merge: true })] : []),
+  ]);
+
+  const failed = results.filter((r) => r.status === "rejected");
+  if (failed.length > 0) {
+    console.warn(`[uploadLocalDataToFirestore] ${failed.length} write(s) failed:`, failed);
   }
+
+  // Clear local copies regardless of individual failures — on next login
+  // useSyncState will load the authoritative data from Firestore.
+  clearLocalGuestData();
+  localStorage.removeItem("welcome-answers");
 }
 
 // Tracks which token has already been synced to prevent Strict Mode double-invoke
@@ -137,7 +163,9 @@ export const useAuthState = () => {
       setToken(email);
       setCurrentUser({ email });
       setIsLoggedIn(true);
-      await migrateLocalDataToFirestore(email);
+      // Login: discard any local guest data so only Firestore data is shown.
+      // useSyncState will load the user's real data as soon as isLoggedIn flips.
+      clearLocalGuestData();
       return { token: freshIdToken, user: userDoc || { email, name: email.split("@")[0] } };
     } catch (e: any) {
       if (e.code === "auth/operation-not-allowed") {
@@ -158,11 +186,16 @@ export const useAuthState = () => {
       setIdToken(freshIdToken);
       const email = userCredential.user.email!;
       let userDoc: UserProfile | null = null;
+      let isNewAccount = false;
       try {
         const snap = await getDoc(doc(db, "users", email));
         if (snap.exists()) {
+          // Existing account: Firestore is the source of truth — discard local guest data.
           userDoc = snap.data() as UserProfile;
+          clearLocalGuestData();
         } else {
+          // New account via Google: treat like a registration and upload any onboarding data.
+          isNewAccount = true;
           userDoc = {
             name: userCredential.user.displayName || "Usuário",
             email,
@@ -186,7 +219,7 @@ export const useAuthState = () => {
       setToken(email);
       setCurrentUser({ email });
       setIsLoggedIn(true);
-      await migrateLocalDataToFirestore(email);
+      if (isNewAccount) await uploadLocalDataToFirestore(email);
       return { token: freshIdToken, user: userDoc };
     } catch (e: any) {
       toast.error(getFirebaseErrorMessage(e));
@@ -225,7 +258,7 @@ export const useAuthState = () => {
       setToken(data.email);
       setCurrentUser({ email: data.email });
       setIsLoggedIn(true);
-      await migrateLocalDataToFirestore(data.email);
+      await uploadLocalDataToFirestore(data.email);
       return { token: freshIdToken, user: userProfile };
     } catch (e: any) {
       if (e.code === "auth/operation-not-allowed") {
@@ -312,11 +345,16 @@ export const useAuthState = () => {
       const uid = userCredential.user.uid;
       const docId = uid;
       let userDoc: UserProfile | null = null;
+      let isNewAccount = false;
       try {
         const snap = await getDoc(doc(db, "users", docId));
         if (snap.exists()) {
+          // Existing account: Firestore is the source of truth — discard local guest data.
           userDoc = snap.data() as UserProfile;
+          clearLocalGuestData();
         } else {
+          // New account via phone: treat like a registration and upload any onboarding data.
+          isNewAccount = true;
           userDoc = {
             name: phone,
             email: docId,
@@ -341,7 +379,7 @@ export const useAuthState = () => {
       setToken(docId);
       setCurrentUser({ email: docId });
       setIsLoggedIn(true);
-      await migrateLocalDataToFirestore(docId);
+      if (isNewAccount) await uploadLocalDataToFirestore(docId);
       return { token: freshIdToken, user: userDoc };
     } catch (e: any) {
       toast.error(getFirebaseErrorMessage(e));
