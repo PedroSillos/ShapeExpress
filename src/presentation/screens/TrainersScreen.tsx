@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Search, UserPlus, X, RefreshCw,
   ChevronLeft, Trophy, ShieldCheck, AlertTriangle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
-import { cn } from '../../utils/cn';
-import { UserProfile, StoreItem, StorePurchase } from '../../domain/entities';
+import { cn } from '@/src/utils/cn';
+import { UserProfile } from '@/src/domain/entities';
 import { TrainerCard } from '../components/TrainerCard';
-import { StoreTab } from '../../features/store';
 import iconZap from '@/src/assets/icons/icon-zap.svg';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -18,13 +17,7 @@ interface TrainerConnection {
   status: 'pending' | 'accepted' | 'rejected' | 'disconnected';
 }
 
-interface ExpressViewProps {
-  userProfile: UserProfile;
-  storeItems: StoreItem[];
-  myPurchases: StorePurchase[];
-  isLoadingItems: boolean;
-  onGoToWorkouts: () => void;
-  createCheckoutSession: (itemId: string) => Promise<{ url: string }>;
+export interface TrainersScreenProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trainers: any[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,30 +25,19 @@ interface ExpressViewProps {
   onConnect: (code: string) => Promise<void>;
   onDisconnect: (trainerEmail: string) => Promise<void>;
   studentConnections: TrainerConnection[];
-  onViewPurchased: () => void;
-  initialTab?: 'treinadores' | 'loja';
+  onGoToStore: () => void;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function ExpressView({
-  userProfile: _userProfile,
-  storeItems,
-  myPurchases,
-  isLoadingItems,
-  onGoToWorkouts,
-  createCheckoutSession,
+export function TrainersScreen({
   trainers,
-  onMessage,
+  onMessage: _onMessage,
   onConnect,
-  onDisconnect,
+  onDisconnect: _onDisconnect,
   studentConnections,
-  onViewPurchased: _onViewPurchased,
-  initialTab,
-}: ExpressViewProps) {
-  const [activeSubTab, setActiveSubTab] = useState<'treinadores' | 'loja'>(
-    initialTab ?? 'treinadores',
-  );
+  onGoToStore,
+}: TrainersScreenProps) {
   const [showConnectPopup, setShowConnectPopup] = useState(false);
   const [connectCode, setConnectCode] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
@@ -63,29 +45,27 @@ export function ExpressView({
   const [selectedTrainer, setSelectedTrainer] = useState<UserProfile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    if (initialTab) setActiveSubTab(initialTab);
-  }, [initialTab]);
-
   const connectedTrainers = trainers.filter((t) =>
     studentConnections.some((c) => c.trainerEmail === t.email && c.status === 'accepted'),
   );
 
-  const filteredTrainers = trainers.filter((t) =>
-    t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (t.specialties?.join(' ') ?? '').toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredTrainers = trainers.filter(
+    (t) =>
+      t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.specialties?.join(' ') ?? '').toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  // Reusable tab switcher rendered inside each header
+  // ─── Tab switcher shared between both screens ──────────────────────────────
+
   const tabSwitcher = (
     <div className="flex gap-2 px-6 pb-5 pt-3">
       {(['treinadores', 'loja'] as const).map((tab) => (
         <button
           key={tab}
-          onClick={() => setActiveSubTab(tab)}
+          onClick={() => { if (tab === 'loja') onGoToStore(); }}
           className={cn(
             'flex-1 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all border',
-            activeSubTab === tab
+            tab === 'treinadores'
               ? 'bg-brand-red border-brand-red text-black shadow-lg shadow-brand-red/20'
               : 'bg-white/10 border-white/10 text-white/60',
           )}
@@ -98,129 +78,115 @@ export function ExpressView({
 
   return (
     <div className="pb-24">
-      {/* ── Store Tab ─────────────────────────────────────────── */}
-      {activeSubTab === 'loja' && (
-        <StoreTab
-          storeItems={storeItems}
-          myPurchases={myPurchases}
-          isLoadingItems={isLoadingItems}
-          onGoToWorkouts={onGoToWorkouts}
-          createCheckoutSession={createCheckoutSession}
-        />
-      )}
-
-      {/* ── Trainers Tab ──────────────────────────────────────── */}
-      {activeSubTab === 'treinadores' && (
-        <div className="space-y-6">
-          {/* Hero Header */}
-          <div
-            className="relative overflow-hidden -mx-6"
-            style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}
-          >
-            <div className="px-6 pt-10 pb-4 flex items-end justify-between">
-              <div className="space-y-1">
-                <h1 className="text-3xl font-black text-white leading-tight">Express</h1>
-                <p className="text-white/70 text-sm font-semibold">Treinadores &amp; Conexões</p>
-                {connectedTrainers.length > 0 && (
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <ShieldCheck size={14} className="text-emerald-400" />
-                    <span className="text-white/80 text-xs font-bold">
-                      {connectedTrainers.length}{' '}
-                      {connectedTrainers.length === 1 ? 'treinador conectado' : 'treinadores conectados'}
-                    </span>
-                  </div>
-                )}
-              </div>
-              <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
-                <img src={iconZap} alt="" className="w-12 h-12 brightness-0 invert" />
-              </div>
+      <div className="space-y-6">
+        {/* ── Hero Header ─────────────────────────────────────────── */}
+        <div
+          className="relative overflow-hidden -mx-6"
+          style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}
+        >
+          <div className="px-6 pt-10 pb-4 flex items-end justify-between">
+            <div className="space-y-1">
+              <h1 className="text-3xl font-black text-white leading-tight">Express</h1>
+              <p className="text-white/70 text-sm font-semibold">Treinadores &amp; Conexões</p>
+              {connectedTrainers.length > 0 && (
+                <div className="flex items-center gap-1.5 mt-2">
+                  <ShieldCheck size={14} className="text-emerald-400" />
+                  <span className="text-white/80 text-xs font-bold">
+                    {connectedTrainers.length}{' '}
+                    {connectedTrainers.length === 1 ? 'treinador conectado' : 'treinadores conectados'}
+                  </span>
+                </div>
+              )}
             </div>
-            {tabSwitcher}
-            <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/5 pointer-events-none" />
-            <div className="absolute top-4 right-12 w-12 h-12 rounded-full bg-white/5 pointer-events-none" />
-          </div>
-
-          {/* Connect CTA */}
-          <button
-            onClick={() => setShowConnectPopup(true)}
-            className="w-full py-4 bg-brand-red text-black rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-brand-red/20 active:scale-[0.98] transition-transform"
-          >
-            <UserPlus size={18} />
-            Conectar por Código
-          </button>
-
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar treinadores..."
-              className="w-full bg-dark-card border border-dark-border rounded-2xl pl-12 pr-4 py-4 text-sm focus:outline-none focus:border-gray-400 transition-all shadow-2xl"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30"
-              >
-                <X size={16} />
-              </button>
-            )}
-          </div>
-
-          {/* Connected trainers */}
-          {connectedTrainers.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.15em] text-white/30">
-                Meus Treinadores
-              </p>
-              <div className="space-y-3">
-                {connectedTrainers.map((trainer) => (
-                  <TrainerCard
-                    key={trainer.email}
-                    trainer={trainer}
-                    studentConnections={studentConnections}
-                    onConnect={onConnect}
-                    onViewProfile={(t) => setSelectedTrainer(t as UserProfile)}
-                  />
-                ))}
-              </div>
+            <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
+              <img src={iconZap} alt="" className="w-12 h-12 brightness-0 invert" />
             </div>
+          </div>
+          {tabSwitcher}
+          <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/5 pointer-events-none" />
+          <div className="absolute top-4 right-12 w-12 h-12 rounded-full bg-white/5 pointer-events-none" />
+        </div>
+
+        {/* ── Connect CTA ───────────────────────────────────────── */}
+        <button
+          onClick={() => setShowConnectPopup(true)}
+          className="w-full py-4 bg-brand-red text-black rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg shadow-brand-red/20 active:scale-[0.98] transition-transform"
+        >
+          <UserPlus size={18} />
+          Conectar por Código
+        </button>
+
+        {/* ── Search ────────────────────────────────────────────── */}
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar treinadores..."
+            className="w-full bg-dark-card border border-dark-border rounded-2xl pl-12 pr-4 py-4 text-sm focus:outline-none focus:border-gray-400 transition-all shadow-2xl"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30"
+            >
+              <X size={16} />
+            </button>
           )}
+        </div>
 
-          {/* All trainers */}
+        {/* ── Connected trainers ────────────────────────────────── */}
+        {connectedTrainers.length > 0 && (
           <div className="space-y-3">
             <p className="text-[10px] font-black uppercase tracking-[0.15em] text-white/30">
-              Treinadores Disponíveis
+              Meus Treinadores
             </p>
-            {filteredTrainers.length > 0 ? (
-              <div className="space-y-3">
-                {filteredTrainers.map((trainer) => (
-                  <TrainerCard
-                    key={trainer.email}
-                    trainer={trainer}
-                    studentConnections={studentConnections}
-                    onConnect={onConnect}
-                    onViewProfile={(t) => setSelectedTrainer(t as UserProfile)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="py-12 text-center space-y-3">
-                <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto">
-                  <Search size={24} className="text-white/15" />
-                </div>
-                <p className="text-sm text-white/30">
-                  {searchTerm
-                    ? `Nenhum treinador encontrado para "${searchTerm}"`
-                    : 'Nenhum treinador disponível'}
-                </p>
-              </div>
-            )}
+            <div className="space-y-3">
+              {connectedTrainers.map((trainer) => (
+                <TrainerCard
+                  key={trainer.email}
+                  trainer={trainer}
+                  studentConnections={studentConnections}
+                  onConnect={onConnect}
+                  onViewProfile={(t) => setSelectedTrainer(t as UserProfile)}
+                />
+              ))}
+            </div>
           </div>
+        )}
+
+        {/* ── All trainers ──────────────────────────────────────── */}
+        <div className="space-y-3">
+          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-white/30">
+            Treinadores Disponíveis
+          </p>
+          {filteredTrainers.length > 0 ? (
+            <div className="space-y-3">
+              {filteredTrainers.map((trainer) => (
+                <TrainerCard
+                  key={trainer.email}
+                  trainer={trainer}
+                  studentConnections={studentConnections}
+                  onConnect={onConnect}
+                  onViewProfile={(t) => setSelectedTrainer(t as UserProfile)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="py-12 text-center space-y-3">
+              <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+                <Search size={24} className="text-white/15" />
+              </div>
+              <p className="text-sm text-white/30">
+                {searchTerm
+                  ? `Nenhum treinador encontrado para "${searchTerm}"`
+                  : 'Nenhum treinador disponível'}
+              </p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* ── Disconnect Confirm Modal ───────────────────────────── */}
       <AnimatePresence>
@@ -251,7 +217,7 @@ export function ExpressView({
                 <button
                   onClick={async () => {
                     if (showDisconnectConfirm) {
-                      await onDisconnect(showDisconnectConfirm);
+                      await _onDisconnect(showDisconnectConfirm);
                       setShowDisconnectConfirm(null);
                     }
                   }}

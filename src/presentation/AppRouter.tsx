@@ -15,7 +15,8 @@ import { CalendarView } from './screens/CalendarView';
 import { WorkoutsView } from './screens/WorkoutsView';
 import { StatsContainer } from './screens/StatsContainer';
 import { NotificationsView } from './screens/NotificationsView';
-import { ExpressView } from './screens/ExpressView';
+import { TrainersScreen } from './screens/TrainersScreen';
+import { LojasScreen } from './screens/LojasScreen';
 import { PurchasedProductsView } from './screens/PurchasedProductsView';
 import { ExerciseLibraryView } from './screens/ExerciseLibraryView';
 import { StudentsView } from './screens/StudentsView';
@@ -443,16 +444,21 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
         />
       );
     case 'store':
-    case 'trainers':
-    case 'express':
       return (
-        <ExpressView
-          userProfile={userProfile} trainers={trainers}
+        <LojasScreen
           storeItems={(storeItems as StoreItem[]) ?? []}
           myPurchases={(myPurchases as StorePurchase[]) ?? []}
           isLoadingItems={!!isLoadingItems}
           onGoToWorkouts={() => switchTab('workouts')}
           createCheckoutSession={api.createCheckoutSession}
+          onGoToTrainers={() => switchTab('trainers')}
+        />
+      );
+    case 'trainers':
+    case 'express':
+      return (
+        <TrainersScreen
+          trainers={trainers}
           onMessage={(t: Student) => { setActiveChatStudent(t); setActiveTab('chat'); }}
           onConnect={async (code: string) => {
             await api.requestConnection(code);
@@ -473,8 +479,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             setNotifications(notifs);
           }}
           studentConnections={studentConnections}
-          onViewPurchased={() => switchTab('purchased-products')}
-          initialTab={activeTab === 'store' ? 'loja' : 'treinadores'}
+          onGoToStore={() => switchTab('store')}
         />
       );
     case 'purchased-products':
