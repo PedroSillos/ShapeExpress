@@ -93,6 +93,52 @@ export function DeleteTemplateModal({ templateId, onCancel, onConfirm }: DeleteT
   );
 }
 
+// --- DeleteSessionModal ---
+interface DeleteSessionModalProps {
+  sessionId: string | null;
+  onCancel: () => void;
+  onConfirm: (id: string) => void;
+}
+
+export function DeleteSessionModal({ sessionId, onCancel, onConfirm }: DeleteSessionModalProps) {
+  return (
+    <AnimatePresence>
+      {sessionId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onCancel}
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+            className="relative w-full bg-dark-card border border-dark-border rounded-3xl p-6 shadow-2xl space-y-6"
+          >
+            <div className="text-center space-y-2">
+              <div className="w-16 h-16 bg-red-400/10 text-red-400 rounded-full flex items-center justify-center mx-auto">
+                <Trash2 size={32} />
+              </div>
+              <h2 className="text-xl font-bold">Excluir Sessão?</h2>
+              <p className="text-sm text-white/40">Esta ação não pode ser desfeita. O registro da sessão será removido permanentemente.</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={onCancel} className="flex-1 py-4 bg-white/5 rounded-2xl font-bold hover:bg-white/10 transition-colors">
+                Cancelar
+              </button>
+              <button
+                onClick={() => onConfirm(sessionId)}
+                className="flex-1 py-4 bg-red-500 rounded-2xl text-white font-bold shadow-lg shadow-red-500/20 active:scale-95 transition-transform"
+              >
+                Excluir
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 // --- WorkoutSelectorModal ---
 interface WorkoutSelectorModalProps {
   open: boolean;

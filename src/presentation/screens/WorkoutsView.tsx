@@ -33,6 +33,7 @@ import {
   estimateWorkoutCalories,
 } from '../../domain/use-cases/workoutEstimation';
 import { Badge } from '../components/Badge';
+import { DeleteSessionModal } from '../components/AppModals';
 import { cn } from '../../utils/cn';
 import { EXERCISES } from '../../constants';
 import iconHalterofilismo from '@/src/assets/icons/icon-halterofilismo.svg';
@@ -405,14 +406,13 @@ function SessionCard({
   session,
   templates,
   onEditSession,
-  onDeleteSession,
+  onRequestDelete,
 }: {
   session: WorkoutSession;
   templates: WorkoutTemplate[];
   onEditSession: (s: WorkoutSession) => void;
-  onDeleteSession: (id: string) => void;
+  onRequestDelete: (id: string) => void;
 }) {
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const templateName = templates.find((t) => t.id === session.workoutId)?.name || 'Treino';
   const mins = session.duration ?? 0;
 
@@ -437,44 +437,13 @@ function SessionCard({
             <Edit size={14} />
           </button>
           <button
-            onClick={() => setConfirmDelete(true)}
+            onClick={() => onRequestDelete(session.id)}
             className="p-1.5 text-white/20 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5"
           >
             <Trash2 size={14} />
           </button>
         </div>
       </div>
-
-      {/* Delete confirmation inline */}
-      <AnimatePresence>
-        {confirmDelete && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden mb-3"
-          >
-            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 space-y-2">
-              <p className="text-xs font-bold text-red-400">Excluir esta sessão?</p>
-              <p className="text-[10px] text-white/40">Esta ação não pode ser desfeita.</p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setConfirmDelete(false)}
-                  className="flex-1 py-2 text-xs font-bold bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={() => onDeleteSession(session.id)}
-                  className="flex-1 py-2 text-xs font-bold bg-red-500 text-white rounded-lg shadow-sm shadow-red-500/30 active:scale-95 transition-transform"
-                >
-                  Excluir
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Stats chips */}
       <div className="flex flex-wrap gap-2 mb-3">
@@ -539,6 +508,7 @@ export function WorkoutsView({
   const [openSettingsId, setOpenSettingsId] = useState<string | null>(null);
   const [selectingSheetTemplate, setSelectingSheetTemplate] = useState<WorkoutTemplate | null>(null);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
+  const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
 
   const sport = useMemo(() => {
     if ((mainUserProfile as any)?.sports?.length) return (mainUserProfile as any).sports[0] as string;
@@ -647,7 +617,7 @@ export function WorkoutsView({
                     session={session}
                     templates={templates}
                     onEditSession={onEditSession}
-                    onDeleteSession={onDeleteSession}
+                    onRequestDelete={setSessionToDelete}
                   />
                 ))}
             </div>
@@ -781,6 +751,16 @@ export function WorkoutsView({
           </>
         )}
       </AnimatePresence>
+
+      {/* Delete Session Modal */}
+      <DeleteSessionModal
+        sessionId={sessionToDelete}
+        onCancel={() => setSessionToDelete(null)}
+        onConfirm={(id) => {
+          onDeleteSession(id);
+          setSessionToDelete(null);
+        }}
+      />
     </div>
   );
 }
