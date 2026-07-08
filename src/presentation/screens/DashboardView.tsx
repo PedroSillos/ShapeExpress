@@ -83,25 +83,34 @@ const NODE_POSITIONS = ['left', 'center', 'right', 'center', 'left', 'center', '
 const ROMAN_ICONS = [iconRoman1, iconRoman2, iconRoman3, iconRoman4, iconRoman5, iconRoman6, iconRoman7];
 
 /**
- * Streak = total workouts in the unbroken chain of weeks leading up to now.
+ * Streak = sum of distinct training days across consecutive weeks that met the
+ * weekly goal, counted backwards from the current week.
  *
  * Rules:
- * - The current week always counts its workouts so far (even if goal not yet met),
- *   because it's still in progress — it never breaks the streak.
- * - Every past week must have met the weekly goal to remain in the chain.
- *   The first past week that falls short ends the streak.
- * - Example: goal=3, weeks=[3, 3, 2(current)] → streak = 3+3+2 = 8
- * - Example: goal=3, weeks=[1(current)] → streak = 1
+ * - Multiple workouts on the same calendar day count as ONE training day.
+ * - The current (in-progress) week always contributes its distinct days so far,
+ *   regardless of whether the goal has been met yet — it never breaks the chain.
+ * - Every past week must have >= weeklyGoal distinct training days to stay in
+ *   the chain. The first past week that falls short ends the streak.
+ *
+ * Example (goal = 3):
+ *   Week 1 (oldest): 4 distinct days  ✓
+ *   Week 2:          2 distinct days  ✗ → chain broken here
+ *   Week 3:          3 distinct days  ✓
+ *   Week 4 (current):4 distinct days  (in progress, always counts)
+ *   → streak = 3 + 4 = 7 days  (weeks 3 and 4 only)
  */
 function calcGoalStreak(sessions: WorkoutSession[], weeklyGoal: number): number {
   if (sessions.length === 0 || weeklyGoal <= 0) return 0;
 
-  // Group sessions by ISO week key (Mon start)
-  const byWeek: Record<string, number> = {};
+  // Build a map: week-start-key → Set of distinct yyyy-MM-dd training days
+  const byWeek: Record<string, Set<string>> = {};
   sessions.forEach(s => {
     try {
+      const dayKey  = format(parseISO(s.date), 'yyyy-MM-dd');
       const weekKey = format(startOfWeek(parseISO(s.date), { weekStartsOn: 1 }), 'yyyy-MM-dd');
-      byWeek[weekKey] = (byWeek[weekKey] ?? 0) + 1;
+      if (!byWeek[weekKey]) byWeek[weekKey] = new Set();
+      byWeek[weekKey].add(dayKey);
     } catch {}
   });
 
@@ -109,19 +118,19 @@ function calcGoalStreak(sessions: WorkoutSession[], weeklyGoal: number): number 
   let weekCursor = startOfWeek(new Date(), { weekStartsOn: 1 });
 
   for (let i = 0; i < 104; i++) {
-    const key = format(weekCursor, 'yyyy-MM-dd');
-    const count = byWeek[key] ?? 0;
+    const key        = format(weekCursor, 'yyyy-MM-dd');
+    const distinctDays = byWeek[key]?.size ?? 0;
 
     if (i === 0) {
-      // Current week: always add whatever was done so far (may be 0)
-      streak += count;
+      // Current week: always add its distinct days (may be 0 if no workout yet this week)
+      streak += distinctDays;
       weekCursor = subWeeks(weekCursor, 1);
       continue;
     }
 
-    // Past weeks: must have met the goal to continue the chain
-    if (count >= weeklyGoal) {
-      streak += count;
+    // Past weeks: must have met the goal to remain in the chain
+    if (distinctDays >= weeklyGoal) {
+      streak += distinctDays;
       weekCursor = subWeeks(weekCursor, 1);
     } else {
       break;
