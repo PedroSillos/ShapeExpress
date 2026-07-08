@@ -3,9 +3,10 @@ import { toast } from "sonner";
 import { db } from "../../firebase";
 import { doc, setDoc, deleteDoc, collection, query, where, getDocs } from "firebase/firestore";
 import type { WorkoutTemplate, WorkoutSession, UserProfile } from "../../domain/entities";
+import { STORAGE_KEYS } from "../../shared/lib/storageKeys";
 
-const LOCAL_SESSIONS_KEY = "local_sessions";
-const LOCAL_TEMPLATES_KEY = "pending-templates";
+const LOCAL_SESSIONS_KEY = STORAGE_KEYS.LOCAL_SESSIONS;
+const LOCAL_TEMPLATES_KEY = STORAGE_KEYS.PENDING_TEMPLATES;
 
 function loadLocalSessions(): WorkoutSession[] {
   try { return JSON.parse(localStorage.getItem(LOCAL_SESSIONS_KEY) ?? "[]"); } catch { return []; }
@@ -37,11 +38,11 @@ export const useWorkoutState = (
   );
   const [templates, setTemplates] = useState<WorkoutTemplate[]>(() => loadLocalTemplates());
   const [activeWorkout, setActiveWorkoutRaw] = useState<WorkoutSession | null>(() => {
-    try { const s = localStorage.getItem('active-workout'); return s ? JSON.parse(s) : null; } catch { return null; }
+    try { const s = localStorage.getItem(STORAGE_KEYS.ACTIVE_WORKOUT); return s ? JSON.parse(s) : null; } catch { return null; }
   });
   const setActiveWorkout = (s: WorkoutSession | null) => {
     setActiveWorkoutRaw(s);
-    try { s ? localStorage.setItem('active-workout', JSON.stringify(s)) : localStorage.removeItem('active-workout'); } catch {}
+    try { s ? localStorage.setItem(STORAGE_KEYS.ACTIVE_WORKOUT, JSON.stringify(s)) : localStorage.removeItem(STORAGE_KEYS.ACTIVE_WORKOUT); } catch {}
   };
   const [lastCompletedSession, setLastCompletedSession] = useState<WorkoutSession | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | null>(null);
@@ -52,7 +53,7 @@ export const useWorkoutState = (
   const [selectingSheetTemplate, setSelectingSheetTemplate] = useState<WorkoutTemplate | null>(null);
   const [scrollToHistory, setScrollToHistory] = useState(false);
 
-  const email = currentUser?.email || token || localStorage.getItem("shape_express_token");
+  const email = currentUser?.email || token || localStorage.getItem(STORAGE_KEYS.TOKEN);
 
   const getTemplates = async () => {
     if (!email) return [];

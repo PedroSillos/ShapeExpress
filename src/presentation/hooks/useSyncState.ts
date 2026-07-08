@@ -3,6 +3,7 @@ import { db } from "../../firebase";
 import { doc, getDoc, getDocs, collection, query, where } from "firebase/firestore";
 import { syncState } from "./useAuthState";
 import { DEFAULT_PROFILE, DEFAULT_STATS } from "./useProfileState";
+import { STORAGE_KEYS } from "../../shared/lib/storageKeys";
 import type {
   UserProfile, UserStats, WorkoutTemplate,
   WorkoutSession, TrainerConnection, Student,
@@ -133,11 +134,11 @@ export const useSyncState = (
           }).catch(() => {}),
           getDocs(query(collection(db, "sessions"), where("userId", "==", emailLower))).then((snap) => {
             const remoteSessions = snap.docs.map((d) => ({ id: d.id, ...d.data() } as WorkoutSession));
-            const localSessions: WorkoutSession[] = (() => { try { return JSON.parse(localStorage.getItem("local_sessions") ?? "[]"); } catch { return []; } })();
+            const localSessions: WorkoutSession[] = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.LOCAL_SESSIONS) ?? "[]"); } catch { return []; } })();
             const remoteIds = new Set(remoteSessions.map((s) => s.id));
             const onlyLocal = localSessions.filter((s) => !remoteIds.has(s.id));
             setSessions([...remoteSessions, ...onlyLocal]);
-            if (onlyLocal.length === 0) localStorage.removeItem("local_sessions");
+            if (onlyLocal.length === 0) localStorage.removeItem(STORAGE_KEYS.LOCAL_SESSIONS);
           }).catch(() => {}),
           getDocs(query(collection(db, "users"), where("userType", "==", "treinador"))).then((snap) => {
             if (!snap.empty) setTrainers(snap.docs.map((d) => d.data() as UserProfile));

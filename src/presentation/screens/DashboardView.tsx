@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { startOfWeek, parseISO, format, subWeeks } from 'date-fns';
 import { Play, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 import {
   UserStats,
   WorkoutSession,
@@ -145,7 +146,7 @@ export function DashboardView({
   const sports = useMemo(() => {
     if ((mainUserProfile as any)?.sports?.length) return (mainUserProfile as any).sports as string[];
     try {
-      const wa = JSON.parse(localStorage.getItem('welcome-answers') ?? 'null');
+      const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
       if (wa?.sports?.length) return wa.sports as string[];
     } catch {}
     return ['Musculação'];

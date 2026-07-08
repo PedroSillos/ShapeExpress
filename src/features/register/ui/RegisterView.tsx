@@ -6,6 +6,7 @@ import { cn } from '../../../utils/cn';
 import { UserProfile } from '../../../domain/entities';
 import { isValidEmail } from '../../../utils/validation';
 import iconGoogle from '@/src/assets/icons/icon-google.svg';
+import { STORAGE_KEYS } from '../../../shared/lib/storageKeys';
 
 // ─── Google icon ──────────────────────────────────────────────────────────────
 function GoogleIcon() {
@@ -113,7 +114,7 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
       weight?: number;
       birthDate?: string;
     } | null = (() => {
-      try { return JSON.parse(localStorage.getItem('welcome-answers') ?? 'null'); } catch { return null; }
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; }
     })();
 
     // Derive experienceLevel from the first selected sport's experience entry

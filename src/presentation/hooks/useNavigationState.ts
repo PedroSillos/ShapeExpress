@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { BodyAssessment, WorkoutSession } from "../../domain/entities";
+import { STORAGE_KEYS } from "../../shared/lib/storageKeys";
 
 export type AppTab =
   | "landing" | "welcome"
@@ -13,7 +14,7 @@ export type AppTab =
 
 export const useNavigationState = () => {
   const [activeTab, setActiveTab] = useState<AppTab>(() =>
-    localStorage.getItem('welcome-done') ? 'dashboard' : 'landing'
+    localStorage.getItem(STORAGE_KEYS.WELCOME_DONE) ? 'dashboard' : 'landing'
   );
   const [swipeDirection, setSwipeDirection] = useState(0);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);

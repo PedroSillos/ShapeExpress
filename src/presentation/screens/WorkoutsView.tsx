@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 import {
   Plus,
   Dumbbell,
@@ -510,7 +511,7 @@ export function WorkoutsView({
   const sport = useMemo(() => {
     if ((mainUserProfile as any)?.sports?.length) return (mainUserProfile as any).sports[0] as string;
     try {
-      const wa = JSON.parse(localStorage.getItem('welcome-answers') ?? 'null');
+      const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
       if (wa?.sports?.length) return wa.sports[0] as string;
     } catch {}
     return 'Musculação';
@@ -526,7 +527,7 @@ export function WorkoutsView({
 
   // Draft recovery
   useEffect(() => {
-    const savedDraft = localStorage.getItem('workout_draft');
+    const savedDraft = localStorage.getItem(STORAGE_KEYS.WORKOUT_DRAFT);
     if (savedDraft) {
       try {
         const draft = JSON.parse(savedDraft);
@@ -538,7 +539,7 @@ export function WorkoutsView({
           if (confirm('Você tem um rascunho de treino não finalizado. Deseja continuar de onde parou?')) {
             onCreateWorkout();
           } else {
-            localStorage.removeItem('workout_draft');
+            localStorage.removeItem(STORAGE_KEYS.WORKOUT_DRAFT);
           }
         }
       } catch {

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { startOfWeek, endOfWeek, subWeeks, parseISO, isWithinInterval, format } from 'date-fns';
 import { WorkoutSession, UserStats } from '../../domain/entities';
+import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 
 interface UseWeeklyGoalParams {
   isLoggedIn: boolean;
@@ -13,7 +14,7 @@ export function useWeeklyGoal({ isLoggedIn, userSessions, userStats, updateStats
   useEffect(() => {
     if (!isLoggedIn || userSessions.length === 0) return;
 
-    const lastCheck = localStorage.getItem('shapeexpress_last_goal_check');
+    const lastCheck = localStorage.getItem(STORAGE_KEYS.LAST_GOAL_CHECK);
     const now = new Date();
     const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
 
@@ -35,6 +36,6 @@ export function useWeeklyGoal({ isLoggedIn, userSessions, userStats, updateStats
       }
     }
 
-    localStorage.setItem('shapeexpress_last_goal_check', now.toISOString());
+    localStorage.setItem(STORAGE_KEYS.LAST_GOAL_CHECK, now.toISOString());
   }, [isLoggedIn, userSessions, userStats.weeklyGoal]);
 }

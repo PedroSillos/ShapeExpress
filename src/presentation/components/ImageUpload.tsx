@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Camera, Upload, X, Check, Loader2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 
 interface ImageUploadProps {
   onUploadSuccess?: (url: string) => void;
@@ -54,7 +55,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       } else {
         const formData = new FormData();
         formData.append('image', file);
-        const token = localStorage.getItem('shape_express_token');
+        const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
         const response = await fetch('/api/upload', {
           method: 'POST',
           headers: {

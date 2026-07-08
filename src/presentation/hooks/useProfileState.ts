@@ -10,6 +10,7 @@ import type {
   ExerciseUserStats,
   BodyAssessment,
 } from "../../domain/entities";
+import { STORAGE_KEYS } from "../../shared/lib/storageKeys";
 
 export const DEFAULT_PROFILE: UserProfile = {
   firstName: "",
@@ -60,14 +61,14 @@ function saveLocal<T>(key: string, value: T) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-const LOCAL_STATS_KEY = 'local_stats';
-const LOCAL_TRAINING_PROFILE_KEY = 'local_training_profile';
-const LOCAL_CALORIE_PROFILE_KEY = 'local_calorie_profile';
-const LOCAL_EXERCISE_STATS_KEY = 'local_exercise_stats';
+const LOCAL_STATS_KEY = STORAGE_KEYS.LOCAL_STATS;
+const LOCAL_TRAINING_PROFILE_KEY = STORAGE_KEYS.LOCAL_TRAINING_PROFILE;
+const LOCAL_CALORIE_PROFILE_KEY = STORAGE_KEYS.LOCAL_CALORIE_PROFILE;
+const LOCAL_EXERCISE_STATS_KEY = STORAGE_KEYS.LOCAL_EXERCISE_STATS;
 
 function getGuestDefaultStats(): UserStats {
   try {
-    const wa = JSON.parse(localStorage.getItem('welcome-answers') ?? 'null');
+    const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
     if (wa?.weeklyGoal) return { ...DEFAULT_STATS, weeklyGoal: wa.weeklyGoal };
   } catch {}
   return DEFAULT_STATS;
@@ -77,7 +78,7 @@ export const useProfileState = (currentUser: { email: string } | null) => {
   const isGuest = !currentUser;
 
   const [userProfile, setUserProfile] = useState<UserProfile>(() =>
-    isGuest ? loadLocal('local_user_profile', DEFAULT_PROFILE) : DEFAULT_PROFILE
+    isGuest ? loadLocal(STORAGE_KEYS.LOCAL_USER_PROFILE, DEFAULT_PROFILE) : DEFAULT_PROFILE
   );
   const [userStats, setUserStats] = useState<UserStats>(() =>
     isGuest ? loadLocal(LOCAL_STATS_KEY, getGuestDefaultStats()) : DEFAULT_STATS
@@ -171,7 +172,7 @@ export const useProfileState = (currentUser: { email: string } | null) => {
     localStorage.removeItem(LOCAL_TRAINING_PROFILE_KEY);
     localStorage.removeItem(LOCAL_CALORIE_PROFILE_KEY);
     localStorage.removeItem(LOCAL_EXERCISE_STATS_KEY);
-    localStorage.removeItem('local_user_profile');
+    localStorage.removeItem(STORAGE_KEYS.LOCAL_USER_PROFILE);
     setUserProfile(DEFAULT_PROFILE);
     setUserStats(DEFAULT_STATS);
     setUserTrainingProfile(DEFAULT_TRAINING_PROFILE);

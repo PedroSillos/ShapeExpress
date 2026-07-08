@@ -7,6 +7,7 @@ import {
 } from "firebase/firestore";
 import type { Student, UserProfile, TrainerConnection, WorkoutSession } from "../../domain/entities";
 import { fullName } from "../../domain/entities";
+import { STORAGE_KEYS } from "../../shared/lib/storageKeys";
 
 export const useStudentsState = (
   currentUser: { email: string } | null,
@@ -19,7 +20,7 @@ export const useStudentsState = (
   const [selectedStudentForWorkouts, setSelectedStudentForWorkouts] = useState<Student | null>(null);
   const [selectedStudentForEvolution, setSelectedStudentForEvolution] = useState<Student | null>(null);
 
-  const email = currentUser?.email || token || localStorage.getItem("shape_express_token");
+  const email = currentUser?.email || token || localStorage.getItem(STORAGE_KEYS.TOKEN);
 
   const buildStudentFromEmail = async (sEmail: string): Promise<Student> => {
     const emailL = sEmail.toLowerCase();

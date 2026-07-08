@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 import { tokenStore } from "../../data/services/tokenStore";
+import { STORAGE_KEYS } from "../../shared/lib/storageKeys";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -30,14 +31,14 @@ function sanitize<T extends object>(obj: T): T {
  */
 export function clearLocalGuestData() {
   const keys = [
-    "pending-templates",
-    "local_sessions",
-    "local_stats",
-    "local_user_profile",
-    "local_training_profile",
-    "local_calorie_profile",
-    "local_exercise_stats",
-    "active-workout",
+    STORAGE_KEYS.PENDING_TEMPLATES,
+    STORAGE_KEYS.LOCAL_SESSIONS,
+    STORAGE_KEYS.LOCAL_STATS,
+    STORAGE_KEYS.LOCAL_USER_PROFILE,
+    STORAGE_KEYS.LOCAL_TRAINING_PROFILE,
+    STORAGE_KEYS.LOCAL_CALORIE_PROFILE,
+    STORAGE_KEYS.LOCAL_EXERCISE_STATS,
+    STORAGE_KEYS.ACTIVE_WORKOUT,
   ];
   keys.forEach((k) => localStorage.removeItem(k));
 }
@@ -48,9 +49,9 @@ export function clearLocalGuestData() {
  * data collected during onboarding is persisted to the user's account.
  */
 async function uploadLocalDataToFirestore(email: string) {
-  const templates: WorkoutTemplate[] = (() => { try { return JSON.parse(localStorage.getItem("pending-templates") ?? "[]"); } catch { return []; } })();
-  const sessions: WorkoutSession[] = (() => { try { return JSON.parse(localStorage.getItem("local_sessions") ?? "[]"); } catch { return []; } })();
-  const localStats = (() => { try { return JSON.parse(localStorage.getItem("local_stats") ?? "null"); } catch { return null; } })();
+  const templates: WorkoutTemplate[] = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_TEMPLATES) ?? "[]"); } catch { return []; } })();
+  const sessions: WorkoutSession[] = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.LOCAL_SESSIONS) ?? "[]"); } catch { return []; } })();
+  const localStats = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.LOCAL_STATS) ?? "null"); } catch { return null; } })();
 
   // Use allSettled so a single failed write does not abort the others.
   const results = await Promise.allSettled([
@@ -68,7 +69,7 @@ async function uploadLocalDataToFirestore(email: string) {
   // Clear local copies regardless of individual failures — on next login
   // useSyncState will load the authoritative data from Firestore.
   clearLocalGuestData();
-  localStorage.removeItem("welcome-answers");
+  localStorage.removeItem(STORAGE_KEYS.WELCOME_ANSWERS);
 }
 
 // Tracks which token has already been synced to prevent Strict Mode double-invoke
@@ -79,7 +80,7 @@ export const resetSyncedToken = () => { syncState.syncedToken = null; };
 export const useAuthState = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ email: string } | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem("shape_express_token"));
+  const [token, setToken] = useState<string | null>(localStorage.getItem(STORAGE_KEYS.TOKEN));
   const [idToken, setIdToken] = useState<string | null>(null);
 
   const fetchWithAuth = useCallback(async (
@@ -116,7 +117,7 @@ export const useAuthState = () => {
 
   useEffect(() => {
     const fallbackTimer = setTimeout(() => {
-      setRestoredTab(localStorage.getItem("welcome-done") ? "dashboard" : "landing");
+      setRestoredTab(localStorage.getItem(STORAGE_KEYS.WELCOME_DONE) ? "dashboard" : "landing");
     }, 5000);
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -126,20 +127,20 @@ export const useAuthState = () => {
         const freshIdToken = await firebaseUser.getIdToken();
         tokenStore.idToken = freshIdToken;
         setIdToken(freshIdToken);
-        localStorage.setItem("shape_express_token", email);
+        localStorage.setItem(STORAGE_KEYS.TOKEN, email);
         setToken(email);
         setCurrentUser({ email });
         setIsLoggedIn(true);
-        setRestoredTab(localStorage.getItem("app-default-tab") || "dashboard");
+        setRestoredTab(localStorage.getItem(STORAGE_KEYS.DEFAULT_TAB) || "dashboard");
       } else {
         tokenStore.idToken = null;
         setIdToken(null);
-        localStorage.removeItem("shape_express_token");
+        localStorage.removeItem(STORAGE_KEYS.TOKEN);
         syncState.syncedToken = null;
         setToken(null);
         setCurrentUser(null);
         setIsLoggedIn(false);
-        setRestoredTab(localStorage.getItem("welcome-done") ? "dashboard" : "landing");
+        setRestoredTab(localStorage.getItem(STORAGE_KEYS.WELCOME_DONE) ? "dashboard" : "landing");
       }
     });
 
@@ -158,7 +159,7 @@ export const useAuthState = () => {
         if (snap.exists()) userDoc = snap.data();
       } catch (e) {}
       toast.success("Bem-vindo de volta!");
-      localStorage.setItem("shape_express_token", email);
+      localStorage.setItem(STORAGE_KEYS.TOKEN, email);
       setToken(email);
       setCurrentUser({ email });
       setIsLoggedIn(true);
@@ -215,7 +216,7 @@ export const useAuthState = () => {
         }
       } catch (e) {}
       toast.success("Bem-vindo!");
-      localStorage.setItem("shape_express_token", email);
+      localStorage.setItem(STORAGE_KEYS.TOKEN, email);
       setToken(email);
       setCurrentUser({ email });
       setIsLoggedIn(true);
@@ -255,7 +256,7 @@ export const useAuthState = () => {
         });
       } catch (e) {}
       toast.success("Conta criada com sucesso!");
-      localStorage.setItem("shape_express_token", data.email);
+      localStorage.setItem(STORAGE_KEYS.TOKEN, data.email);
       setToken(data.email);
       setCurrentUser({ email: data.email });
       setIsLoggedIn(true);
@@ -297,7 +298,7 @@ export const useAuthState = () => {
     Object.keys(localStorage)
       .filter((k) => k.startsWith("firebase:"))
       .forEach((k) => localStorage.removeItem(k));
-    localStorage.removeItem("shape_express_token");
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
     tokenStore.idToken = null;
     syncState.syncedToken = null;
     setIdToken(null);
@@ -313,7 +314,7 @@ export const useAuthState = () => {
     Object.keys(localStorage)
       .filter((k) => k.startsWith("firebase:"))
       .forEach((k) => localStorage.removeItem(k));
-    localStorage.removeItem("shape_express_token");
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
     tokenStore.idToken = null;
     syncState.syncedToken = null;
     setIdToken(null);
@@ -376,7 +377,7 @@ export const useAuthState = () => {
         }
       } catch (e) {}
       toast.success("Bem-vindo!");
-      localStorage.setItem("shape_express_token", docId);
+      localStorage.setItem(STORAGE_KEYS.TOKEN, docId);
       setToken(docId);
       setCurrentUser({ email: docId });
       setIsLoggedIn(true);

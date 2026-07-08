@@ -3,6 +3,7 @@ import { X, ChevronLeft, Search, SlidersHorizontal, Play, Check, Plus, Trash2, E
 import { motion, AnimatePresence } from 'motion/react';
 import { format, addMonths, parseISO } from 'date-fns';
 import { cn } from '../../utils/cn';
+import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 import { EXERCISES } from '../../constants';
 import { Card } from '../components/Card';
 import { ConfigureExercisesView } from '../components/ConfigureExercisesView';
@@ -57,7 +58,7 @@ export function CreateWorkoutView({
   const sport = useMemo(() => {
     if ((userProfile as any)?.sports?.length) return (userProfile as any).sports[0] as string;
     try {
-      const wa = JSON.parse(localStorage.getItem('welcome-answers') ?? 'null');
+      const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
       if (wa?.sports?.length) return wa.sports[0] as string;
     } catch {}
     return 'Musculação';
@@ -77,14 +78,14 @@ export function CreateWorkoutView({
       sheets,
       step
     };
-    localStorage.setItem('workout_draft', JSON.stringify(draft));
+    localStorage.setItem(STORAGE_KEYS.WORKOUT_DRAFT, JSON.stringify(draft));
   }, [protocolName, category, startDate, endDate, cycles, numSheets, sheets, step, initialTemplate]);
 
   // Load draft on mount
   useEffect(() => {
     if (initialTemplate) return;
     
-    const savedDraft = localStorage.getItem('workout_draft');
+    const savedDraft = localStorage.getItem(STORAGE_KEYS.WORKOUT_DRAFT);
     if (savedDraft) {
       try {
         const draft = JSON.parse(savedDraft);
@@ -100,7 +101,7 @@ export function CreateWorkoutView({
             setSheets(draft.sheets);
             setStep(draft.step);
           } else {
-            localStorage.removeItem('workout_draft');
+            localStorage.removeItem(STORAGE_KEYS.WORKOUT_DRAFT);
           }
         }
       } catch (e) {
@@ -110,7 +111,7 @@ export function CreateWorkoutView({
   }, [initialTemplate]);
 
   const clearDraft = () => {
-    localStorage.removeItem('workout_draft');
+    localStorage.removeItem(STORAGE_KEYS.WORKOUT_DRAFT);
   };
   
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);

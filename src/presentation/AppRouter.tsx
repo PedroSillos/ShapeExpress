@@ -4,6 +4,7 @@ import { Student, UserProfile, WorkoutTemplate, WorkoutSession, StoreItem, Store
 import { fullName } from '../domain/entities';
 import { DEFAULT_PROFILE } from '../constants';
 import type { PublishPayload } from './hooks/useStoreState';
+import { STORAGE_KEYS } from '../shared/lib/storageKeys';
 
 // Screens
 import { LandingView } from './screens/auth/LandingView';
@@ -76,7 +77,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
   const previousTabRef = useRef<string>('landing');
   if (activeTab !== 'login' && activeTab !== 'register' && activeTab !== 'forgot-password') {
     previousTabRef.current = activeTab;
-    try { localStorage.setItem('previous-tab', activeTab); } catch {}
+    try { localStorage.setItem(STORAGE_KEYS.PREVIOUS_TAB, activeTab); } catch {}
   }
 
   const {
@@ -97,7 +98,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     if (isGeneratingAI) return;
     setIsGeneratingAI(true);
     try {
-      const wa = (() => { try { return JSON.parse(localStorage.getItem('welcome-answers') ?? 'null'); } catch { return null; } })();
+      const wa = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; } })();
       const sports: string[] = wa?.sports ?? [];
       const now = new Date();
       const end = new Date(now); end.setMonth(end.getMonth() + 3);
@@ -150,11 +151,11 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       setSession={setActiveWorkout}
       onFinish={finishWorkout}
       onCancel={() => {
-        if (localStorage.getItem('onboarding-workout-pending')) {
-          localStorage.removeItem('onboarding-workout-pending');
-          localStorage.removeItem('welcome-done');
-          localStorage.removeItem('welcome-answers');
-          localStorage.removeItem('pending-templates');
+        if (localStorage.getItem(STORAGE_KEYS.ONBOARDING_PENDING)) {
+          localStorage.removeItem(STORAGE_KEYS.ONBOARDING_PENDING);
+          localStorage.removeItem(STORAGE_KEYS.WELCOME_DONE);
+          localStorage.removeItem(STORAGE_KEYS.WELCOME_ANSWERS);
+          localStorage.removeItem(STORAGE_KEYS.PENDING_TEMPLATES);
           state.setTemplates([]);
           setActiveWorkout(null);
           setActiveTab('landing');
@@ -214,8 +215,8 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             // Clear any stale onboarding data from previous runs before creating a fresh template.
             // This prevents ghost templates/sessions from appearing if the user redid the onboarding
             // or if HMR caused the hook to re-mount with leftover localStorage data.
-            localStorage.removeItem('pending-templates');
-            localStorage.removeItem('local_sessions');
+            localStorage.removeItem(STORAGE_KEYS.PENDING_TEMPLATES);
+            localStorage.removeItem(STORAGE_KEYS.LOCAL_SESSIONS);
             state.setTemplates([]);
             state.setSessions([]);
 
@@ -255,19 +256,19 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             // silent=true: the user is about to start the workout, no need for a toast.
             await api.createTemplate(template, true);
 
-            try { localStorage.setItem('welcome-answers', JSON.stringify(answers)); } catch {}
+            try { localStorage.setItem(STORAGE_KEYS.WELCOME_ANSWERS, JSON.stringify(answers)); } catch {}
             if (a.weeklyGoal) {
               state.setUserStats({ ...state.userStats, weeklyGoal: a.weeklyGoal });
             }
 
             if (a.skipWorkout) {
-              localStorage.setItem('welcome-done', '1');
+              localStorage.setItem(STORAGE_KEYS.WELCOME_DONE, '1');
               state.onShowSuggestProfile?.() ?? setActiveTab('dashboard');
               return;
             }
 
-            localStorage.setItem('welcome-done', '1');
-            localStorage.setItem('onboarding-workout-pending', '1');
+            localStorage.setItem(STORAGE_KEYS.WELCOME_DONE, '1');
+            localStorage.setItem(STORAGE_KEYS.ONBOARDING_PENDING, '1');
             workout.startWorkout(template);
           }}
         />
@@ -279,19 +280,19 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onLogin={async (email: string, password: string) => {
             const data = await api.login(email, password);
             setUserProfile(data.user);
-            const defaultTab = localStorage.getItem('app-default-tab') || 'dashboard';
+            const defaultTab = localStorage.getItem(STORAGE_KEYS.DEFAULT_TAB) || 'dashboard';
             setActiveTab(defaultTab as any);
           }}
           onForgotPassword={() => setActiveTab('forgot-password')}
           onRegister={() => setActiveTab('register')}
-          onBack={() => setActiveTab((localStorage.getItem('previous-tab') || 'landing') as any)}
+          onBack={() => setActiveTab((localStorage.getItem(STORAGE_KEYS.PREVIOUS_TAB) || 'landing') as any)}
         />
       );
     case 'register':
       return (
         <RegisterView
           onRegister={async (p: any) => {
-            const pending = (() => { try { return JSON.parse(localStorage.getItem('welcome-answers') ?? 'null'); } catch { return null; } })();
+            const pending = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; } })();
             const merged = pending ? {
               ...p,
               objective: pending.objective ?? p.objective,
@@ -302,14 +303,14 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
               weeklyGoal: pending.weeklyGoal ?? p.weeklyGoal,
             } : p;
             const data = await api.register(merged);
-            localStorage.removeItem('welcome-answers');
+            localStorage.removeItem(STORAGE_KEYS.WELCOME_ANSWERS);
             setUserProfile(data.user);
-            const defaultTab = localStorage.getItem('app-default-tab') || 'dashboard';
+            const defaultTab = localStorage.getItem(STORAGE_KEYS.DEFAULT_TAB) || 'dashboard';
             setActiveTab(defaultTab as any);
           }}
           onBack={() => {
-            const previousTab = localStorage.getItem('previous-tab') || 'landing';
-            const hasOnboardingAnswers = !!localStorage.getItem('welcome-answers');
+            const previousTab = localStorage.getItem(STORAGE_KEYS.PREVIOUS_TAB) || 'landing';
+            const hasOnboardingAnswers = !!localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS);
             if (previousTab === 'perfil') {
               setActiveTab('perfil' as any);
             } else if (hasOnboardingAnswers && onShowSuggestProfile) {
@@ -597,7 +598,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       // Sports: from welcome-answers (athletes) or specialties (trainers)
       const sports: string[] = (() => {
         try {
-          const wa = JSON.parse(localStorage.getItem('welcome-answers') ?? 'null');
+          const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
           if (wa?.sports?.length) return wa.sports as string[];
         } catch {}
         if (userProfile?.specialties?.length) return userProfile.specialties;

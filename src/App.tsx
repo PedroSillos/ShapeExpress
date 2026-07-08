@@ -22,6 +22,7 @@ import { OnboardingStreakScreen } from './presentation/screens/auth/OnboardingSt
 import { OnboardingSuggestProfileScreen } from './presentation/screens/auth/OnboardingSuggestProfileScreen';
 
 import { WorkoutTemplate } from './domain/entities';
+import { STORAGE_KEYS } from './shared/lib/storageKeys';
 
 export default function App() {
   const appState = useAppState();
@@ -129,11 +130,11 @@ export default function App() {
 
   // If app was closed during onboarding workout, clean up and restart from landing
   useEffect(() => {
-    if (localStorage.getItem('onboarding-workout-pending')) {
-      localStorage.removeItem('onboarding-workout-pending');
-      localStorage.removeItem('welcome-done');
-      localStorage.removeItem('welcome-answers');
-      localStorage.removeItem('pending-templates');
+    if (localStorage.getItem(STORAGE_KEYS.ONBOARDING_PENDING)) {
+      localStorage.removeItem(STORAGE_KEYS.ONBOARDING_PENDING);
+      localStorage.removeItem(STORAGE_KEYS.WELCOME_DONE);
+      localStorage.removeItem(STORAGE_KEYS.WELCOME_ANSWERS);
+      localStorage.removeItem(STORAGE_KEYS.PENDING_TEMPLATES);
       setTemplates([]);
       setActiveTab('landing');
     }
@@ -142,7 +143,7 @@ export default function App() {
 
   useEffect(() => {
     if (!isLoggedIn && !lastCompletedSession && !activeWorkout && !onboardingSession && activeTab !== 'landing' && activeTab !== 'welcome' && activeTab !== 'login' && activeTab !== 'forgot-password' && activeTab !== 'register') {
-      if (!localStorage.getItem('welcome-done')) setActiveTab('landing');
+      if (!localStorage.getItem(STORAGE_KEYS.WELCOME_DONE)) setActiveTab('landing');
     }
   }, [isLoggedIn, activeTab, lastCompletedSession, activeWorkout, onboardingSession]);
 
@@ -163,11 +164,11 @@ export default function App() {
   // Capture onboarding session once, then clear it from shared state
   useEffect(() => {
     if (lastCompletedSession && !isLoggedIn) {
-      localStorage.setItem('welcome-done', '1');
-      localStorage.removeItem('onboarding-workout-pending');
+      localStorage.setItem(STORAGE_KEYS.WELCOME_DONE, '1');
+      localStorage.removeItem(STORAGE_KEYS.ONBOARDING_PENDING);
       // Apply weeklyGoal chosen during onboarding to userStats
       try {
-        const wa = JSON.parse(localStorage.getItem('welcome-answers') ?? 'null');
+        const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
         if (wa?.weeklyGoal && wa.weeklyGoal !== userStats.weeklyGoal) {
           setUserStats({ ...userStats, weeklyGoal: wa.weeklyGoal });
         }

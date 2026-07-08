@@ -1,6 +1,7 @@
 import { Dumbbell, BarChart3, Home, User, ShoppingBag, Users, UserCheck } from 'lucide-react';
 import { UserProfile, WorkoutSession } from '../domain/entities';
 import { NavButton } from './components/NavButton';
+import { STORAGE_KEYS } from '../shared/lib/storageKeys';
 
 interface AppNavBarProps {
   isLoggedIn: boolean;
@@ -19,7 +20,7 @@ export function AppNavBar({
   switchTab,
   onStudentsClick,
 }: AppNavBarProps) {
-  const welcomeDone = !!localStorage.getItem('welcome-done');
+  const welcomeDone = !!localStorage.getItem(STORAGE_KEYS.WELCOME_DONE);
   if (
     (!isLoggedIn && !welcomeDone) ||
     activeWorkout ||

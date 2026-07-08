@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
+import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 import {
   LineChart,
   Line,
@@ -72,7 +73,7 @@ export function StatsView({
   const sport = useMemo(() => {
     if ((mainUserProfile as any)?.sports?.length) return (mainUserProfile as any).sports[0] as string;
     try {
-      const wa = JSON.parse(localStorage.getItem('welcome-answers') ?? 'null');
+      const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
       if (wa?.sports?.length) return wa.sports[0] as string;
     } catch {}
     return 'Musculação';
