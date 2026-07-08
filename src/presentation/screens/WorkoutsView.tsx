@@ -412,6 +412,7 @@ function SessionCard({
   onEditSession: (s: WorkoutSession) => void;
   onDeleteSession: (id: string) => void;
 }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const templateName = templates.find((t) => t.id === session.workoutId)?.name || 'Treino';
   const mins = session.duration ?? 0;
 
@@ -436,13 +437,44 @@ function SessionCard({
             <Edit size={14} />
           </button>
           <button
-            onClick={() => onDeleteSession(session.id)}
+            onClick={() => setConfirmDelete(true)}
             className="p-1.5 text-white/20 hover:text-red-400 transition-colors rounded-lg hover:bg-white/5"
           >
             <Trash2 size={14} />
           </button>
         </div>
       </div>
+
+      {/* Delete confirmation inline */}
+      <AnimatePresence>
+        {confirmDelete && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden mb-3"
+          >
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 space-y-2">
+              <p className="text-xs font-bold text-red-400">Excluir esta sessão?</p>
+              <p className="text-[10px] text-white/40">Esta ação não pode ser desfeita.</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="flex-1 py-2 text-xs font-bold bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => onDeleteSession(session.id)}
+                  className="flex-1 py-2 text-xs font-bold bg-red-500 text-white rounded-lg shadow-sm shadow-red-500/30 active:scale-95 transition-transform"
+                >
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Stats chips */}
       <div className="flex flex-wrap gap-2 mb-3">
