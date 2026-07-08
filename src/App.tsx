@@ -20,6 +20,7 @@ import { PublishToStoreModal } from './presentation/components/PublishToStoreMod
 import { WorkoutDoneScreen } from './presentation/screens/auth/WelcomeView';
 import { OnboardingStreakScreen } from './presentation/screens/auth/OnboardingStreakScreen';
 import { OnboardingSuggestProfileScreen } from './presentation/screens/auth/OnboardingSuggestProfileScreen';
+import { SettingsView } from './features/profile';
 
 import { WorkoutTemplate } from './domain/entities';
 import { STORAGE_KEYS } from './shared/lib/storageKeys';
@@ -59,6 +60,7 @@ export default function App() {
   const [studentTemplates, setStudentTemplates] = useState<WorkoutTemplate[]>([]);
   const [showOnboardingStreak, setShowOnboardingStreak] = useState(false);
   const [showSuggestProfile, setShowSuggestProfile] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [onboardingSession, setOnboardingSession] = useState<typeof lastCompletedSession>(null);
 
   const dataSync = useDataSync({
@@ -213,7 +215,7 @@ export default function App() {
   }
 
   const currentAnimations = document.documentElement.getAttribute('data-animations') || 'enabled';
-  const routerState = { ...appState, switchTab, selectedStudentForProfile, setSelectedStudentForProfile, publishingTemplate, setPublishingTemplate: (t: WorkoutTemplate | null) => setPublishingTemplate(t), studentTemplates, setStudentTemplates, onShowSuggestProfile: () => setShowSuggestProfile(true), onShowStreak: () => { setShowSuggestProfile(false); setShowOnboardingStreak(true); } };
+  const routerState = { ...appState, switchTab, selectedStudentForProfile, setSelectedStudentForProfile, publishingTemplate, setPublishingTemplate: (t: WorkoutTemplate | null) => setPublishingTemplate(t), studentTemplates, setStudentTemplates, onShowSuggestProfile: () => setShowSuggestProfile(true), onShowStreak: () => { setShowSuggestProfile(false); setShowOnboardingStreak(true); }, showSettings, setShowSettings };
 
   if (activeTab === 'landing' || activeTab === 'welcome' || activeTab === 'login' || activeTab === 'register' || activeTab === 'forgot-password') {
     return (
@@ -278,6 +280,17 @@ export default function App() {
           onCancel={() => setShowLogoutConfirm(false)}
           onConfirm={async () => { await api.logout(); setShowLogoutConfirm(false); }}
         />
+
+        <AnimatePresence>
+          {showSettings && (
+            <div className="fixed inset-0 z-[90] bg-dark-surface overflow-y-auto">
+              <SettingsView
+                onClose={() => setShowSettings(false)}
+                onLogout={() => { setShowSettings(false); setShowLogoutConfirm(true); }}
+              />
+            </div>
+          )}
+        </AnimatePresence>
 
         <AnimatePresence>
           {publishingTemplate && (

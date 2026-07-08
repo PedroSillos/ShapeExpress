@@ -615,6 +615,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           sports={sports}
           friendsCount={friendsCount}
           onAddFriends={() => switchTab(userProfile?.userType === 'treinador' ? 'students' : 'trainers')}
+          onSettings={() => state.setShowSettings(true)}
         />
       ) : (
         <ProfileGuestView
