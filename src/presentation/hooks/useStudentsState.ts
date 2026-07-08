@@ -6,6 +6,7 @@ import {
   collection, query, where, getDocs, addDoc,
 } from "firebase/firestore";
 import type { Student, UserProfile, TrainerConnection, WorkoutSession } from "../../domain/entities";
+import { fullName } from "../../domain/entities";
 
 export const useStudentsState = (
   currentUser: { email: string } | null,
@@ -59,9 +60,8 @@ export const useStudentsState = (
 
     return {
       id: userData?.email || emailL,
-      name: userData?.name || emailL.split("@")[0],
+      name: userData ? fullName(userData) : emailL.split("@")[0],
       email: userData?.email || emailL,
-      avatarUrl: userData?.avatarUrl || "https://picsum.photos/400",
       objective: userData?.objective,
       experienceLevel: userData?.experienceLevel,
       lastWorkout,
@@ -82,15 +82,15 @@ export const useStudentsState = (
       if (data.length === 0) {
         data = [
           {
-            name: "Pedro (Personal)", email: "mock1@example.com", userType: "treinador",
+            firstName: "Pedro (Personal)", email: "mock1@example.com", userType: "treinador",
             height: 180, initialWeight: 80, objective: "Hipertrofia", birthDate: "1990-01-01",
-            avatarUrl: "https://picsum.photos/seed/t1/400", hasPersonal: false,
+            hasPersonal: false,
             personalCode: "PEDRO123", specialty: "Treinamento de Força", rating: 5.0, distance: "1.2km",
           } as UserProfile,
           {
-            name: "Amanda (Coach)", email: "mock2@example.com", userType: "treinador",
+            firstName: "Amanda (Coach)", email: "mock2@example.com", userType: "treinador",
             height: 165, initialWeight: 60, objective: "Emagrecimento", birthDate: "1992-05-05",
-            avatarUrl: "https://picsum.photos/seed/t2/400", hasPersonal: false,
+            hasPersonal: false,
             personalCode: "AMANDA99", specialty: "Emagrecimento", rating: 4.9, distance: "2.5km",
           } as UserProfile,
         ];
@@ -167,8 +167,7 @@ export const useStudentsState = (
         trainerEmail: trainer.email.toLowerCase(),
         status: "pending",
         createdAt: new Date().toISOString(),
-        trainerName: trainer.name,
-        trainerAvatar: trainer.avatarUrl,
+        trainerName: fullName(trainer),
       };
       await setDoc(doc(db, "connections", newConnection.id), newConnection);
       setStudentConnections((prev) => [...prev, newConnection]);

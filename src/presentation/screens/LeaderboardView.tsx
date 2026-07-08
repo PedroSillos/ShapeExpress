@@ -3,6 +3,7 @@ import { Flame } from 'lucide-react';
 import { Badge } from '../components/Badge';
 import { LeaderboardEntry, UserProfile, UserStats } from '../../domain/entities';
 import { cn } from '../../utils/cn';
+import { InitialsAvatar } from '@/src/shared/ui/InitialsAvatar';
 
 interface LeaderboardViewProps {
   currentUserProfile: UserProfile | null;
@@ -14,11 +15,11 @@ interface LeaderboardViewProps {
 }
 
 const MOCK: LeaderboardEntry[] = [
-  { id: 'mock-0', name: 'Ana Silva',      avatarUrl: 'https://picsum.photos/seed/u101/200', xp: 15000, streak: 50, level: 30, rank: 1 },
-  { id: 'mock-1', name: 'Lucas Oliveira', avatarUrl: 'https://picsum.photos/seed/u102/200', xp: 13800, streak: 42, level: 28, rank: 2 },
-  { id: 'mock-2', name: 'Mariana Costa',  avatarUrl: 'https://picsum.photos/seed/u103/200', xp: 12600, streak: 35, level: 26, rank: 3 },
-  { id: 'mock-3', name: 'Pedro Santos',   avatarUrl: 'https://picsum.photos/seed/u104/200', xp: 11000, streak: 30, level: 24, rank: 4 },
-  { id: 'mock-4', name: 'Carla Dias',     avatarUrl: 'https://picsum.photos/seed/u105/200', xp:  9800, streak: 27, level: 22, rank: 5 },
+  { id: 'mock-0', name: 'Ana Silva',       xp: 15000, streak: 50, level: 30, rank: 1 },
+  { id: 'mock-1', name: 'Lucas Oliveira',  xp: 13800, streak: 42, level: 28, rank: 2 },
+  { id: 'mock-2', name: 'Mariana Costa',   xp: 12600, streak: 35, level: 26, rank: 3 },
+  { id: 'mock-3', name: 'Pedro Santos',    xp: 11000, streak: 30, level: 24, rank: 4 },
+  { id: 'mock-4', name: 'Carla Dias',      xp:  9800, streak: 27, level: 22, rank: 5 },
 ];
 
 const medalStyle: Record<number, string> = {
@@ -48,7 +49,7 @@ export function LeaderboardView({ currentUserProfile, userStats, isLoggedIn, get
               <div className={cn('w-11 h-11 rounded-full flex items-center justify-center font-bold text-base border-2 flex-shrink-0', medalStyle[entry.rank])}>
                 {entry.rank}
               </div>
-              <img src={entry.avatarUrl} alt="" className="w-14 h-14 rounded-full object-cover border-2 border-white/20 flex-shrink-0" referrerPolicy="no-referrer" />
+              <InitialsAvatar name={entry.name} sizeClass="w-14 h-14" className="border-2 border-white/20 text-xl" />
               <div className="flex-1 h-3.5 bg-white/10 rounded-full" />
             </div>
           ))}
@@ -96,7 +97,7 @@ export function LeaderboardView({ currentUserProfile, userStats, isLoggedIn, get
             )}>
               {entry.rank}
             </div>
-            <img src={entry.avatarUrl} alt={entry.name} className="w-11 h-11 rounded-full object-cover border-2 border-white/20 flex-shrink-0" referrerPolicy="no-referrer" />
+            <InitialsAvatar name={entry.name} sizeClass="w-11 h-11" className="border-2 border-white/20 text-base" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <p className="font-bold text-sm truncate">{entry.name}</p>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Trophy, ShieldCheck, RefreshCw } from 'lucide-react';
 import { Card } from './Card';
+import { InitialsAvatar } from '@/src/shared/ui/InitialsAvatar';
 
 export interface TrainerCardProps {
   key?: any;
@@ -23,7 +24,12 @@ export function TrainerCard({ trainer, showDistance, onConnect, studentConnectio
     >
       <div className="flex gap-4">
         <div className="relative">
-          <img src={trainer.avatarUrl} alt={trainer.name} className="w-16 h-16 rounded-2xl object-cover border border-white/10 group-hover:border-brand-red/50 transition-all" />
+          <InitialsAvatar
+            name={trainer.name ?? ''}
+            sizeClass="w-16 h-16"
+            roundedClass="rounded-2xl"
+            className="border border-white/10 group-hover:border-brand-red/50 transition-all"
+          />
           {showDistance && (
             <div className="absolute -bottom-1 -right-1 bg-brand-red text-black text-[8px] font-bold px-1.5 py-0.5 rounded-md shadow-lg">
               {trainer.distance}

@@ -90,7 +90,7 @@ async function startServer() {
     .withMessage('ID de sessão inválido');
 
   const validateCoachAdvice = [
-    body('userProfile.name').optional().trim().isLength({ max: 100 }).escape(),
+    body('userProfile.firstName').optional().trim().isLength({ max: 100 }).escape(),
     body('userProfile.objective').optional().trim().isLength({ max: 200 }).escape(),
     body('userProfile.experienceLevel').optional().isIn(['Iniciante', 'Intermediário', 'Avançado']),
     body('sessions').optional().isArray({ max: 100 }),
@@ -171,7 +171,7 @@ JSON sem markdown: {"name":"Treino Básico: <modalidade>","exercises":[{"exercis
       Analise os dados do usuário e forneça conselhos motivadores e técnicos para sua evolução.
       
       Perfil do Usuário:
-      - Nome: ${userProfile?.name || 'Não informado'}
+      - Nome: ${userProfile?.firstName ? [userProfile.firstName, userProfile.lastName].filter(Boolean).join(' ') : 'Não informado'}
       - Objetivo: ${userProfile?.objective || 'Não informado'}
       - Nível: ${userProfile?.experienceLevel || 'Intermediário'}
       
@@ -243,8 +243,8 @@ JSON sem markdown: {"name":"Treino Básico: <modalidade>","exercises":[{"exercis
 
       const base = {
         creatorEmail: email.toLowerCase(),
-        creatorName: userData.name || email,
-        creatorAvatar: userData.avatarUrl || '',
+        creatorName: userData.firstName ? [userData.firstName, userData.lastName].filter(Boolean).join(' ') : email,
+        creatorAvatar: '',
         title,
         description: description || '',
         coverImageUrl: coverImageUrl || '',

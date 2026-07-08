@@ -7,6 +7,7 @@ import {
   UserCalorieProfile,
   BodyAssessment,
   UserProfile,
+  fullName,
 } from '../../domain/entities';
 import {
   estimateWorkoutDuration,
@@ -61,7 +62,7 @@ export function NextWorkoutWidget({
               <h3 className="text-xl font-bold">{nextWorkout.name}</h3>
               {nextWorkout.creatorEmail && nextWorkout.creatorEmail !== mainUserProfile.email && (
                 <p className="text-[10px] text-brand-red font-bold uppercase tracking-wider mb-1">
-                  Por {trainers.find(t => t.email === nextWorkout!.creatorEmail)?.name || 'Treinador'}
+                  Por {(() => { const t = trainers.find(t => t.email === nextWorkout!.creatorEmail); return t ? fullName(t) : 'Treinador'; })()}
                 </p>
               )}
               <p className="text-xs text-white/40 flex items-center gap-2">

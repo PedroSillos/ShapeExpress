@@ -1,5 +1,6 @@
 import { Settings, Flame, Zap, Trophy, Dumbbell, UserPlus } from 'lucide-react';
 import type { UserProfile, UserStats } from '../../../domain/entities';
+import { fullName } from '../../../domain/entities';
 
 // Sport SVG icons — same mapping as DashboardView
 import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
@@ -95,8 +96,8 @@ export function ProfileUserView({
   // e.g. "pedro.sillos@gmail.com" → "@pedro.sillos"
   const emailHandle = userProfile.email?.split('@')[0]?.trim() ?? '';
 
-  // Name: use filled name; fall back to email prefix, then userType label
-  const rawName = userProfile.name?.trim();
+  // Name: use filled firstName; fall back to email prefix, then userType label
+  const rawName = fullName(userProfile).trim();
   const fallbackName = userProfile.userType === 'treinador' ? 'Treinador' : 'Atleta';
   const displayName = rawName || emailHandle || fallbackName;
 
@@ -138,21 +139,12 @@ export function ProfileUserView({
 
       {/* ── Avatar — overlaps header bottom edge ── */}
       <div className="flex justify-center -mt-14 z-10">
-        {userProfile.avatarUrl ? (
-          <img
-            src={userProfile.avatarUrl}
-            alt={displayName}
-            className="w-28 h-28 rounded-full object-cover"
-            style={{ boxShadow: `0 0 0 4px ${sportColor}` }}
-          />
-        ) : (
-          <div
-            className="w-28 h-28 rounded-full flex items-center justify-center text-4xl font-extrabold text-white"
-            style={{ backgroundColor: sportColor, boxShadow: `0 0 0 4px ${sportColor}99` }}
-          >
-            {displayName.charAt(0).toUpperCase()}
-          </div>
-        )}
+        <div
+          className="w-28 h-28 rounded-full flex items-center justify-center text-4xl font-extrabold text-white"
+          style={{ backgroundColor: sportColor, boxShadow: `0 0 0 4px ${sportColor}99` }}
+        >
+          {displayName.charAt(0).toUpperCase()}
+        </div>
       </div>
 
       {/* ── Stats row: modalidades · amigos ── */}

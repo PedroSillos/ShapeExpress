@@ -18,7 +18,6 @@ import {
 } from "firebase/auth";
 import { getFirebaseErrorMessage } from "../../utils/firebaseErrors";
 import type { UserProfile, WorkoutTemplate, WorkoutSession } from "../../domain/entities";
-import { getRandomSportAvatar, generateAvatarUrl } from "../../shared/lib/sportAvatars";
 
 function sanitize<T extends object>(obj: T): T {
   return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as T;
@@ -197,17 +196,18 @@ export const useAuthState = () => {
           // New account via Google: treat like a registration and upload any onboarding data.
           isNewAccount = true;
           userDoc = {
-            name: userCredential.user.displayName || "Usuário",
+            firstName: (userCredential.user.displayName || 'Usuário').split(' ')[0],
+            lastName: (userCredential.user.displayName || '').split(' ').slice(1).join(' ') || undefined,
             email,
             userType: "atleta",
             height: 180,
             initialWeight: 80,
             objective: "Manutenção",
             birthDate: "2000-01-01",
-            avatarUrl: userCredential.user.photoURL || generateAvatarUrl(getRandomSportAvatar()),
             hasPersonal: false,
           };
           await setDoc(doc(db, "users", email), userDoc);
+          console.log("[TEST] loginWithGoogle() — novo usuário, dados enviados ao Firestore:", { ...userDoc });
           await setDoc(doc(db, "stats", email), {
             level: 1, xp: 0, streak: 0, bestStreak: 0, weeklyGoal: 3,
             completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: email,
@@ -233,19 +233,20 @@ export const useAuthState = () => {
       const freshIdToken = await userCredential.user.getIdToken();
       tokenStore.idToken = freshIdToken;
       setIdToken(freshIdToken);
-      const isTrainer = (data.userType || "atleta") === "treinador";
+      const resolvedUserType: "atleta" | "treinador" = data.userType === "treinador" ? "treinador" : "atleta";
+      const isTrainer = resolvedUserType === "treinador";
       const userProfile = {
         ...data,
-        userType: data.userType || "atleta",
+        userType: resolvedUserType,
         height: data.height || 180,
         initialWeight: data.initialWeight || 80,
         objective: data.objective || "Manutenção",
         birthDate: data.birthDate || "2000-01-01",
-        avatarUrl: data.avatarUrl || generateAvatarUrl(getRandomSportAvatar()),
         hasPersonal: data.hasPersonal || false,
         ...(isTrainer ? { personalCode: Math.random().toString(36).substring(2, 8).toUpperCase() } : {}),
       };
       delete userProfile.password;
+      console.log("[TEST] register() — dados enviados ao Firestore:", { ...userProfile });
       try {
         await setDoc(doc(db, "users", data.email), userProfile);
         await setDoc(doc(db, "stats", data.email), {
@@ -356,7 +357,7 @@ export const useAuthState = () => {
           // New account via phone: treat like a registration and upload any onboarding data.
           isNewAccount = true;
           userDoc = {
-            name: phone,
+            firstName: phone,
             email: docId,
             userType: "atleta",
             phone,
@@ -364,10 +365,10 @@ export const useAuthState = () => {
             initialWeight: 80,
             objective: "Manutenção",
             birthDate: "2000-01-01",
-            avatarUrl: generateAvatarUrl(getRandomSportAvatar()),
             hasPersonal: false,
           } as any;
           await setDoc(doc(db, "users", docId), userDoc);
+          console.log("[TEST] confirmPhoneLogin() — novo usuário, dados enviados ao Firestore:", { ...(userDoc as object) });
           await setDoc(doc(db, "stats", docId), {
             level: 1, xp: 0, streak: 0, bestStreak: 0, weeklyGoal: 3,
             completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: docId,

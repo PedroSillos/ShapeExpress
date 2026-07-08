@@ -1,6 +1,7 @@
 import { toast } from 'sonner';
 import { useRef, useState } from 'react';
 import { Student, UserProfile, WorkoutTemplate, WorkoutSession, StoreItem, StorePurchase } from '../domain/entities';
+import { fullName } from '../domain/entities';
 import { DEFAULT_PROFILE } from '../constants';
 import type { PublishPayload } from './hooks/useStoreState';
 
@@ -297,7 +298,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
               height: pending.height ? Number(pending.height) : p.height,
               initialWeight: pending.weight ? Number(pending.weight) : p.initialWeight,
               birthDate: pending.birthDate ?? p.birthDate,
-              avatarUrl: pending.avatarUrl ?? p.avatarUrl,
               hasPersonal: pending.hasPersonal ?? p.hasPersonal,
               weeklyGoal: pending.weeklyGoal ?? p.weeklyGoal,
             } : p;
@@ -431,8 +431,9 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
                   } else if (trainerConn) {
                     setActiveChatStudent({
                       id: trainerConn.trainerEmail, name: trainerConn.trainerName,
-                      email: trainerConn.trainerEmail, avatarUrl: trainerConn.trainerAvatar,
-                      status: 'new', progress: 0, streak: 0, weeklyWorkouts: [0,0,0,0,0,0,0], score: 0,
+                      email: trainerConn.trainerEmail,
+                      lastWorkout: '', status: 'new', progress: 0, streak: 0,
+                      weeklyWorkouts: [0,0,0,0,0,0,0], score: 0,
                     } as Student);
                     setActiveTab('chat');
                   }
@@ -498,7 +499,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             try {
               await api.sendNotification(student.email, {
                 title: 'Lembrete de Pagamento',
-                message: `Seu pagamento vence em breve. Entre em contato com seu treinador ${userProfile.name} para regularizar.`,
+                message: `Seu pagamento vence em breve. Entre em contato com seu treinador ${fullName(userProfile)} para regularizar.`,
                 timestamp: new Date().toISOString(), type: 'warning',
               });
               toast.success(`Lembrete enviado para ${student.name}!`);

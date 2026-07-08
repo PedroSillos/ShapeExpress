@@ -12,6 +12,7 @@ import { cn } from '../../utils/cn';
 import { Student, UserProfile, AppNotification, TrainerConnection } from '../../domain/entities';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
+import { InitialsAvatar } from '@/src/shared/ui/InitialsAvatar';
 
 export function StudentsView({ students, userProfile, onMessage, onReminder, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, selectedStudentForProfile, setSelectedStudentForProfile }: { 
   students: Student[], 
@@ -254,7 +255,12 @@ export function StudentsView({ students, userProfile, onMessage, onReminder, pen
           >
             <div className="flex gap-4">
               <div className="relative">
-                <img src={student.avatarUrl} alt={student.name} className="w-16 h-16 rounded-2xl object-cover border border-white/10 group-hover:border-brand-red/50 transition-all" />
+                <InitialsAvatar
+                  name={student.name}
+                  sizeClass="w-16 h-16"
+                  roundedClass="rounded-2xl"
+                  className="border border-white/10 group-hover:border-brand-red/50 transition-all"
+                />
                 <div className={cn(
                   "absolute -bottom-1 -right-1 p-1 rounded-lg border shadow-lg",
                   getStatusColor(student.status)
@@ -329,8 +335,10 @@ export function StudentsView({ students, userProfile, onMessage, onReminder, pen
               className="relative w-full max-w-lg bg-dark-surface border-t sm:border border-white/10 rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl"
             >
               {/* Header */}
-              <div className="relative h-40 w-full">
-                <img src={selectedStudentForProfile.avatarUrl} alt={selectedStudentForProfile.name} className="w-full h-full object-cover" />
+              <div className="relative h-40 w-full bg-brand-red/20 flex items-center justify-center">
+                <span className="text-7xl font-extrabold text-white/20">
+                  {(selectedStudentForProfile.name ?? '?').charAt(0).toUpperCase()}
+                </span>
                 <div className="absolute inset-0 bg-gradient-to-t from-dark-surface via-dark-surface/40 to-transparent" />
                 <button 
                   onClick={() => setSelectedStudentForProfile(null)}

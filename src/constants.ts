@@ -1814,13 +1814,12 @@ export const DEFAULT_TRAINING_PROFILE: UserTrainingProfile = {
 };
 
 export const DEFAULT_PROFILE: UserProfile = {
-  name: "",
+  firstName: "",
+  lastName: "",
   email: "",
   height: 0,
   initialWeight: 0,
   objective: "",
   birthDate: "",
-  avatarUrl:
-    "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop",
   userType: "atleta",
 };

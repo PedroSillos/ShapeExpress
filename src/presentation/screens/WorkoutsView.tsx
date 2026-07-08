@@ -25,6 +25,7 @@ import {
   BodyAssessment,
   UserProfile,
   WorkoutSheet,
+  fullName,
 } from '../../domain/entities';
 import {
   estimateWorkoutDuration,
@@ -239,7 +240,7 @@ function TemplateCard({
             </div>
             {trainer && (
               <p className="text-[10px] text-brand-red font-bold uppercase tracking-wider">
-                por {trainer.name}
+                por {fullName(trainer)}
               </p>
             )}
             <p className="text-[10px] text-white/25 font-bold uppercase tracking-wide">

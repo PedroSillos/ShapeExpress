@@ -3,6 +3,7 @@ import { ChevronLeft, Send, User, Image, Paperclip, MoreVertical, ShieldCheck } 
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../utils/cn';
 import { Student, ChatMessage, UserProfile } from '../../domain/entities';
+import { InitialsAvatar } from '@/src/shared/ui/InitialsAvatar';
 
 export function ChatView({ student, messages, onSendMessage, onBack, userProfile }: { 
   student: Student, 
@@ -38,7 +39,12 @@ export function ChatView({ student, messages, onSendMessage, onBack, userProfile
         </button>
         <div className="flex-1 flex items-center gap-3">
           <div className="relative">
-            <img src={student.avatarUrl} alt={student.name} className="w-10 h-10 rounded-xl object-cover border border-white/10" />
+            <InitialsAvatar
+              name={student.name}
+              sizeClass="w-10 h-10"
+              roundedClass="rounded-xl"
+              className="border border-white/10"
+            />
             <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-dark-surface" />
           </div>
           <div>

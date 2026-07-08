@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
-import { UserProfile } from '@/src/domain/entities';
+import { UserProfile, fullName } from '@/src/domain/entities';
 import { TrainerCard } from '../components/TrainerCard';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -291,12 +291,10 @@ export function TrainersScreen({
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="relative w-full max-w-lg bg-dark-surface border-t sm:border border-white/10 rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl"
             >
-              <div className="relative h-48 w-full">
-                <img
-                  src={selectedTrainer.avatarUrl}
-                  alt={selectedTrainer.name}
-                  className="w-full h-full object-cover"
-                />
+              <div className="relative h-48 w-full bg-brand-red/20 flex items-center justify-center">
+                <span className="text-8xl font-extrabold text-white/20">
+                  {(fullName(selectedTrainer) || '?').charAt(0).toUpperCase()}
+                </span>
                 <div className="absolute inset-0 bg-gradient-to-t from-dark-surface via-dark-surface/20 to-transparent" />
                 <button
                   onClick={() => setSelectedTrainer(null)}
@@ -308,7 +306,7 @@ export function TrainersScreen({
               <div className="p-8 -mt-12 relative z-10 space-y-6">
                 <div className="flex justify-between items-end">
                   <div className="space-y-1">
-                    <h3 className="text-3xl font-bold">{selectedTrainer.name}</h3>
+                    <h3 className="text-3xl font-bold">{fullName(selectedTrainer)}</h3>
                     <p className="text-brand-red font-bold uppercase tracking-widest text-xs">
                       {selectedTrainer.specialties?.[0] ?? 'Treinador Elite'}
                     </p>

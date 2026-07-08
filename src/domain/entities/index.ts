@@ -199,7 +199,8 @@ export interface UserStats {
 }
 
 export interface UserProfile {
-  name: string;
+  firstName: string;
+  lastName?: string;
   email: string;
   phone?: string;
   userType?: "treinador" | "atleta";
@@ -207,8 +208,6 @@ export interface UserProfile {
   initialWeight: number;
   objective: string;
   birthDate: string;
-  avatarUrl: string;
-  trainingFrequency?: number;
   experienceLevel?: "Iniciante" | "Intermediário" | "Avançado";
   limitations?: string;
   preferredStyle?: string;
@@ -226,6 +225,11 @@ export interface UserProfile {
   personalCodeConnected?: string;
   age?: number;
   trainingLocation?: "Casa" | "Academia";
+}
+
+/** Returns the full display name from a UserProfile (or any object with firstName/lastName). */
+export function fullName(p: { firstName: string; lastName?: string }): string {
+  return [p.firstName, p.lastName].filter(Boolean).join(' ');
 }
 
 export type AssessmentMethod = "7 Dobras" | "3 Dobras" | "Bioimpedância";
@@ -304,7 +308,6 @@ export interface Student {
   id: string;
   name: string;
   email: string;
-  avatarUrl: string;
   lastWorkout: string;
   progress: number;
   streak: number;
@@ -363,7 +366,6 @@ export interface AppNotification {
 export interface LeaderboardEntry {
   id: string;
   name: string;
-  avatarUrl: string;
   xp: number;
   streak: number;
   level: number;

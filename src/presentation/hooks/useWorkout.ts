@@ -248,7 +248,7 @@ export function useWorkout({
     if (template) {
       const totalCompleted = sessions.filter(s => s.workoutId === template.id).length + 1;
       const weeks = Math.max(1, Math.ceil(differenceInWeeks(parseISO(template.endDate), parseISO(template.startDate))));
-      const totalExpected = weeks * (userProfile?.trainingFrequency || 3);
+      const totalExpected = weeks * (userStats?.weeklyGoal || 3);
       if (totalCompleted % 3 === 0 || totalCompleted === totalExpected) {
         alerts.push({ type: 'Program', title: 'Progresso no Programa', description: `Treino ${totalCompleted} de ${totalExpected} concluído (${Math.round((totalCompleted / totalExpected) * 100)}%)`, icon: '🎯', color: 'text-brand-red' });
       }

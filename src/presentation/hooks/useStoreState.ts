@@ -104,12 +104,12 @@ export const useStoreState = (
   }, [currentUser?.email]);
 
   // ── Publish a new item ───────────────────────────────────────────────────
-  const publishItem = useCallback(async (payload: PublishPayload, creatorProfile: { email: string; name: string; avatarUrl?: string }): Promise<StoreItem> => {
+  const publishItem = useCallback(async (payload: PublishPayload, creatorProfile: { email: string; firstName: string; lastName?: string }): Promise<StoreItem> => {
     const email = creatorProfile.email.toLowerCase();
     const base = {
       creatorEmail: email,
-      creatorName: creatorProfile.name,
-      creatorAvatar: creatorProfile.avatarUrl ?? "",
+      creatorName: [creatorProfile.firstName, creatorProfile.lastName].filter(Boolean).join(' '),
+      creatorAvatar: "",
       title: payload.title,
       description: payload.description ?? "",
       coverImageUrl: payload.coverImageUrl ?? "",

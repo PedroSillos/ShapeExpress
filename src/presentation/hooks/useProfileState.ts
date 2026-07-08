@@ -12,14 +12,14 @@ import type {
 } from "../../domain/entities";
 
 export const DEFAULT_PROFILE: UserProfile = {
-  name: "",
+  firstName: "",
+  lastName: "",
   email: "",
   userType: "atleta",
   height: 180,
   initialWeight: 80,
   objective: "Manutenção",
   birthDate: "2000-01-01",
-  avatarUrl: "https://picsum.photos/seed/user/400",
   hasPersonal: false,
   personalCodeConnected: undefined,
 };

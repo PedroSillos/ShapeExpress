@@ -7,6 +7,7 @@ import type {
   UserProfile, UserStats, WorkoutTemplate,
   WorkoutSession, TrainerConnection, Student,
 } from "../../domain/entities";
+import { fullName } from "../../domain/entities";
 
 interface SyncSetters {
   setUserProfile: (p: UserProfile) => void;
@@ -62,9 +63,8 @@ const buildStudentFromConnections = async (
 
       return {
         id: userData?.email || sEmailL,
-        name: userData?.name || sEmailL.split("@")[0],
+        name: userData ? fullName(userData) : sEmailL.split("@")[0],
         email: userData?.email || sEmailL,
-        avatarUrl: userData?.avatarUrl || "https://picsum.photos/400",
         objective: userData?.objective,
         experienceLevel: userData?.experienceLevel,
         lastWorkout,

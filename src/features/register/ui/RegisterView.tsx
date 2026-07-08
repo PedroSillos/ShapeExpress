@@ -100,26 +100,40 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
   };
 
   const handleFinalize = async () => {
-    const name = `${firstName.trim()} ${lastName.trim()}`.trim();
     if (!firstName.trim()) { setError('Informe seu nome.'); return; }
     setIsLoading(true);
+
+    // Read onboarding answers collected during WelcomeView
+    const wa: {
+      sports?: string[];
+      objective?: string;
+      experiences?: Record<string, string>;
+      weeklyGoal?: number;
+      height?: number;
+      weight?: number;
+      birthDate?: string;
+    } | null = (() => {
+      try { return JSON.parse(localStorage.getItem('welcome-answers') ?? 'null'); } catch { return null; }
+    })();
+
+    // Derive experienceLevel from the first selected sport's experience entry
+    const firstSport = wa?.sports?.[0];
+    const experienceLevel = (firstSport && wa?.experiences?.[firstSport]) || undefined;
+
+    // phone is only available when the user registered via the phone flow;
+    // for email/Google flows it is absent — omit the field rather than sending an empty string
+    const phoneValue = phone.trim() || undefined;
+
     try {
       await onRegister({
-        name,
+        firstName: firstName.trim(),
+        ...(lastName.trim() && { lastName: lastName.trim() }),
         email,
         password,
-        userType: 'atleta',
-        phone: '',
-        avatarUrl: '',
-        specialties: [],
-        experienceLevel: 'Iniciante',
-        trainingFrequency: 3,
-        objective: 'Ganhar massa muscular',
-        trainingLocation: 'Academia',
-        experienceYears: '0–1 ano',
-        serviceType: 'Ambos',
-        studentsCount: '1–10',
-        worksInGym: false,
+        ...(phoneValue !== undefined && { phone: phoneValue }),
+        specialties: wa?.sports ?? [],
+        ...(experienceLevel !== undefined && { experienceLevel }),
+        objective: wa?.objective,
       } as any);
     } catch (e: any) {
       if (e?.code === 'auth/email-already-in-use') {
