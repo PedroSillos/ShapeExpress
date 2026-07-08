@@ -207,7 +207,7 @@ export const useAuthState = () => {
             hasPersonal: false,
           };
           await setDoc(doc(db, "users", email), userDoc);
-          console.log("[TEST] loginWithGoogle() — novo usuário, dados enviados ao Firestore:", { ...userDoc });
+
           await setDoc(doc(db, "stats", email), {
             level: 1, xp: 0, streak: 0, bestStreak: 0, weeklyGoal: 3,
             completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: email,
@@ -246,7 +246,7 @@ export const useAuthState = () => {
         ...(isTrainer ? { personalCode: Math.random().toString(36).substring(2, 8).toUpperCase() } : {}),
       };
       delete userProfile.password;
-      console.log("[TEST] register() — dados enviados ao Firestore:", { ...userProfile });
+
       try {
         await setDoc(doc(db, "users", data.email), userProfile);
         await setDoc(doc(db, "stats", data.email), {
@@ -368,7 +368,7 @@ export const useAuthState = () => {
             hasPersonal: false,
           } as any;
           await setDoc(doc(db, "users", docId), userDoc);
-          console.log("[TEST] confirmPhoneLogin() — novo usuário, dados enviados ao Firestore:", { ...(userDoc as object) });
+
           await setDoc(doc(db, "stats", docId), {
             level: 1, xp: 0, streak: 0, bestStreak: 0, weeklyGoal: 3,
             completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: docId,

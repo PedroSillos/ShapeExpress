@@ -27,7 +27,6 @@ export function StudentsView({ students, userProfile, onMessage, onReminder, pen
   selectedStudentForProfile: Student | null,
   setSelectedStudentForProfile: (s: Student | null) => void
 }) {
-  console.log('[StudentsView] render — students:', students.length, students.map(s => s.email));
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'Todos' | 'Evoluindo' | 'Estagnados' | 'Em Risco' | 'Novos'>('Todos');
   const [showFilters, setShowFilters] = useState(false);

@@ -78,23 +78,7 @@ export const useStudentsState = (
     try {
       const q = query(collection(db, "users"), where("userType", "==", "treinador"));
       const snap = await getDocs(q);
-      let data = snap.docs.map((d) => d.data() as UserProfile);
-      if (data.length === 0) {
-        data = [
-          {
-            firstName: "Pedro (Personal)", email: "mock1@example.com", userType: "treinador",
-            height: 180, initialWeight: 80, objective: "Hipertrofia", birthDate: "1990-01-01",
-            hasPersonal: false,
-            personalCode: "PEDRO123", specialty: "Treinamento de Força", rating: 5.0, distance: "1.2km",
-          } as UserProfile,
-          {
-            firstName: "Amanda (Coach)", email: "mock2@example.com", userType: "treinador",
-            height: 165, initialWeight: 60, objective: "Emagrecimento", birthDate: "1992-05-05",
-            hasPersonal: false,
-            personalCode: "AMANDA99", specialty: "Emagrecimento", rating: 4.9, distance: "2.5km",
-          } as UserProfile,
-        ];
-      }
+      const data = snap.docs.map((d) => d.data() as UserProfile);
       setTrainers(data);
       return data;
     } catch (e) {
