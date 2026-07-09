@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import type { UserProfile } from '@/src/domain/entities';
 import { PreferencesView } from './PreferencesView';
 import { EditProfileView } from './EditProfileView';
+import { NotificationsSettingsView } from '@/src/features/notifications';
+import { ManageSportsView } from '@/src/features/sports';
 
 interface SettingsViewProps {
   onClose: () => void;
@@ -23,7 +25,7 @@ interface SettingsSection {
   items: SettingsItem[];
 }
 
-type SubScreen = 'preferences' | 'profile' | null;
+type SubScreen = 'preferences' | 'profile' | 'notifications' | 'sports' | null;
 
 /**
  * Settings screen — Duolingo-inspired layout.
@@ -45,8 +47,8 @@ export function SettingsView({
       items: [
         { label: 'Preferências', onPress: () => setSubScreen('preferences') },
         { label: 'Perfil', onPress: () => setSubScreen('profile') },
-        { label: 'Notificações' },
-        { label: 'Modalidades' },
+        { label: 'Notificações', onPress: () => setSubScreen('notifications') },
+        { label: 'Modalidades', onPress: () => setSubScreen('sports') },
         { label: 'Shape Express para academias' },
         { label: 'Privacidade' },
       ],
@@ -149,6 +151,20 @@ export function SettingsView({
               userProfile={userProfile}
               onUpdateProfile={onUpdateProfile}
               onDeleteAccount={onDeleteAccount}
+              onBack={() => setSubScreen(null)}
+            />
+          </div>
+        )}
+        {subScreen === 'notifications' && (
+          <div className="absolute inset-0 bg-dark-surface">
+            <NotificationsSettingsView onBack={() => setSubScreen(null)} />
+          </div>
+        )}
+        {subScreen === 'sports' && (
+          <div className="absolute inset-0 bg-dark-surface">
+            <ManageSportsView
+              userProfile={userProfile}
+              onUpdateProfile={onUpdateProfile}
               onBack={() => setSubScreen(null)}
             />
           </div>
