@@ -1,5 +1,6 @@
 import { useRef, useState, type KeyboardEvent, type ClipboardEvent } from 'react';
-import { ChevronLeft, Dumbbell, Loader2 } from 'lucide-react';
+import { ChevronLeft, Loader2 } from 'lucide-react';
+import shapinho from '/shapinho.png';
 import { motion } from 'motion/react';
 
 interface GymViewProps {
@@ -136,8 +137,8 @@ export function GymView({ onBack }: GymViewProps) {
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center px-8 gap-6">
-          <div className="w-20 h-20 rounded-full bg-sky-400/20 flex items-center justify-center">
-            <Dumbbell size={40} className="text-sky-400" />
+          <div className="w-24 h-24 rounded-full bg-sky-400/20 flex items-center justify-center overflow-hidden">
+            <img src={shapinho} alt="Shapinho" className="w-full h-full object-contain" />
           </div>
           <h2 className="text-white font-black text-2xl text-center">Academia vinculada!</h2>
           <p className="text-white/50 text-base text-center leading-relaxed">
@@ -181,16 +182,11 @@ export function GymView({ onBack }: GymViewProps) {
 
       {/* ── Hero banner ── */}
       <div className="w-full h-52 bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center flex-shrink-0">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center">
-            <Dumbbell size={44} className="text-white" />
-          </div>
-          <div className="flex gap-1">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="w-2 h-2 rounded-full bg-white/40" />
-            ))}
-          </div>
-        </div>
+        <img
+          src={shapinho}
+          alt="Shapinho"
+          className="h-44 object-contain drop-shadow-lg"
+        />
       </div>
 
       {/* ── Content ── */}
@@ -222,7 +218,7 @@ export function GymView({ onBack }: GymViewProps) {
               onPaste={(e) => handlePaste(index, e)}
               onFocus={(e) => e.target.select()}
               className={[
-                'flex-1 h-14 rounded-2xl text-center text-white font-black text-xl',
+                'w-11 h-12 rounded-xl text-center text-white font-black text-lg',
                 'bg-dark-card border-2 transition-colors outline-none',
                 'focus:border-sky-400',
                 char !== '' ? 'border-sky-400/60' : 'border-dark-border',
