@@ -310,10 +310,13 @@ export default function App() {
 
         <AnimatePresence>
           {showSettings && (
-            <div className="fixed inset-0 z-[90] bg-dark-surface overflow-y-auto">
+            <div className="fixed inset-0 z-[90] bg-dark-surface overflow-hidden">
               <SettingsView
                 onClose={() => setShowSettings(false)}
                 onLogout={() => { setShowSettings(false); setShowLogoutConfirm(true); }}
+                userProfile={userProfile}
+                onUpdateProfile={api.updateProfile}
+                onDeleteAccount={() => api.deleteAccount()}
               />
             </div>
           )}
