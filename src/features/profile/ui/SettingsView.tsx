@@ -6,6 +6,7 @@ import { PreferencesView } from './PreferencesView';
 import { EditProfileView } from './EditProfileView';
 import { NotificationsSettingsView } from '@/src/features/notifications';
 import { ManageSportsView } from '@/src/features/sports';
+import { GymView } from '@/src/features/gym';
 
 interface SettingsViewProps {
   onClose: () => void;
@@ -25,7 +26,7 @@ interface SettingsSection {
   items: SettingsItem[];
 }
 
-type SubScreen = 'preferences' | 'profile' | 'notifications' | 'sports' | null;
+type SubScreen = 'preferences' | 'profile' | 'notifications' | 'sports' | 'gym' | null;
 
 /**
  * Settings screen — Duolingo-inspired layout.
@@ -49,7 +50,7 @@ export function SettingsView({
         { label: 'Perfil', onPress: () => setSubScreen('profile') },
         { label: 'Notificações', onPress: () => setSubScreen('notifications') },
         { label: 'Modalidades', onPress: () => setSubScreen('sports') },
-        { label: 'Shape Express para academias' },
+        { label: 'Shape Express para academias', onPress: () => setSubScreen('gym') },
         { label: 'Privacidade' },
       ],
     },
@@ -167,6 +168,11 @@ export function SettingsView({
               onUpdateProfile={onUpdateProfile}
               onBack={() => setSubScreen(null)}
             />
+          </div>
+        )}
+        {subScreen === 'gym' && (
+          <div className="absolute inset-0 bg-dark-surface">
+            <GymView onBack={() => setSubScreen(null)} />
           </div>
         )}
       </AnimatePresence>
