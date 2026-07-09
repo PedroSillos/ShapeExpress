@@ -79,6 +79,9 @@ export const resetSyncedToken = () => { syncState.syncedToken = null; };
 
 export const useAuthState = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // authReady: false until onAuthStateChanged fires for the first time.
+  // Used to block rendering before Firebase has resolved the session.
+  const [authReady, setAuthReady] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ email: string } | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem(STORAGE_KEYS.TOKEN));
   const [idToken, setIdToken] = useState<string | null>(null);
@@ -118,6 +121,8 @@ export const useAuthState = () => {
   useEffect(() => {
     const fallbackTimer = setTimeout(() => {
       setRestoredTab(localStorage.getItem(STORAGE_KEYS.WELCOME_DONE) ? "dashboard" : "landing");
+      // Ensure splash never stays forever if Firebase times out
+      setAuthReady(true);
     }, 5000);
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -132,6 +137,7 @@ export const useAuthState = () => {
         setCurrentUser({ email });
         setIsLoggedIn(true);
         setRestoredTab(localStorage.getItem(STORAGE_KEYS.DEFAULT_TAB) || "dashboard");
+        setAuthReady(true);
       } else {
         tokenStore.idToken = null;
         setIdToken(null);
@@ -141,6 +147,7 @@ export const useAuthState = () => {
         setCurrentUser(null);
         setIsLoggedIn(false);
         setRestoredTab(localStorage.getItem(STORAGE_KEYS.WELCOME_DONE) ? "dashboard" : "landing");
+        setAuthReady(true);
       }
     });
 
@@ -392,6 +399,7 @@ export const useAuthState = () => {
 
   return {
     isLoggedIn, setIsLoggedIn,
+    authReady,
     currentUser,
     token, setToken,
     idToken,

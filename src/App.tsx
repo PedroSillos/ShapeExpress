@@ -12,6 +12,8 @@ import { useAiAdvice } from './presentation/hooks/useAiAdvice';
 import { AppNavBar } from './presentation/AppNavBar';
 import { AppRouter } from './presentation/AppRouter';
 
+import { SplashScreen } from './presentation/components/SplashScreen';
+
 import { LogoutModal } from './presentation/components/AppModals';
 import { DeleteTemplateModal } from './presentation/components/AppModals';
 import { WorkoutSelectorModal } from './presentation/components/AppModals';
@@ -30,6 +32,8 @@ export default function App() {
   const {
     activeTab, setActiveTab,
     isLoggedIn,
+    authReady,
+    dataReady,
     swipeDirection, setSwipeDirection,
     showLogoutConfirm, setShowLogoutConfirm,
     deletingTemplateId, setDeletingTemplateId,
@@ -180,37 +184,57 @@ export default function App() {
     }
   }, [lastCompletedSession, isLoggedIn]);
 
+  // showingSplash: true while Firebase Auth hasn't resolved yet, or while
+  // the Firestore sync is still running for a logged-in user.
+  // The SplashScreen is rendered as a fixed overlay in every return branch
+  // so AnimatePresence can animate it out without unmounting the content below.
+  const showingSplash = !authReady || (isLoggedIn && !dataReady);
+
   if (onboardingSession) {
     return (
-      <WorkoutDoneScreen
-        session={onboardingSession}
-        onContinue={() => {
-          setOnboardingSession(null);
-          setShowOnboardingStreak(true);
-        }}
-      />
+      <>
+        <WorkoutDoneScreen
+          session={onboardingSession}
+          onContinue={() => {
+            setOnboardingSession(null);
+            setShowOnboardingStreak(true);
+          }}
+        />
+        <AnimatePresence>{showingSplash && <SplashScreen key="splash" />}</AnimatePresence>
+      </>
     );
   }
 
   if (lastCompletedSession) {
     return (
-      <WorkoutDoneScreen
-        session={lastCompletedSession}
-        onContinue={() => { setLastCompletedSession(null); setStagnationReports([]); setActiveTab('dashboard'); }}
-      />
+      <>
+        <WorkoutDoneScreen
+          session={lastCompletedSession}
+          onContinue={() => { setLastCompletedSession(null); setStagnationReports([]); setActiveTab('dashboard'); }}
+        />
+        <AnimatePresence>{showingSplash && <SplashScreen key="splash" />}</AnimatePresence>
+      </>
     );
   }
 
   if (showOnboardingStreak) {
-    return <OnboardingStreakScreen onContinue={() => { setShowOnboardingStreak(false); setShowSuggestProfile(true); }} />;
+    return (
+      <>
+        <OnboardingStreakScreen onContinue={() => { setShowOnboardingStreak(false); setShowSuggestProfile(true); }} />
+        <AnimatePresence>{showingSplash && <SplashScreen key="splash" />}</AnimatePresence>
+      </>
+    );
   }
 
   if (showSuggestProfile) {
     return (
-      <OnboardingSuggestProfileScreen
-        onCreateProfile={() => { setShowSuggestProfile(false); setActiveTab('register'); }}
-        onSkip={() => { setShowSuggestProfile(false); setActiveTab('dashboard'); }}
-      />
+      <>
+        <OnboardingSuggestProfileScreen
+          onCreateProfile={() => { setShowSuggestProfile(false); setActiveTab('register'); }}
+          onSkip={() => { setShowSuggestProfile(false); setActiveTab('dashboard'); }}
+        />
+        <AnimatePresence>{showingSplash && <SplashScreen key="splash" />}</AnimatePresence>
+      </>
     );
   }
 
@@ -219,10 +243,13 @@ export default function App() {
 
   if (activeTab === 'landing' || activeTab === 'welcome' || activeTab === 'login' || activeTab === 'register' || activeTab === 'forgot-password') {
     return (
-      <MotionConfig transition={currentAnimations === 'reduced' ? { duration: 0 } : undefined}>
-        <Toaster position="top-center" richColors />
-        <AppRouter state={routerState} workout={workout} dataSync={dataSync} />
-      </MotionConfig>
+      <>
+        <MotionConfig transition={currentAnimations === 'reduced' ? { duration: 0 } : undefined}>
+          <Toaster position="top-center" richColors />
+          <AppRouter state={routerState} workout={workout} dataSync={dataSync} />
+        </MotionConfig>
+        <AnimatePresence>{showingSplash && <SplashScreen key="splash" />}</AnimatePresence>
+      </>
     );
   }
 
@@ -315,6 +342,7 @@ export default function App() {
         />
 
       </div>
+      <AnimatePresence>{showingSplash && <SplashScreen key="splash" />}</AnimatePresence>
     </MotionConfig>
   );
 }

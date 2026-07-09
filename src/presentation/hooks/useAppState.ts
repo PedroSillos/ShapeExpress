@@ -25,7 +25,7 @@ export const useAppState = () => {
   const store = useStoreState(auth.currentUser, auth.idToken);
 
   // Boot sync after login
-  useSyncState(auth.isLoggedIn, auth.token, {
+  const { dataReady } = useSyncState(auth.isLoggedIn, auth.token, {
     setUserProfile: profile.setUserProfile,
     setUserStats: profile.setUserStats,
     setTemplates: workout.setTemplates,
@@ -151,6 +151,8 @@ export const useAppState = () => {
     // Auth
     isLoggedIn: auth.isLoggedIn,
     setIsLoggedIn: auth.setIsLoggedIn,
+    authReady: auth.authReady,
+    dataReady,
     fetchWithAuth: auth.fetchWithAuth,
     currentUserEmail: auth.currentUser?.email ?? null,
 
