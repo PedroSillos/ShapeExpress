@@ -185,7 +185,7 @@ export function GymView({ onBack }: GymViewProps) {
         <img
           src={shapinho}
           alt="Shapinho"
-          className="h-44 object-contain drop-shadow-lg"
+          className="h-32 object-contain drop-shadow-lg brightness-0 invert"
         />
       </div>
 
