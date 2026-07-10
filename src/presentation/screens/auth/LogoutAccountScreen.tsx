@@ -9,8 +9,11 @@ interface LogoutAccountScreenProps {
   userProfile: UserProfile;
   /** Called after the Firebase signOut resolves. */
   onLogoutConfirm: () => Promise<void>;
-  /** Navigates to the login screen (user tapped their own account card). */
-  onGoToLogin: () => void;
+  /**
+   * Called when the user taps their own account card — no logout is performed,
+   * the screen is dismissed and the active session is resumed.
+   */
+  onResumeSession: () => void;
   /** Navigates to the register screen (user tapped "Adicionar outra conta"). */
   onGoToRegister: () => void;
   /** Navigates to a screen listing all saved accounts (future feature). */
@@ -30,7 +33,7 @@ interface LogoutAccountScreenProps {
 export function LogoutAccountScreen({
   userProfile,
   onLogoutConfirm,
-  onGoToLogin,
+  onResumeSession,
   onGoToRegister,
   onManageAccounts,
 }: LogoutAccountScreenProps) {
@@ -43,13 +46,10 @@ export function LogoutAccountScreen({
 
   const email = userProfile.email ?? '';
 
-  // Tapping the account card: complete logout then go to login so the user
-  // can authenticate as this same account again.
-  async function handleAccountPress() {
-    if (loggingOut) return;
-    setLoggingOut(true);
-    await onLogoutConfirm();
-    onGoToLogin();
+  // Tapping the account card: the user still has an active session, so just
+  // dismiss this screen and resume — no logout needed.
+  function handleAccountPress() {
+    onResumeSession();
   }
 
   // Tapping "Adicionar outra conta": complete logout then go to register.

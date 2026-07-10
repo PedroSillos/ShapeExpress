@@ -307,7 +307,7 @@ export default function App() {
             <LogoutAccountScreen
               userProfile={userProfile}
               onLogoutConfirm={async () => { await api.logout(); setShowLogoutConfirm(false); }}
-              onGoToLogin={() => { setShowLogoutConfirm(false); setActiveTab('login'); }}
+              onResumeSession={() => { setShowLogoutConfirm(false); }}
               onGoToRegister={() => { setShowLogoutConfirm(false); setActiveTab('register'); }}
               onManageAccounts={() => { setShowLogoutConfirm(false); setActiveTab('login'); }}
             />
