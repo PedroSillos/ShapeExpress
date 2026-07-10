@@ -6,4 +6,5 @@ export { EditProfileView } from './ui/EditProfileView';
 export { PrivacySettingsView } from './ui/PrivacySettingsView';
 export { SubscriptionView } from './ui/SubscriptionView';
 export { HelpCenterView } from './ui/HelpCenterView';
+export { FeedbackView } from './ui/FeedbackView';
 export type { ProfileStats } from './types';
