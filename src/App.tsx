@@ -14,7 +14,7 @@ import { AppRouter } from './presentation/AppRouter';
 
 import { SplashScreen } from './presentation/components/SplashScreen';
 
-import { LogoutModal } from './presentation/components/AppModals';
+import { LogoutAccountScreen } from './presentation/screens/auth/LogoutAccountScreen';
 import { DeleteTemplateModal } from './presentation/components/AppModals';
 import { WorkoutSelectorModal } from './presentation/components/AppModals';
 import { SheetSelectorModal } from './presentation/components/AppModals';
@@ -302,11 +302,17 @@ export default function App() {
           onSelectSheet={(t, i) => { workout.startWorkout(t, i); setSelectingSheetTemplate(null); }}
         />
 
-        <LogoutModal
-          open={showLogoutConfirm}
-          onCancel={() => setShowLogoutConfirm(false)}
-          onConfirm={async () => { await api.logout(); setShowLogoutConfirm(false); }}
-        />
+        <AnimatePresence>
+          {showLogoutConfirm && (
+            <LogoutAccountScreen
+              userProfile={userProfile}
+              onLogoutConfirm={async () => { await api.logout(); setShowLogoutConfirm(false); }}
+              onGoToLogin={() => { setShowLogoutConfirm(false); setActiveTab('login'); }}
+              onGoToRegister={() => { setShowLogoutConfirm(false); setActiveTab('register'); }}
+              onManageAccounts={() => { setShowLogoutConfirm(false); setActiveTab('login'); }}
+            />
+          )}
+        </AnimatePresence>
 
         <AnimatePresence>
           {showSettings && (
