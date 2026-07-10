@@ -11,6 +11,8 @@ import { PrivacySettingsView } from './PrivacySettingsView';
 import { SubscriptionView } from './SubscriptionView';
 import { HelpCenterView } from './HelpCenterView';
 import { FeedbackView } from './FeedbackView';
+import { TermsView } from './TermsView';
+import { PrivacyPolicyView } from './PrivacyPolicyView';
 
 interface SettingsViewProps {
   onClose: () => void;
@@ -30,7 +32,7 @@ interface SettingsSection {
   items: SettingsItem[];
 }
 
-type SubScreen = 'preferences' | 'profile' | 'notifications' | 'sports' | 'gym' | 'privacy' | 'subscription' | 'help' | 'feedback' | null;
+type SubScreen = 'preferences' | 'profile' | 'notifications' | 'sports' | 'gym' | 'privacy' | 'subscription' | 'help' | 'feedback' | 'terms' | 'privacy-policy' | null;
 
 /**
  * Settings screen — Duolingo-inspired layout.
@@ -133,10 +135,16 @@ export function SettingsView({
 
           {/* ── Legal links ── */}
           <div className="flex flex-col gap-2 pb-8">
-            <button className="text-left text-sky-400 font-bold text-sm tracking-widest uppercase hover:opacity-70 transition-opacity">
+            <button
+              onClick={() => setSubScreen('terms')}
+              className="text-left text-sky-400 font-bold text-sm tracking-widest uppercase hover:opacity-70 transition-opacity"
+            >
               Termos de uso
             </button>
-            <button className="text-left text-sky-400 font-bold text-sm tracking-widest uppercase hover:opacity-70 transition-opacity">
+            <button
+              onClick={() => setSubScreen('privacy-policy')}
+              className="text-left text-sky-400 font-bold text-sm tracking-widest uppercase hover:opacity-70 transition-opacity"
+            >
               Política de privacidade
             </button>
           </div>
@@ -200,6 +208,16 @@ export function SettingsView({
               userProfile={userProfile}
               onBack={() => setSubScreen(null)}
             />
+          </div>
+        )}
+        {subScreen === 'terms' && (
+          <div className="absolute inset-0 bg-dark-surface">
+            <TermsView onBack={() => setSubScreen(null)} />
+          </div>
+        )}
+        {subScreen === 'privacy-policy' && (
+          <div className="absolute inset-0 bg-dark-surface">
+            <PrivacyPolicyView onBack={() => setSubScreen(null)} />
           </div>
         )}
       </AnimatePresence>
