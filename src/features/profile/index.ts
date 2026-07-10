@@ -5,4 +5,5 @@ export { PreferencesView } from './ui/PreferencesView';
 export { EditProfileView } from './ui/EditProfileView';
 export { PrivacySettingsView } from './ui/PrivacySettingsView';
 export { SubscriptionView } from './ui/SubscriptionView';
+export { HelpCenterView } from './ui/HelpCenterView';
 export type { ProfileStats } from './types';

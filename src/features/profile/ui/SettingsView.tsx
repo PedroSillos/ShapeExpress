@@ -9,6 +9,7 @@ import { ManageSportsView } from '@/src/features/sports';
 import { GymView } from '@/src/features/gym';
 import { PrivacySettingsView } from './PrivacySettingsView';
 import { SubscriptionView } from './SubscriptionView';
+import { HelpCenterView } from './HelpCenterView';
 
 interface SettingsViewProps {
   onClose: () => void;
@@ -28,7 +29,7 @@ interface SettingsSection {
   items: SettingsItem[];
 }
 
-type SubScreen = 'preferences' | 'profile' | 'notifications' | 'sports' | 'gym' | 'privacy' | 'subscription' | null;
+type SubScreen = 'preferences' | 'profile' | 'notifications' | 'sports' | 'gym' | 'privacy' | 'subscription' | 'help' | null;
 
 /**
  * Settings screen — Duolingo-inspired layout.
@@ -65,7 +66,7 @@ export function SettingsView({
     {
       title: 'Suporte',
       items: [
-        { label: 'Central de Ajuda' },
+        { label: 'Central de Ajuda', onPress: () => setSubScreen('help') },
         { label: 'Feedback' },
       ],
     },
@@ -185,6 +186,11 @@ export function SettingsView({
         {subScreen === 'subscription' && (
           <div className="absolute inset-0 bg-dark-surface">
             <SubscriptionView onBack={() => setSubScreen(null)} />
+          </div>
+        )}
+        {subScreen === 'help' && (
+          <div className="absolute inset-0 bg-dark-surface">
+            <HelpCenterView onBack={() => setSubScreen(null)} />
           </div>
         )}
       </AnimatePresence>
