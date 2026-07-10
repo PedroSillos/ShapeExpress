@@ -267,7 +267,7 @@ export function HelpCenterView({ onBack }: HelpCenterViewProps) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 40 }}
       transition={{ duration: 0.2 }}
-      className="min-h-screen bg-dark-surface flex flex-col"
+      className="h-screen bg-dark-surface flex flex-col"
     >
       {/* ── Header ── */}
       <div className="flex items-center justify-between px-5 pt-12 pb-4 border-b border-dark-border">
