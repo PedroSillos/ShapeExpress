@@ -3,4 +3,6 @@ export { ProfileUserView } from './ui/ProfileUserView';
 export { SettingsView } from './ui/SettingsView';
 export { PreferencesView } from './ui/PreferencesView';
 export { EditProfileView } from './ui/EditProfileView';
+export { PrivacySettingsView } from './ui/PrivacySettingsView';
+export { SubscriptionView } from './ui/SubscriptionView';
 export type { ProfileStats } from './types';

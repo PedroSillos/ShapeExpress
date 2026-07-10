@@ -7,6 +7,8 @@ import { EditProfileView } from './EditProfileView';
 import { NotificationsSettingsView } from '@/src/features/notifications';
 import { ManageSportsView } from '@/src/features/sports';
 import { GymView } from '@/src/features/gym';
+import { PrivacySettingsView } from './PrivacySettingsView';
+import { SubscriptionView } from './SubscriptionView';
 
 interface SettingsViewProps {
   onClose: () => void;
@@ -26,7 +28,7 @@ interface SettingsSection {
   items: SettingsItem[];
 }
 
-type SubScreen = 'preferences' | 'profile' | 'notifications' | 'sports' | 'gym' | null;
+type SubScreen = 'preferences' | 'profile' | 'notifications' | 'sports' | 'gym' | 'privacy' | 'subscription' | null;
 
 /**
  * Settings screen — Duolingo-inspired layout.
@@ -51,13 +53,13 @@ export function SettingsView({
         { label: 'Notificações', onPress: () => setSubScreen('notifications') },
         { label: 'Modalidades', onPress: () => setSubScreen('sports') },
         { label: 'Shape Express para academias', onPress: () => setSubScreen('gym') },
-        { label: 'Privacidade' },
+        { label: 'Privacidade', onPress: () => setSubScreen('privacy') },
       ],
     },
     {
       title: 'Assinatura',
       items: [
-        { label: 'Escolher um plano' },
+        { label: 'Escolher um plano', onPress: () => setSubScreen('subscription') },
       ],
     },
     {
@@ -77,7 +79,7 @@ export function SettingsView({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 24 }}
         transition={{ duration: 0.2 }}
-        className="min-h-screen bg-dark-surface flex flex-col"
+        className="h-full bg-dark-surface flex flex-col"
       >
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-5 pt-12 pb-4 border-b border-dark-border">
@@ -173,6 +175,16 @@ export function SettingsView({
         {subScreen === 'gym' && (
           <div className="absolute inset-0 bg-dark-surface">
             <GymView onBack={() => setSubScreen(null)} />
+          </div>
+        )}
+        {subScreen === 'privacy' && (
+          <div className="absolute inset-0 bg-dark-surface">
+            <PrivacySettingsView onBack={() => setSubScreen(null)} />
+          </div>
+        )}
+        {subScreen === 'subscription' && (
+          <div className="absolute inset-0 bg-dark-surface">
+            <SubscriptionView onBack={() => setSubScreen(null)} />
           </div>
         )}
       </AnimatePresence>
