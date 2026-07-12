@@ -65,6 +65,7 @@ interface WorkoutsViewProps {
   assessments: BodyAssessment[];
   mainUserProfile: UserProfile;
   trainers?: UserProfile[];
+  isLoggedIn?: boolean;
 }
 
 
@@ -504,6 +505,7 @@ export function WorkoutsView({
   mainUserProfile,
   trainers = [],
   onCreateAd,
+  isLoggedIn,
 }: WorkoutsViewProps) {
   const [openSettingsId, setOpenSettingsId] = useState<string | null>(null);
   const [selectingSheetTemplate, setSelectingSheetTemplate] = useState<WorkoutTemplate | null>(null);
@@ -511,13 +513,17 @@ export function WorkoutsView({
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
 
   const sport = useMemo(() => {
-    if ((mainUserProfile as any)?.sports?.length) return (mainUserProfile as any).sports[0] as string;
-    try {
-      const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
-      if (wa?.sports?.length) return wa.sports[0] as string;
-    } catch {}
+    // 1. Logged-in user — use cloud profile specialties
+    if (mainUserProfile?.specialties?.length) return mainUserProfile.specialties[0];
+    // 2. Guest/onboarding — fallback to local answers
+    if (!isLoggedIn) {
+      try {
+        const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
+        if (wa?.sports?.length) return wa.sports[0] as string;
+      } catch {}
+    }
     return 'Musculação';
-  }, [mainUserProfile]);
+  }, [mainUserProfile, isLoggedIn]);
   const historyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

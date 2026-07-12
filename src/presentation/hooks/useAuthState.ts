@@ -39,6 +39,7 @@ export function clearLocalGuestData() {
     STORAGE_KEYS.LOCAL_CALORIE_PROFILE,
     STORAGE_KEYS.LOCAL_EXERCISE_STATS,
     STORAGE_KEYS.ACTIVE_WORKOUT,
+    STORAGE_KEYS.WELCOME_ANSWERS,
   ];
   keys.forEach((k) => localStorage.removeItem(k));
 }
@@ -69,7 +70,6 @@ async function uploadLocalDataToFirestore(email: string) {
   // Clear local copies regardless of individual failures — on next login
   // useSyncState will load the authoritative data from Firestore.
   clearLocalGuestData();
-  localStorage.removeItem(STORAGE_KEYS.WELCOME_ANSWERS);
 }
 
 // Tracks which token has already been synced to prevent Strict Mode double-invoke

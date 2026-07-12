@@ -153,13 +153,17 @@ export function DashboardView({
 }: DashboardViewProps) {
   // Sports: from profile or welcome-answers fallback
   const sports = useMemo(() => {
-    if ((mainUserProfile as any)?.sports?.length) return (mainUserProfile as any).sports as string[];
-    try {
-      const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
-      if (wa?.sports?.length) return wa.sports as string[];
-    } catch {}
+    // 1. Logged-in user — use cloud profile specialties
+    if (mainUserProfile?.specialties?.length) return mainUserProfile.specialties;
+    // 2. Guest/onboarding — fallback to local answers
+    if (!isLoggedIn) {
+      try {
+        const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
+        if (wa?.sports?.length) return wa.sports as string[];
+      } catch {}
+    }
     return ['Musculação'];
-  }, [mainUserProfile]);
+  }, [mainUserProfile, isLoggedIn]);
 
   const [sportIdx, setSportIdx] = useState(0);
   const currentSport = sports[sportIdx] ?? sports[0];

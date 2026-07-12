@@ -56,7 +56,7 @@ export function CreateWorkoutView({
   });
 
   const sport = useMemo(() => {
-    if ((userProfile as any)?.sports?.length) return (userProfile as any).sports[0] as string;
+    if (userProfile?.specialties?.length) return userProfile.specialties[0];
     try {
       const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
       if (wa?.sports?.length) return wa.sports[0] as string;

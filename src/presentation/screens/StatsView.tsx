@@ -71,7 +71,7 @@ export function StatsView({
   readOnly,
 }: StatsViewProps) {
   const sport = useMemo(() => {
-    if ((mainUserProfile as any)?.sports?.length) return (mainUserProfile as any).sports[0] as string;
+    if (mainUserProfile?.specialties?.length) return mainUserProfile.specialties[0];
     try {
       const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
       if (wa?.sports?.length) return wa.sports[0] as string;

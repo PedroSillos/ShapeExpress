@@ -382,6 +382,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           mainUserProfile={userProfile}
           trainers={trainers}
           onCreateAd={(t: WorkoutTemplate) => setPublishingTemplate(t)}
+          isLoggedIn={isLoggedIn}
         />
       );
     case 'stats':
