@@ -222,7 +222,6 @@ export interface UserProfile {
   personalCode?: string;
   personalCodeConnected?: string;
   age?: number;
-  trainingLocation?: "Casa" | "Academia";
   weeklyGoal?: number;
 }
 

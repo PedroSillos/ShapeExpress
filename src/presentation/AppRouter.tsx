@@ -28,7 +28,7 @@ import { StudentEvolutionView } from './screens/StudentEvolutionView';
 import { CreateWorkoutView } from './screens/CreateWorkoutView';
 import { ActiveWorkoutView } from './screens/ActiveWorkoutView';
 import { BodyAssessmentView as NewAssessmentView } from './screens/BodyAssessmentView';
-import { generateFirstWorkoutAI } from '../data/services/aiService';
+import { generateWorkoutAI } from '../data/services/aiService';
 import { ProfileGuestView, ProfileUserView } from '../features/profile';
 
 
@@ -131,7 +131,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
 
       let template: WorkoutTemplate | null = null;
       try {
-        const ai = await generateFirstWorkoutAI({ sports, objective, experience, height, weight, age });
+        const ai = await generateWorkoutAI({ sports, objective, experience, height, weight, age });
         if (ai && ai.exercises?.length > 0) {
           template = {
             id: `ai-${Date.now()}`,
@@ -238,11 +238,10 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             // Build template: try AI first, fall back to static
             const buildTemplate = async (): Promise<WorkoutTemplate> => {
               try {
-                const ai = await generateFirstWorkoutAI({
+                const ai = await generateWorkoutAI({
                   sports,
                   objective: a.objective,
                   experience: Object.values(a.experiences ?? {})[0] as string | undefined,
-                  location: a.location,
                   height: a.height,
                   weight: a.weight,
                   age: a.birthDate ? new Date().getFullYear() - new Date(a.birthDate).getFullYear() : undefined,
