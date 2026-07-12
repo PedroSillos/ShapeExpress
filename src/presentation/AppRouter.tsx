@@ -98,25 +98,40 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     if (isGeneratingAI) return;
     setIsGeneratingAI(true);
     try {
-      const wa = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; } })();
-      const sports: string[] = wa?.sports ?? [];
+      // Logged-in: use cloud profile fields
+      // Guest: fall back to WELCOME_ANSWERS from onboarding
+      let sports: string[];
+      let objective: string | undefined;
+      let experience: string | undefined;
+      let height: number | undefined;
+      let weight: number | undefined;
+      let age: number | undefined;
+
+      if (isLoggedIn) {
+        sports = userProfile?.specialties ?? [];
+        objective = userProfile?.objective;
+        experience = userProfile?.experienceLevel;
+        height = userProfile?.height;
+        weight = userProfile?.initialWeight;
+        age = userProfile?.birthDate
+          ? new Date().getFullYear() - new Date(userProfile.birthDate).getFullYear()
+          : undefined;
+      } else {
+        const wa = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; } })();
+        sports = wa?.sports ?? [];
+        objective = wa?.objective;
+        experience = wa?.experiences ? (Object.values(wa.experiences)[0] as string | undefined) : undefined;
+        height = undefined;
+        weight = undefined;
+        age = undefined;
+      }
+
       const now = new Date();
       const end = new Date(now); end.setMonth(end.getMonth() + 3);
-      const age = userProfile?.birthDate
-        ? new Date().getFullYear() - new Date(userProfile.birthDate).getFullYear()
-        : undefined;
 
       let template: WorkoutTemplate | null = null;
       try {
-        const ai = await generateFirstWorkoutAI({
-          sports,
-          objective: wa?.objective ?? userProfile?.objective,
-          experience: wa?.experiences ? (Object.values(wa.experiences)[0] as string | undefined) : userProfile?.experienceLevel,
-          location: wa?.location ?? userProfile?.trainingLocation,
-          height: userProfile?.height,
-          weight: userProfile?.initialWeight,
-          age,
-        });
+        const ai = await generateFirstWorkoutAI({ sports, objective, experience, height, weight, age });
         if (ai && ai.exercises?.length > 0) {
           template = {
             id: `ai-${Date.now()}`,
@@ -133,7 +148,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
 
       if (!template) {
         const { generateFirstWorkout } = await import('../domain/use-cases/generateFirstWorkout');
-        const fallback = generateFirstWorkout(sports, userProfile?.email ?? 'user', userProfile?.experienceLevel);
+        const fallback = generateFirstWorkout(sports, userProfile?.email ?? 'user', experience);
         template = fallback;
       }
 

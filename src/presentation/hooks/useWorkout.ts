@@ -12,7 +12,6 @@ import {
 import { analyzeExerciseStagnation } from '../../domain/use-cases/analyzeStagnation';
 import { EXERCISES } from '../../constants';
 import { getInputMode } from '../../domain/use-cases/exerciseInputMode';
-import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 
 interface UseWorkoutParams {
   api: any;
@@ -90,14 +89,7 @@ export function useWorkout({
         );
         const lastWeight = lastSessionWithExercise?.exercises
           .find(ex => ex.exerciseId === config.exerciseId)?.sets[0]?.weight
-          ?? estimateInitialWeight(config.exerciseId, (() => {
-            if (userProfile?.experienceLevel) return userProfile;
-            try {
-              const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? '{}');
-              const expFromOnboarding = Object.values(saved.experiences ?? {})[0] as string | undefined;
-              return { ...userProfile, experienceLevel: expFromOnboarding as any };
-            } catch { return userProfile; }
-          })());
+          ?? estimateInitialWeight(config.exerciseId, userProfile);
 
         return {
           id: Math.random().toString(36).substr(2, 9),
