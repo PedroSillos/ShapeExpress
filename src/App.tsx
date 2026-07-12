@@ -181,7 +181,8 @@ export default function App() {
   // the Firestore sync is still running for a logged-in user.
   // The SplashScreen is rendered as a fixed overlay in every return branch
   // so AnimatePresence can animate it out without unmounting the content below.
-  const showingSplash = !authReady || (isLoggedIn && !dataReady);
+  // Never shown on the landing screen — it has its own visual identity.
+  const showingSplash = activeTab !== 'landing' && (!authReady || (isLoggedIn && !dataReady));
 
   if (onboardingSession) {
     return (
