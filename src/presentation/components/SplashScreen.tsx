@@ -39,9 +39,9 @@ export function SplashScreen() {
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
               display: 'inline-block',
-            }}
-            initial={{ '--fill': '0%' } as React.CSSProperties}
-            animate={{ '--fill': ['0%', '100%', '100%', '0%'] } as React.CSSProperties}
+            } as React.CSSProperties}
+            initial={{ '--fill': '0%' } as any}
+            animate={{ '--fill': ['0%', '100%', '100%', '0%'] } as any}
             transition={{
               duration: 2.5,
               delay: 0.6,
