@@ -611,15 +611,10 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
         />
       ) : null;
     case 'perfil': {
-      // Sports: from welcome-answers (athletes) or specialties (trainers)
-      const sports: string[] = (() => {
-        try {
-          const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
-          if (wa?.sports?.length) return wa.sports as string[];
-        } catch {}
-        if (userProfile?.specialties?.length) return userProfile.specialties;
-        return [];
-      })();
+      // Logged-in: use cloud profile specialties. Guest: fallback to onboarding answers.
+      const sports: string[] = isLoggedIn
+        ? (userProfile?.specialties ?? [])
+        : (() => { try { const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); return wa?.sports ?? []; } catch { return []; } })();
       // Friends = trainer connections (athletes) + students (trainers)
       const friendsCount =
         (studentConnections?.length ?? 0) + (students?.length ?? 0) + (trainers?.length ?? 0);
