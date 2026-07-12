@@ -195,6 +195,7 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
         specialties: wa?.sports ?? [],
         ...(experienceLevel !== undefined && { experienceLevel }),
         objective: wa?.objective,
+        ...(wa?.weeklyGoal !== undefined && { weeklyGoal: wa.weeklyGoal }),
       } as any);
     } catch (e: any) {
       if (e?.code === 'auth/email-already-in-use') {

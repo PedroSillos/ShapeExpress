@@ -235,13 +235,13 @@ export function useWorkout({
       if (inc > 5) alerts.push({ type: 'Weekly', title: 'Progressão Semanal', description: `Seu volume subiu ${inc.toFixed(0)}% esta semana!`, icon: '📊', color: 'text-blue-400' });
     }
     const thisWeekCount = sessions.filter(s => isWithinInterval(parseISO(s.date), { start: oneWeekAgo, end: now })).length;
-    if (thisWeekCount + 1 >= userStats.weeklyGoal) {
-      alerts.push({ type: 'Weekly', title: 'Consistência Excelente', description: `Você atingiu sua meta de ${userStats.weeklyGoal} treinos esta semana!`, icon: '📊', color: 'text-emerald-400' });
+    if (thisWeekCount + 1 >= (userProfile.weeklyGoal ?? 3)) {
+      alerts.push({ type: 'Weekly', title: 'Consistência Excelente', description: `Você atingiu sua meta de ${userProfile.weeklyGoal ?? 3} treinos esta semana!`, icon: '📊', color: 'text-emerald-400' });
     }
     if (template) {
       const totalCompleted = sessions.filter(s => s.workoutId === template.id).length + 1;
       const weeks = Math.max(1, Math.ceil(differenceInWeeks(parseISO(template.endDate), parseISO(template.startDate))));
-      const totalExpected = weeks * (userStats?.weeklyGoal || 3);
+      const totalExpected = weeks * (userProfile.weeklyGoal ?? 3);
       if (totalCompleted % 3 === 0 || totalCompleted === totalExpected) {
         alerts.push({ type: 'Program', title: 'Progresso no Programa', description: `Treino ${totalCompleted} de ${totalExpected} concluído (${Math.round((totalCompleted / totalExpected) * 100)}%)`, icon: '🎯', color: 'text-brand-red' });
       }

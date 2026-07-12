@@ -212,12 +212,12 @@ export const useAuthState = () => {
             initialWeight: 80,
             objective: "Manutenção",
             birthDate: "2000-01-01",
-            hasPersonal: false,
+            weeklyGoal: 3,
           };
           await setDoc(doc(db, "users", email), userDoc);
 
           await setDoc(doc(db, "stats", email), {
-            level: 1, xp: 0, streak: 0, bestStreak: 0, weeklyGoal: 3,
+            level: 1, xp: 0, streak: 0, bestStreak: 0,
             completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: email,
           });
         }
@@ -250,7 +250,7 @@ export const useAuthState = () => {
         initialWeight: data.initialWeight || 80,
         objective: data.objective || "Manutenção",
         birthDate: data.birthDate || "2000-01-01",
-        hasPersonal: data.hasPersonal || false,
+        weeklyGoal: data.weeklyGoal ?? 3,
         ...(isTrainer ? { personalCode: Math.random().toString(36).substring(2, 8).toUpperCase() } : {}),
       };
       delete userProfile.password;
@@ -258,7 +258,7 @@ export const useAuthState = () => {
       try {
         await setDoc(doc(db, "users", data.email), userProfile);
         await setDoc(doc(db, "stats", data.email), {
-          level: 1, xp: 0, streak: 0, bestStreak: 0, weeklyGoal: 3,
+          level: 1, xp: 0, streak: 0, bestStreak: 0,
           completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: data.email,
         });
       } catch (e) {}
@@ -373,12 +373,12 @@ export const useAuthState = () => {
             initialWeight: 80,
             objective: "Manutenção",
             birthDate: "2000-01-01",
-            hasPersonal: false,
+            weeklyGoal: 3,
           } as any;
           await setDoc(doc(db, "users", docId), userDoc);
 
           await setDoc(doc(db, "stats", docId), {
-            level: 1, xp: 0, streak: 0, bestStreak: 0, weeklyGoal: 3,
+            level: 1, xp: 0, streak: 0, bestStreak: 0,
             completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: docId,
           });
         }

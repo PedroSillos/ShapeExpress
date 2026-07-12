@@ -85,7 +85,7 @@ export default function App() {
   });
 
   useWeeklyGoal({
-    isLoggedIn, userSessions, userStats,
+    isLoggedIn, userSessions, userStats, userProfile,
     updateStats: dataSync.updateStats,
   });
 
@@ -172,13 +172,6 @@ export default function App() {
     if (lastCompletedSession && !isLoggedIn) {
       localStorage.setItem(STORAGE_KEYS.WELCOME_DONE, '1');
       localStorage.removeItem(STORAGE_KEYS.ONBOARDING_PENDING);
-      // Apply weeklyGoal chosen during onboarding to userStats
-      try {
-        const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
-        if (wa?.weeklyGoal && wa.weeklyGoal !== userStats.weeklyGoal) {
-          setUserStats({ ...userStats, weeklyGoal: wa.weeklyGoal });
-        }
-      } catch {}
       setOnboardingSession(lastCompletedSession);
       setLastCompletedSession(null);
     }

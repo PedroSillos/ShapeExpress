@@ -21,8 +21,8 @@ export const DEFAULT_PROFILE: UserProfile = {
   initialWeight: 80,
   objective: "Manutenção",
   birthDate: "2000-01-01",
-  hasPersonal: false,
   personalCodeConnected: undefined,
+  weeklyGoal: 3,
 };
 
 export const DEFAULT_STATS: UserStats = {
@@ -30,7 +30,6 @@ export const DEFAULT_STATS: UserStats = {
   xp: 0,
   streak: 0,
   bestStreak: 0,
-  weeklyGoal: 3,
   completedThisWeek: 0,
   totalWorkouts: 0,
   totalVolume: 0,
@@ -67,18 +66,22 @@ const LOCAL_CALORIE_PROFILE_KEY = STORAGE_KEYS.LOCAL_CALORIE_PROFILE;
 const LOCAL_EXERCISE_STATS_KEY = STORAGE_KEYS.LOCAL_EXERCISE_STATS;
 
 function getGuestDefaultStats(): UserStats {
+  return DEFAULT_STATS;
+}
+
+function getGuestDefaultProfile(): UserProfile {
   try {
     const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
-    if (wa?.weeklyGoal) return { ...DEFAULT_STATS, weeklyGoal: wa.weeklyGoal };
+    if (wa?.weeklyGoal) return { ...DEFAULT_PROFILE, weeklyGoal: wa.weeklyGoal };
   } catch {}
-  return DEFAULT_STATS;
+  return DEFAULT_PROFILE;
 }
 
 export const useProfileState = (currentUser: { email: string } | null) => {
   const isGuest = !currentUser;
 
   const [userProfile, setUserProfile] = useState<UserProfile>(() =>
-    isGuest ? loadLocal(STORAGE_KEYS.LOCAL_USER_PROFILE, DEFAULT_PROFILE) : DEFAULT_PROFILE
+    isGuest ? loadLocal(STORAGE_KEYS.LOCAL_USER_PROFILE, getGuestDefaultProfile()) : DEFAULT_PROFILE
   );
   const [userStats, setUserStats] = useState<UserStats>(() =>
     isGuest ? loadLocal(LOCAL_STATS_KEY, getGuestDefaultStats()) : DEFAULT_STATS

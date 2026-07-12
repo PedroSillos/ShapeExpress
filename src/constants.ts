@@ -1797,7 +1797,6 @@ export const DEFAULT_STATS: UserStats = {
   xp: 0,
   streak: 0,
   bestStreak: 0,
-  weeklyGoal: 3,
   completedThisWeek: 0,
   totalWorkouts: 0,
   totalVolume: 0,

@@ -314,7 +314,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
               height: pending.height ? Number(pending.height) : p.height,
               initialWeight: pending.weight ? Number(pending.weight) : p.initialWeight,
               birthDate: pending.birthDate ?? p.birthDate,
-              hasPersonal: pending.hasPersonal ?? p.hasPersonal,
               weeklyGoal: pending.weeklyGoal ?? p.weeklyGoal,
             } : p;
             const data = await api.register(merged);

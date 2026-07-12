@@ -168,10 +168,10 @@ export function DashboardView({
   const [sportIdx, setSportIdx] = useState(0);
   const currentSport = sports[sportIdx] ?? sports[0];
 
-  const goalStreak = useMemo(() => calcGoalStreak(sessions, userStats.weeklyGoal), [sessions, userStats.weeklyGoal]);
+  const goalStreak = useMemo(() => calcGoalStreak(sessions, mainUserProfile.weeklyGoal ?? 3), [sessions, mainUserProfile.weeklyGoal]);
 
   // Completed weeks = total streak workouts divided by weekly goal (floor)
-  const completedWeeks = Math.floor(goalStreak / Math.max(1, userStats.weeklyGoal));
+  const completedWeeks = Math.floor(goalStreak / Math.max(1, mainUserProfile.weeklyGoal ?? 3));
 
   const completedThisWeek = useMemo(() => {
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -186,7 +186,7 @@ export function DashboardView({
 
   // Trail: one node per weekly goal slot. Nodes up to completedThisWeek are "done",
   // the next one is "active" (if goal not yet met), and the rest are "locked".
-  const weeklyGoal = Math.max(1, userStats.weeklyGoal);
+  const weeklyGoal = Math.max(1, mainUserProfile.weeklyGoal ?? 3);
   const trailNodes = Array.from({ length: weeklyGoal }, (_, i) => {
     const state =
       i < completedThisWeek ? 'done'
@@ -246,7 +246,7 @@ export function DashboardView({
           <div className="w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0 bg-blue-600">
             <img src={iconCalendar} className="w-full h-full object-contain brightness-0 invert" alt="meta semanal" />
           </div>
-          <span className="font-black text-sm text-blue-400">{completedThisWeek}/{userStats.weeklyGoal}</span>
+          <span className="font-black text-sm text-blue-400">{completedThisWeek}/{mainUserProfile.weeklyGoal ?? 3}</span>
         </div>
       </div>
 
@@ -258,7 +258,7 @@ export function DashboardView({
         >
           <div className="text-left">
             <p className="text-[10px] font-black uppercase tracking-widest text-white/70">
-              {completedThisWeek} de {userStats.weeklyGoal} essa semana
+              {completedThisWeek} de {mainUserProfile.weeklyGoal ?? 3} essa semana
             </p>
             <p className="font-black text-white text-base leading-tight">{currentTemplate.name}</p>
           </div>

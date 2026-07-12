@@ -186,7 +186,6 @@ export interface UserStats {
   xp: number;
   streak: number;
   bestStreak: number;
-  weeklyGoal: number;
   completedThisWeek: number;
   totalWorkouts: number;
   totalVolume: number;
@@ -221,10 +220,10 @@ export interface UserProfile {
   bio?: string;
   instagram?: string;
   personalCode?: string;
-  hasPersonal?: boolean;
   personalCodeConnected?: string;
   age?: number;
   trainingLocation?: "Casa" | "Academia";
+  weeklyGoal?: number;
 }
 
 /** Returns the full display name from a UserProfile (or any object with firstName/lastName). */
