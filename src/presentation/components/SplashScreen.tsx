@@ -9,33 +9,52 @@ export function SplashScreen() {
   return (
     <motion.div
       key="splash"
-      className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-[#0a0a0a]"
+      className="fixed inset-0 z-[999] bg-[#0a0a0a]"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
     >
-      {/* App icon */}
-      <motion.img
-        src="/icon.png"
-        alt="Shape Express"
-        className="w-24 h-24 mb-8 object-contain"
-        initial={{ scale: 0.85, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
-      />
+      <div className="absolute left-1/2 top-[40%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4">
+        <motion.img
+          src="/icon.png"
+          alt="Shape Express"
+          className="w-44 h-44 object-contain -mb-6"
+          initial={{ scale: 0.85, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+        />
 
-      {/* App name */}
-      <motion.p
-        className="text-white/60 text-sm tracking-widest uppercase mb-10"
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1, ease: 'easeOut' }}
-      >
-        Shape Express
-      </motion.p>
-
-      {/* Spinner */}
-      <div className="w-5 h-5 rounded-full border-2 border-white/15 border-t-white/70 animate-spin" />
+        {/* Text starts fully dark, bright reveal sweeps left → right, then repeats */}
+        <motion.p
+          className="font-display font-semibold text-[20px] tracking-widest uppercase whitespace-nowrap"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15, ease: 'easeOut' }}
+        >
+          <motion.span
+            style={{
+              backgroundImage:
+                'linear-gradient(90deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.9) var(--fill), rgba(255,255,255,0.2) var(--fill), rgba(255,255,255,0.2) 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              display: 'inline-block',
+            }}
+            initial={{ '--fill': '0%' } as React.CSSProperties}
+            animate={{ '--fill': ['0%', '100%', '100%', '0%'] } as React.CSSProperties}
+            transition={{
+              duration: 2.5,
+              delay: 0.6,
+              times: [0, 0.5, 0.8, 1],
+              repeat: Infinity,
+              repeatDelay: 0.5,
+              ease: 'easeInOut',
+            }}
+          >
+            Shape Express
+          </motion.span>
+        </motion.p>
+      </div>
     </motion.div>
   );
 }

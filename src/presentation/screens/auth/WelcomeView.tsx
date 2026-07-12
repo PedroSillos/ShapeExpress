@@ -436,7 +436,7 @@ function ReadyScreen({ onContinue, onNotReady, onBack, loading, skipLoading }: {
         </div>
 
         {/* Mascot */}
-        <img src="/icon.png" alt="Shapinho" className="w-32 h-32 object-contain" />
+        <img src="/icon.png" alt="Shapinho" className="w-44 h-44 object-contain" />
       </div>
 
       {/* Buttons */}
@@ -781,7 +781,7 @@ const toggleSport = (id: string) => {
         <div className="flex-1 relative">
           {/* Icon fixed at vertical center */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <img src="/icon.png" alt="Shapinho" className="w-32 h-32 object-contain" />
+            <img src="/icon.png" alt="Shapinho" className="w-44 h-44 object-contain" />
           </div>
           {/* Bubble anchored above the icon */}
           <div className="absolute left-0 right-0" style={{ bottom: 'calc(50% + 56px + 32px)' }}>
@@ -798,7 +798,7 @@ const toggleSport = (id: string) => {
       ) : (
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex items-center gap-3 mb-5 shrink-0">
-            <img src="/icon.png" alt="Shapinho" className="w-16 h-16 shrink-0 object-contain" />
+            <img src="/icon.png" alt="Shapinho" className="w-20 h-20 shrink-0 object-contain" />
             <div className="relative bg-dark-card border border-dark-border rounded-2xl px-4 py-3 flex-1">
               <p className="text-white text-base leading-snug">{question!.balloon(answers)}</p>
               <div className="absolute left-[-10px] top-4 w-0 h-0" style={{ borderTop: '8px solid transparent', borderBottom: '8px solid transparent', borderRight: `10px solid var(--theme-card)` }} />
