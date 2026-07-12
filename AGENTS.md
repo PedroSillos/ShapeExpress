@@ -134,6 +134,28 @@ Use this pattern for icon cards (onboarding, selections, lists):
 - **Firebase**: Admin SDK for privileged writes; enforce Firestore Security Rules (`request.auth.token.email == email`). On Railway: `FIREBASE_SERVICE_ACCOUNT` env var. On Cloud Run: Application Default Credentials.
 - **Logging**: never log tokens, emails, or payment data.
 
+## Data Layer
+
+Dois modos: **guest** (localStorage) e **logado** (Firestore). Transição gerenciada por `useAuthState` → `useSyncState` → `useProfileState` / `useWorkoutState`.
+
+**Guest** — todas as leituras e escritas vão para localStorage (`LOCAL_USER_PROFILE`, `LOCAL_STATS`, `LOCAL_SESSIONS`, `PENDING_TEMPLATES`, etc.). `WELCOME_ANSWERS` é a fonte de modalidade, objective e experience para features de IA.
+
+**Logado** — no boot, `useSyncState` busca tudo do Firestore em paralelo (profile, stats, templates, sessions, connections) e aplica via batching em um único re-render. App fica no splash até `dataReady = true`. Escritas são otimistas (memória + Firestore simultaneamente). Sem re-sync automático durante a sessão.
+
+**Transições:**
+- Login conta existente → `clearLocalGuestData()` limpa todo localStorage guest → sync do Firestore.
+- Registro / nova conta Google/Phone → `uploadLocalDataToFirestore()` migra dados locais para o Firestore → `clearLocalGuestData()`.
+- Logout → `resetWorkoutStates()` + `resetProfileStates()` limpam localStorage e zeram memória.
+
+**Exceções importantes:**
+- `activeWorkout` sempre vai para localStorage, independente de login (sobrevive reloads).
+- Sessions: sync faz merge com `LOCAL_SESSIONS` pendentes para cobrir race condition de treino concluído durante o login.
+- `userTrainingProfile`, `userCalorieProfile` e `exerciseUserStats` **nunca são sincronizados com o Firestore** — ficam em DEFAULT_* para logados e são recalculados das sessions.
+
+**Campos do UserProfile no Firestore:** `firstName`, `lastName`, `email`, `userType`, `birthDate`, `height`, `initialWeight`, `objective`, `experienceLevel`, `specialties` (array — modalidade do usuário), `hasPersonal`, `weeklyGoal`. Campo `location` **não existe** no banco.
+
+**Regra:** para usuários logados, sempre usar `userProfile.*`. `WELCOME_ANSWERS` só é válido para guests (`!isLoggedIn`).
+
 ## Troubleshooting
 
 | Problem | Fix |
