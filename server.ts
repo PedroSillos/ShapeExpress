@@ -89,16 +89,6 @@ async function startServer() {
     .matches(/^[a-zA-Z0-9_-]+$/)
     .withMessage('ID de sessão inválido');
 
-  const validateCoachAdvice = [
-    body('userProfile.firstName').optional().trim().isLength({ max: 100 }).escape(),
-    body('userProfile.objective').optional().trim().isLength({ max: 200 }).escape(),
-    body('userProfile.experienceLevel').optional().isIn(['Iniciante', 'Intermediário', 'Avançado']),
-    body('sessions').optional().isArray({ max: 100 }),
-    body('progressScore.score').optional().isNumeric(),
-    body('progressScore.classification').optional().trim().isLength({ max: 50 }).escape(),
-    body('stagnationReports').optional().isArray({ max: 50 }),
-  ];
-
   // AI Generate First Workout Endpoint
   app.post('/api/ai/generate-first-workout', [
     body('sports').isArray({ min: 1, max: 10 }),
@@ -150,48 +140,6 @@ JSON sem markdown: {"name":"Treino Básico: <modalidade>","exercises":[{"exercis
     } catch (error: any) {
       console.error('Generate workout error:', error?.message || error);
       res.status(500).json({ error: 'Erro ao gerar treino.' });
-    }
-  });
-
-  // AI Coach Endpoint (server-side Gemini)
-  app.post('/api/ai/coach-advice', authMiddleware, validateCoachAdvice, async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    if (!genAI) {
-      return res.status(500).json({ error: 'AI não está configurado. Adicione GEMINI_API_KEY nas variáveis de ambiente.' });
-    }
-
-    const { userProfile, sessions, stagnationReports, progressScore } = req.body;
-
-    try {
-      const prompt = `Você é um Personal Trainer IA de elite chamado "Shape Express Coach". 
-      Analise os dados do usuário e forneça conselhos motivadores e técnicos para sua evolução.
-      
-      Perfil do Usuário:
-      - Nome: ${userProfile?.firstName ? [userProfile.firstName, userProfile.lastName].filter(Boolean).join(' ') : 'Não informado'}
-      - Objetivo: ${userProfile?.objective || 'Não informado'}
-      - Nível: ${userProfile?.experienceLevel || 'Intermediário'}
-      
-      Dados Recentes:
-      - Total de Treinos: ${sessions?.length || 0}
-      - Score de Progresso: ${progressScore?.score || 'N/A'} (${progressScore?.classification || 'N/A'})
-      - Relatórios de Estagnação: ${JSON.stringify(stagnationReports || [])}
-      
-      Responda em Português (Brasil). Seja conciso, use emojis e foque em como superar a estagnação se houver, ou como manter o ritmo se estiver progredindo bem.
-      Limite a resposta a no máximo 3 parágrafos curtos.`;
-
-      const response = await genAI.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: [{ role: "user", parts: [{ text: prompt }] }]
-      });
-
-      res.json({ advice: response.text || "Não consegui gerar um conselho no momento. Continue treinando firme!" });
-    } catch (error: any) {
-      console.error('AI Coach Error:', error);
-      res.status(500).json({ error: 'Erro ao gerar conselho. Tente novamente.' });
     }
   });
 

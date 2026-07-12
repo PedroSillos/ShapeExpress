@@ -1,7 +1,6 @@
-import { Flame, TrendingUp, Trophy, ChevronRight, Quote, Zap, Target, UserPlus } from 'lucide-react';
+import { Flame, TrendingUp, Trophy, ChevronRight, Target, UserPlus } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import ReactMarkdown from 'react-markdown';
 import { Card } from '../components/Card';
 import { ProgressBar } from '../components/ProgressBar';
 import { cn } from '../../utils/cn';
@@ -9,7 +8,6 @@ import {
   UserStats,
   UserCalorieProfile,
   ProgressScore,
-  UserProfile,
 } from '../../domain/entities';
 
 // --- StatsWidget ---
@@ -135,34 +133,6 @@ export function ProgressScoreWidget({ progressScore }: { progressScore: Progress
   );
 }
 
-// --- AiCoachWidget ---
-export function AiCoachWidget({ aiAdvice, isAiLoading }: { aiAdvice: string | null; isAiLoading: boolean }) {
-  return (
-    <Card className="relative overflow-hidden border-brand-red/30 bg-brand-red/5">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-8 h-8 rounded-full red-gradient flex items-center justify-center">
-          <Zap size={16} color="currentColor" />
-        </div>
-        <div>
-          <h3 className="font-bold text-sm">Coach IA</h3>
-          <p className="text-[10px] text-brand-red font-bold uppercase tracking-widest">Conselho Personalizado</p>
-        </div>
-      </div>
-      {isAiLoading ? (
-        <div className="space-y-2 animate-pulse">
-          <div className="h-3 bg-white/10 rounded w-full" />
-          <div className="h-3 bg-white/10 rounded w-5/6" />
-          <div className="h-3 bg-white/10 rounded w-4/6" />
-        </div>
-      ) : (
-        <div className="text-xs text-white/80 leading-relaxed italic prose prose-invert prose-p:leading-relaxed">
-          <ReactMarkdown>{aiAdvice || ''}</ReactMarkdown>
-        </div>
-      )}
-    </Card>
-  );
-}
-
 // --- HireCoachWidget ---
 export function HireCoachWidget({ onPress }: { onPress: () => void }) {
   return (
@@ -181,27 +151,6 @@ export function HireCoachWidget({ onPress }: { onPress: () => void }) {
       </div>
       <ChevronRight size={20} className="text-white/20 group-hover:text-brand-red transition-colors" />
     </button>
-  );
-}
-
-// --- MotivationWidget ---
-export function MotivationWidget() {
-  return (
-    <Card className="bg-gradient-to-br from-brand-red/20 to-orange-500/10 border-brand-red/20 relative overflow-hidden group">
-      <div className="absolute -right-4 -top-4 w-24 h-24 bg-brand-red/10 rounded-full blur-2xl group-hover:bg-brand-red/20 transition-colors" />
-      <div className="relative z-10 flex gap-4">
-        <div className="w-12 h-12 rounded-2xl bg-brand-red/20 flex items-center justify-center text-brand-red shrink-0">
-          <Quote size={24} />
-        </div>
-        <div className="space-y-1">
-          <p className="text-[10px] text-brand-red font-bold uppercase tracking-widest">Motivação do Dia</p>
-          <p className="text-sm font-medium italic leading-relaxed">
-            "A disciplina é a ponte entre metas e realizações. Hoje é o dia de construir mais um degrau."
-          </p>
-          <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">— Jim Rohn</p>
-        </div>
-      </div>
-    </Card>
   );
 }
 

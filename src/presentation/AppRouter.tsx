@@ -67,7 +67,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     setDeletingTemplateId,
     setScrollToHistory, scrollToHistory,
     setShowLogoutConfirm,
-    progressScore, aiAdvice, isAiLoading,
+    progressScore,
     calculatedStreak, personalRecords,
     api, switchTab,
     onShowSuggestProfile, onShowStreak,
@@ -363,8 +363,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           assessments={assessments}
           mainUserProfile={userProfile}
           progressScore={progressScore}
-          aiAdvice={aiAdvice}
-          isAiLoading={isAiLoading}
           switchTab={switchTab}
           personalRecords={personalRecords}
           studentConnections={studentConnections}

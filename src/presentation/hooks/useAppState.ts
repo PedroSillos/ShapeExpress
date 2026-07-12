@@ -204,10 +204,6 @@ export const useAppState = () => {
     setStagnationReports: progress.setStagnationReports,
     progressScore: progress.progressScore,
     setProgressScore: progress.setProgressScore,
-    aiAdvice: progress.aiAdvice,
-    setAiAdvice: progress.setAiAdvice,
-    isAiLoading: progress.isAiLoading,
-    setIsAiLoading: progress.setIsAiLoading,
     calculatedStreak: progress.calculatedStreak,
     personalRecords: progress.personalRecords,
 

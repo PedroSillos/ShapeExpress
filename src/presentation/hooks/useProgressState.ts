@@ -16,8 +16,6 @@ export const useProgressState = (
   const [progressionAlerts, setProgressionAlerts] = useState<ProgressionAlert[]>([]);
   const [stagnationReports, setStagnationReports] = useState<StagnationReport[]>([]);
   const [progressScore, setProgressScore] = useState<ProgressScore | null>(null);
-  const [aiAdvice, setAiAdvice] = useState<string | null>(null);
-  const [isAiLoading, setIsAiLoading] = useState(false);
 
   const calculatedStreak = useMemo(() => {
     if (userSessions.length === 0) return 0;
@@ -79,15 +77,12 @@ export const useProgressState = (
     setProgressionAlerts([]);
     setStagnationReports([]);
     setProgressScore(null);
-    setAiAdvice(null);
   };
 
   return {
     progressionAlerts, setProgressionAlerts,
     stagnationReports, setStagnationReports,
     progressScore, setProgressScore,
-    aiAdvice, setAiAdvice,
-    isAiLoading, setIsAiLoading,
     calculatedStreak,
     personalRecords,
     resetProgressStates,

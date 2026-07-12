@@ -7,7 +7,6 @@ import { useDataSync } from './presentation/hooks/useDataSync';
 import { useWorkout } from './presentation/hooks/useWorkout';
 import { useWeeklyGoal } from './presentation/hooks/useWeeklyGoal';
 import { useChatListener } from './presentation/hooks/useChatListener';
-import { useAiAdvice } from './presentation/hooks/useAiAdvice';
 
 import { AppNavBar } from './presentation/AppNavBar';
 import { AppRouter } from './presentation/AppRouter';
@@ -54,7 +53,7 @@ export default function App() {
     activeChatStudent, setChatMessages,
     notifications,
     userSessions, filteredTemplates,
-    progressScore, aiAdvice, isAiLoading, setAiAdvice, setIsAiLoading,
+    progressScore,
     api,
     selectedStudentForWorkouts,
   } = appState;
@@ -90,12 +89,6 @@ export default function App() {
   });
 
   useChatListener({ activeChatStudent, userProfile, setChatMessages });
-
-  useAiAdvice({
-    isLoggedIn, activeTab, userProfile, userSessions,
-    stagnationReports, progressScore,
-    aiAdvice, isAiLoading, setAiAdvice, setIsAiLoading,
-  });
 
   useEffect(() => {
     if (!selectedStudentForWorkouts) { setStudentTemplates([]); return; }

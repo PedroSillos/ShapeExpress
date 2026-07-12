@@ -42,8 +42,6 @@ interface DashboardViewProps {
   assessments: BodyAssessment[];
   mainUserProfile: UserProfile;
   progressScore: ProgressScore | null;
-  aiAdvice: string | null;
-  isAiLoading: boolean;
   switchTab: (tab: string) => void;
   personalRecords: { weight: number; date: string; name: string }[];
   studentConnections?: any[];
@@ -145,8 +143,6 @@ export function DashboardView({
   sessions,
   templates,
   onStartWorkout,
-  aiAdvice,
-  isAiLoading,
   switchTab,
   mainUserProfile,
   isLoggedIn,
