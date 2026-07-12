@@ -71,7 +71,7 @@ export function LogoutAccountScreen({
       {/* ── Top spacer + mascot ── */}
       <div className="flex-1 flex flex-col items-center justify-center gap-6">
         <motion.img
-          src="/shapinho.png"
+          src="/icon.png"
           alt="Shapinho"
           className="w-36 h-36 object-contain drop-shadow-2xl"
           initial={{ y: -20, opacity: 0 }}

@@ -1,6 +1,6 @@
 import { useRef, useState, type KeyboardEvent, type ClipboardEvent } from 'react';
 import { ChevronLeft, Loader2 } from 'lucide-react';
-import shapinho from '/shapinho.png';
+import shapinho from '/icon.png';
 import { motion } from 'motion/react';
 
 interface GymViewProps {

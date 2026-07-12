@@ -16,9 +16,9 @@ export function SplashScreen() {
     >
       {/* App icon */}
       <motion.img
-        src="/shapinho.png"
+        src="/icon.png"
         alt="Shape Express"
-        className="w-24 h-24 mb-8"
+        className="w-24 h-24 mb-8 object-contain"
         initial={{ scale: 0.85, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
