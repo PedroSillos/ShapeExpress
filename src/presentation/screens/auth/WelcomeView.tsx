@@ -766,7 +766,7 @@ const toggleSport = (id: string) => {
   return (
     <div className="h-screen flex flex-col pt-6 pb-12 px-8 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-2">
         <button onClick={handleBack} className="p-1 text-white/40 active:scale-95 transition-transform shrink-0">
           <ArrowLeft size={24} />
         </button>
@@ -797,8 +797,8 @@ const toggleSport = (id: string) => {
         </div>
       ) : (
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex items-center gap-3 mb-5 shrink-0">
-            <img src="/icon.png" alt="Shapinho" className="w-20 h-20 shrink-0 object-contain" />
+          <div className="flex items-center gap-0 mb-2 shrink-0">
+            <img src="/icon.png" alt="Shapinho" className="w-28 h-28 shrink-0 object-contain -ml-4" />
             <div className="relative bg-dark-card border border-dark-border rounded-2xl px-4 py-3 flex-1">
               <p className="text-white text-base leading-snug">{question!.balloon(answers)}</p>
               <div className="absolute left-[-10px] top-4 w-0 h-0" style={{ borderTop: '8px solid transparent', borderBottom: '8px solid transparent', borderRight: `10px solid var(--theme-card)` }} />
