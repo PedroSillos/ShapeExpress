@@ -36,7 +36,9 @@ export const useWorkoutState = (
   const [sessions, setSessions] = useState<WorkoutSession[]>(() =>
     currentUser ? [] : loadLocalSessions()
   );
-  const [templates, setTemplates] = useState<WorkoutTemplate[]>(() => loadLocalTemplates());
+  const [templates, setTemplates] = useState<WorkoutTemplate[]>(() =>
+    currentUser ? [] : loadLocalTemplates()
+  );
   const [activeWorkout, setActiveWorkoutRaw] = useState<WorkoutSession | null>(() => {
     try { const s = localStorage.getItem(STORAGE_KEYS.ACTIVE_WORKOUT); return s ? JSON.parse(s) : null; } catch { return null; }
   });
@@ -218,6 +220,8 @@ export const useWorkoutState = (
   }, [sessions, userProfile, templates]);
 
   const resetWorkoutStates = () => {
+    localStorage.removeItem(LOCAL_SESSIONS_KEY);
+    localStorage.removeItem(LOCAL_TEMPLATES_KEY);
     setSessions([]);
     setTemplates([]);
     setActiveWorkout(null);
