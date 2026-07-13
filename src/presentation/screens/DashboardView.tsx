@@ -200,6 +200,12 @@ function DayTrainedContent({
 }
 
 /** Background style for a trained day cell based on the sports trained. */
+
+const PRISMATIC_BG        = 'rgba(255,255,255,0.35)';
+const PRISMATIC_BG_FADED  = 'rgba(255,255,255,0.20)';
+const PRISMATIC_SHADOW    = '0 2px 0 0 rgba(255,255,255,0.18)';
+const PRISMATIC_SHADOW_LG = '0 3px 0 0 rgba(255,255,255,0.18)';
+
 function dayBgStyle(sports: string[], isToday: boolean): { className: string; style?: React.CSSProperties } {
   if (sports.length === 0) {
     return isToday
@@ -235,10 +241,8 @@ function dayBgStyle(sports: string[], isToday: boolean): { className: string; st
   return {
     className: '',
     style: {
-      background: isToday
-        ? 'linear-gradient(135deg, #c8d6e5, #ffffff, #b8cfe0, #e8f0f8, #a8bfd4, #dce8f0)'
-        : 'linear-gradient(135deg, #c8d6e577, #ffffff88, #b8cfe077, #e8f0f877, #a8bfd477, #dce8f077)',
-      boxShadow: isToday ? '0 2px 0 0 rgba(148,163,184,0.5)' : undefined,
+      background: isToday ? PRISMATIC_BG : PRISMATIC_BG_FADED,
+      boxShadow: isToday ? PRISMATIC_SHADOW : undefined,
     },
   };
 }
@@ -362,7 +366,7 @@ function WeekDayBar({
                 const bg = trained
                   ? dayBgStyle(daySports, isToday)
                   : isToday
-                    ? { className: 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]' }
+                    ? { className: '', style: { background: PRISMATIC_BG, boxShadow: PRISMATIC_SHADOW } }
                     : { className: 'bg-white/5' };
 
                 return (
@@ -513,28 +517,30 @@ export function DashboardView({
         {currentTemplate ? (
           <button
             onClick={() => onStartWorkout(currentTemplate)}
-            className="mx-6 mt-3 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(150,10,10,0.6)]"
+            className="mx-6 mt-3 w-[calc(100%-3rem)] rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform border border-white/10"
+            style={{ background: PRISMATIC_BG, boxShadow: PRISMATIC_SHADOW_LG }}
           >
             <div className="text-left">
-              <p className="text-[10px] font-black uppercase tracking-widest text-white/70">
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/50">
                 {completedThisWeek} de {mainUserProfile.weeklyGoal ?? 3} essa semana
               </p>
               <p className="font-black text-white text-base leading-tight">{currentTemplate.name}</p>
             </div>
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center shrink-0">
               <Play size={20} fill="white" color="white" />
             </div>
           </button>
         ) : (
           <button
             onClick={() => switchTab('workouts')}
-            className="mx-6 mt-3 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(150,10,10,0.6)]"
+            className="mx-6 mt-3 w-[calc(100%-3rem)] rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform border border-white/10"
+            style={{ background: PRISMATIC_BG, boxShadow: PRISMATIC_SHADOW_LG }}
           >
             <div className="text-left">
-              <p className="text-[10px] font-black uppercase tracking-widest text-white/70">Comece agora</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/50">Comece agora</p>
               <p className="font-black text-white text-base leading-tight">Criar primeiro treino</p>
             </div>
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center shrink-0">
               <Play size={20} fill="white" color="white" />
             </div>
           </button>
