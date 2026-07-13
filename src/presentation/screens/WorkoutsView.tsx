@@ -52,6 +52,7 @@ import iconNatacao from '@/src/assets/icons/icon-natacao.svg';
 import iconCrossfit from '@/src/assets/icons/icon-crossfit.svg';
 import iconTriatlo from '@/src/assets/icons/icon-triatlo.svg';
 import iconYoga from '@/src/assets/icons/icon-yoga.svg';
+import { ALL_SPORTS } from '../../features/sports/constants';
 
 const SPORT_ICONS: Record<string, string> = {
   'Musculação':     iconMusculacao,
@@ -82,7 +83,7 @@ interface WorkoutsViewProps {
   sessions: WorkoutSession[];
   onStartWorkout: (t: WorkoutTemplate, sheetIndex?: number) => void;
   onCreateWorkout: () => void;
-  onGenerateWithAI: () => void;
+  onGenerateWithAI: (sport: string) => void;
   onEditWorkout: (t: WorkoutTemplate) => void;
   onDeleteWorkout: (id: string) => void;
   onRenameWorkout: (id: string, name: string) => void;
@@ -742,6 +743,8 @@ export function WorkoutsView({
   const [selectingSheetTemplate, setSelectingSheetTemplate] = useState<WorkoutTemplate | null>(null);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
+  const [showAISportPicker, setShowAISportPicker] = useState(false);
+  const [aiSelectedSport, setAiSelectedSport] = useState<string>('');
   // filterDate: when navigating from Dashboard, shows only sessions from that date
   const [filterDate, setFilterDate] = useState<string | null>(null);
   const [showDateFilter, setShowDateFilter] = useState(false);
@@ -758,6 +761,11 @@ export function WorkoutsView({
     }
     return 'Musculação';
   }, [mainUserProfile, isLoggedIn]);
+
+  // Sync AI sport picker default with user's primary sport
+  useEffect(() => {
+    if (sport && !aiSelectedSport) setAiSelectedSport(sport);
+  }, [sport]);
   const historyRef = useRef<HTMLDivElement>(null);
 
   // When arriving from Dashboard with a highlighted session, filter by that day
@@ -1056,7 +1064,7 @@ export function WorkoutsView({
                     </div>
                   </button>
                   <button
-                    onClick={() => { setShowCreateMenu(false); onGenerateWithAI(); }}
+                    onClick={() => { setShowCreateMenu(false); setAiSelectedSport(sport); setShowAISportPicker(true); }}
                     className="w-full flex items-center gap-4 p-4 rounded-2xl active:scale-95 transition-transform"
                     style={{ background: 'rgba(124, 58, 237, 0.12)', border: '1px solid rgba(124, 58, 237, 0.25)' }}
                   >
@@ -1082,6 +1090,71 @@ export function WorkoutsView({
                   </button>
                 </div>
               </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* AI Sport Picker Bottom Sheet */}
+      <AnimatePresence>
+        {showAISportPicker && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowAISportPicker(false)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: '100%' }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 bg-dark-card border-t border-dark-border rounded-t-3xl p-5 z-[110]"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-base font-black text-white">Qual modalidade?</h3>
+                <button onClick={() => setShowAISportPicker(false)} className="p-2 text-white/20 hover:text-white">
+                  <X size={18} />
+                </button>
+              </div>
+              <p className="text-xs text-white/40 mb-5">Escolha a modalidade para o treino gerado pela IA</p>
+
+              <div className="grid grid-cols-4 gap-2 mb-6">
+                {ALL_SPORTS.map(s => (
+                  <button
+                    key={s.id}
+                    onClick={() => setAiSelectedSport(s.id)}
+                    className={cn(
+                      'flex flex-col items-center gap-1.5 p-2.5 rounded-2xl border transition-all active:scale-95',
+                      aiSelectedSport === s.id
+                        ? 'border-transparent scale-105'
+                        : 'bg-white/5 border-white/10 opacity-50'
+                    )}
+                    style={aiSelectedSport === s.id ? { backgroundColor: s.bg, borderColor: s.bg } : {}}
+                  >
+                    <img src={s.icon} alt={s.label} className="w-6 h-6 brightness-0 invert" />
+                    <span className="text-[9px] font-black text-white text-center leading-tight">{s.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowAISportPicker(false);
+                  if (aiSelectedSport) onGenerateWithAI(aiSelectedSport);
+                }}
+                disabled={!aiSelectedSport}
+                className={cn(
+                  'w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95',
+                  aiSelectedSport
+                    ? 'red-gradient text-black shadow-[0_4px_0_0_rgba(150,10,10,0.6)]'
+                    : 'bg-dark-card border-2 border-dark-border text-white/30 pointer-events-none'
+                )}
+              >
+                Gerar treino com IA
+              </button>
             </motion.div>
           </>
         )}

@@ -26,6 +26,8 @@ import { ActiveWorkoutView } from './screens/ActiveWorkoutView';
 import { BodyAssessmentView as NewAssessmentView } from './screens/BodyAssessmentView';
 import { generateWorkoutAI } from '../data/services/aiService';
 import { ProfileGuestView, ProfileUserView } from '../features/profile';
+import { ALL_SPORTS } from '../features/sports/constants';
+import { cn } from '../utils/cn';
 
 
 interface AppRouterProps {
@@ -88,13 +90,16 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [publishingTemplate, setPublishingTemplate] = useState<WorkoutTemplate | null>(null);
 
-  const handleGenerateWithAI = async () => {
+  /**
+   * Called after the user picks a sport in the AI sport picker (inside WorkoutsView).
+   * Generates a workout with AI (or falls back to static) for that specific sport.
+   */
+  const handleGenerateWithAI = async (sport: string) => {
     if (isGeneratingAI) return;
     setIsGeneratingAI(true);
     try {
-      // Logged-in: use cloud profile fields
-      // Guest: fall back to WELCOME_ANSWERS from onboarding
-      let sports: string[];
+      // Always use the chosen sport. Supplement with profile data for context.
+      const sports: string[] = [sport];
       let objective: string | undefined;
       let experience: string | undefined;
       let height: number | undefined;
@@ -102,7 +107,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       let age: number | undefined;
 
       if (isLoggedIn) {
-        sports = userProfile?.specialties ?? [];
         objective = userProfile?.objective;
         experience = userProfile?.experienceLevel;
         height = userProfile?.height;
@@ -112,12 +116,8 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           : undefined;
       } else {
         const wa = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; } })();
-        sports = wa?.sports ?? [];
         objective = wa?.objective;
         experience = wa?.experiences ? (Object.values(wa.experiences)[0] as string | undefined) : undefined;
-        height = undefined;
-        weight = undefined;
-        age = undefined;
       }
 
       const now = new Date();
@@ -130,6 +130,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           template = {
             id: `ai-${Date.now()}`,
             userId: userProfile?.email ?? 'user',
+            sport,
             name: ai.name,
             category: 'basic' as const,
             startDate: now.toISOString(),
@@ -142,8 +143,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
 
       if (!template) {
         const { generateFirstWorkout } = await import('../domain/use-cases/generateFirstWorkout');
-        const fallback = generateFirstWorkout(sports, userProfile?.email ?? 'user', experience);
-        template = fallback;
+        template = generateFirstWorkout(sports, userProfile?.email ?? 'user', experience);
       }
 
       await createTemplate(template);
@@ -231,6 +231,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
 
             // Build template: try AI first, fall back to static
             const buildTemplate = async (): Promise<WorkoutTemplate> => {
+              const primarySport = sports[0] ?? 'Musculação';
               try {
                 const ai = await generateWorkoutAI({
                   sports,
@@ -244,6 +245,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
                   return {
                     id: `first-${Date.now()}`,
                     userId: 'guest',
+                    sport: primarySport,
                     name: ai.name,
                     category: 'basic' as const,
                     startDate: now.toISOString(),
