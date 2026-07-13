@@ -178,6 +178,8 @@ export const useAppState = () => {
     setSelectingSheetTemplate: workout.setSelectingSheetTemplate,
     scrollToHistory: workout.scrollToHistory,
     setScrollToHistory: workout.setScrollToHistory,
+    highlightSessionId: workout.highlightSessionId,
+    setHighlightSessionId: workout.setHighlightSessionId,
     filteredTemplates: workout.filteredTemplates,
     userSessions: workout.userSessions,
     filteredSessions: workout.filteredSessions,

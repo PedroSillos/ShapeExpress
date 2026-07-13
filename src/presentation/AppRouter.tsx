@@ -59,6 +59,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     studentTemplates, setStudentTemplates,
     setDeletingTemplateId,
     setScrollToHistory, scrollToHistory,
+    highlightSessionId, setHighlightSessionId,
     setShowLogoutConfirm,
     progressScore,
     calculatedStreak, personalRecords,
@@ -360,6 +361,8 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           studentConnections={studentConnections}
           trainers={trainers}
           isLoggedIn={isLoggedIn}
+          setScrollToHistory={setScrollToHistory}
+          setHighlightSessionId={setHighlightSessionId}
         />
       );
     case 'calendar':
@@ -379,6 +382,8 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onDeleteSession={deleteSession}
           scrollToHistory={scrollToHistory}
           onScrollHandled={() => setScrollToHistory(false)}
+          highlightSessionId={highlightSessionId}
+          onHighlightHandled={() => setHighlightSessionId(null)}
           userProfile={userTrainingProfile}
           exerciseStats={exerciseUserStats}
           calorieProfile={userCalorieProfile}

@@ -9,13 +9,15 @@ import {
   Clock,
   Flame,
   X,
+  ChevronLeft,
   ChevronRight,
   Play,
   ShoppingBag,
   Sparkles,
+  Calendar as CalendarIcon,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, startOfMonth, endOfMonth, startOfWeek, addDays, isSameMonth, addMonths, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
   WorkoutTemplate,
@@ -59,6 +61,8 @@ interface WorkoutsViewProps {
   onCreateAd?: (t: WorkoutTemplate) => void;
   scrollToHistory?: boolean;
   onScrollHandled?: () => void;
+  highlightSessionId?: string | null;
+  onHighlightHandled?: () => void;
   userProfile: UserTrainingProfile;
   exerciseStats: ExerciseUserStats[];
   calorieProfile: UserCalorieProfile;
@@ -401,6 +405,127 @@ function TemplateCard({
 }
 
 
+// ─── Date Filter Calendar ─────────────────────────────────────────────────────
+
+const CAL_DAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'] as const;
+
+function DateFilterCalendar({
+  sessions,
+  selectedDate,
+  onSelect,
+  onClear,
+}: {
+  sessions: WorkoutSession[];
+  selectedDate: string | null;
+  onSelect: (date: string) => void;
+  onClear: () => void;
+}) {
+  const [month, setMonth] = useState(() =>
+    selectedDate ? startOfMonth(parseISO(selectedDate)) : startOfMonth(new Date())
+  );
+
+  const trainedDays = useMemo(() => {
+    const set = new Set<string>();
+    sessions.forEach(s => {
+      try { set.add(format(parseISO(s.date), 'yyyy-MM-dd')); } catch {}
+    });
+    return set;
+  }, [sessions]);
+
+  // Build grid: weeks starting Sunday
+  const gridStart = startOfWeek(startOfMonth(month), { weekStartsOn: 0 });
+  const gridEnd   = endOfMonth(month);
+  const days: Date[] = [];
+  let cursor = gridStart;
+  while (cursor <= gridEnd || days.length % 7 !== 0) {
+    days.push(cursor);
+    cursor = addDays(cursor, 1);
+    if (days.length > 42) break;
+  }
+
+  const today = format(new Date(), 'yyyy-MM-dd');
+
+  return (
+    <div>
+      {/* Month nav */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => setMonth(m => subMonths(m, 1))}
+          className="p-2 text-white/40 hover:text-white active:scale-90 transition-all"
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <span className="text-sm font-black capitalize">
+          {format(month, 'MMMM yyyy', { locale: ptBR })}
+        </span>
+        <button
+          onClick={() => setMonth(m => addMonths(m, 1))}
+          className="p-2 text-white/40 hover:text-white active:scale-90 transition-all"
+        >
+          <ChevronRight size={18} />
+        </button>
+      </div>
+
+      {/* Day labels */}
+      <div className="grid grid-cols-7 mb-1">
+        {CAL_DAYS.map((d, i) => (
+          <div key={i} className="text-center text-[10px] font-black text-white/20 py-1">{d}</div>
+        ))}
+      </div>
+
+      {/* Day cells */}
+      <div className="grid grid-cols-7 gap-y-1">
+        {days.map((day, i) => {
+          const key       = format(day, 'yyyy-MM-dd');
+          const inMonth   = isSameMonth(day, month);
+          const hasTrain  = trainedDays.has(key);
+          const isToday   = key === today;
+          const isSelected = selectedDate === key;
+
+          return (
+            <button
+              key={i}
+              onClick={() => inMonth && onSelect(key)}
+              disabled={!inMonth}
+              className={cn(
+                'aspect-square mx-auto w-9 rounded-xl flex flex-col items-center justify-center relative transition-all active:scale-90',
+                !inMonth && 'opacity-0 pointer-events-none',
+                isSelected && 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]',
+                !isSelected && isToday && 'border border-brand-red/50',
+                !isSelected && !isToday && 'hover:bg-white/5',
+              )}
+            >
+              <span className={cn(
+                'text-xs font-black',
+                isSelected ? 'text-white' : isToday ? 'text-brand-red' : inMonth ? 'text-white/80' : 'text-white/10',
+              )}>
+                {format(day, 'd')}
+              </span>
+              {hasTrain && (
+                <span className={cn(
+                  'w-1 h-1 rounded-full mt-0.5',
+                  isSelected ? 'bg-white/60' : 'bg-brand-red',
+                )} />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Clear button */}
+      {selectedDate && (
+        <button
+          onClick={onClear}
+          className="mt-4 w-full py-2.5 rounded-xl border border-white/10 text-xs font-black text-white/40 hover:text-white hover:border-white/20 transition-colors active:scale-95"
+        >
+          Limpar filtro — ver todos
+        </button>
+      )}
+    </div>
+  );
+}
+
+
 // ─── Session Card ─────────────────────────────────────────────────────────────
 
 function SessionCard({
@@ -498,6 +623,8 @@ export function WorkoutsView({
   onDeleteSession,
   scrollToHistory,
   onScrollHandled,
+  highlightSessionId,
+  onHighlightHandled,
   userProfile,
   exerciseStats,
   calorieProfile,
@@ -511,6 +638,9 @@ export function WorkoutsView({
   const [selectingSheetTemplate, setSelectingSheetTemplate] = useState<WorkoutTemplate | null>(null);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
+  // filterDate: when navigating from Dashboard, shows only sessions from that date
+  const [filterDate, setFilterDate] = useState<string | null>(null);
+  const [showDateFilter, setShowDateFilter] = useState(false);
 
   const sport = useMemo(() => {
     // 1. Logged-in user — use cloud profile specialties
@@ -525,6 +655,19 @@ export function WorkoutsView({
     return 'Musculação';
   }, [mainUserProfile, isLoggedIn]);
   const historyRef = useRef<HTMLDivElement>(null);
+
+  // When arriving from Dashboard with a highlighted session, filter by that day
+  useEffect(() => {
+    if (highlightSessionId) {
+      const session = sessions.find(s => s.id === highlightSessionId);
+      if (session) {
+        try {
+          setFilterDate(format(parseISO(session.date), 'yyyy-MM-dd'));
+        } catch {}
+      }
+      onHighlightHandled?.();
+    }
+  }, [highlightSessionId]);
 
   useEffect(() => {
     if (scrollToHistory && historyRef.current) {
@@ -607,17 +750,59 @@ export function WorkoutsView({
 
         {/* History section */}
         <div ref={historyRef} className="space-y-4">
-          <SectionLabel>Histórico de Sessões</SectionLabel>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-white/30">
+              Histórico de Sessões
+            </p>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {filterDate && (
+                <button
+                  onClick={() => setFilterDate(null)}
+                  className="p-1 text-white/30 hover:text-white transition-colors"
+                  aria-label="Limpar filtro"
+                >
+                  <X size={13} strokeWidth={2.5} />
+                </button>
+              )}
+              <button
+                onClick={() => setShowDateFilter(true)}
+                className={cn(
+                  'relative w-7 h-7 flex items-center justify-center rounded-lg border transition-colors active:scale-95',
+                  filterDate
+                    ? 'bg-brand-red/15 border-brand-red/40 text-brand-red'
+                    : 'bg-white/5 border-white/10 text-white/40',
+                )}
+                aria-label="Filtrar por data"
+              >
+                <CalendarIcon size={13} strokeWidth={2.5} />
+                {filterDate && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-brand-red" />
+                )}
+              </button>
+            </div>
+          </div>
           {sessions.length === 0 ? (
             <div className="text-center py-10 rounded-2xl bg-white/3 border border-white/6">
               <p className="text-white/20 font-bold text-sm">Nenhuma sessão registrada</p>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {sessions
-                .slice()
-                .reverse()
-                .map((session) => (
+          ) : (() => {
+            const displayed = sessions
+              .slice()
+              .reverse()
+              .filter(s => {
+                if (!filterDate) return true;
+                try { return format(parseISO(s.date), 'yyyy-MM-dd') === filterDate; } catch { return false; }
+              });
+            if (displayed.length === 0) {
+              return (
+                <div className="text-center py-10 rounded-2xl bg-white/3 border border-white/6">
+                  <p className="text-white/20 font-bold text-sm">Nenhuma sessão neste dia</p>
+                </div>
+              );
+            }
+            return (
+              <div className="space-y-3">
+                {displayed.map((session) => (
                   <SessionCard
                     key={session.id}
                     session={session}
@@ -626,10 +811,48 @@ export function WorkoutsView({
                     onRequestDelete={setSessionToDelete}
                   />
                 ))}
-            </div>
-          )}
+              </div>
+            );
+          })()}
         </div>
       </div>
+
+      {/* Date Filter Bottom Sheet — full calendar */}
+      <AnimatePresence>
+        {showDateFilter && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDateFilter(false)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: '100%' }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 bg-dark-card border-t border-dark-border rounded-t-3xl p-5 z-[110]"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-black">Filtrar por Data</h3>
+                <button onClick={() => setShowDateFilter(false)} className="p-2 text-white/20 hover:text-white">
+                  <X size={18} />
+                </button>
+              </div>
+
+              <DateFilterCalendar
+                sessions={sessions}
+                selectedDate={filterDate}
+                onSelect={(date) => { setFilterDate(date); setShowDateFilter(false); }}
+                onClear={() => { setFilterDate(null); setShowDateFilter(false); }}
+              />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Sheet Selector Modal */}
       <AnimatePresence>

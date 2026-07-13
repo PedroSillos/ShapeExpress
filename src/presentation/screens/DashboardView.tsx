@@ -1,6 +1,6 @@
 import { useMemo, useRef, useEffect, useState } from 'react';
 import { startOfWeek, parseISO, format, subWeeks, addWeeks, addDays, endOfWeek } from 'date-fns';
-import { Play, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { Play, ChevronLeft, ChevronRight, Check, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 import {
@@ -40,6 +40,8 @@ interface DashboardViewProps {
   studentConnections?: any[];
   trainers?: UserProfile[];
   isLoggedIn?: boolean;
+  setScrollToHistory?: (v: boolean) => void;
+  setHighlightSessionId?: (id: string | null) => void;
 }
 
 /** Map sport name -> brand color (matches WelcomeView SPORTS) */
@@ -132,10 +134,29 @@ const CURRENT_WEEK_INDEX = WEEKS_PAST; // index 2
 
 /** Stacked bar showing 2 past weeks, current week, and 3 future weeks.
  *  On mount the current-week card is scrolled to the vertical center of the viewport. */
-function WeekDayBar({ sessions, weeklyGoal }: { sessions: WorkoutSession[]; weeklyGoal: number }) {
+function WeekDayBar({
+  sessions,
+  weeklyGoal,
+  onDayClick,
+}: {
+  sessions: WorkoutSession[];
+  weeklyGoal: number;
+  onDayClick?: (sessionId: string) => void;
+}) {
   const currentWeekRef = useRef<HTMLDivElement>(null);
   const today          = format(new Date(), 'yyyy-MM-dd');
   const totalWeeks     = WEEKS_PAST + 1 + WEEKS_FUTURE;
+
+  /** Map date string → most recent session id for that day */
+  const sessionByDay = useMemo(() => {
+    const map = new Map<string, string>();
+    // Sort ascending so last write wins (most recent)
+    const sorted = [...sessions].sort((a, b) => a.date.localeCompare(b.date));
+    sorted.forEach(s => {
+      try { map.set(format(parseISO(s.date), 'yyyy-MM-dd'), s.id); } catch {}
+    });
+    return map;
+  }, [sessions]);
 
   const weeks = useMemo(() => {
     const currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 0 });
@@ -147,13 +168,7 @@ function WeekDayBar({ sessions, weeklyGoal }: { sessions: WorkoutSession[]; week
     });
   }, [totalWeeks]);
 
-  const trainedDaySet = useMemo(() => {
-    const set = new Set<string>();
-    sessions.forEach(s => {
-      try { set.add(format(parseISO(s.date), 'yyyy-MM-dd')); } catch {}
-    });
-    return set;
-  }, [sessions]);
+  const trainedDaySet = useMemo(() => new Set(sessionByDay.keys()), [sessionByDay]);
 
   // Scroll current week to the vertical center of the viewport on mount
   useEffect(() => {
@@ -188,45 +203,57 @@ function WeekDayBar({ sessions, weeklyGoal }: { sessions: WorkoutSession[]; week
               )}>
                 {weekLabel}
               </p>
-              <p className={cn(
-                'text-xs font-black uppercase tracking-widest',
-                isCurrent ? 'text-white/60' : 'text-white/30',
-              )}>
-                {trainedCount}/{weeklyGoal}
-              </p>
+              <div className="flex items-center gap-1">
+                {trainedCount >= weeklyGoal
+                  ? <Check size={11} strokeWidth={3.5} className={cn(isCurrent ? 'text-white/60' : 'text-white/30')} />
+                  : weekIdx < CURRENT_WEEK_INDEX && (
+                      <X size={11} strokeWidth={3.5} className={cn(isCurrent ? 'text-white/60' : 'text-white/30')} />
+                    )
+                }
+                <p className={cn(
+                  'text-xs font-black uppercase tracking-widest',
+                  isCurrent ? 'text-white/60' : 'text-white/30',
+                )}>
+                  {trainedCount}/{weeklyGoal}
+                </p>
+              </div>
             </div>
 
             <div className="flex items-end justify-between gap-1">
               {WEEK_DAYS.map((label, dayIdx) => {
-                const dayKey  = format(addDays(weekStart, dayIdx), 'yyyy-MM-dd');
-                const trained = trainedDaySet.has(dayKey);
-                const isToday = dayKey === today;
+                const dayKey    = format(addDays(weekStart, dayIdx), 'yyyy-MM-dd');
+                const trained   = trainedDaySet.has(dayKey);
+                const isToday   = dayKey === today;
+                const isPast    = dayKey < today;
+                const clickable = trained && isPast && !!onDayClick;
 
                 return (
                   <div
                     key={label}
                     className={cn('flex flex-col items-center gap-2', isToday ? 'flex-[1.25]' : 'flex-1')}
                   >
-                    <div className={cn(
-                      'w-full rounded-lg transition-colors duration-300 flex items-center justify-center',
-                      isToday ? 'h-10' : 'h-8',
-                      trained
-                        ? 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]'
-                        : isToday
+                    <div
+                      onClick={clickable ? () => onDayClick!(sessionByDay.get(dayKey)!) : undefined}
+                      className={cn(
+                        'w-full rounded-lg transition-colors duration-300 flex items-center justify-center',
+                        isToday ? 'h-10' : 'h-8',
+                        clickable && 'cursor-pointer active:scale-95',
+                        trained && isToday
                           ? 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]'
-                          : isCurrent
-                            ? 'bg-brand-red/10'
-                            : 'bg-white/5',
-                    )}>
-                      {isToday && (
-                        trained
-                          ? <Check size={16} color="white" strokeWidth={3} />
-                          : <Play size={14} fill="white" color="white" />
-                      )}
+                          : trained
+                            ? 'bg-brand-red/30'
+                            : isToday
+                              ? 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]'
+                              : 'bg-white/5',
+                      )}>
+                      {trained
+                        ? <Check size={isToday ? 16 : 13} color={isToday ? 'white' : 'rgba(255,255,255,0.45)'} strokeWidth={3} />
+                        : isToday && <Play size={14} fill="white" color="white" />
+                      }
                     </div>
                     <span className={cn(
                       'text-[10px] font-black uppercase tracking-wide',
-                      trained ? 'text-white' : isToday ? 'text-white' : isCurrent ? 'text-white/30' : 'text-white/15',
+                      isToday ? 'text-white' : 'text-white/30',
                     )}>
                       {label}
                     </span>
@@ -249,6 +276,8 @@ export function DashboardView({
   switchTab,
   mainUserProfile,
   isLoggedIn,
+  setScrollToHistory,
+  setHighlightSessionId,
 }: DashboardViewProps) {
   // Sports: from profile or welcome-answers fallback
   const sports = useMemo(() => {
@@ -372,7 +401,15 @@ export function DashboardView({
 
       {/* ── Scrollable weeks ── */}
       <div className="flex-1 overflow-y-auto pt-3">
-        <WeekDayBar sessions={sessions} weeklyGoal={weeklyGoal} />
+        <WeekDayBar
+          sessions={sessions}
+          weeklyGoal={weeklyGoal}
+          onDayClick={(sessionId) => {
+            setHighlightSessionId?.(sessionId);
+            setScrollToHistory?.(true);
+            switchTab('workouts');
+          }}
+        />
       </div>
     </div>
   );

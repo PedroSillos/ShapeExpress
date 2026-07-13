@@ -54,6 +54,7 @@ export const useWorkoutState = (
   const [showWorkoutSelector, setShowWorkoutSelector] = useState(false);
   const [selectingSheetTemplate, setSelectingSheetTemplate] = useState<WorkoutTemplate | null>(null);
   const [scrollToHistory, setScrollToHistory] = useState(false);
+  const [highlightSessionId, setHighlightSessionId] = useState<string | null>(null);
 
   const email = currentUser?.email || token || localStorage.getItem(STORAGE_KEYS.TOKEN);
 
@@ -240,6 +241,7 @@ export const useWorkoutState = (
     showWorkoutSelector, setShowWorkoutSelector,
     selectingSheetTemplate, setSelectingSheetTemplate,
     scrollToHistory, setScrollToHistory,
+    highlightSessionId, setHighlightSessionId,
     filteredTemplates, userSessions, filteredSessions,
     getTemplates, createTemplate, updateTemplate, deleteTemplate,
     getSessions, createSession, updateSession, deleteSession,
