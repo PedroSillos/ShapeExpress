@@ -102,6 +102,8 @@ interface WorkoutsViewProps {
   mainUserProfile: UserProfile;
   trainers?: UserProfile[];
   isLoggedIn?: boolean;
+  initialOpenCreateMenu?: boolean;
+  onCreateMenuMounted?: () => void;
 }
 
 
@@ -738,11 +740,22 @@ export function WorkoutsView({
   trainers = [],
   onCreateAd,
   isLoggedIn,
+  initialOpenCreateMenu,
+  onCreateMenuMounted,
 }: WorkoutsViewProps) {
   const [openSettingsId, setOpenSettingsId] = useState<string | null>(null);
   const [selectingSheetTemplate, setSelectingSheetTemplate] = useState<WorkoutTemplate | null>(null);
-  const [showCreateMenu, setShowCreateMenu] = useState(false);
+  const [showCreateMenu, setShowCreateMenu] = useState(!!initialOpenCreateMenu);
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
+
+  // Open the create menu whenever the parent signals it (works even if component was already mounted)
+  useEffect(() => {
+    if (initialOpenCreateMenu) {
+      setShowCreateMenu(true);
+      onCreateMenuMounted?.();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialOpenCreateMenu]);
   const [showAISportPicker, setShowAISportPicker] = useState(false);
   const [aiSelectedSport, setAiSelectedSport] = useState<string>('');
   // filterDate: when navigating from Dashboard, shows only sessions from that date

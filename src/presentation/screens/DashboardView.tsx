@@ -1,6 +1,6 @@
 import { useMemo, useRef, useEffect, useState } from 'react';
 import { startOfWeek, parseISO, format, subWeeks, addWeeks, addDays, endOfWeek } from 'date-fns';
-import { Play, ChevronRight, Check, X } from 'lucide-react';
+import { Play, Check, X, Plus } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 import {
@@ -42,6 +42,7 @@ interface DashboardViewProps {
   isLoggedIn?: boolean;
   setScrollToHistory?: (v: boolean) => void;
   setHighlightSessionId?: (id: string | null) => void;
+  onAddWorkout?: () => void;
 }
 
 /** Map sport name -> brand color (matches WelcomeView SPORTS) */
@@ -93,14 +94,14 @@ function calcGoalStreak(sessions: WorkoutSession[], weeklyGoal: number): number 
   sessions.forEach(s => {
     try {
       const dayKey  = format(parseISO(s.date), 'yyyy-MM-dd');
-      const weekKey = format(startOfWeek(parseISO(s.date), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+      const weekKey = format(startOfWeek(parseISO(s.date), { weekStartsOn: 0 }), 'yyyy-MM-dd');
       if (!byWeek[weekKey]) byWeek[weekKey] = new Set();
       byWeek[weekKey].add(dayKey);
     } catch {}
   });
 
   let streak = 0;
-  let weekCursor = startOfWeek(new Date(), { weekStartsOn: 1 });
+  let weekCursor = startOfWeek(new Date(), { weekStartsOn: 0 });
 
   for (let i = 0; i < 104; i++) {
     const key        = format(weekCursor, 'yyyy-MM-dd');
@@ -426,6 +427,7 @@ export function DashboardView({
   isLoggedIn,
   setScrollToHistory,
   setHighlightSessionId,
+  onAddWorkout,
 }: DashboardViewProps) {
   // Sports derived from existing templates (unique sports across all templates)
   const templateSports = useMemo(() => {
@@ -462,7 +464,7 @@ export function DashboardView({
   const goalStreak = useMemo(() => calcGoalStreak(sessions, mainUserProfile.weeklyGoal ?? 3), [sessions, mainUserProfile.weeklyGoal]);
 
   const completedThisWeek = useMemo(() => {
-    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+    const weekStart = startOfWeek(new Date(), { weekStartsOn: 0 });
     return sessions.filter(s => { try { return parseISO(s.date) >= weekStart; } catch { return false; } }).length;
   }, [sessions]);
 
@@ -504,12 +506,6 @@ export function DashboardView({
                   alt={currentSport}
                 />
               </div>
-              {templateSports.length > 1 && (
-                <ChevronRight
-                  size={12}
-                  className={cn('text-white/30 transition-transform duration-200', showSportMenu && 'rotate-90')}
-                />
-              )}
             </button>
 
             {/* Dropdown anchored below the icon */}
@@ -548,9 +544,18 @@ export function DashboardView({
                           alt={s}
                           className="w-6 h-6 brightness-0 invert"
                         />
-                        <span className="text-[9px] font-black text-white text-center leading-tight">{s}</span>
+                        <span className="text-[9px] font-black text-white text-center leading-tight min-h-[2.2em] flex items-center justify-center">{s}</span>
                       </button>
                     ))}
+                    {onAddWorkout && (
+                      <button
+                        onClick={() => { setShowSportMenu(false); onAddWorkout(); }}
+                        className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl border border-white/15 bg-white/5 active:scale-95 transition-all w-16 opacity-70 hover:opacity-100"
+                      >
+                        <Plus size={24} className="text-white w-6 h-6" />
+                        <span className="text-[9px] font-black text-white text-center leading-tight min-h-[2.2em] flex items-center justify-center">Novo</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </>
@@ -603,7 +608,7 @@ export function DashboardView({
           </button>
         ) : (
           <button
-            onClick={() => switchTab('workouts')}
+            onClick={() => { switchTab('workouts'); onAddWorkout?.(); }}
             className="mx-6 mt-3 w-[calc(100%-3rem)] rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-all border border-white/10"
             style={{
               background: `linear-gradient(135deg, color-mix(in srgb, ${SPORT_COLORS[currentSport] ?? '#dc2626'} 80%, #000) 0%, ${SPORT_COLORS[currentSport] ?? '#dc2626'} 100%)`,

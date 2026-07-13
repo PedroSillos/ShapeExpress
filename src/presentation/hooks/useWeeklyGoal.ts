@@ -19,14 +19,14 @@ export function useWeeklyGoal({ isLoggedIn, userSessions, userStats, userProfile
 
     const lastCheck = localStorage.getItem(STORAGE_KEYS.LAST_GOAL_CHECK);
     const now = new Date();
-    const currentWeekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const currentWeekStart = startOfWeek(now, { weekStartsOn: 0 });
 
     if (lastCheck) {
-      const lastCheckWeekStart = startOfWeek(parseISO(lastCheck), { weekStartsOn: 1 });
+      const lastCheckWeekStart = startOfWeek(parseISO(lastCheck), { weekStartsOn: 0 });
 
       if (currentWeekStart > lastCheckWeekStart) {
         const previousWeekStart = subWeeks(currentWeekStart, 1);
-        const previousWeekEnd = endOfWeek(previousWeekStart, { weekStartsOn: 1 });
+        const previousWeekEnd = endOfWeek(previousWeekStart, { weekStartsOn: 0 });
 
         const sessionsInPreviousWeek = userSessions.filter(s =>
           isWithinInterval(parseISO(s.date), { start: previousWeekStart, end: previousWeekEnd }),
