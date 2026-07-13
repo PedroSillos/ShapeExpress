@@ -23,6 +23,7 @@ import { ptBR } from 'date-fns/locale';
 import {
   WorkoutTemplate,
   WorkoutSession,
+  WorkoutTemplateExercise,
   UserTrainingProfile,
   ExerciseUserStats,
   UserCalorieProfile,
@@ -45,6 +46,34 @@ import iconAlarm from '@/src/assets/icons/icon-alarm.svg';
 import iconZap from '@/src/assets/icons/icon-zap.svg';
 import iconTrophy from '@/src/assets/icons/icon-trophy.svg';
 import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
+import iconCorrida from '@/src/assets/icons/icon-corrida.svg';
+import iconCiclismo from '@/src/assets/icons/icon-ciclismo.svg';
+import iconNatacao from '@/src/assets/icons/icon-natacao.svg';
+import iconCrossfit from '@/src/assets/icons/icon-crossfit.svg';
+import iconTriatlo from '@/src/assets/icons/icon-triatlo.svg';
+import iconYoga from '@/src/assets/icons/icon-yoga.svg';
+
+const SPORT_ICONS: Record<string, string> = {
+  'Musculação':     iconMusculacao,
+  'Halterofilismo': iconHalterofilismo,
+  'Corrida':        iconCorrida,
+  'Ciclismo':       iconCiclismo,
+  'Natação':        iconNatacao,
+  'Crossfit':       iconCrossfit,
+  'Triatlo':        iconTriatlo,
+  'Yoga':           iconYoga,
+};
+
+const SPORT_COLORS: Record<string, string> = {
+  'Musculação':     '#dc2626',
+  'Crossfit':       '#ea580c',
+  'Corrida':        '#ca8a04',
+  'Yoga':           '#16a34a',
+  'Natação':        '#2563eb',
+  'Ciclismo':       '#0891b2',
+  'Halterofilismo': '#7c3aed',
+  'Triatlo':        '#db2777',
+};
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -131,6 +160,7 @@ function WorkoutsHeader({ sessionCount, sport }: { sessionCount: number; sport: 
 
 interface TemplateCardProps {
   template: WorkoutTemplate;
+  sport: string;
   sessions: WorkoutSession[];
   userProfile: UserTrainingProfile;
   exerciseStats: ExerciseUserStats[];
@@ -150,6 +180,7 @@ interface TemplateCardProps {
 
 function TemplateCard({
   template,
+  sport,
   sessions,
   userProfile,
   exerciseStats,
@@ -212,17 +243,6 @@ function TemplateCard({
 
   const nextSheetInfo = getNextSheetInfo();
 
-  const totalExercises =
-    template.category === 'multicycle'
-      ? template.cycles?.reduce(
-          (acc, c) =>
-            acc + c.sheets.reduce((sAcc, s) => sAcc + (s.exerciseIds?.length || s.exercises?.length || 0), 0),
-          0
-        )
-      : hasSheets
-      ? template.sheets!.reduce((acc, s) => acc + (s.exerciseIds?.length || s.exercises?.length || 0), 0)
-      : template.exerciseIds?.length || template.exercises?.length || 0;
-
   const trainer =
     template.creatorEmail && template.creatorEmail !== mainUserProfile.email
       ? trainers.find((t) => t.email === template.creatorEmail)
@@ -244,10 +264,14 @@ function TemplateCard({
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-dark-card border border-dark-border rounded-3xl overflow-hidden"
+      className="rounded-3xl overflow-hidden"
+      style={{
+        background: `linear-gradient(145deg, color-mix(in srgb, ${SPORT_COLORS[sport] ?? '#dc2626'} 8%, #1a1a1a) 0%, #151515 60%)`,
+        border: `1px solid color-mix(in srgb, ${SPORT_COLORS[sport] ?? '#dc2626'} 30%, transparent)`,
+      }}
     >
       {/* Top accent stripe */}
-      <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #E53E3E, #E05C2A)' }} />
+      <div className="h-1 w-full" style={{ background: SPORT_COLORS[sport] ?? '#dc2626' }} />
 
       <div className="p-4 space-y-4">
         {/* Header row */}
@@ -294,7 +318,18 @@ function TemplateCard({
           </div>
 
           {/* Settings menu */}
-          <div className="relative shrink-0">
+          <div className="relative shrink-0 flex items-center gap-1">
+            {/* Sport icon */}
+            <div
+              className="w-8 h-8 rounded-xl flex items-center justify-center"
+              style={{ backgroundColor: SPORT_COLORS[sport] ?? '#dc2626' }}
+            >
+              <img
+                src={SPORT_ICONS[sport] ?? iconMusculacao}
+                alt={sport}
+                className="w-4 h-4 brightness-0 invert"
+              />
+            </div>
             <button
               onClick={() => setOpenSettingsId(openSettingsId === template.id ? null : template.id)}
               className="p-2 text-white/20 hover:text-white transition-colors"
@@ -336,50 +371,32 @@ function TemplateCard({
           </div>
         </div>
 
-        {/* Stats row */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/6 border border-white/8">
-            <Dumbbell size={11} className="text-white/40" />
-            <span className="text-[10px] font-bold text-white/50">
-              {template.category === 'multicycle'
-                ? `${template.cycles?.length || 0} ciclos`
-                : hasSheets
-                ? `${template.sheets!.length} ${template.sheets!.length === 1 ? 'ficha' : 'fichas'}`
-                : `${totalExercises} exerc.`}
-            </span>
-          </div>
-          {nextSheetInfo && (
-            <>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/6 border border-white/8">
-                <Clock size={11} className="text-white/40" />
-                <span className="text-[10px] font-bold text-white/50">
-                  {estimateWorkoutDuration(nextSheetInfo.sheet.exercises, userProfile, exerciseStats)} min
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/6 border border-white/8">
-                <Flame size={11} className="text-orange-400/70" />
-                <span className="text-[10px] font-bold text-orange-400/70">
-                  {Math.round(
-                    estimateWorkoutCalories(
-                      nextSheetInfo.sheet.exercises,
-                      assessments.length > 0 ? assessments[0].weight : mainUserProfile?.initialWeight,
-                      userProfile,
-                      exerciseStats,
-                      calorieProfile
-                    )
-                  )}{' '}
-                  kcal
-                </span>
-              </div>
-            </>
-          )}
-          {completedCount > 0 && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-red/10 border border-brand-red/20">
-              <img src={iconTrophy} alt="" className="w-2.5 h-2.5 brightness-0 invert opacity-60" />
-              <span className="text-[10px] font-bold text-brand-red/80">{completedCount}×</span>
+        {/* Stats row — only shown when there's an active sheet with estimates */}
+        {nextSheetInfo && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/6 border border-white/8">
+              <Clock size={11} className="text-white/40" />
+              <span className="text-[10px] font-bold text-white/50">
+                {estimateWorkoutDuration(nextSheetInfo.sheet.exercises, userProfile, exerciseStats)} min
+              </span>
             </div>
-          )}
-        </div>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/6 border border-white/8">
+              <Flame size={11} className="text-orange-400/70" />
+              <span className="text-[10px] font-bold text-orange-400/70">
+                {Math.round(
+                  estimateWorkoutCalories(
+                    nextSheetInfo.sheet.exercises,
+                    assessments.length > 0 ? assessments[0].weight : mainUserProfile?.initialWeight,
+                    userProfile,
+                    exerciseStats,
+                    calorieProfile
+                  )
+                )}{' '}
+                kcal
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Next session pill (duolingo style) */}
         {nextSheetInfo && (
@@ -409,30 +426,73 @@ function TemplateCard({
           </button>
         )}
 
-        {/* Basic template without sheets */}
-        {!nextSheetInfo && !hasSheets && template.exercises && template.exercises.length > 0 && (
-          <button
-            onClick={() => onStartWorkout(template)}
-            className="w-full flex items-center justify-between p-3.5 rounded-2xl active:scale-95 transition-all border"
-            style={{
-              background: 'linear-gradient(135deg, rgba(229,62,62,0.12) 0%, rgba(224,92,42,0.08) 100%)',
-              borderColor: 'rgba(229,62,62,0.25)',
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-brand-red/20 flex items-center justify-center shrink-0">
-                <img src={iconHalterofilismo} alt="" className="w-5 h-5 brightness-0 invert" />
-              </div>
-              <div className="text-left">
-                <p className="text-xs font-black text-white">{template.exercises.length} exercícios</p>
-                <p className="text-[10px] text-white/40 font-bold mt-0.5">Toque para iniciar</p>
-              </div>
+
+
+        {/* Exercise list */}
+        {(() => {
+          // Collect sheets to display
+          let sheetsToShow: { label: string | null; exercises: WorkoutTemplateExercise[] }[] = [];
+
+          if (template.category === 'multicycle') {
+            // Show only the active cycle's sheets (same logic as nextSheetInfo)
+            const now = new Date();
+            const activeCycle = template.cycles?.find(c => {
+              const start = parseISO(c.startDate);
+              const end = parseISO(c.endDate);
+              return now >= start && now <= end;
+            }) ?? template.cycles?.[0];
+            if (activeCycle) {
+              sheetsToShow = activeCycle.sheets.map(s => ({
+                label: s.name,
+                exercises: s.exercises ?? [],
+              }));
+            }
+          } else if (hasSheets && template.sheets) {
+            sheetsToShow = template.sheets.map(s => ({
+              label: template.sheets!.length > 1 ? s.name : null,
+              exercises: s.exercises ?? [],
+            }));
+          } else if (template.exercises && template.exercises.length > 0) {
+            sheetsToShow = [{ label: null, exercises: template.exercises }];
+          }
+
+          if (sheetsToShow.length === 0) return null;
+
+          return (
+            <div className="space-y-3">
+              {sheetsToShow.map((sheet, si) => (
+                <div key={si} className="space-y-1.5">
+                  {sheet.label && (
+                    <p className="text-[10px] font-black text-white/30 uppercase tracking-widest px-1">
+                      {sheet.label}
+                    </p>
+                  )}
+                  {sheet.exercises.map((ex, idx) => {
+                    const exercise = EXERCISES.find(e => e.id === ex.exerciseId);
+                    if (!exercise) return null;
+                    return (
+                      <div
+                        key={ex.exerciseId + idx}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/4 border border-white/6"
+                      >
+                        <span className="text-sm font-black text-white/30 w-5 shrink-0 text-center tabular-nums">
+                          {idx + 1}
+                        </span>
+                        <span className="w-px h-4 bg-white/10 shrink-0" />
+                        <span className="text-sm font-bold text-white/80 flex-1 truncate">
+                          {exercise.name}
+                        </span>
+                        <span className="text-xs font-bold text-white/40 shrink-0 tabular-nums">
+                          {ex.numSets} × {ex.sets}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
-            <div className="w-8 h-8 rounded-xl bg-brand-red flex items-center justify-center shrink-0 shadow-lg shadow-brand-red/40">
-              <Play size={14} className="text-white fill-white ml-0.5" />
-            </div>
-          </button>
-        )}
+          );
+        })()}
 
         {mainUserProfile.userType === 'treinador' && onCreateAd && (
           <button
@@ -773,6 +833,7 @@ export function WorkoutsView({
               <TemplateCard
                 key={template.id}
                 template={template}
+                sport={template.sport ?? sport}
                 sessions={sessions}
                 userProfile={userProfile}
                 exerciseStats={exerciseStats}

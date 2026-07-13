@@ -8,6 +8,7 @@ import { EXERCISES } from '../../constants';
 import { Card } from '../components/Card';
 import { ConfigureExercisesView } from '../components/ConfigureExercisesView';
 import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
+import { ALL_SPORTS } from '../../features/sports/constants';
 import { 
   WorkoutTemplate, 
   WorkoutCycle, 
@@ -55,7 +56,7 @@ export function CreateWorkoutView({
     return [{ id: Math.random().toString(36).substr(2, 9), name: '', order: 0, exerciseIds: [], exercises: [] }];
   });
 
-  const sport = useMemo(() => {
+  const defaultSport = useMemo(() => {
     if (userProfile?.specialties?.length) return userProfile.specialties[0];
     try {
       const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
@@ -64,6 +65,12 @@ export function CreateWorkoutView({
     return 'Musculação';
   }, [userProfile]);
 
+  const [selectedSport, setSelectedSport] = useState<string>(
+    initialTemplate?.sport ?? defaultSport
+  );
+
+  const sport = selectedSport;
+
   // Draft saving logic
   useEffect(() => {
     if (initialTemplate) return; // Don't save drafts when editing existing templates
@@ -71,6 +78,7 @@ export function CreateWorkoutView({
     const draft = {
       protocolName,
       category,
+      selectedSport,
       startDate,
       endDate,
       cycles,
@@ -79,7 +87,7 @@ export function CreateWorkoutView({
       step
     };
     localStorage.setItem(STORAGE_KEYS.WORKOUT_DRAFT, JSON.stringify(draft));
-  }, [protocolName, category, startDate, endDate, cycles, numSheets, sheets, step, initialTemplate]);
+  }, [protocolName, category, selectedSport, startDate, endDate, cycles, numSheets, sheets, step, initialTemplate]);
 
   // Load draft on mount
   useEffect(() => {
@@ -94,6 +102,7 @@ export function CreateWorkoutView({
           if (confirm('Você tem um rascunho de treino não finalizado. Deseja continuar de onde parou?')) {
             setProtocolName(draft.protocolName);
             setCategory(draft.category);
+            if (draft.selectedSport) setSelectedSport(draft.selectedSport);
             setStartDate(draft.startDate);
             setEndDate(draft.endDate);
             setCycles(draft.cycles);
@@ -238,6 +247,7 @@ export function CreateWorkoutView({
         id: initialTemplate?.id || Date.now().toString(),
         userId: studentEmail,
         name: protocolName,
+        sport: selectedSport,
         category,
         startDate,
         endDate,
@@ -264,6 +274,7 @@ export function CreateWorkoutView({
       id: initialTemplate?.id || Date.now().toString(),
       userId: studentEmail,
       name: protocolName,
+      sport: selectedSport,
       category,
       startDate,
       endDate,
@@ -313,18 +324,18 @@ export function CreateWorkoutView({
         {/* Header */}
         <div
           className="relative overflow-hidden -mx-6 mb-6"
-          style={{ background: 'linear-gradient(135deg, #C0392B 0%, #E74C3C 60%, #E05C2A 100%)' }}
+          style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${ALL_SPORTS.find(s => s.id === selectedSport)?.bg ?? '#C0392B'} 80%, #000) 0%, ${ALL_SPORTS.find(s => s.id === selectedSport)?.bg ?? '#E74C3C'} 100%)` }}
         >
           <div className="px-6 pt-10 pb-8 flex items-end justify-between">
             <div className="space-y-1">
               <h1 className="text-3xl font-black text-white leading-tight">
                 {initialTemplate ? 'Editar treino' : 'Novo treino'}
               </h1>
-              <p className="text-white/70 text-sm font-semibold">{sport}</p>
+              <p className="text-white/70 text-sm font-semibold">{selectedSport}</p>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
-                <img src={iconMusculacao} alt="" className="w-12 h-12 brightness-0 invert" />
+                <img src={ALL_SPORTS.find(s => s.id === selectedSport)?.icon ?? iconMusculacao} alt="" className="w-12 h-12 brightness-0 invert" />
               </div>
             </div>
           </div>
@@ -349,6 +360,28 @@ export function CreateWorkoutView({
               placeholder="Ex: Hipertrofia Elite"
               className="w-full bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-1">Modalidade</label>
+            <div className="grid grid-cols-4 gap-2">
+              {ALL_SPORTS.map(s => (
+                <button
+                  key={s.id}
+                  onClick={() => setSelectedSport(s.id)}
+                  className={cn(
+                    'flex flex-col items-center gap-1.5 p-2.5 rounded-2xl border transition-all',
+                    selectedSport === s.id
+                      ? 'border-transparent scale-105'
+                      : 'bg-white/5 border-white/10 opacity-50'
+                  )}
+                  style={selectedSport === s.id ? { backgroundColor: s.bg, borderColor: s.bg } : {}}
+                >
+                  <img src={s.icon} alt={s.label} className="w-5 h-5 brightness-0 invert" />
+                  <span className="text-[9px] font-black text-white text-center leading-tight">{s.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-2">

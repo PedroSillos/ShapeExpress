@@ -61,6 +61,7 @@ export function generateFirstWorkout(sports: string[], userEmail: string, experi
     userId: userEmail,
     creatorEmail: userEmail,
     name: `Treino Básico: ${sportLabel}`,
+    sport: sports[0] ?? 'Musculação',
     category: 'basic',
     startDate: now.toISOString(),
     endDate: end.toISOString(),

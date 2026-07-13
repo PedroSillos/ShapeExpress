@@ -163,6 +163,7 @@ export interface WorkoutTemplate {
   userId?: string;
   creatorEmail?: string;
   name: string;
+  sport?: string;
   category: WorkoutCategory;
   startDate: string;
   endDate: string;
