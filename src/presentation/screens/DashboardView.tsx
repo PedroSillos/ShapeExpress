@@ -251,12 +251,14 @@ function WeekDayBar({
   sessions,
   templates,
   weeklyGoal,
+  currentSport,
   onDayClick,
   onTodayClick,
 }: {
   sessions: WorkoutSession[];
   templates: WorkoutTemplate[];
   weeklyGoal: number;
+  currentSport: string;
   onDayClick?: (sessionId: string) => void;
   onTodayClick?: () => void;
 }) {
@@ -363,10 +365,11 @@ function WeekDayBar({
                     )]
                   : [];
 
+                const todaySportColor = SPORT_COLORS[currentSport] ?? '#dc2626';
                 const bg = trained
                   ? dayBgStyle(daySports, isToday)
                   : isToday
-                    ? { className: '', style: { background: PRISMATIC_BG, boxShadow: PRISMATIC_SHADOW } }
+                    ? { className: '', style: { backgroundColor: todaySportColor, boxShadow: `0 2px 0 0 ${todaySportColor}99` } }
                     : { className: 'bg-white/5' };
 
                 return (
@@ -424,23 +427,44 @@ export function DashboardView({
   setScrollToHistory,
   setHighlightSessionId,
 }: DashboardViewProps) {
-  // Sports: from profile or welcome-answers fallback
-  const sports = useMemo(() => {
-    // 1. Logged-in user — use cloud profile specialties
-    if (mainUserProfile?.specialties?.length) return mainUserProfile.specialties;
-    // 2. Guest/onboarding — fallback to local answers
-    if (!isLoggedIn) {
-      try {
-        const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
-        if (wa?.sports?.length) return wa.sports as string[];
-      } catch {}
+  // Sports derived from existing templates (unique sports across all templates)
+  const templateSports = useMemo(() => {
+    const seen = new Set<string>();
+    const result: string[] = [];
+    templates.forEach(t => {
+      const s = t.sport ?? getSportForWorkout(t.id, templates);
+      if (s && !seen.has(s)) { seen.add(s); result.push(s); }
+    });
+    // Fallback: profile or onboarding answers if no templates yet
+    if (result.length === 0) {
+      if (mainUserProfile?.specialties?.length) return mainUserProfile.specialties;
+      if (!isLoggedIn) {
+        try {
+          const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
+          if (wa?.sports?.length) return wa.sports as string[];
+        } catch {}
+      }
+      return ['Musculação'];
     }
-    return ['Musculação'];
-  }, [mainUserProfile, isLoggedIn]);
+    return result;
+  }, [templates, mainUserProfile, isLoggedIn]);
 
   const [sportIdx, setSportIdx] = useState(0);
+
+  // Auto-cycle through template sports every 3s
+  useEffect(() => {
+    if (templateSports.length <= 1) return;
+    const id = setInterval(() => setSportIdx(i => (i + 1) % templateSports.length), 3000);
+    return () => clearInterval(id);
+  }, [templateSports.length]);
+
+  // Keep sportIdx in bounds if templateSports changes
+  useEffect(() => {
+    setSportIdx(i => Math.min(i, Math.max(0, templateSports.length - 1)));
+  }, [templateSports.length]);
+
   const [showWorkoutPicker, setShowWorkoutPicker] = useState(false);
-  const currentSport = sports[sportIdx] ?? sports[0];
+  const currentSport = templateSports[sportIdx] ?? templateSports[0];
 
   const goalStreak = useMemo(() => calcGoalStreak(sessions, mainUserProfile.weeklyGoal ?? 3), [sessions, mainUserProfile.weeklyGoal]);
 
@@ -452,11 +476,15 @@ export function DashboardView({
     return sessions.filter(s => { try { return parseISO(s.date) >= weekStart; } catch { return false; } }).length;
   }, [sessions]);
 
-  const lastSession = sessions[0] ?? null;
-  const currentTemplateIdx = lastSession
-    ? Math.max(0, templates.findIndex(t => t.id === lastSession.workoutId))
-    : 0;
-  const currentTemplate = templates[currentTemplateIdx] ?? null;
+  // currentTemplate: most recently used template of the active sport
+  const currentTemplate = useMemo(() => {
+    const sportTemplates = templates.filter(t => (t.sport ?? getSportForWorkout(t.id, templates)) === currentSport);
+    if (sportTemplates.length === 0) return templates[0] ?? null;
+    // Sort by most recent session
+    const lastSessionDate = (t: typeof templates[0]) =>
+      sessions.filter(s => s.workoutId === t.id).map(s => s.date).sort().at(-1) ?? '';
+    return [...sportTemplates].sort((a, b) => lastSessionDate(b).localeCompare(lastSessionDate(a)))[0];
+  }, [templates, sessions, currentSport]);
 
   // Trail: one node per weekly goal slot. Nodes up to completedThisWeek are "done",
   const weeklyGoal = Math.max(1, mainUserProfile.weeklyGoal ?? 3);
@@ -469,8 +497,8 @@ export function DashboardView({
         <div className="flex items-center justify-between px-6 py-3 border-b border-white/5 mt-2">
           {/* Sport selector */}
           <div className="flex items-center gap-1">
-            {sports.length > 1 && (
-              <button onClick={() => setSportIdx(i => (i - 1 + sports.length) % sports.length)} className="text-white/30 active:text-white">
+            {templateSports.length > 1 && (
+              <button onClick={() => setSportIdx(i => (i - 1 + templateSports.length) % templateSports.length)} className="text-white/30 active:text-white">
                 <ChevronLeft size={14} />
               </button>
             )}
@@ -482,8 +510,8 @@ export function DashboardView({
               />
             </div>
             <span className="font-bold text-sm ml-1" style={{ color: SPORT_COLORS[currentSport] ?? '#dc2626' }}>{completedWeeks + 1}</span>
-            {sports.length > 1 && (
-              <button onClick={() => setSportIdx(i => (i + 1) % sports.length)} className="text-white/30 active:text-white">
+            {templateSports.length > 1 && (
+              <button onClick={() => setSportIdx(i => (i + 1) % templateSports.length)} className="text-white/30 active:text-white">
                 <ChevronRight size={14} />
               </button>
             )}
@@ -517,30 +545,36 @@ export function DashboardView({
         {currentTemplate ? (
           <button
             onClick={() => onStartWorkout(currentTemplate)}
-            className="mx-6 mt-3 w-[calc(100%-3rem)] rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform border border-white/10"
-            style={{ background: PRISMATIC_BG, boxShadow: PRISMATIC_SHADOW_LG }}
+            className="mx-6 mt-3 w-[calc(100%-3rem)] rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-all border border-white/10"
+            style={{
+              background: `linear-gradient(135deg, color-mix(in srgb, ${SPORT_COLORS[currentSport] ?? '#dc2626'} 80%, #000) 0%, ${SPORT_COLORS[currentSport] ?? '#dc2626'} 100%)`,
+              boxShadow: `0 4px 0 0 color-mix(in srgb, ${SPORT_COLORS[currentSport] ?? '#dc2626'} 60%, #000)`,
+            }}
           >
             <div className="text-left">
-              <p className="text-[10px] font-black uppercase tracking-widest text-white/50">
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/70">
                 {completedThisWeek} de {mainUserProfile.weeklyGoal ?? 3} essa semana
               </p>
               <p className="font-black text-white text-base leading-tight">{currentTemplate.name}</p>
             </div>
-            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center shrink-0">
-              <Play size={20} fill="white" color="white" />
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+              <img src={SPORT_ICONS[currentSport] ?? iconMusculacao} alt="" className="w-5 h-5 brightness-0 invert" />
             </div>
           </button>
         ) : (
           <button
             onClick={() => switchTab('workouts')}
-            className="mx-6 mt-3 w-[calc(100%-3rem)] rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform border border-white/10"
-            style={{ background: PRISMATIC_BG, boxShadow: PRISMATIC_SHADOW_LG }}
+            className="mx-6 mt-3 w-[calc(100%-3rem)] rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-all border border-white/10"
+            style={{
+              background: `linear-gradient(135deg, color-mix(in srgb, ${SPORT_COLORS[currentSport] ?? '#dc2626'} 80%, #000) 0%, ${SPORT_COLORS[currentSport] ?? '#dc2626'} 100%)`,
+              boxShadow: `0 4px 0 0 color-mix(in srgb, ${SPORT_COLORS[currentSport] ?? '#dc2626'} 60%, #000)`,
+            }}
           >
             <div className="text-left">
-              <p className="text-[10px] font-black uppercase tracking-widest text-white/50">Comece agora</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/70">Comece agora</p>
               <p className="font-black text-white text-base leading-tight">Criar primeiro treino</p>
             </div>
-            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
               <Play size={20} fill="white" color="white" />
             </div>
           </button>
@@ -553,6 +587,7 @@ export function DashboardView({
           sessions={sessions}
           templates={templates}
           weeklyGoal={weeklyGoal}
+          currentSport={currentSport}
           onDayClick={(sessionId) => {
             setHighlightSessionId?.(sessionId);
             setScrollToHistory?.(true);
