@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { startOfWeek, parseISO, format, subWeeks, addDays, endOfWeek } from 'date-fns';
+import { useMemo, useRef, useEffect, useState } from 'react';
+import { startOfWeek, parseISO, format, subWeeks, addWeeks, addDays, endOfWeek } from 'date-fns';
 import { Play, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
@@ -125,72 +125,118 @@ function calcGoalStreak(sessions: WorkoutSession[], weeklyGoal: number): number 
 
 const WEEK_DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as const;
 
-/** Bar showing each day of the current week (Sun→Sat), lit red if the user trained that day. */
+/** Weeks to show: 2 past + current + 3 future = 6 total. Current week is at index 2. */
+const WEEKS_PAST         = 2;
+const WEEKS_FUTURE       = 3;
+const CURRENT_WEEK_INDEX = WEEKS_PAST; // index 2
+
+/** Stacked bar showing 2 past weeks, current week, and 3 future weeks.
+ *  On mount the current-week card is scrolled to the vertical center of the viewport. */
 function WeekDayBar({ sessions, weeklyGoal }: { sessions: WorkoutSession[]; weeklyGoal: number }) {
-  const weekStart = startOfWeek(new Date(), { weekStartsOn: 0 }); // Sunday
-  const weekEnd   = endOfWeek(new Date(), { weekStartsOn: 0 });   // Saturday
+  const currentWeekRef = useRef<HTMLDivElement>(null);
+  const today          = format(new Date(), 'yyyy-MM-dd');
+  const totalWeeks     = WEEKS_PAST + 1 + WEEKS_FUTURE;
 
-  // "12/07 – 18/07" style header
-  const weekLabel = `${format(weekStart, 'dd/MM')} – ${format(weekEnd, 'dd/MM')}`;
+  const weeks = useMemo(() => {
+    const currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 0 });
+    return Array.from({ length: totalWeeks }, (_, i) => {
+      const offset = i - CURRENT_WEEK_INDEX;
+      return offset < 0
+        ? subWeeks(currentWeekStart, Math.abs(offset))
+        : addWeeks(currentWeekStart, offset);
+    });
+  }, [totalWeeks]);
 
-  // Set of 'yyyy-MM-dd' for days that had at least one session this week
-  const trainedDays = useMemo(() => {
+  const trainedDaySet = useMemo(() => {
     const set = new Set<string>();
     sessions.forEach(s => {
-      try {
-        const d = parseISO(s.date);
-        if (d >= weekStart && d <= weekEnd) set.add(format(d, 'yyyy-MM-dd'));
-      } catch {}
+      try { set.add(format(parseISO(s.date), 'yyyy-MM-dd')); } catch {}
     });
     return set;
-  // weekStart/weekEnd are derived from `new Date()` — stable within the render
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessions]);
 
+  // Scroll current week to the vertical center of the viewport on mount
+  useEffect(() => {
+    currentWeekRef.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
+  }, []);
+
   return (
-    <div className="mx-6 mt-4 mb-8 bg-dark-card border border-white/5 rounded-2xl px-4 py-3">
-      {/* Header: week range + trained counter */}
-      <div className="flex items-center justify-between mb-1.5">
-        <p className="text-xs font-black uppercase tracking-widest text-white/40">
-          {weekLabel}
-        </p>
-        <p className="text-xs font-black uppercase tracking-widest text-white/40">
-          {trainedDays.size}/{weeklyGoal}
-        </p>
-      </div>
+    <div className="mx-6 mb-8 flex flex-col gap-3">
+      {weeks.map((weekStart, weekIdx) => {
+        const weekEnd   = endOfWeek(weekStart, { weekStartsOn: 0 });
+        const isCurrent = weekIdx === CURRENT_WEEK_INDEX;
+        const weekLabel = `${format(weekStart, 'dd/MM')} – ${format(weekEnd, 'dd/MM')}`;
 
-      {/* Day columns */}
-      <div className="flex items-end justify-between gap-1">
-        {WEEK_DAYS.map((label, i) => {
-          const dayKey  = format(addDays(weekStart, i), 'yyyy-MM-dd');
-          const trained = trainedDays.has(dayKey);
-          const isToday = dayKey === format(new Date(), 'yyyy-MM-dd');
+        let trainedCount = 0;
+        for (let d = 0; d < 7; d++) {
+          if (trainedDaySet.has(format(addDays(weekStart, d), 'yyyy-MM-dd'))) trainedCount++;
+        }
 
-          return (
-            <div key={label} className={cn('flex flex-col items-center gap-2', isToday ? 'flex-[1.25]' : 'flex-1')}>
-              {/* Bar — today is 1.25x taller and wider */}
-              <div className={cn(
-                'w-full rounded-lg transition-colors duration-300 flex items-center justify-center',
-                isToday ? 'h-10' : 'h-8',
-                trained ? 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]' : isToday ? 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]' : 'bg-brand-red/10',
+        return (
+          <div
+            key={format(weekStart, 'yyyy-MM-dd')}
+            ref={isCurrent ? currentWeekRef : undefined}
+            className={cn(
+              'bg-dark-card border rounded-2xl px-4 py-3',
+              isCurrent ? 'border-white/15' : 'border-white/5',
+            )}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <p className={cn(
+                'text-xs font-black uppercase tracking-widest',
+                isCurrent ? 'text-white/60' : 'text-white/30',
               )}>
-                {isToday && (
-                  trained
-                    ? <Check size={16} color="white" strokeWidth={3} />
-                    : <Play size={14} fill="white" color="white" />
-                )}
-              </div>
-              {/* Label */}
-              <span className={cn(
-                'text-[10px] font-black uppercase tracking-wide',
-                trained ? 'text-white' : isToday ? 'text-white' : 'text-white/30',
+                {weekLabel}
+              </p>
+              <p className={cn(
+                'text-xs font-black uppercase tracking-widest',
+                isCurrent ? 'text-white/60' : 'text-white/30',
               )}>
-                {label}
-              </span>
+                {trainedCount}/{weeklyGoal}
+              </p>
             </div>
-          );
-        })}
-      </div>
+
+            <div className="flex items-end justify-between gap-1">
+              {WEEK_DAYS.map((label, dayIdx) => {
+                const dayKey  = format(addDays(weekStart, dayIdx), 'yyyy-MM-dd');
+                const trained = trainedDaySet.has(dayKey);
+                const isToday = dayKey === today;
+
+                return (
+                  <div
+                    key={label}
+                    className={cn('flex flex-col items-center gap-2', isToday ? 'flex-[1.25]' : 'flex-1')}
+                  >
+                    <div className={cn(
+                      'w-full rounded-lg transition-colors duration-300 flex items-center justify-center',
+                      isToday ? 'h-10' : 'h-8',
+                      trained
+                        ? 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]'
+                        : isToday
+                          ? 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]'
+                          : isCurrent
+                            ? 'bg-brand-red/10'
+                            : 'bg-white/5',
+                    )}>
+                      {isToday && (
+                        trained
+                          ? <Check size={16} color="white" strokeWidth={3} />
+                          : <Play size={14} fill="white" color="white" />
+                      )}
+                    </div>
+                    <span className={cn(
+                      'text-[10px] font-black uppercase tracking-wide',
+                      trained ? 'text-white' : isToday ? 'text-white' : isCurrent ? 'text-white/30' : 'text-white/15',
+                    )}>
+                      {label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -241,89 +287,93 @@ export function DashboardView({
   const weeklyGoal = Math.max(1, mainUserProfile.weeklyGoal ?? 3);
 
   return (
-    <div className="-mx-6">
-      {/* Top stats bar — Duolingo style */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-white/5 mt-2">
-        {/* Sport selector */}
-        <div className="flex items-center gap-1">
-          {sports.length > 1 && (
-            <button onClick={() => setSportIdx(i => (i - 1 + sports.length) % sports.length)} className="text-white/30 active:text-white">
-              <ChevronLeft size={14} />
-            </button>
-          )}
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0" style={{ backgroundColor: SPORT_COLORS[currentSport] ?? '#dc2626' }}>
-            <img
-              src={SPORT_ICONS[currentSport] ?? iconMusculacao}
-              className="w-full h-full object-contain brightness-0 invert"
-              alt={currentSport}
-            />
+    <div className="-mx-6 flex flex-col" style={{ height: 'calc(100dvh - 6rem)' }}>
+      {/* ── Fixed top: stats bar + workout card ── */}
+      <div className="shrink-0 border-b border-white/5 pb-3">
+        {/* Top stats bar — Duolingo style */}
+        <div className="flex items-center justify-between px-6 py-3 border-b border-white/5 mt-2">
+          {/* Sport selector */}
+          <div className="flex items-center gap-1">
+            {sports.length > 1 && (
+              <button onClick={() => setSportIdx(i => (i - 1 + sports.length) % sports.length)} className="text-white/30 active:text-white">
+                <ChevronLeft size={14} />
+              </button>
+            )}
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0" style={{ backgroundColor: SPORT_COLORS[currentSport] ?? '#dc2626' }}>
+              <img
+                src={SPORT_ICONS[currentSport] ?? iconMusculacao}
+                className="w-full h-full object-contain brightness-0 invert"
+                alt={currentSport}
+              />
+            </div>
+            <span className="font-bold text-sm ml-1" style={{ color: SPORT_COLORS[currentSport] ?? '#dc2626' }}>{completedWeeks + 1}</span>
+            {sports.length > 1 && (
+              <button onClick={() => setSportIdx(i => (i + 1) % sports.length)} className="text-white/30 active:text-white">
+                <ChevronRight size={14} />
+              </button>
+            )}
           </div>
-          <span className="font-bold text-sm ml-1" style={{ color: SPORT_COLORS[currentSport] ?? '#dc2626' }}>{completedWeeks + 1}</span>
-          {sports.length > 1 && (
-            <button onClick={() => setSportIdx(i => (i + 1) % sports.length)} className="text-white/30 active:text-white">
-              <ChevronRight size={14} />
-            </button>
-          )}
+
+          {/* Streak */}
+          <div className="flex items-center gap-1.5">
+            <div className={cn(
+              'w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0',
+              goalStreak > 0 ? 'bg-orange-500' : 'bg-white/10',
+            )}>
+              <img
+                src={iconFlame}
+                className={cn('w-full h-full object-contain brightness-0 invert', goalStreak === 0 && 'opacity-40')}
+                alt="streak"
+              />
+            </div>
+            <span className={cn('font-black text-sm', goalStreak > 0 ? 'text-orange-400' : 'text-white/30')}>{goalStreak}</span>
+          </div>
+
+          {/* Weekly progress */}
+          <div className="flex items-center gap-1.5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0 bg-blue-600">
+              <img src={iconCalendar} className="w-full h-full object-contain brightness-0 invert" alt="meta semanal" />
+            </div>
+            <span className="font-black text-sm text-blue-400">{completedThisWeek}/{mainUserProfile.weeklyGoal ?? 3}</span>
+          </div>
         </div>
 
-        {/* Streak */}
-        <div className="flex items-center gap-1.5">
-          <div className={cn(
-            'w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0',
-            goalStreak > 0 ? 'bg-orange-500' : 'bg-white/10',
-          )}>
-            <img
-              src={iconFlame}
-              className={cn('w-full h-full object-contain brightness-0 invert', goalStreak === 0 && 'opacity-40')}
-              alt="streak"
-            />
-          </div>
-          <span className={cn('font-black text-sm', goalStreak > 0 ? 'text-orange-400' : 'text-white/30')}>{goalStreak}</span>
-        </div>
-
-        {/* Weekly progress */}
-        <div className="flex items-center gap-1.5">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0 bg-blue-600">
-            <img src={iconCalendar} className="w-full h-full object-contain brightness-0 invert" alt="meta semanal" />
-          </div>
-          <span className="font-black text-sm text-blue-400">{completedThisWeek}/{mainUserProfile.weeklyGoal ?? 3}</span>
-        </div>
+        {/* Mission banner */}
+        {currentTemplate ? (
+          <button
+            onClick={() => onStartWorkout(currentTemplate)}
+            className="mx-6 mt-3 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(150,10,10,0.6)]"
+          >
+            <div className="text-left">
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/70">
+                {completedThisWeek} de {mainUserProfile.weeklyGoal ?? 3} essa semana
+              </p>
+              <p className="font-black text-white text-base leading-tight">{currentTemplate.name}</p>
+            </div>
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+              <Play size={20} fill="white" color="white" />
+            </div>
+          </button>
+        ) : (
+          <button
+            onClick={() => switchTab('workouts')}
+            className="mx-6 mt-3 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(150,10,10,0.6)]"
+          >
+            <div className="text-left">
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/70">Comece agora</p>
+              <p className="font-black text-white text-base leading-tight">Criar primeiro treino</p>
+            </div>
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+              <Play size={20} fill="white" color="white" />
+            </div>
+          </button>
+        )}
       </div>
 
-      {/* Mission banner */}
-      {currentTemplate ? (
-        <button
-          onClick={() => onStartWorkout(currentTemplate)}
-          className="mx-6 mt-3 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(150,10,10,0.6)]"
-        >
-          <div className="text-left">
-            <p className="text-[10px] font-black uppercase tracking-widest text-white/70">
-              {completedThisWeek} de {mainUserProfile.weeklyGoal ?? 3} essa semana
-            </p>
-            <p className="font-black text-white text-base leading-tight">{currentTemplate.name}</p>
-          </div>
-          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-            <Play size={20} fill="white" color="white" />
-          </div>
-        </button>
-      ) : (
-        <button
-          onClick={() => switchTab('workouts')}
-          className="mx-6 mt-3 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(150,10,10,0.6)]"
-        >
-          <div className="text-left">
-            <p className="text-[10px] font-black uppercase tracking-widest text-white/70">Comece agora</p>
-            <p className="font-black text-white text-base leading-tight">Criar primeiro treino</p>
-          </div>
-          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-            <Play size={20} fill="white" color="white" />
-          </div>
-        </button>
-      )}
-
-      {/* Weekly day bar */}
-      <WeekDayBar sessions={sessions} weeklyGoal={weeklyGoal} />
-
+      {/* ── Scrollable weeks ── */}
+      <div className="flex-1 overflow-y-auto pt-3">
+        <WeekDayBar sessions={sessions} weeklyGoal={weeklyGoal} />
+      </div>
     </div>
   );
 }
