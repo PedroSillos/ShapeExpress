@@ -3,7 +3,7 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
   Search, SlidersHorizontal, UserPlus, X, RefreshCw, ChevronRight, 
-  MessageCircle, Trash2, ShieldCheck, AlertTriangle, TrendingUp, 
+  Trash2, ShieldCheck, AlertTriangle, TrendingUp, 
   TrendingDown, Minus, Trophy, Calendar, Target, Dumbbell, User, Sparkles,
   DollarSign, PieChart, AlertCircle, CalendarPlus, UserMinus, Percent, Users
 } from 'lucide-react';
@@ -14,10 +14,9 @@ import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { InitialsAvatar } from '@/src/shared/ui/InitialsAvatar';
 
-export function StudentsView({ students, userProfile, onMessage, onReminder, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, selectedStudentForProfile, setSelectedStudentForProfile }: { 
+export function StudentsView({ students, userProfile, onReminder, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, selectedStudentForProfile, setSelectedStudentForProfile }: { 
   students: Student[], 
   userProfile: UserProfile, 
-  onMessage: (student: Student) => void,
   onReminder: (student: Student) => Promise<void>,
   pendingRequests: AppNotification[],
   onRespond: (id: string, status: 'accepted' | 'rejected') => Promise<void>,
@@ -430,16 +429,6 @@ export function StudentsView({ students, userProfile, onMessage, onReminder, pen
                     Ver Treinos
                   </button>
                   <div className="flex gap-3">
-                    <button 
-                      onClick={() => {
-                        onMessage(selectedStudentForProfile);
-                        setSelectedStudentForProfile(null);
-                      }}
-                      className="flex-1 py-4 bg-brand-red text-black rounded-2xl font-bold uppercase tracking-widest shadow-lg shadow-brand-red/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                    >
-                      <MessageCircle size={18} />
-                      Enviar Mensagem
-                    </button>
                     <button 
                       onClick={() => setShowDisconnectConfirm(selectedStudentForProfile)}
                       className="p-4 bg-white/5 border border-white/10 rounded-2xl text-white/40 hover:text-brand-red transition-colors"

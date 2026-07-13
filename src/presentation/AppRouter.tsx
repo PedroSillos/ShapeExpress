@@ -22,7 +22,6 @@ import { LojasScreen } from './screens/LojasScreen';
 import { PurchasedProductsView } from './screens/PurchasedProductsView';
 import { ExerciseLibraryView } from './screens/ExerciseLibraryView';
 import { StudentsView } from './screens/StudentsView';
-import { ChatView } from './screens/ChatView';
 import { WorkoutTemplatesView } from './screens/WorkoutTemplatesView';
 import { StudentEvolutionView } from './screens/StudentEvolutionView';
 import { CreateWorkoutView } from './screens/CreateWorkoutView';
@@ -58,8 +57,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     trainers,
     studentConnections, setStudentConnections,
     trainerConnections,
-    activeChatStudent, setActiveChatStudent,
-    chatMessages,
     selectedStudentForWorkouts, setSelectedStudentForWorkouts,
     selectedStudentForEvolution, setSelectedStudentForEvolution,
     selectedStudentForProfile, setSelectedStudentForProfile,
@@ -433,26 +430,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
               case 'workout_assigned':
                 setActiveTab('workouts');
                 break;
-              case 'chat_message': {
-                const senderEmail = notification.data?.senderEmail;
-                if (senderEmail) {
-                  const student = students.find((s: Student) => s.email === senderEmail);
-                  const trainerConn = studentConnections.find((c: any) => c.trainerEmail === senderEmail);
-                  if (student) {
-                    setActiveChatStudent(student);
-                    setActiveTab('chat');
-                  } else if (trainerConn) {
-                    setActiveChatStudent({
-                      id: trainerConn.trainerEmail, name: trainerConn.trainerName,
-                      email: trainerConn.trainerEmail,
-                      lastWorkout: '', status: 'new', progress: 0, streak: 0,
-                      weeklyWorkouts: [0,0,0,0,0,0,0], score: 0,
-                    } as Student);
-                    setActiveTab('chat');
-                  }
-                }
-                break;
-              }
             }
           }}
         />
@@ -472,7 +449,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       return (
         <TrainersScreen
           trainers={trainers}
-          onMessage={(t: Student) => { setActiveChatStudent(t); setActiveTab('chat'); }}
           onConnect={async (code: string) => {
             await api.requestConnection(code);
             const [connections, profile, notifs] = await Promise.all([
@@ -507,7 +483,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             await api.respondToConnection(id, status);
             await Promise.all([api.getStudents(), api.getTrainerConnections()]);
           }}
-          onMessage={(student: Student) => { setActiveChatStudent(student); setActiveTab('chat'); }}
           onReminder={async (student: Student) => {
             try {
               await api.sendNotification(student.email, {
@@ -525,18 +500,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           setSelectedStudentForProfile={(s: Student | null) => setSelectedStudentForProfile(s)}
         />
       );
-    case 'chat':
-      return activeChatStudent ? (
-        <ChatView
-          student={activeChatStudent}
-          messages={chatMessages[activeChatStudent.id] || []}
-          userProfile={userProfile}
-          onSendMessage={async (text: string) => {
-            try { await api.sendMessage(activeChatStudent.email, text); } catch (e) { console.error(e); }
-          }}
-          onBack={() => switchTab(userProfile?.userType === 'treinador' ? 'students' : 'trainers')}
-        />
-      ) : null;
     case 'student-workouts':
       return selectedStudentForWorkouts ? (
         <WorkoutTemplatesView

@@ -6,7 +6,6 @@ import { useAppState } from './presentation/hooks/useAppState';
 import { useDataSync } from './presentation/hooks/useDataSync';
 import { useWorkout } from './presentation/hooks/useWorkout';
 import { useWeeklyGoal } from './presentation/hooks/useWeeklyGoal';
-import { useChatListener } from './presentation/hooks/useChatListener';
 
 import { AppNavBar } from './presentation/AppNavBar';
 import { AppRouter } from './presentation/AppRouter';
@@ -50,7 +49,6 @@ export default function App() {
     userTrainingProfile, setUserTrainingProfile,
     exerciseUserStats, setExerciseUserStats,
     userCalorieProfile, setUserCalorieProfile,
-    activeChatStudent, setChatMessages,
     notifications,
     userSessions, filteredTemplates,
     progressScore,
@@ -87,8 +85,6 @@ export default function App() {
     isLoggedIn, userSessions, userStats, userProfile,
     updateStats: dataSync.updateStats,
   });
-
-  useChatListener({ activeChatStudent, userProfile, setChatMessages });
 
   useEffect(() => {
     if (!selectedStudentForWorkouts) { setStudentTemplates([]); return; }
@@ -174,8 +170,18 @@ export default function App() {
   // the Firestore sync is still running for a logged-in user.
   // The SplashScreen is rendered as a fixed overlay in every return branch
   // so AnimatePresence can animate it out without unmounting the content below.
-  // Never shown on the landing screen — it has its own visual identity.
-  const showingSplash = activeTab !== 'landing' && (!authReady || (isLoggedIn && !dataReady));
+  //
+  // We intentionally do NOT exclude 'landing' from the !authReady check:
+  // when the user is already logged in but localStorage was cleared (fresh
+  // Android install, cleared app data), activeTab initialises to 'landing'
+  // because WELCOME_DONE is missing. Without the splash the landing would
+  // flash briefly before Firebase restores the session and redirects to
+  // dashboard. Showing the splash until authReady resolves hides this.
+  //
+  // After authReady the landing is excluded from the dataReady wait — it has
+  // its own visual identity and a logged-in user will be redirected away from
+  // it immediately once the restoredTab effect fires.
+  const showingSplash = !authReady || (isLoggedIn && !dataReady && activeTab !== 'landing');
 
   if (onboardingSession) {
     return (

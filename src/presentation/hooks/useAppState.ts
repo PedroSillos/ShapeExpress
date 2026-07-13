@@ -9,7 +9,6 @@ import { useWorkoutState } from "./useWorkoutState";
 import { useProgressState } from "./useProgressState";
 import { useStudentsState } from "./useStudentsState";
 import { useNotificationsState } from "./useNotificationsState";
-import { useChatState } from "./useChatState";
 import { useStoreState } from "./useStoreState";
 import { useSyncState } from "./useSyncState";
 
@@ -21,7 +20,6 @@ export const useAppState = () => {
   const progress = useProgressState(workout.userSessions, profile.userStats);
   const students = useStudentsState(auth.currentUser, auth.token);
   const notifs = useNotificationsState(auth.currentUser, auth.isLoggedIn, auth.token);
-  const chat = useChatState(auth.currentUser);
   const store = useStoreState(auth.currentUser, auth.idToken);
 
   // Boot sync after login
@@ -106,10 +104,6 @@ export const useAppState = () => {
     getNotifications: notifs.getNotifications,
     markNotificationRead: notifs.markNotificationRead,
     clearAllNotifications: notifs.clearAllNotifications,
-
-    // Chat
-    getMessages: chat.getMessages,
-    sendMessage: chat.sendMessage,
 
     // Store
     getProtocols: store.getProtocols,
@@ -224,12 +218,6 @@ export const useAppState = () => {
     // Notifications
     notifications: notifs.notifications,
     setNotifications: notifs.setNotifications,
-
-    // Chat
-    chatMessages: chat.chatMessages,
-    setChatMessages: chat.setChatMessages,
-    activeChatStudent: chat.activeChatStudent,
-    setActiveChatStudent: chat.setActiveChatStudent,
 
     // Store
     storeItems: store.storeItems,

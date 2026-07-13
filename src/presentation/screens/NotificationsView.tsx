@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, ChevronLeft, CheckCircle2, MessageSquare, UserCheck, UserPlus, Dumbbell, Flame, AlertTriangle } from 'lucide-react';
+import { Bell, ChevronLeft, CheckCircle2, UserCheck, UserPlus, Dumbbell, Flame, AlertTriangle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../../utils/cn';
 import { AppNotification } from '../../domain/entities';
@@ -80,12 +80,12 @@ export function NotificationsView({
               <div className="flex gap-4">
                 <div className={cn(
                   "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                  (notification.type === 'info' || notification.type === 'chat_message') && "bg-blue-500/10 text-blue-500",
+                  notification.type === 'info' && "bg-blue-500/10 text-blue-500",
                   (notification.type === 'success' || notification.type === 'connection_response') && "bg-emerald-500/10 text-emerald-500",
                   (notification.type === 'warning' || notification.type === 'connection_request') && "bg-amber-500/10 text-amber-500",
                   (notification.type === 'alert' || notification.type === 'workout_assigned') && "bg-brand-red/10 text-brand-red"
                 )}>
-                  {(notification.type === 'info' || notification.type === 'chat_message') && (notification.type === 'chat_message' ? <MessageSquare size={20} /> : <Bell size={20} />)}
+                  {notification.type === 'info' && <Bell size={20} />}
                   {(notification.type === 'success' || notification.type === 'connection_response') && (notification.type === 'connection_response' ? <UserCheck size={20} /> : <CheckCircle2 size={20} />)}
                   {(notification.type === 'warning' || notification.type === 'connection_request') && (notification.type === 'connection_request' ? <UserPlus size={20} /> : <AlertTriangle size={20} />)}
                   {(notification.type === 'alert' || notification.type === 'workout_assigned') && (notification.type === 'workout_assigned' ? <Dumbbell size={20} /> : <Flame size={20} />)}

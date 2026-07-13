@@ -322,16 +322,6 @@ export interface Student {
   dueDate?: string;
 }
 
-export interface ChatMessage {
-  id: string;
-  senderId: string;
-  senderEmail?: string;
-  receiverId: string;
-  receiverEmail?: string;
-  text: string;
-  timestamp: string;
-}
-
 export interface TrainerConnection {
   id: string;
   studentEmail: string;
@@ -356,8 +346,7 @@ export interface AppNotification {
     | "alert"
     | "connection_request"
     | "connection_response"
-    | "workout_assigned"
-    | "chat_message";
+    | "workout_assigned";
   data?: any;
 }
 

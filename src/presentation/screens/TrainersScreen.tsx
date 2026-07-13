@@ -18,8 +18,6 @@ interface TrainerConnection {
 export interface TrainersScreenProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trainers: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onMessage: (t: any) => void;
   onConnect: (code: string) => Promise<void>;
   onDisconnect: (trainerEmail: string) => Promise<void>;
   studentConnections: TrainerConnection[];
@@ -29,7 +27,6 @@ export interface TrainersScreenProps {
 
 export function TrainersScreen({
   trainers,
-  onMessage: _onMessage,
   onConnect,
   onDisconnect: _onDisconnect,
   studentConnections,
