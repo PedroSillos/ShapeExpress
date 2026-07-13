@@ -451,13 +451,6 @@ export function DashboardView({
 
   const [sportIdx, setSportIdx] = useState(0);
 
-  // Auto-cycle through template sports every 3s
-  useEffect(() => {
-    if (templateSports.length <= 1) return;
-    const id = setInterval(() => setSportIdx(i => (i + 1) % templateSports.length), 3000);
-    return () => clearInterval(id);
-  }, [templateSports.length]);
-
   // Keep sportIdx in bounds if templateSports changes
   useEffect(() => {
     setSportIdx(i => Math.min(i, Math.max(0, templateSports.length - 1)));
