@@ -10,7 +10,7 @@ export type AppTab =
   | "login" | "settings-goal" | "settings-notifications"
   | "forgot-password" | "register" | "help" | "express" | "store" | "library"
   | "students" | "student-workouts" | "student-evolution"
-  | "chat" | "notifications" | "purchased-products" | "leaderboard";
+  | "chat" | "notifications" | "purchased-products";
 
 export const useNavigationState = () => {
   const [activeTab, setActiveTab] = useState<AppTab>(() =>

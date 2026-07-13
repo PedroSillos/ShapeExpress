@@ -115,7 +115,6 @@ export const useAppState = () => {
     unpublishStoreItem: store.unpublishItem,
 
     // Misc
-    getLeaderboard: async (_league: string) => [],
     addXP: async (_xp: number) => {},
     followUser: async (_e: string) => {},
     unfollowUser: async (_e: string) => {},

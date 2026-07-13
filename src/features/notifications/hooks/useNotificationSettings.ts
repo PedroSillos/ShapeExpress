@@ -25,16 +25,6 @@ export const NOTIFICATION_CATEGORIES: NotificationCategory[] = [
     ],
   },
   {
-    id: 'placar',
-    title: 'Placar',
-    description: 'Atualizações de progresso na sua liga',
-    items: [
-      { key: 'leaderboard_promoted', label: 'Promoção de liga' },
-      { key: 'leaderboard_overtaken', label: 'Alguém te ultrapassou' },
-      { key: 'leaderboard_weekly_summary', label: 'Resumo semanal da liga' },
-    ],
-  },
-  {
     id: 'nudges',
     title: 'Nudges de Amigos',
     description: 'Lembretes enviados por amigos',

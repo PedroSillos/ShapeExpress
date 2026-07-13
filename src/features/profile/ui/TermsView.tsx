@@ -26,7 +26,7 @@ const TERMS_SECTIONS: TermsSection[] = [
     title: 'Descrição do Serviço',
     paragraphs: [
       'O Shape Express é uma plataforma premium de acompanhamento fitness que oferece treinos personalizados, monitoramento de progresso, comunidades de usuários, inteligência artificial aplicada ao coaching esportivo e recursos de pagamento para planos de assinatura.',
-      'O Serviço inclui, mas não se limita a: criação e gestão de treinos, registro de atividades físicas, estatísticas de desempenho, calendário de treinos, placar de conquistas, chat em comunidades, recomendações por IA e ferramentas para personal trainers e academias.',
+      'O Serviço inclui, mas não se limita a: criação e gestão de treinos, registro de atividades físicas, estatísticas de desempenho, calendário de treinos, chat em comunidades, recomendações por IA e ferramentas para personal trainers e academias.',
       'Algumas funcionalidades são exclusivas para assinantes premium. O acesso a recursos premium está condicionado à assinatura ativa de um plano pago, conforme descrito na Seção 6 destes Termos.',
     ],
   },

@@ -350,16 +350,6 @@ export interface AppNotification {
   data?: any;
 }
 
-export interface LeaderboardEntry {
-  id: string;
-  name: string;
-  xp: number;
-  streak: number;
-  level: number;
-  rank: number;
-  isFollowing?: boolean;
-}
-
 // ─── Store ────────────────────────────────────────────────────────────────────
 
 /** A single workout template listed for sale in the store */
