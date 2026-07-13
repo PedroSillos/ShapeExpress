@@ -20,7 +20,6 @@ import { NotificationsView } from './screens/NotificationsView';
 import { TrainersScreen } from './screens/TrainersScreen';
 import { LojasScreen } from './screens/LojasScreen';
 import { PurchasedProductsView } from './screens/PurchasedProductsView';
-import { ExerciseLibraryView } from './screens/ExerciseLibraryView';
 import { StudentsView } from './screens/StudentsView';
 import { WorkoutTemplatesView } from './screens/WorkoutTemplatesView';
 import { StudentEvolutionView } from './screens/StudentEvolutionView';
@@ -472,8 +471,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       );
     case 'purchased-products':
       return <PurchasedProductsView onBack={() => switchTab('store')} />;
-    case 'library':
-      return <ExerciseLibraryView />;
     case 'students':
       return (
         <StudentsView

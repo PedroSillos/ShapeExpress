@@ -8,7 +8,7 @@ export type AppTab =
   | "profile" | "edit-profile" | "evolution" | "trainers"
   | "new-assessment" | "edit-assessment" | "create-workout" | "edit-workout"
   | "login" | "settings-goal" | "settings-notifications"
-  | "forgot-password" | "register" | "help" | "express" | "store" | "library"
+  | "forgot-password" | "register" | "help" | "express" | "store"
   | "students" | "student-workouts" | "student-evolution"
   | "chat" | "notifications" | "purchased-products";
 
