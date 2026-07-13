@@ -128,19 +128,122 @@ function calcGoalStreak(sessions: WorkoutSession[], weeklyGoal: number): number 
 const WEEK_DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as const;
 
 /** Weeks to show: 2 past + current + 3 future = 6 total. Current week is at index 2. */
-const WEEKS_PAST         = 2;
-const WEEKS_FUTURE       = 3;
-const CURRENT_WEEK_INDEX = WEEKS_PAST; // index 2
+const WEEKS_PAST         = 4;
+const WEEKS_FUTURE       = 2;
+const CURRENT_WEEK_INDEX = WEEKS_PAST; // index 4
 
 /** Stacked bar showing 2 past weeks, current week, and 3 future weeks.
  *  On mount the current-week card is scrolled to the vertical center of the viewport. */
+/** Resolve the sport name for a given workoutId via the template list.
+ *  Falls back to 'Musculação' if the template is not found. */
+function getSportForWorkout(workoutId: string, templates: WorkoutTemplate[]): string {
+  const t = templates.find(t => t.id === workoutId);
+  if (!t) return 'Musculação';
+  // Derive sport from template name by matching known sport keys
+  const known = Object.keys(SPORT_COLORS);
+  return known.find(s => t.name.toLowerCase().includes(s.toLowerCase())) ?? 'Musculação';
+}
+
+/** Renders the inner content of a trained day cell:
+ *  - 1 sport  → sport icon centered on solid color bg
+ *  - 2 sports → split-diagonal halves, each with its sport icon
+ *  - 3+ sports → rainbow gradient + star burst icon */
+function DayTrainedContent({
+  sports,
+  size,
+}: {
+  sports: string[];   // deduplicated sport names for this day
+  size: number;       // icon size in px
+}) {
+  if (sports.length === 0) return null;
+
+  if (sports.length === 1) {
+    const sport = sports[0];
+    const icon  = SPORT_ICONS[sport] ?? iconMusculacao;
+    return (
+      <img
+        src={icon}
+        alt={sport}
+        style={{ width: size, height: size }}
+        className="brightness-0 invert opacity-90 object-contain"
+      />
+    );
+  }
+
+  if (sports.length === 2) {
+    const [s1, s2] = sports;
+    const icon1 = SPORT_ICONS[s1] ?? iconMusculacao;
+    const icon2 = SPORT_ICONS[s2] ?? iconMusculacao;
+    // Two small icons side by side
+    const half = Math.round(size * 0.72);
+    return (
+      <div className="flex items-center justify-center gap-0.5">
+        <img src={icon1} alt={s1} style={{ width: half, height: half }} className="brightness-0 invert opacity-90 object-contain" />
+        <img src={icon2} alt={s2} style={{ width: half, height: half }} className="brightness-0 invert opacity-90 object-contain" />
+      </div>
+    );
+  }
+
+  // 3+ sports: rainbow star burst
+  return (
+    <span style={{ fontSize: size + 2, lineHeight: 1 }} role="img" aria-label="multi-sport">
+      🌟
+    </span>
+  );
+}
+
+/** Background style for a trained day cell based on the sports trained. */
+function dayBgStyle(sports: string[], isToday: boolean): { className: string; style?: React.CSSProperties } {
+  if (sports.length === 0) {
+    return isToday
+      ? { className: 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]' }
+      : { className: 'bg-white/5' };
+  }
+
+  if (sports.length === 1) {
+    const color = SPORT_COLORS[sports[0]] ?? '#dc2626';
+    const shadow = isToday ? `0 2px 0 0 ${color}99` : undefined;
+    return {
+      className: '',
+      style: {
+        backgroundColor: isToday ? color : `${color}55`,
+        boxShadow: shadow,
+      },
+    };
+  }
+
+  if (sports.length === 2) {
+    const c1 = SPORT_COLORS[sports[0]] ?? '#dc2626';
+    const c2 = SPORT_COLORS[sports[1]] ?? '#2563eb';
+    const opacity = isToday ? 'ff' : '66';
+    return {
+      className: '',
+      style: {
+        background: `linear-gradient(135deg, ${c1}${opacity} 50%, ${c2}${opacity} 50%)`,
+      },
+    };
+  }
+
+  // 3+ sports: rainbow
+  return {
+    className: '',
+    style: {
+      background: isToday
+        ? 'linear-gradient(135deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #a855f7)'
+        : 'linear-gradient(135deg, #ef444466, #f9731666, #eab30866, #22c55e66, #3b82f666, #a855f766)',
+    },
+  };
+}
+
 function WeekDayBar({
   sessions,
+  templates,
   weeklyGoal,
   onDayClick,
   onTodayClick,
 }: {
   sessions: WorkoutSession[];
+  templates: WorkoutTemplate[];
   weeklyGoal: number;
   onDayClick?: (sessionId: string) => void;
   onTodayClick?: () => void;
@@ -152,10 +255,22 @@ function WeekDayBar({
   /** Map date string → most recent session id for that day */
   const sessionByDay = useMemo(() => {
     const map = new Map<string, string>();
-    // Sort ascending so last write wins (most recent)
     const sorted = [...sessions].sort((a, b) => a.date.localeCompare(b.date));
     sorted.forEach(s => {
       try { map.set(format(parseISO(s.date), 'yyyy-MM-dd'), s.id); } catch {}
+    });
+    return map;
+  }, [sessions]);
+
+  /** Map date string → all sessions for that day */
+  const sessionsByDay = useMemo(() => {
+    const map = new Map<string, WorkoutSession[]>();
+    sessions.forEach(s => {
+      try {
+        const key = format(parseISO(s.date), 'yyyy-MM-dd');
+        if (!map.has(key)) map.set(key, []);
+        map.get(key)!.push(s);
+      } catch {}
     });
     return map;
   }, [sessions]);
@@ -172,7 +287,6 @@ function WeekDayBar({
 
   const trainedDaySet = useMemo(() => new Set(sessionByDay.keys()), [sessionByDay]);
 
-  // Scroll current week to the vertical center of the viewport on mount
   useEffect(() => {
     currentWeekRef.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
   }, []);
@@ -230,6 +344,19 @@ function WeekDayBar({
                 const clickable = trained && (isPast || isToday) && !!onDayClick;
                 const todayClickable = isToday && !trained && !!onTodayClick;
 
+                // Deduplicated sports trained on this day
+                const daySports = trained
+                  ? [...new Set(
+                      (sessionsByDay.get(dayKey) ?? []).map(s => getSportForWorkout(s.workoutId, templates))
+                    )]
+                  : [];
+
+                const bg = trained
+                  ? dayBgStyle(daySports, isToday)
+                  : isToday
+                    ? { className: 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]' }
+                    : { className: 'bg-white/5' };
+
                 return (
                   <div
                     key={label}
@@ -244,21 +371,18 @@ function WeekDayBar({
                             : undefined
                       }
                       className={cn(
-                        'w-full rounded-lg transition-colors duration-300 flex items-center justify-center',
+                        'w-full rounded-lg transition-colors duration-300 flex items-center justify-center overflow-hidden',
                         isToday ? 'h-10' : 'h-8',
                         (clickable || todayClickable) && 'cursor-pointer active:scale-95',
-                        trained && isToday
-                          ? 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]'
-                          : trained
-                            ? 'bg-brand-red/30'
-                            : isToday
-                              ? 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]'
-                              : 'bg-white/5',
-                      )}>
-                      {trained
-                        ? <Check size={isToday ? 16 : 13} color={isToday ? 'white' : 'rgba(255,255,255,0.45)'} strokeWidth={3} />
-                        : isToday && <Play size={14} fill="white" color="white" />
-                      }
+                        bg.className,
+                      )}
+                      style={bg.style}
+                    >
+                      {trained ? (
+                        <DayTrainedContent sports={daySports} size={isToday ? 16 : 13} />
+                      ) : isToday ? (
+                        <Play size={14} fill="white" color="white" />
+                      ) : null}
                     </div>
                     <span className={cn(
                       'text-[10px] font-black uppercase tracking-wide',
@@ -413,6 +537,7 @@ export function DashboardView({
       <div className="flex-1 overflow-y-auto pt-3">
         <WeekDayBar
           sessions={sessions}
+          templates={templates}
           weeklyGoal={weeklyGoal}
           onDayClick={(sessionId) => {
             setHighlightSessionId?.(sessionId);
@@ -445,7 +570,36 @@ export function DashboardView({
               </div>
             ) : (
               <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
-                {templates.map(template => (
+                {[...templates].sort((a, b) => {
+                  // Last session date for each template ('' = never used → sorts first)
+                  const lastA = sessions
+                    .filter(s => s.workoutId === a.id)
+                    .map(s => s.date)
+                    .sort()
+                    .at(-1) ?? '';
+                  const lastB = sessions
+                    .filter(s => s.workoutId === b.id)
+                    .map(s => s.date)
+                    .sort()
+                    .at(-1) ?? '';
+
+                  if (lastA !== lastB) return lastA.localeCompare(lastB);
+
+                  // Tiebreaker: oldest session across all templates sharing the same workoutName
+                  // (proxy for "modality group" — e.g. all "Musculação X" templates)
+                  const oldestForName = (name: string) =>
+                    sessions
+                      .filter(s => s.workoutName === name)
+                      .map(s => s.date)
+                      .sort()
+                      .at(0) ?? '';
+
+                  const oldestA = oldestForName(a.name);
+                  const oldestB = oldestForName(b.name);
+
+                  // The one whose modality was practiced longest ago goes first (left)
+                  return oldestA.localeCompare(oldestB);
+                }).map(template => (
                   <button
                     key={template.id}
                     onClick={() => {
@@ -467,7 +621,7 @@ export function DashboardView({
                     <div>
                       <p className="text-sm font-black leading-tight line-clamp-2">{template.name}</p>
                       <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">
-                        {template.sheets?.length ?? 0} {(template.sheets?.length ?? 0) === 1 ? 'sessão' : 'sessões'}
+                        {(() => { const n = sessions.filter(s => s.workoutId === template.id).length; return n === 0 ? 'Novo' : `${n} ${n === 1 ? 'sessão' : 'sessões'}`; })()}
                       </p>
                     </div>
                     <div className="mt-auto w-full bg-brand-red rounded-xl flex items-center justify-center gap-1.5 py-2">
