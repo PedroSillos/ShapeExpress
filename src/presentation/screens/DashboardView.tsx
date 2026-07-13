@@ -236,8 +236,8 @@ function dayBgStyle(sports: string[], isToday: boolean): { className: string; st
     className: '',
     style: {
       background: isToday
-        ? 'linear-gradient(135deg, #e2e8f0, #ffffff, #cbd5e1, #f1f5f9, #94a3b8, #e2e8f0)'
-        : 'linear-gradient(135deg, #e2e8f044, #ffffff55, #cbd5e144, #f1f5f944, #94a3b844, #e2e8f044)',
+        ? 'linear-gradient(135deg, #c8d6e5, #ffffff, #b8cfe0, #e8f0f8, #a8bfd4, #dce8f0)'
+        : 'linear-gradient(135deg, #c8d6e577, #ffffff88, #b8cfe077, #e8f0f877, #a8bfd477, #dce8f077)',
       boxShadow: isToday ? '0 2px 0 0 rgba(148,163,184,0.5)' : undefined,
     },
   };
