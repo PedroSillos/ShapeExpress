@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
-import { startOfWeek, parseISO, format, subWeeks } from 'date-fns';
-import { Play, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { startOfWeek, parseISO, format, subWeeks, addDays, endOfWeek } from 'date-fns';
+import { Play, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 import {
@@ -23,13 +23,6 @@ import iconCiclismo from '@/src/assets/icons/icon-ciclismo.svg';
 import iconNatacao from '@/src/assets/icons/icon-natacao.svg';
 import iconCrossfit from '@/src/assets/icons/icon-crossfit.svg';
 import iconTriatlo from '@/src/assets/icons/icon-triatlo.svg';
-import iconRoman1 from '@/src/assets/icons/icon-roman-1.svg';
-import iconRoman2 from '@/src/assets/icons/icon-roman-2.svg';
-import iconRoman3 from '@/src/assets/icons/icon-roman-3.svg';
-import iconRoman4 from '@/src/assets/icons/icon-roman-4.svg';
-import iconRoman5 from '@/src/assets/icons/icon-roman-5.svg';
-import iconRoman6 from '@/src/assets/icons/icon-roman-6.svg';
-import iconRoman7 from '@/src/assets/icons/icon-roman-7.svg';
 
 interface DashboardViewProps {
   userStats: UserStats;
@@ -71,14 +64,6 @@ const SPORT_ICONS: Record<string, string> = {
   'Crossfit':       iconCrossfit,
   'Triatlo':        iconTriatlo,
 };
-
-const XP_PER_LEVEL = 500;
-
-// Node positions alternating left/center/right for trail effect
-const NODE_POSITIONS = ['left', 'center', 'right', 'center', 'left', 'center', 'right', 'center'] as const;
-
-// Roman numeral icons indexed by workout number (1-based)
-const ROMAN_ICONS = [iconRoman1, iconRoman2, iconRoman3, iconRoman4, iconRoman5, iconRoman6, iconRoman7];
 
 /**
  * Streak = sum of distinct training days across consecutive weeks that met the
@@ -138,6 +123,78 @@ function calcGoalStreak(sessions: WorkoutSession[], weeklyGoal: number): number 
   return streak;
 }
 
+const WEEK_DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] as const;
+
+/** Bar showing each day of the current week (Sun→Sat), lit red if the user trained that day. */
+function WeekDayBar({ sessions, weeklyGoal }: { sessions: WorkoutSession[]; weeklyGoal: number }) {
+  const weekStart = startOfWeek(new Date(), { weekStartsOn: 0 }); // Sunday
+  const weekEnd   = endOfWeek(new Date(), { weekStartsOn: 0 });   // Saturday
+
+  // "12/07 – 18/07" style header
+  const weekLabel = `${format(weekStart, 'dd/MM')} – ${format(weekEnd, 'dd/MM')}`;
+
+  // Set of 'yyyy-MM-dd' for days that had at least one session this week
+  const trainedDays = useMemo(() => {
+    const set = new Set<string>();
+    sessions.forEach(s => {
+      try {
+        const d = parseISO(s.date);
+        if (d >= weekStart && d <= weekEnd) set.add(format(d, 'yyyy-MM-dd'));
+      } catch {}
+    });
+    return set;
+  // weekStart/weekEnd are derived from `new Date()` — stable within the render
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessions]);
+
+  return (
+    <div className="mx-6 mt-4 mb-8 bg-dark-card border border-white/5 rounded-2xl px-4 py-3">
+      {/* Header: week range + trained counter */}
+      <div className="flex items-center justify-between mb-1.5">
+        <p className="text-xs font-black uppercase tracking-widest text-white/40">
+          {weekLabel}
+        </p>
+        <p className="text-xs font-black uppercase tracking-widest text-white/40">
+          {trainedDays.size}/{weeklyGoal}
+        </p>
+      </div>
+
+      {/* Day columns */}
+      <div className="flex items-end justify-between gap-1">
+        {WEEK_DAYS.map((label, i) => {
+          const dayKey  = format(addDays(weekStart, i), 'yyyy-MM-dd');
+          const trained = trainedDays.has(dayKey);
+          const isToday = dayKey === format(new Date(), 'yyyy-MM-dd');
+
+          return (
+            <div key={label} className={cn('flex flex-col items-center gap-2', isToday ? 'flex-[1.25]' : 'flex-1')}>
+              {/* Bar — today is 1.25x taller and wider */}
+              <div className={cn(
+                'w-full rounded-lg transition-colors duration-300 flex items-center justify-center',
+                isToday ? 'h-10' : 'h-8',
+                trained ? 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]' : isToday ? 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]' : 'bg-brand-red/10',
+              )}>
+                {isToday && (
+                  trained
+                    ? <Check size={16} color="white" strokeWidth={3} />
+                    : <Play size={14} fill="white" color="white" />
+                )}
+              </div>
+              {/* Label */}
+              <span className={cn(
+                'text-[10px] font-black uppercase tracking-wide',
+                trained ? 'text-white' : isToday ? 'text-white' : 'text-white/30',
+              )}>
+                {label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function DashboardView({
   userStats,
   sessions,
@@ -181,20 +238,7 @@ export function DashboardView({
   const currentTemplate = templates[currentTemplateIdx] ?? null;
 
   // Trail: one node per weekly goal slot. Nodes up to completedThisWeek are "done",
-  // the next one is "active" (if goal not yet met), and the rest are "locked".
   const weeklyGoal = Math.max(1, mainUserProfile.weeklyGoal ?? 3);
-  const trailNodes = Array.from({ length: weeklyGoal }, (_, i) => {
-    const state =
-      i < completedThisWeek ? 'done'
-      : i === completedThisWeek ? 'active'
-      : 'locked';
-    // Pick a template to show for the active node (next workout)
-    const templateForNode = templates[i % Math.max(1, templates.length)] ?? null;
-    return { template: templateForNode, state, index: i };
-  });
-
-  const xpProgress = userStats.xp % XP_PER_LEVEL;
-  const xpProgressPct = Math.round((xpProgress / XP_PER_LEVEL) * 100);
 
   return (
     <div className="-mx-6">
@@ -250,7 +294,7 @@ export function DashboardView({
       {currentTemplate ? (
         <button
           onClick={() => onStartWorkout(currentTemplate)}
-          className="mx-6 mt-4 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(150,10,10,0.6)]"
+          className="mx-6 mt-3 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(150,10,10,0.6)]"
         >
           <div className="text-left">
             <p className="text-[10px] font-black uppercase tracking-widest text-white/70">
@@ -265,7 +309,7 @@ export function DashboardView({
       ) : (
         <button
           onClick={() => switchTab('workouts')}
-          className="mx-6 mt-4 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(150,10,10,0.6)]"
+          className="mx-6 mt-3 w-[calc(100%-3rem)] bg-brand-red rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-transform shadow-[0_4px_0_0_rgba(150,10,10,0.6)]"
         >
           <div className="text-left">
             <p className="text-[10px] font-black uppercase tracking-widest text-white/70">Comece agora</p>
@@ -277,82 +321,8 @@ export function DashboardView({
         </button>
       )}
 
-      {/* XP progress bar */}
-      <div className="px-6 mt-3 mb-1">
-        <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-brand-red rounded-full transition-all duration-500"
-            style={{ width: `${xpProgressPct}%` }}
-          />
-        </div>
-        <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest mt-1 text-right">
-          {xpProgress} / {XP_PER_LEVEL} XP
-        </p>
-      </div>
-
-      {/* Trail map */}
-      <div className="px-6 pb-8 pt-6 flex flex-col items-center gap-6">
-        {trailNodes.map((node, i) => {
-          const pos = NODE_POSITIONS[i % NODE_POSITIONS.length];
-          const isActive = node.state === 'active';
-          const isDone = node.state === 'done';
-          const isLocked = node.state === 'locked';
-
-          return (
-            <div
-              key={node.index}
-              className={cn(
-                'w-full flex',
-                pos === 'left' && 'justify-start pl-4',
-                pos === 'center' && 'justify-center',
-                pos === 'right' && 'justify-end pr-4',
-              )}
-            >
-              <button
-                onClick={isActive ? () => onStartWorkout(node.template ?? currentTemplate ?? undefined) : undefined}
-                disabled={isLocked || isDone}
-                className="relative flex flex-col items-center gap-2 active:scale-95 transition-transform disabled:cursor-default"
-              >
-                {/* Glow ring for active */}
-                {isActive && (
-                  <div className="absolute inset-0 rounded-full bg-brand-red/20 animate-ping scale-150" />
-                )}
-                <div className={cn(
-                  'w-18 h-18 rounded-full flex items-center justify-center shadow-lg relative',
-                  'w-[72px] h-[72px]',
-                  isActive && 'bg-brand-red shadow-[0_6px_0_0_rgba(150,10,10,0.7)]',
-                  isDone && 'bg-brand-red/60 shadow-[0_4px_0_0_rgba(150,10,10,0.4)]',
-                  isLocked && 'bg-[#2a3540]',
-                )}>
-                  {/* Progress ring on active node */}
-                  {isActive && (
-                    <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 72 72">
-                      <circle cx="36" cy="36" r="32" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="5" />
-                      <circle cx="36" cy="36" r="32" fill="none" stroke="white" strokeWidth="5"
-                        strokeDasharray={`${2 * Math.PI * 32 * (xpProgressPct / 100)} ${2 * Math.PI * 32}`}
-                        strokeLinecap="round" />
-                    </svg>
-                  )}
-                  {isLocked
-                    ? <Lock size={26} className="text-white/20" />
-                    : (
-                      <img
-                        src={ROMAN_ICONS[Math.min(node.index, ROMAN_ICONS.length - 1)]}
-                        className={cn(
-                          'w-8 h-8 object-contain brightness-0 invert relative z-10',
-                          (isDone) && 'opacity-70',
-                        )}
-                        alt={`Treino ${node.index + 1}`}
-                      />
-                    )}
-                </div>
-              </button>
-            </div>
-          );
-        })}
-
-      </div>
-
+      {/* Weekly day bar */}
+      <WeekDayBar sessions={sessions} weeklyGoal={weeklyGoal} />
 
     </div>
   );
