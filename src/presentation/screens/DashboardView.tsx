@@ -138,10 +138,12 @@ function WeekDayBar({
   sessions,
   weeklyGoal,
   onDayClick,
+  onTodayClick,
 }: {
   sessions: WorkoutSession[];
   weeklyGoal: number;
   onDayClick?: (sessionId: string) => void;
+  onTodayClick?: () => void;
 }) {
   const currentWeekRef = useRef<HTMLDivElement>(null);
   const today          = format(new Date(), 'yyyy-MM-dd');
@@ -225,7 +227,8 @@ function WeekDayBar({
                 const trained   = trainedDaySet.has(dayKey);
                 const isToday   = dayKey === today;
                 const isPast    = dayKey < today;
-                const clickable = trained && isPast && !!onDayClick;
+                const clickable = trained && (isPast || isToday) && !!onDayClick;
+                const todayClickable = isToday && !trained && !!onTodayClick;
 
                 return (
                   <div
@@ -233,11 +236,17 @@ function WeekDayBar({
                     className={cn('flex flex-col items-center gap-2', isToday ? 'flex-[1.25]' : 'flex-1')}
                   >
                     <div
-                      onClick={clickable ? () => onDayClick!(sessionByDay.get(dayKey)!) : undefined}
+                      onClick={
+                        clickable
+                          ? () => onDayClick!(sessionByDay.get(dayKey)!)
+                          : todayClickable
+                            ? () => onTodayClick!()
+                            : undefined
+                      }
                       className={cn(
                         'w-full rounded-lg transition-colors duration-300 flex items-center justify-center',
                         isToday ? 'h-10' : 'h-8',
-                        clickable && 'cursor-pointer active:scale-95',
+                        (clickable || todayClickable) && 'cursor-pointer active:scale-95',
                         trained && isToday
                           ? 'bg-brand-red shadow-[0_2px_0_0_rgba(150,10,10,0.6)]'
                           : trained
@@ -294,6 +303,7 @@ export function DashboardView({
   }, [mainUserProfile, isLoggedIn]);
 
   const [sportIdx, setSportIdx] = useState(0);
+  const [showWorkoutPicker, setShowWorkoutPicker] = useState(false);
   const currentSport = sports[sportIdx] ?? sports[0];
 
   const goalStreak = useMemo(() => calcGoalStreak(sessions, mainUserProfile.weeklyGoal ?? 3), [sessions, mainUserProfile.weeklyGoal]);
@@ -316,7 +326,7 @@ export function DashboardView({
   const weeklyGoal = Math.max(1, mainUserProfile.weeklyGoal ?? 3);
 
   return (
-    <div className="-mx-6 flex flex-col" style={{ height: 'calc(100dvh - 6rem)' }}>
+    <div className="-mx-6 flex flex-col relative" style={{ height: 'calc(100dvh - 6rem)' }}>
       {/* ── Fixed top: stats bar + workout card ── */}
       <div className="shrink-0 border-b border-white/5 pb-3">
         {/* Top stats bar — Duolingo style */}
@@ -409,8 +419,68 @@ export function DashboardView({
             setScrollToHistory?.(true);
             switchTab('workouts');
           }}
+          onTodayClick={() => setShowWorkoutPicker(true)}
         />
       </div>
+
+      {/* ── Workout picker bottom sheet ── */}
+      {showWorkoutPicker && (
+        <div
+          className="absolute inset-0 z-50 flex flex-col justify-end"
+          style={{ background: 'rgba(0,0,0,0.6)' }}
+          onClick={() => setShowWorkoutPicker(false)}
+        >
+          <div
+            className="bg-dark-card rounded-t-3xl px-5 pt-5 pb-8 flex flex-col gap-4"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Handle */}
+            <div className="w-10 h-1 rounded-full bg-white/20 mx-auto -mt-1 mb-1" />
+
+            <p className="text-xs font-black uppercase tracking-widest text-white/40">Escolha um treino</p>
+
+            {templates.length === 0 ? (
+              <div className="py-8 text-center space-y-2 opacity-40">
+                <p className="text-sm">Nenhum treino criado ainda.</p>
+              </div>
+            ) : (
+              <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
+                {templates.map(template => (
+                  <button
+                    key={template.id}
+                    onClick={() => {
+                      setShowWorkoutPicker(false);
+                      onStartWorkout(template);
+                    }}
+                    className="shrink-0 w-44 bg-white/5 border border-white/10 rounded-2xl p-4 text-left flex flex-col gap-3 active:scale-[0.97] transition-transform"
+                  >
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center p-2"
+                      style={{ backgroundColor: '#dc2626' }}
+                    >
+                      <img
+                        src={iconMusculacao}
+                        className="w-full h-full object-contain brightness-0 invert"
+                        alt=""
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm font-black leading-tight line-clamp-2">{template.name}</p>
+                      <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">
+                        {template.sheets?.length ?? 0} {(template.sheets?.length ?? 0) === 1 ? 'sessão' : 'sessões'}
+                      </p>
+                    </div>
+                    <div className="mt-auto w-full bg-brand-red rounded-xl flex items-center justify-center gap-1.5 py-2">
+                      <Play size={12} fill="white" color="white" />
+                      <span className="text-xs font-black text-white">Iniciar</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -377,6 +377,10 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onGenerateWithAI={handleGenerateWithAI}
           onEditWorkout={(t: WorkoutTemplate) => { setEditingTemplate(t); setActiveTab('edit-workout'); }}
           onDeleteWorkout={(id: string) => setDeletingTemplateId(id)}
+          onRenameWorkout={async (id: string, name: string) => {
+            const t = filteredTemplates.find(tmpl => tmpl.id === id);
+            if (t) await updateTemplate({ ...t, name });
+          }}
           onGoToStore={() => switchTab('store')}
           onEditSession={(s: WorkoutSession) => setEditingSession(s)}
           onDeleteSession={deleteSession}

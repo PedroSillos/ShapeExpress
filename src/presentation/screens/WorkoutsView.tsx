@@ -15,6 +15,7 @@ import {
   ShoppingBag,
   Sparkles,
   Calendar as CalendarIcon,
+  Pen,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, parseISO, startOfMonth, endOfMonth, startOfWeek, addDays, isSameMonth, addMonths, subMonths } from 'date-fns';
@@ -55,6 +56,7 @@ interface WorkoutsViewProps {
   onGenerateWithAI: () => void;
   onEditWorkout: (t: WorkoutTemplate) => void;
   onDeleteWorkout: (id: string) => void;
+  onRenameWorkout: (id: string, name: string) => void;
   onGoToStore: () => void;
   onEditSession: (s: WorkoutSession) => void;
   onDeleteSession: (id: string) => void;
@@ -140,6 +142,7 @@ interface TemplateCardProps {
   setOpenSettingsId: (id: string | null) => void;
   onEditWorkout: (t: WorkoutTemplate) => void;
   onDeleteWorkout: (id: string) => void;
+  onRenameWorkout: (id: string, name: string) => void;
   onStartWorkout: (t: WorkoutTemplate, sheetIndex?: number) => void;
   onSelectSheet: (t: WorkoutTemplate) => void;
   onCreateAd?: (t: WorkoutTemplate) => void;
@@ -158,11 +161,29 @@ function TemplateCard({
   setOpenSettingsId,
   onEditWorkout,
   onDeleteWorkout,
+  onRenameWorkout,
   onStartWorkout,
   onSelectSheet,
   onCreateAd,
 }: TemplateCardProps) {
   const hasSheets = !!(template.sheets && template.sheets.length > 0);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState(template.name);
+  const renameInputRef = useRef<HTMLInputElement>(null);
+
+  const startRename = () => {
+    setRenameValue(template.name);
+    setOpenSettingsId(null);
+    setIsRenaming(true);
+    // focus after render
+    setTimeout(() => renameInputRef.current?.select(), 50);
+  };
+
+  const commitRename = () => {
+    const trimmed = renameValue.trim();
+    if (trimmed && trimmed !== template.name) onRenameWorkout(template.id, trimmed);
+    setIsRenaming(false);
+  };
 
   const getNextSheetInfo = () => {
     let sheets: WorkoutSheet[] = [];
@@ -233,17 +254,33 @@ function TemplateCard({
         <div className="flex items-start justify-between">
           <div className="flex-1 space-y-0.5 pr-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-base font-black text-white leading-snug">{template.name}</h3>
-              <Badge
-                className={cn(
-                  'text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider',
-                  template.category === 'multicycle'
-                    ? 'bg-brand-red/20 text-brand-red border border-brand-red/30'
-                    : 'bg-white/8 text-white/40 border border-white/10'
-                )}
-              >
-                {template.category === 'multicycle' ? 'Multiciclo' : 'Básico'}
-              </Badge>
+              {isRenaming ? (
+                <input
+                  ref={renameInputRef}
+                  value={renameValue}
+                  onChange={e => setRenameValue(e.target.value)}
+                  onBlur={commitRename}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') commitRename();
+                    if (e.key === 'Escape') setIsRenaming(false);
+                  }}
+                  className="text-base font-black text-white leading-snug bg-white/10 border border-brand-red/50 rounded-lg px-2 py-0.5 outline-none w-full"
+                />
+              ) : (
+                <h3 className="text-base font-black text-white leading-snug">{template.name}</h3>
+              )}
+              {!isRenaming && (
+                <Badge
+                  className={cn(
+                    'text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider',
+                    template.category === 'multicycle'
+                      ? 'bg-brand-red/20 text-brand-red border border-brand-red/30'
+                      : 'bg-white/8 text-white/40 border border-white/10'
+                  )}
+                >
+                  {template.category === 'multicycle' ? 'Multiciclo' : 'Básico'}
+                </Badge>
+              )}
             </div>
             {trainer && (
               <p className="text-[10px] text-brand-red font-bold uppercase tracking-wider">
@@ -272,11 +309,17 @@ function TemplateCard({
                     initial={{ opacity: 0, scale: 0.9, y: -8 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: -8 }}
-                    className="absolute right-0 top-9 w-32 bg-dark-card border border-dark-border rounded-2xl shadow-2xl z-20 overflow-hidden"
+                    className="absolute right-0 top-9 w-36 bg-dark-card border border-dark-border rounded-2xl shadow-2xl z-20 overflow-hidden"
                   >
                     <button
-                      onClick={() => { onEditWorkout(template); setOpenSettingsId(null); }}
+                      onClick={startRename}
                       className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold hover:bg-white/5 transition-colors"
+                    >
+                      <Pen size={13} /> Renomear
+                    </button>
+                    <button
+                      onClick={() => { onEditWorkout(template); setOpenSettingsId(null); }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold hover:bg-white/5 transition-colors border-t border-dark-border"
                     >
                       <Edit size={13} /> Editar
                     </button>
@@ -618,6 +661,7 @@ export function WorkoutsView({
   onGenerateWithAI,
   onEditWorkout,
   onDeleteWorkout,
+  onRenameWorkout,
   onGoToStore,
   onEditSession,
   onDeleteSession,
@@ -740,6 +784,7 @@ export function WorkoutsView({
                 setOpenSettingsId={setOpenSettingsId}
                 onEditWorkout={onEditWorkout}
                 onDeleteWorkout={onDeleteWorkout}
+                onRenameWorkout={onRenameWorkout}
                 onStartWorkout={onStartWorkout}
                 onSelectSheet={setSelectingSheetTemplate}
                 onCreateAd={onCreateAd}
