@@ -332,24 +332,6 @@ export interface TrainerConnection {
   createdAt: string;
 }
 
-export interface AppNotification {
-  id: string;
-  userEmail?: string;
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-  type:
-    | "info"
-    | "success"
-    | "warning"
-    | "alert"
-    | "connection_request"
-    | "connection_response"
-    | "workout_assigned";
-  data?: any;
-}
-
 // ─── Store ────────────────────────────────────────────────────────────────────
 
 /** A single workout template listed for sale in the store */

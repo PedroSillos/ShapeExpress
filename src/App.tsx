@@ -49,7 +49,6 @@ export default function App() {
     userTrainingProfile, setUserTrainingProfile,
     exerciseUserStats, setExerciseUserStats,
     userCalorieProfile, setUserCalorieProfile,
-    notifications,
     userSessions, filteredTemplates,
     progressScore,
     api,

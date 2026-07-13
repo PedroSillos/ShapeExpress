@@ -8,7 +8,6 @@ import { useProfileState } from "./useProfileState";
 import { useWorkoutState } from "./useWorkoutState";
 import { useProgressState } from "./useProgressState";
 import { useStudentsState } from "./useStudentsState";
-import { useNotificationsState } from "./useNotificationsState";
 import { useStoreState } from "./useStoreState";
 import { useSyncState } from "./useSyncState";
 
@@ -19,7 +18,6 @@ export const useAppState = () => {
   const workout = useWorkoutState(auth.currentUser, auth.token, profile.userProfile);
   const progress = useProgressState(workout.userSessions, profile.userStats);
   const students = useStudentsState(auth.currentUser, auth.token);
-  const notifs = useNotificationsState(auth.currentUser, auth.isLoggedIn, auth.token);
   const store = useStoreState(auth.currentUser, auth.idToken);
 
   // Boot sync after login
@@ -98,12 +96,6 @@ export const useAppState = () => {
     disconnectStudent: students.disconnectStudent,
     getTrainerSettings: async () => ({}),
     updateTrainerSettings: async (_s: any) => {},
-
-    // Notifications
-    sendNotification: notifs.sendNotification,
-    getNotifications: notifs.getNotifications,
-    markNotificationRead: notifs.markNotificationRead,
-    clearAllNotifications: notifs.clearAllNotifications,
 
     // Store
     getProtocols: store.getProtocols,
@@ -213,10 +205,6 @@ export const useAppState = () => {
     setSelectedStudentForWorkouts: students.setSelectedStudentForWorkouts,
     selectedStudentForEvolution: students.selectedStudentForEvolution,
     setSelectedStudentForEvolution: students.setSelectedStudentForEvolution,
-
-    // Notifications
-    notifications: notifs.notifications,
-    setNotifications: notifs.setNotifications,
 
     // Store
     storeItems: store.storeItems,

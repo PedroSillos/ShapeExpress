@@ -1,7 +1,6 @@
 import { toast } from 'sonner';
 import { useRef, useState } from 'react';
 import { Student, UserProfile, WorkoutTemplate, WorkoutSession, StoreItem, StorePurchase } from '../domain/entities';
-import { fullName } from '../domain/entities';
 import { DEFAULT_PROFILE } from '../constants';
 import type { PublishPayload } from './hooks/useStoreState';
 import { STORAGE_KEYS } from '../shared/lib/storageKeys';
@@ -16,7 +15,6 @@ import { DashboardView } from './screens/DashboardView';
 import { CalendarView } from './screens/CalendarView';
 import { WorkoutsView } from './screens/WorkoutsView';
 import { StatsContainer } from './screens/StatsContainer';
-import { NotificationsView } from './screens/NotificationsView';
 import { TrainersScreen } from './screens/TrainersScreen';
 import { LojasScreen } from './screens/LojasScreen';
 import { PurchasedProductsView } from './screens/PurchasedProductsView';
@@ -51,7 +49,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     setTemplates,
     userTrainingProfile, exerciseUserStats, userCalorieProfile,
     assessments,
-    notifications, setNotifications,
     students, setStudents,
     trainers,
     studentConnections, setStudentConnections,
@@ -401,38 +398,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onGoToWorkouts={() => switchTab('workouts')}
         />
       );
-    case 'notifications':
-      return (
-        <NotificationsView
-          notifications={notifications}
-          onBack={() => setActiveTab('dashboard')}
-          onMarkAsRead={async (id: string) => {
-            try {
-              await api.markNotificationRead(id);
-              setNotifications((prev: any) => prev.map((n: any) => n.id === id ? { ...n, read: true } : n));
-            } catch (e) { console.error(e); }
-          }}
-          onClearAll={async () => {
-            try {
-              await api.clearAllNotifications();
-              setNotifications([]);
-            } catch (e) { console.error(e); }
-          }}
-          onAction={(notification: any) => {
-            switch (notification.type) {
-              case 'connection_request':
-                if (userProfile?.userType === 'treinador') setActiveTab('students');
-                break;
-              case 'connection_response':
-                if (userProfile?.userType === 'atleta') setActiveTab('trainers');
-                break;
-              case 'workout_assigned':
-                setActiveTab('workouts');
-                break;
-            }
-          }}
-        />
-      );
     case 'store':
       return (
         <LojasScreen
@@ -450,21 +415,19 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           trainers={trainers}
           onConnect={async (code: string) => {
             await api.requestConnection(code);
-            const [connections, profile, notifs] = await Promise.all([
-              api.getStudentConnections(), api.getProfile(), api.getNotifications(),
+            const [connections, profile] = await Promise.all([
+              api.getStudentConnections(), api.getProfile(),
             ]);
             setStudentConnections(connections);
             setUserProfile((profile as UserProfile) || DEFAULT_PROFILE);
-            setNotifications(notifs);
           }}
           onDisconnect={async (trainerEmail: string) => {
             await api.disconnectTrainer(trainerEmail);
-            const [connections, profile, notifs] = await Promise.all([
-              api.getStudentConnections(), api.getProfile(), api.getNotifications(),
+            const [connections, profile] = await Promise.all([
+              api.getStudentConnections(), api.getProfile(),
             ]);
             setStudentConnections(connections);
             setUserProfile((profile as UserProfile) || DEFAULT_PROFILE);
-            setNotifications(notifs);
           }}
           studentConnections={studentConnections}
         />
@@ -479,16 +442,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onRespond={async (id: string, status: any) => {
             await api.respondToConnection(id, status);
             await Promise.all([api.getStudents(), api.getTrainerConnections()]);
-          }}
-          onReminder={async (student: Student) => {
-            try {
-              await api.sendNotification(student.email, {
-                title: 'Lembrete de Pagamento',
-                message: `Seu pagamento vence em breve. Entre em contato com seu treinador ${fullName(userProfile)} para regularizar.`,
-                timestamp: new Date().toISOString(), type: 'warning',
-              });
-              toast.success(`Lembrete enviado para ${student.name}!`);
-            } catch (e) { toast.error('Erro ao enviar lembrete.'); }
           }}
           onDisconnect={async (email: string) => { await api.disconnectStudent(email); }}
           onViewWorkouts={(student: Student) => { setSelectedStudentForWorkouts(student); setActiveTab('student-workouts'); }}

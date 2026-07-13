@@ -9,16 +9,15 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../utils/cn';
-import { Student, UserProfile, AppNotification, TrainerConnection } from '../../domain/entities';
+import { Student, UserProfile, TrainerConnection } from '../../domain/entities';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { InitialsAvatar } from '@/src/shared/ui/InitialsAvatar';
 
-export function StudentsView({ students, userProfile, onReminder, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, selectedStudentForProfile, setSelectedStudentForProfile }: { 
+export function StudentsView({ students, userProfile, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, selectedStudentForProfile, setSelectedStudentForProfile }: { 
   students: Student[], 
   userProfile: UserProfile, 
-  onReminder: (student: Student) => Promise<void>,
-  pendingRequests: AppNotification[],
+  pendingRequests: TrainerConnection[],
   onRespond: (id: string, status: 'accepted' | 'rejected') => Promise<void>,
   onDisconnect: (studentEmail: string) => Promise<void>,
   onViewWorkouts: (student: Student) => void,
@@ -153,7 +152,7 @@ export function StudentsView({ students, userProfile, onReminder, pendingRequest
                   </div>
                   <div className="flex-1">
                     <h4 className="font-bold text-sm">Novo Aluno</h4>
-                    <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">{((request as unknown) as TrainerConnection).studentEmail || request.data?.studentEmail}</p>
+                    <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest">{request.studentEmail}</p>
                   </div>
                   <div className="flex gap-2">
                     <button 
@@ -491,7 +490,6 @@ export function StudentsView({ students, userProfile, onReminder, pendingRequest
           <FinancialDashboardModal 
             onClose={() => setShowFinancialDashboard(false)} 
             students={students}
-            onReminder={onReminder}
           />
         )}
       </AnimatePresence>
@@ -499,8 +497,7 @@ export function StudentsView({ students, userProfile, onReminder, pendingRequest
   );
 }
 
-function FinancialDashboardModal({ onClose, students, onReminder }: { onClose: () => void, students: Student[], onReminder: (student: Student) => Promise<void> }) {
-  const [sendingReminder, setSendingReminder] = useState<string | null>(null);
+function FinancialDashboardModal({ onClose, students }: { onClose: () => void, students: Student[] }) {
   // Mock data for the dashboard
   const activeStudents = students.length;
   const monthlyRevenue = activeStudents * 150; // Assuming R$ 150 per student
@@ -620,17 +617,6 @@ function FinancialDashboardModal({ onClose, students, onReminder }: { onClose: (
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold text-emerald-500">R$ 150,00</p>
-                    <button
-                      disabled={sendingReminder === student.id}
-                      onClick={async () => {
-                        setSendingReminder(student.id);
-                        await onReminder(student);
-                        setSendingReminder(null);
-                      }}
-                      className="text-[10px] text-white/40 hover:text-amber-400 underline mt-1 disabled:opacity-40 transition-colors"
-                    >
-                      {sendingReminder === student.id ? 'Enviando...' : 'Lembrar'}
-                    </button>
                   </div>
                 </div>
               ))}
