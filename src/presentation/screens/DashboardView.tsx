@@ -461,9 +461,6 @@ export function DashboardView({
 
   const goalStreak = useMemo(() => calcGoalStreak(sessions, mainUserProfile.weeklyGoal ?? 3), [sessions, mainUserProfile.weeklyGoal]);
 
-  // Completed weeks = total streak workouts divided by weekly goal (floor)
-  const completedWeeks = Math.floor(goalStreak / Math.max(1, mainUserProfile.weeklyGoal ?? 3));
-
   const completedThisWeek = useMemo(() => {
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
     return sessions.filter(s => { try { return parseISO(s.date) >= weekStart; } catch { return false; } }).length;
@@ -502,7 +499,6 @@ export function DashboardView({
                 alt={currentSport}
               />
             </div>
-            <span className="font-bold text-sm ml-1" style={{ color: SPORT_COLORS[currentSport] ?? '#dc2626' }}>{completedWeeks + 1}</span>
             {templateSports.length > 1 && (
               <button onClick={() => setSportIdx(i => (i + 1) % templateSports.length)} className="text-white/30 active:text-white">
                 <ChevronRight size={14} />
@@ -510,7 +506,7 @@ export function DashboardView({
             )}
           </div>
 
-          {/* Streak */}
+          {/* Streak — center */}
           <div className="flex items-center gap-1.5">
             <div className={cn(
               'w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0',
