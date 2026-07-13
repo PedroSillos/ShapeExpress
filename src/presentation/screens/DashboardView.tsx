@@ -135,11 +135,14 @@ const CURRENT_WEEK_INDEX = WEEKS_PAST; // index 4
 /** Stacked bar showing 2 past weeks, current week, and 3 future weeks.
  *  On mount the current-week card is scrolled to the vertical center of the viewport. */
 /** Resolve the sport name for a given workoutId via the template list.
- *  Falls back to 'Musculação' if the template is not found. */
+ *  Uses template.sport when available; falls back to name-matching for
+ *  legacy templates created before the sport field existed. */
 function getSportForWorkout(workoutId: string, templates: WorkoutTemplate[]): string {
   const t = templates.find(t => t.id === workoutId);
   if (!t) return 'Musculação';
-  // Derive sport from template name by matching known sport keys
+  // Prefer explicit sport field (set since the sport-field commit)
+  if (t.sport) return t.sport;
+  // Legacy fallback: derive from template name
   const known = Object.keys(SPORT_COLORS);
   return known.find(s => t.name.toLowerCase().includes(s.toLowerCase())) ?? 'Musculação';
 }
@@ -608,16 +611,23 @@ export function DashboardView({
                     }}
                     className="shrink-0 w-44 bg-white/5 border border-white/10 rounded-2xl p-4 text-left flex flex-col gap-3 active:scale-[0.97] transition-transform"
                   >
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center p-2"
-                      style={{ backgroundColor: '#dc2626' }}
-                    >
-                      <img
-                        src={iconMusculacao}
-                        className="w-full h-full object-contain brightness-0 invert"
-                        alt=""
-                      />
-                    </div>
+                    {(() => {
+                      const tSport = template.sport ?? getSportForWorkout(template.id, templates);
+                      const sportColor = SPORT_COLORS[tSport] ?? '#dc2626';
+                      const sportIcon  = SPORT_ICONS[tSport]  ?? iconMusculacao;
+                      return (
+                        <div
+                          className="w-10 h-10 rounded-xl flex items-center justify-center p-2"
+                          style={{ backgroundColor: sportColor }}
+                        >
+                          <img
+                            src={sportIcon}
+                            className="w-full h-full object-contain brightness-0 invert"
+                            alt={tSport}
+                          />
+                        </div>
+                      );
+                    })()}
                     <div>
                       <p className="text-sm font-black leading-tight line-clamp-2">{template.name}</p>
                       <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">
