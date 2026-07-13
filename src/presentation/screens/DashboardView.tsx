@@ -1,6 +1,6 @@
 import { useMemo, useRef, useEffect, useState } from 'react';
 import { startOfWeek, parseISO, format, subWeeks, addWeeks, addDays, endOfWeek } from 'date-fns';
-import { Play, ChevronLeft, ChevronRight, Check, X } from 'lucide-react';
+import { Play, ChevronRight, Check, X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 import {
@@ -479,30 +479,81 @@ export function DashboardView({
   // Trail: one node per weekly goal slot. Nodes up to completedThisWeek are "done",
   const weeklyGoal = Math.max(1, mainUserProfile.weeklyGoal ?? 3);
 
+  const [showSportMenu, setShowSportMenu] = useState(false);
+
   return (
     <div className="-mx-6 flex flex-col relative" style={{ height: 'calc(100dvh - 6rem)' }}>
       {/* ── Fixed top: stats bar + workout card ── */}
       <div className="shrink-0 border-b border-white/5 pb-3">
         {/* Top stats bar — Duolingo style */}
         <div className="flex items-center justify-between px-6 py-3 border-b border-white/5 mt-2">
-          {/* Sport selector */}
-          <div className="flex items-center gap-1">
-            {templateSports.length > 1 && (
-              <button onClick={() => setSportIdx(i => (i - 1 + templateSports.length) % templateSports.length)} className="text-white/30 active:text-white">
-                <ChevronLeft size={14} />
-              </button>
-            )}
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0" style={{ backgroundColor: SPORT_COLORS[currentSport] ?? '#dc2626' }}>
-              <img
-                src={SPORT_ICONS[currentSport] ?? iconMusculacao}
-                className="w-full h-full object-contain brightness-0 invert"
-                alt={currentSport}
-              />
-            </div>
-            {templateSports.length > 1 && (
-              <button onClick={() => setSportIdx(i => (i + 1) % templateSports.length)} className="text-white/30 active:text-white">
-                <ChevronRight size={14} />
-              </button>
+
+          {/* Sport selector — tap to open dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowSportMenu(v => !v)}
+              className="flex items-center gap-1.5 active:scale-95 transition-transform"
+            >
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0"
+                style={{ backgroundColor: SPORT_COLORS[currentSport] ?? '#dc2626' }}
+              >
+                <img
+                  src={SPORT_ICONS[currentSport] ?? iconMusculacao}
+                  className="w-full h-full object-contain brightness-0 invert"
+                  alt={currentSport}
+                />
+              </div>
+              {templateSports.length > 1 && (
+                <ChevronRight
+                  size={12}
+                  className={cn('text-white/30 transition-transform duration-200', showSportMenu && 'rotate-90')}
+                />
+              )}
+            </button>
+
+            {/* Dropdown anchored below the icon */}
+            {showSportMenu && templateSports.length > 1 && (
+              <>
+                {/* Backdrop */}
+                <div
+                  className="fixed inset-0 z-[199]"
+                  onClick={() => setShowSportMenu(false)}
+                />
+                {/* Triangle pointer */}
+                <div
+                  className="absolute left-3 top-full mt-1 w-0 h-0 z-[201]"
+                  style={{
+                    borderLeft: '7px solid transparent',
+                    borderRight: '7px solid transparent',
+                    borderBottom: '7px solid #1e2130',
+                  }}
+                />
+                <div className="absolute left-0 top-full mt-2 z-[200] bg-[#1e2130] border border-white/10 rounded-2xl p-3 shadow-2xl">
+                  <div className="flex gap-2.5">
+                    {templateSports.map((s, idx) => (
+                      <button
+                        key={s}
+                        onClick={() => { setSportIdx(idx); setShowSportMenu(false); }}
+                        className={cn(
+                          'flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all active:scale-95 w-16',
+                          idx === sportIdx
+                            ? 'border-transparent'
+                            : 'bg-white/5 border-white/10 opacity-60'
+                        )}
+                        style={idx === sportIdx ? { backgroundColor: SPORT_COLORS[s] ?? '#dc2626', borderColor: SPORT_COLORS[s] ?? '#dc2626' } : {}}
+                      >
+                        <img
+                          src={SPORT_ICONS[s] ?? iconMusculacao}
+                          alt={s}
+                          className="w-6 h-6 brightness-0 invert"
+                        />
+                        <span className="text-[9px] font-black text-white text-center leading-tight">{s}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
             )}
           </div>
 
