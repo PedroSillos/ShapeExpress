@@ -60,7 +60,7 @@ export function generateFirstWorkout(sports: string[], userEmail: string, experi
     id: `first-workout-${Date.now()}`,
     userId: userEmail,
     creatorEmail: userEmail,
-    name: `Treino Básico: ${sportLabel}`,
+    name: `Treino de IA: ${sportLabel}`,
     sport: sports[0] ?? 'Musculação',
     category: 'basic',
     startDate: now.toISOString(),
