@@ -187,10 +187,14 @@ function DayTrainedContent({
     );
   }
 
-  // 3+ sports: rainbow star burst
+  // 3+ sports: prismatic shimmer
   return (
-    <span style={{ fontSize: size + 2, lineHeight: 1 }} role="img" aria-label="multi-sport">
-      🌟
+    <span
+      style={{ fontSize: size + 2, lineHeight: 1, color: 'rgba(30,30,40,0.7)', textShadow: '0 1px 2px rgba(255,255,255,0.4)' }}
+      role="img"
+      aria-label="multi-sport"
+    >
+      ✦
     </span>
   );
 }
@@ -227,13 +231,14 @@ function dayBgStyle(sports: string[], isToday: boolean): { className: string; st
     };
   }
 
-  // 3+ sports: rainbow
+  // 3+ sports: prismatic silver/white
   return {
     className: '',
     style: {
       background: isToday
-        ? 'linear-gradient(135deg, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #a855f7)'
-        : 'linear-gradient(135deg, #ef444466, #f9731666, #eab30866, #22c55e66, #3b82f666, #a855f766)',
+        ? 'linear-gradient(135deg, #e2e8f0, #ffffff, #cbd5e1, #f1f5f9, #94a3b8, #e2e8f0)'
+        : 'linear-gradient(135deg, #e2e8f044, #ffffff55, #cbd5e144, #f1f5f944, #94a3b844, #e2e8f044)',
+      boxShadow: isToday ? '0 2px 0 0 rgba(148,163,184,0.5)' : undefined,
     },
   };
 }
