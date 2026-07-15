@@ -362,8 +362,8 @@ function WeekDayBar({
                 const trained   = trainedDaySet.has(dayKey);
                 const isToday   = dayKey === today;
                 const isPast    = dayKey < today;
-                const clickable = trained && (isPast || isToday) && !!onDayClick;
-                const todayClickable = isToday && !trained && !!onTodayClick;
+                // Today always opens the workout picker — never navigates to history.
+                const clickable = !isToday && trained && isPast && !!onDayClick;
 
                 // Deduplicated sports trained on this day
                 const daySports = trained
@@ -373,10 +373,11 @@ function WeekDayBar({
                   : [];
 
                 const todaySportColor = SPORT_COLORS[currentSport] ?? '#dc2626';
-                const bg = trained
-                  ? dayBgStyle(daySports, isToday)
-                  : isToday
-                    ? { className: '', style: { backgroundColor: todaySportColor, boxShadow: `0 2px 0 0 ${todaySportColor}99` } }
+                // Today always shows the active-sport color + play icon, regardless of trained state.
+                const bg = isToday
+                  ? { className: '', style: { backgroundColor: todaySportColor, boxShadow: `0 2px 0 0 ${todaySportColor}99` } }
+                  : trained
+                    ? dayBgStyle(daySports, false)
                     : { className: 'bg-white/5' };
 
                 return (
@@ -386,24 +387,24 @@ function WeekDayBar({
                   >
                     <div
                       onClick={
-                        clickable
-                          ? () => onDayClick!(sessionByDay.get(dayKey)!)
-                          : todayClickable
-                            ? () => onTodayClick!()
+                        isToday && !!onTodayClick
+                          ? () => onTodayClick!()
+                          : clickable
+                            ? () => onDayClick!(sessionByDay.get(dayKey)!)
                             : undefined
                       }
                       className={cn(
                         'w-full rounded-lg transition-colors duration-300 flex items-center justify-center overflow-hidden',
                         isToday ? 'h-10' : 'h-8',
-                        (clickable || todayClickable) && 'cursor-pointer active:scale-95',
+                        (isToday || clickable) && !!onTodayClick && 'cursor-pointer active:scale-95',
                         bg.className,
                       )}
                       style={bg.style}
                     >
-                      {trained ? (
-                        <DayTrainedContent sports={daySports} size={isToday ? 16 : 13} />
-                      ) : isToday ? (
+                      {isToday ? (
                         <Play size={14} fill="white" color="white" />
+                      ) : trained ? (
+                        <DayTrainedContent sports={daySports} size={13} />
                       ) : null}
                     </div>
                     <span className={cn(
