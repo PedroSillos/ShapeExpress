@@ -1,19 +1,6 @@
 import { WorkoutTemplate, WorkoutTemplateExercise } from '../../domain/entities';
 import { EXERCISES } from '../../constants';
-
-// Exercise IDs per sport — mapped to existing EXERCISES in constants.ts
-const SPORT_EXERCISE_IDS: Record<string, string[]> = {
-  'Musculação':     ['1', '2', '3', '4', '5', '7', '8', '30'],
-  'Halterofilismo': ['6', '2', '21', '4', '3', '1'],
-  'Corrida':        ['36', '41', '40', '10', '25'],
-  'Ciclismo':       ['37', '7', '19', '25'],
-  'Natação':        ['42', '43', '44', '45', '39'],
-  'Crossfit':       ['14', '2', '1', '11', '38', '9'],
-  'Yoga':           ['142', '143', '144', '145', '146', '12'],
-  'Triatlo':        ['36', '37', '42', '11', '10'],
-};
-
-const DEFAULT_IDS = ['1', '2', '3', '4', '5'];
+import { getExerciseIdsForSport, DEFAULT_EXERCISE_IDS } from './sportExercises';
 
 // Exercise IDs preferred for each experience level (within a sport's pool)
 const BEGINNER_SAFE_IDS = new Set(['7', '8', '9', '10', '11', '14', '33', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45']);
@@ -28,7 +15,7 @@ export function generateFirstWorkout(sports: string[], userEmail: string, experi
   const exerciseIds: string[] = [];
 
   for (const sport of sports) {
-    let ids = SPORT_EXERCISE_IDS[sport] ?? DEFAULT_IDS;
+    let ids = getExerciseIdsForSport(sport);
     // Prefer safe exercises for beginners, heavy compounds for advanced
     if (isAbsolute) ids = ids.filter(id => BEGINNER_SAFE_IDS.has(id)).concat(ids.filter(id => !BEGINNER_SAFE_IDS.has(id)));
     else if (isAdvanced) ids = ids.filter(id => ADVANCED_IDS.has(id)).concat(ids.filter(id => !ADVANCED_IDS.has(id)));
@@ -38,6 +25,11 @@ export function generateFirstWorkout(sports: string[], userEmail: string, experi
         exerciseIds.push(id);
       }
     }
+  }
+
+  // If no IDs were resolved (empty sport pool after filtering), fall back to defaults
+  if (exerciseIds.length === 0) {
+    DEFAULT_EXERCISE_IDS.slice(0, 3).forEach(id => exerciseIds.push(id));
   }
 
   const reps = isAbsolute ? '8' : isAdvanced ? '13' : exp.includes('intermedi') ? '12' : '10';

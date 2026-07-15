@@ -113,11 +113,29 @@ async function startServer() {
           ? 'INTERMEDIARIO: exercicios compostos (IDs 1,2,3). sets="12".'
           : 'INICIANTE: exercicios basicos (IDs 7,8,9). sets="10".';
 
+    // Sport-specific exercise pools — must match SPORT_EXERCISE_IDS in sportExercises.ts
+    const sportPools: Record<string, string> = {
+      'Natação':        '147=Flutuacao,148=Deslizamento,149=Pernadas,42=Crawl,43=Costas,44=Peito,45=Borboleta',
+      'Corrida':        '36=Corrida,41=Trote,40=Caminhada,10=Afundo,25=Gemeos',
+      'Ciclismo':       '37=Ciclismo,7=LegPress,19=Extensora,25=Gemeos',
+      'Crossfit':       '14=KBSwing,2=Agachamento,1=Supino,11=Prancha,38=PularCorda,9=Flexao',
+      'Yoga':           '142=Balasana,143=AdhoMukha,144=Guerreiro,145=Arvore,146=Pombo,12=AlongIsquio',
+      'Triatlo':        '36=Corrida,37=Ciclismo,42=Crawl,11=Prancha,10=Afundo',
+      'Halterofilismo': '6=Terra,2=Agachamento,21=Stiff,4=DevMilitar,3=Remada,1=Supino',
+    };
+    const primarySport = (sports[0] || '').trim();
+    const sportPoolStr = sportPools[primarySport] || '';
+    const sportNote = sportPoolStr
+      ? `MODALIDADE ${primarySport.toUpperCase()}: use APENAS estes IDs: ${sportPoolStr}.`
+      : 'Musculação: IDs 1=Supino,2=Agachamento,3=Remada,4=DevMilitar,5=Rosca,6=Terra,7=LegPress,8=Puxada,30=TricepsPulley.';
+
     const prompt = `Personal trainer: crie treino para modalidade ${sports.join(', ')}, objetivo ${objective || 'condicionamento'}${height ? `, altura ${height}cm` : ''}${weight ? `, peso ${weight}kg` : ''}${age ? `, idade ${age} anos` : ''}.
 Nivel: ${difficulty}
-Regras: EXATAMENTE 3 exercicios, numSets=3 em todos, rest="60s" em todos. Casa: apenas IDs 9,10,11,14,33,35,38.
-IDs: 1=Supino,2=Agachamento,3=Remada,4=Dev.Militar,5=Rosca,6=Terra,7=LegPress,8=Puxada,9=Flexao,10=Afundo,11=Prancha,13=RoscaHalter,14=KBSwing,19=Extensora,20=MesaFlexora,21=Stiff,22=ElevPelvica,25=Gemeos,28=ElevLateral,30=TricepsPulley,33=AbdSupra,35=GiroRusso,36=Corrida,37=Ciclismo,38=PularCorda.
-JSON sem markdown: {"name":"Treino Básico: <modalidade>","exercises":[{"exerciseId":"ID","numSets":3,"sets":"10","rest":"60s"}]}`;
+${sportNote}
+Regras gerais (fallback apenas se modalidade for Musculacao/casa): Casa: apenas IDs 9,10,11,14,33,35,38.
+IDs gerais: 9=Flexao,10=Afundo,11=Prancha,13=RoscaHalter,14=KBSwing,19=Extensora,20=MesaFlexora,21=Stiff,22=ElevPelvica,25=Gemeos,28=ElevLateral,30=TricepsPulley,33=AbdSupra,35=GiroRusso,36=Corrida,37=Ciclismo,38=PularCorda.
+REGRA CRITICA: use EXATAMENTE 3 exercicios, numSets=3 em todos, rest="60s" em todos.
+JSON sem markdown: {"name":"Treino Basico: <modalidade>","exercises":[{"exerciseId":"ID","numSets":3,"sets":"10","rest":"60s"}]}`;
 
     try {
       const response = await genAI.models.generateContent({

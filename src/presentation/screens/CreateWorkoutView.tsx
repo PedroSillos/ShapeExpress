@@ -9,6 +9,7 @@ import { Card } from '../components/Card';
 import { ConfigureExercisesView } from '../components/ConfigureExercisesView';
 import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
 import { ALL_SPORTS } from '../../features/sports/constants';
+import { exerciseBelongsToSport } from '../../domain/use-cases/sportExercises';
 import { 
   WorkoutTemplate, 
   WorkoutCycle, 
@@ -136,12 +137,13 @@ export function CreateWorkoutView({
   const activeSheet = sheets[activeSheetIndex];
 
   const filteredExercises = EXERCISES.filter(ex => {
+    const matchesSport = exerciseBelongsToSport(ex.id, selectedSport);
     const matchesSearch = ex.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesMuscle = selectedMuscleGroup === 'Todos' || ex.muscleGroup === selectedMuscleGroup;
     const matchesSubgroup = selectedMuscleSubgroup === 'Todos' || ex.muscleSubgroup === selectedMuscleSubgroup;
     const matchesCategory = selectedCategory === 'Todos' || ex.category === selectedCategory;
     const matchesEquipment = selectedEquipment === 'Todos' || ex.equipment === selectedEquipment;
-    return matchesSearch && matchesMuscle && matchesSubgroup && matchesCategory && matchesEquipment;
+    return matchesSport && matchesSearch && matchesMuscle && matchesSubgroup && matchesCategory && matchesEquipment;
   });
 
   const muscleSubgroupsMap: Record<string, MuscleSubgroup[]> = {
