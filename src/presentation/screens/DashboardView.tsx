@@ -666,42 +666,29 @@ export function DashboardView({
 
             <p className="text-xs font-black uppercase tracking-widest text-white/40">Escolha um treino</p>
 
-            {templates.length === 0 ? (
+            {templates.filter(t => (t.sport ?? getSportForWorkout(t.id, templates)) === currentSport).length === 0 ? (
               <div className="py-8 text-center space-y-2 opacity-40">
-                <p className="text-sm">Nenhum treino criado ainda.</p>
+                <p className="text-sm">Nenhum treino de {currentSport} criado ainda.</p>
               </div>
             ) : (
               <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
-                {[...templates].sort((a, b) => {
-                  // Last session date for each template ('' = never used → sorts first)
-                  const lastA = sessions
-                    .filter(s => s.workoutId === a.id)
-                    .map(s => s.date)
-                    .sort()
-                    .at(-1) ?? '';
-                  const lastB = sessions
-                    .filter(s => s.workoutId === b.id)
-                    .map(s => s.date)
-                    .sort()
-                    .at(-1) ?? '';
-
-                  if (lastA !== lastB) return lastA.localeCompare(lastB);
-
-                  // Tiebreaker: oldest session across all templates sharing the same workoutName
-                  // (proxy for "modality group" — e.g. all "Musculação X" templates)
-                  const oldestForName = (name: string) =>
-                    sessions
-                      .filter(s => s.workoutName === name)
+                {[...templates]
+                  // Only show templates matching the currently active sport
+                  .filter(t => (t.sport ?? getSportForWorkout(t.id, templates)) === currentSport)
+                  .sort((a, b) => {
+                    // Sort by last session date ascending (never used → first, most recent → last)
+                    const lastA = sessions
+                      .filter(s => s.workoutId === a.id)
                       .map(s => s.date)
                       .sort()
-                      .at(0) ?? '';
-
-                  const oldestA = oldestForName(a.name);
-                  const oldestB = oldestForName(b.name);
-
-                  // The one whose modality was practiced longest ago goes first (left)
-                  return oldestA.localeCompare(oldestB);
-                }).map(template => (
+                      .at(-1) ?? '';
+                    const lastB = sessions
+                      .filter(s => s.workoutId === b.id)
+                      .map(s => s.date)
+                      .sort()
+                      .at(-1) ?? '';
+                    return lastA.localeCompare(lastB);
+                  }).map(template => (
                   <button
                     key={template.id}
                     onClick={() => {
