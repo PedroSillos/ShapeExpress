@@ -3,6 +3,7 @@ import { startOfWeek, parseISO, format, subWeeks, addWeeks, addDays, endOfWeek }
 import { Play, Check, X, Plus } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
+import { AddSportView } from '../../features/sports/ui/AddSportView';
 import {
   UserStats,
   WorkoutSession,
@@ -42,7 +43,8 @@ interface DashboardViewProps {
   isLoggedIn?: boolean;
   setScrollToHistory?: (v: boolean) => void;
   setHighlightSessionId?: (id: string | null) => void;
-  onAddWorkout?: () => void;
+  /** Called when the user picks a new sport from the "Novo" button in the sport dropdown. */
+  onAddSport?: (sport: string) => void;
 }
 
 /** Map sport name -> brand color (matches WelcomeView SPORTS) */
@@ -427,29 +429,20 @@ export function DashboardView({
   isLoggedIn,
   setScrollToHistory,
   setHighlightSessionId,
-  onAddWorkout,
+  onAddSport,
 }: DashboardViewProps) {
-  // Sports derived from existing templates (unique sports across all templates)
+  // The sport menu always reflects the user's profile specialties — the source of truth.
+  // Templates are used only to pick the currentTemplate, not to define which sports exist.
   const templateSports = useMemo(() => {
-    const seen = new Set<string>();
-    const result: string[] = [];
-    templates.forEach(t => {
-      const s = t.sport ?? getSportForWorkout(t.id, templates);
-      if (s && !seen.has(s)) { seen.add(s); result.push(s); }
-    });
-    // Fallback: profile or onboarding answers if no templates yet
-    if (result.length === 0) {
-      if (mainUserProfile?.specialties?.length) return mainUserProfile.specialties;
-      if (!isLoggedIn) {
-        try {
-          const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
-          if (wa?.sports?.length) return wa.sports as string[];
-        } catch {}
-      }
-      return ['Musculação'];
+    if (mainUserProfile?.specialties?.length) return mainUserProfile.specialties;
+    if (!isLoggedIn) {
+      try {
+        const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
+        if (wa?.sports?.length) return wa.sports as string[];
+      } catch {}
     }
-    return result;
-  }, [templates, mainUserProfile, isLoggedIn]);
+    return ['Musculação'];
+  }, [mainUserProfile, isLoggedIn]);
 
   const [sportIdx, setSportIdx] = useState(0);
 
@@ -459,6 +452,7 @@ export function DashboardView({
   }, [templateSports.length]);
 
   const [showWorkoutPicker, setShowWorkoutPicker] = useState(false);
+  const [showAddSport, setShowAddSport] = useState(false);
   const currentSport = templateSports[sportIdx] ?? templateSports[0];
 
   const goalStreak = useMemo(() => calcGoalStreak(sessions, mainUserProfile.weeklyGoal ?? 3), [sessions, mainUserProfile.weeklyGoal]);
@@ -509,7 +503,7 @@ export function DashboardView({
             </button>
 
             {/* Dropdown anchored below the icon */}
-            {showSportMenu && templateSports.length > 1 && (
+            {showSportMenu && (
               <>
                 {/* Backdrop */}
                 <div
@@ -547,9 +541,9 @@ export function DashboardView({
                         <span className="text-[9px] font-black text-white text-center leading-tight min-h-[2.2em] flex items-center justify-center">{s}</span>
                       </button>
                     ))}
-                    {onAddWorkout && (
+                    {onAddSport && (
                       <button
-                        onClick={() => { setShowSportMenu(false); onAddWorkout(); }}
+                        onClick={() => { setShowSportMenu(false); setShowAddSport(true); }}
                         className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl border border-white/15 bg-white/5 active:scale-95 transition-all w-16 opacity-70 hover:opacity-100"
                       >
                         <Plus size={24} className="text-white w-6 h-6" />
@@ -608,7 +602,7 @@ export function DashboardView({
           </button>
         ) : (
           <button
-            onClick={() => { switchTab('workouts'); onAddWorkout?.(); }}
+            onClick={() => switchTab('workouts')}
             className="mx-6 mt-3 w-[calc(100%-3rem)] rounded-2xl flex items-center justify-between px-4 py-3 active:scale-[0.98] transition-all border border-white/10"
             style={{
               background: `linear-gradient(135deg, color-mix(in srgb, ${SPORT_COLORS[currentSport] ?? '#dc2626'} 80%, #000) 0%, ${SPORT_COLORS[currentSport] ?? '#dc2626'} 100%)`,
@@ -734,6 +728,20 @@ export function DashboardView({
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* ── Add sport overlay ── */}
+      {showAddSport && (
+        <div className="absolute inset-0 z-50">
+          <AddSportView
+            currentSports={templateSports}
+            onAdd={(sport) => {
+              setShowAddSport(false);
+              onAddSport?.(sport);
+            }}
+            onBack={() => setShowAddSport(false)}
+          />
         </div>
       )}
     </div>

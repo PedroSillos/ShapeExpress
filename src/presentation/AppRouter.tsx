@@ -365,6 +365,15 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           isLoggedIn={isLoggedIn}
           setScrollToHistory={setScrollToHistory}
           setHighlightSessionId={setHighlightSessionId}
+          onAddSport={async (sport: string) => {
+            // Update specialties (persists to Firestore for logged-in users, localStorage for guests)
+            const currentSpecialties: string[] = userProfile?.specialties ?? [];
+            if (!currentSpecialties.includes(sport)) {
+              await updateProfile({ ...userProfile, specialties: [...currentSpecialties, sport] });
+            }
+            // Generate AI workout for the new sport
+            handleGenerateWithAI(sport);
+          }}
         />
       );
     case 'calendar':

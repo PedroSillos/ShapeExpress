@@ -140,7 +140,13 @@ export const useProfileState = (currentUser: { email: string } | null) => {
   };
 
   const updateProfile = async (p: UserProfile) => {
-    if (!currentUser?.email) return;
+    // Guest: persist to localStorage only
+    if (!currentUser?.email) {
+      saveLocal(STORAGE_KEYS.LOCAL_USER_PROFILE, p);
+      setUserProfile(p);
+      return;
+    }
+    // Logged-in: persist to Firestore
     try {
       await setDoc(doc(db, "users", currentUser.email), p, { merge: true });
       setUserProfile(p);
