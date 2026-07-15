@@ -12,20 +12,20 @@
  *   147 = Flutuação        (duration_only)   — aprender a boiar, controle de respiração
  *   148 = Deslizamento     (duration_distance) — impulso na borda, alinhamento corporal
  *   149 = Pernadas         (duration_distance) — pernadas isoladas de cada estilo
- *    42 = Nado crawl       (duration_distance) — primeiro estilo ensinado
- *    43 = Nado costas      (duration_distance) — equilíbrio corporal e respiração
- *    44 = Nado peito       (duration_distance) — exige coordenação braços/pernas
- *    45 = Nado borboleta   (duration_distance) — último estilo, mais técnico
+ *   150 = Nado crawl       (duration_distance) — primeiro estilo ensinado
+ *   151 = Nado costas      (duration_distance) — equilíbrio corporal e respiração
+ *   152 = Nado peito       (duration_distance) — exige coordenação braços/pernas
+ *   153 = Nado borboleta   (duration_distance) — último estilo, mais técnico
  */
 export const SPORT_EXERCISE_IDS: Record<string, string[]> = {
   'Musculação':     ['1', '2', '3', '4', '5', '7', '8', '30'],
   'Halterofilismo': ['6', '2', '21', '4', '3', '1'],
-  'Corrida':        ['36', '41', '40', '10', '25'],
+  'Corrida':        ['36', '155', '154', '10', '25'],
   'Ciclismo':       ['37', '7', '19', '25'],
-  'Natação':        ['147', '148', '149', '42', '43', '44', '45'],
+  'Natação':        ['147', '148', '149', '150', '151', '152', '153'],
   'Crossfit':       ['14', '2', '1', '11', '38', '9'],
   'Yoga':           ['142', '143', '144', '145', '146', '12'],
-  'Triatlo':        ['36', '37', '42', '11', '10'],
+  'Triatlo':        ['36', '37', '150', '11', '10'],
 };
 
 export const DEFAULT_EXERCISE_IDS = ['1', '2', '3', '4', '5'];

@@ -1648,7 +1648,7 @@ export const EXERCISES: Exercise[] = [
 
   // Corrida / Caminhada
   {
-    id: "40",
+    id: "154",
     name: "Caminhada",
     muscleGroup: "Pernas",
     defaultSets: 1,
@@ -1659,7 +1659,7 @@ export const EXERCISES: Exercise[] = [
     inputMode: "duration_distance",
   },
   {
-    id: "41",
+    id: "155",
     name: "Trote",
     muscleGroup: "Pernas",
     defaultSets: 1,
@@ -1672,7 +1672,7 @@ export const EXERCISES: Exercise[] = [
 
   // Natação — estilos
   {
-    id: "42",
+    id: "150",
     name: "Nado crawl",
     muscleGroup: "Full Body",
     defaultSets: 4,
@@ -1683,7 +1683,7 @@ export const EXERCISES: Exercise[] = [
     inputMode: "duration_distance",
   },
   {
-    id: "43",
+    id: "151",
     name: "Nado costas",
     muscleGroup: "Costas",
     defaultSets: 3,
@@ -1694,7 +1694,7 @@ export const EXERCISES: Exercise[] = [
     inputMode: "duration_distance",
   },
   {
-    id: "44",
+    id: "152",
     name: "Nado peito",
     muscleGroup: "Peito",
     defaultSets: 3,
@@ -1705,7 +1705,7 @@ export const EXERCISES: Exercise[] = [
     inputMode: "duration_distance",
   },
   {
-    id: "45",
+    id: "153",
     name: "Nado borboleta",
     muscleGroup: "Full Body",
     defaultSets: 3,

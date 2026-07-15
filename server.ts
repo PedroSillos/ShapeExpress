@@ -106,21 +106,21 @@ async function startServer() {
 
     const exp = (experience || '').toLowerCase();
     const difficulty = exp.includes('nunca') || exp.includes('never')
-      ? 'INICIANTE ABSOLUTO: exercicios simples (IDs 9,10,11). sets="8".'
+      ? 'INICIANTE ABSOLUTO: exercicios simples e de baixo impacto. sets="8".'
       : exp.includes('avan')
-        ? 'AVANCADO: exercicios pesados (IDs 6,2,4). sets="13".'
+        ? 'AVANCADO: exercicios compostos e de alta intensidade. sets="13".'
         : exp.includes('intermedi')
-          ? 'INTERMEDIARIO: exercicios compostos (IDs 1,2,3). sets="12".'
-          : 'INICIANTE: exercicios basicos (IDs 7,8,9). sets="10".';
+          ? 'INTERMEDIARIO: exercicios compostos moderados. sets="12".'
+          : 'INICIANTE: exercicios basicos. sets="10".';
 
     // Sport-specific exercise pools — must match SPORT_EXERCISE_IDS in sportExercises.ts
     const sportPools: Record<string, string> = {
-      'Natação':        '147=Flutuacao,148=Deslizamento,149=Pernadas,42=Crawl,43=Costas,44=Peito,45=Borboleta',
-      'Corrida':        '36=Corrida,41=Trote,40=Caminhada,10=Afundo,25=Gemeos',
+      'Natação':        '147=Flutuacao,148=Deslizamento,149=Pernadas,150=Crawl,151=Costas,152=Peito,153=Borboleta',
+      'Corrida':        '36=Corrida,155=Trote,154=Caminhada,10=Afundo,25=Gemeos',
       'Ciclismo':       '37=Ciclismo,7=LegPress,19=Extensora,25=Gemeos',
       'Crossfit':       '14=KBSwing,2=Agachamento,1=Supino,11=Prancha,38=PularCorda,9=Flexao',
       'Yoga':           '142=Balasana,143=AdhoMukha,144=Guerreiro,145=Arvore,146=Pombo,12=AlongIsquio',
-      'Triatlo':        '36=Corrida,37=Ciclismo,42=Crawl,11=Prancha,10=Afundo',
+      'Triatlo':        '36=Corrida,37=Ciclismo,150=Crawl,11=Prancha,10=Afundo',
       'Halterofilismo': '6=Terra,2=Agachamento,21=Stiff,4=DevMilitar,3=Remada,1=Supino',
     };
     const primarySport = (sports[0] || '').trim();

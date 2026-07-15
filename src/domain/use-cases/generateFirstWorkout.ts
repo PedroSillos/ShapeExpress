@@ -3,7 +3,7 @@ import { EXERCISES } from '../../constants';
 import { getExerciseIdsForSport, DEFAULT_EXERCISE_IDS } from './sportExercises';
 
 // Exercise IDs preferred for each experience level (within a sport's pool)
-const BEGINNER_SAFE_IDS = new Set(['7', '8', '9', '10', '11', '14', '33', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45']);
+const BEGINNER_SAFE_IDS = new Set(['7', '8', '9', '10', '11', '14', '33', '36', '37', '38', '39', '154', '155', '147', '148', '149', '150', '151', '152', '153']);
 const ADVANCED_IDS = new Set(['6', '2', '1', '4', '21', '3']);
 
 export function generateFirstWorkout(sports: string[], userEmail: string, experience?: string): WorkoutTemplate {
