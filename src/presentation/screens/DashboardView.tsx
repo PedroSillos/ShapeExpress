@@ -4,6 +4,7 @@ import { Play, Check, X, Plus } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 import { AddSportView } from '../../features/sports/ui/AddSportView';
+import { getSportLevel } from '../../domain/use-cases/sportLevel';
 import {
   UserStats,
   WorkoutSession,
@@ -515,6 +516,12 @@ export function DashboardView({
                   alt={currentSport}
                 />
               </div>
+              <span
+                className="font-black text-sm"
+                style={{ color: SPORT_COLORS[currentSport] ?? '#dc2626' }}
+              >
+                {getSportLevel(userStats.sportXp, currentSport)}
+              </span>
             </button>
 
             {/* Dropdown anchored below the icon */}

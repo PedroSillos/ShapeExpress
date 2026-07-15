@@ -196,6 +196,13 @@ export interface UserStats {
   score?: number;
   status?: "evolving" | "stagnated" | "at-risk" | "new";
   userEmail?: string;
+  /**
+   * Accumulated XP per sport name (e.g. { "Corrida": 300, "Musculação": 1100 }).
+   * Each completed workout adds 100 XP to its sport.
+   * The global `xp` is the sum of all sport XP values; `level` is derived from it.
+   * Sport level = floor(sportXp[sport] / 1000) + 1.
+   */
+  sportXp?: Record<string, number>;
 }
 
 export interface UserProfile {

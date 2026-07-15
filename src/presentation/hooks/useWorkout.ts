@@ -10,6 +10,7 @@ import {
   updateTrainingProfile, updateExerciseStats, updateCalorieProfile, estimateInitialWeight,
 } from '../../domain/use-cases/workoutEstimation';
 import { analyzeExerciseStagnation } from '../../domain/use-cases/analyzeStagnation';
+import { addSportXp, SPORT_XP_PER_WORKOUT } from '../../domain/use-cases/sportLevel';
 import { EXERCISES } from '../../constants';
 import { getInputMode } from '../../domain/use-cases/exerciseInputMode';
 
@@ -125,10 +126,6 @@ export function useWorkout({
     const activeWorkout = activeWorkoutRef.current;
     if (!activeWorkout) return;
 
-    const completedSets = activeWorkout.exercises.reduce((acc, ex) => acc + ex.sets.filter(s => s.completed).length, 0);
-    const durationMinutes = Math.floor(metrics.totalDuration / 60);
-    const calculatedXp = 50 + completedSets * 10 + durationMinutes * 2;
-
     const completedSession: WorkoutSession = {
       ...activeWorkout,
       totalVolume: activeWorkout.exercises.reduce(
@@ -140,7 +137,10 @@ export function useWorkout({
         }, 0,
       ),
       duration: metrics.totalDuration,
-      xpEarned: calculatedXp,
+      // xpEarned mirrors exactly what addSportXp grants, so the value
+      // shown on the "Treino concluído" screen and session history is always
+      // consistent with the XP actually credited to the sport.
+      xpEarned: SPORT_XP_PER_WORKOUT,
       caloriesBurned: 0,
     };
 
@@ -189,15 +189,18 @@ export function useWorkout({
     setExerciseUserStats(newExerciseStats);
     api.updateExerciseStats(newExerciseStats);
 
-    // Stats + level up
+    // Stats + sport XP + level up
+    const sport = template?.sport ?? 'Musculação';
+    const sportXpUpdate = addSportXp(userStats, sport);
     const newStats = {
       ...userStats,
       completedThisWeek: userStats.completedThisWeek + 1,
       totalWorkouts: userStats.totalWorkouts + 1,
       totalVolume: userStats.totalVolume + completedSession.totalVolume,
-      xp: userStats.xp + completedSession.xpEarned,
+      xp: sportXpUpdate.xp,
+      level: sportXpUpdate.level,
+      sportXp: sportXpUpdate.sportXp,
     };
-    if (newStats.xp >= 1000) { newStats.level += 1; newStats.xp -= 1000; }
     updateStats(newStats);
 
     // Progression alerts
