@@ -68,6 +68,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     api, switchTab,
     onShowSuggestProfile, onShowStreak,
     storeItems, myPurchases, myListings, isLoadingItems,
+    activeSport, setActiveSport,
   } = state;
 
   const previousTabRef = useRef<string>('landing');
@@ -365,6 +366,8 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           isLoggedIn={isLoggedIn}
           setScrollToHistory={setScrollToHistory}
           setHighlightSessionId={setHighlightSessionId}
+          activeSport={activeSport}
+          onSportChange={setActiveSport}
           onAddSport={async (sport: string) => {
             // Update specialties (persists to Firestore for logged-in users, localStorage for guests)
             const currentSpecialties: string[] = userProfile?.specialties ?? [];
@@ -407,6 +410,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           trainers={trainers}
           onCreateAd={(t: WorkoutTemplate) => setPublishingTemplate(t)}
           isLoggedIn={isLoggedIn}
+          activeSport={activeSport}
         />
       );
     case 'stats':
@@ -416,6 +420,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           templates={filteredTemplates}
           mainUserProfile={userProfile}
           onGoToWorkouts={() => switchTab('workouts')}
+          activeSport={activeSport}
         />
       );
     case 'store':

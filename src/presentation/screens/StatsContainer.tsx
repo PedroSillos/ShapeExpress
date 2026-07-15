@@ -7,6 +7,8 @@ interface StatsContainerProps {
   mainUserProfile?: UserProfile;
   onGoToWorkouts?: () => void;
   readOnly?: boolean;
+  /** Currently active sport (from global nav state). Used to filter stats. */
+  activeSport?: string;
 }
 
 export function StatsContainer({
@@ -15,6 +17,7 @@ export function StatsContainer({
   mainUserProfile,
   onGoToWorkouts,
   readOnly = false,
+  activeSport,
 }: StatsContainerProps) {
   return (
     <StatsView
@@ -23,6 +26,7 @@ export function StatsContainer({
       mainUserProfile={mainUserProfile}
       onGoToWorkouts={onGoToWorkouts}
       readOnly={readOnly}
+      activeSport={activeSport}
     />
   );
 }

@@ -45,6 +45,10 @@ interface DashboardViewProps {
   setHighlightSessionId?: (id: string | null) => void;
   /** Called when the user picks a new sport from the "Novo" button in the sport dropdown. */
   onAddSport?: (sport: string) => void;
+  /** Currently active sport (from global nav state, persisted). */
+  activeSport: string;
+  /** Called when the user selects a different sport in the header dropdown. */
+  onSportChange: (sport: string) => void;
 }
 
 /** Map sport name -> brand color (matches WelcomeView SPORTS) */
@@ -430,6 +434,8 @@ export function DashboardView({
   setScrollToHistory,
   setHighlightSessionId,
   onAddSport,
+  activeSport: activeSportProp,
+  onSportChange,
 }: DashboardViewProps) {
   // The sport menu always reflects the user's profile specialties — the source of truth.
   // Templates are used only to pick the currentTemplate, not to define which sports exist.
@@ -444,16 +450,24 @@ export function DashboardView({
     return ['Musculação'];
   }, [mainUserProfile, isLoggedIn]);
 
-  const [sportIdx, setSportIdx] = useState(0);
+  // Resolve the active sport: use the global prop if valid, otherwise fall back to first sport.
+  // Also sync the global state when it's empty or out of bounds (e.g. on first load or after
+  // the user removes the previously-active sport from their profile).
+  const currentSport = useMemo(() => {
+    if (activeSportProp && templateSports.includes(activeSportProp)) return activeSportProp;
+    return templateSports[0] ?? 'Musculação';
+  }, [activeSportProp, templateSports]);
 
-  // Keep sportIdx in bounds if templateSports changes
+  // Write the resolved value back to global state whenever it differs from the stored prop
+  // (handles first-load '' and out-of-bounds cases without triggering a loop).
   useEffect(() => {
-    setSportIdx(i => Math.min(i, Math.max(0, templateSports.length - 1)));
-  }, [templateSports.length]);
+    if (currentSport !== activeSportProp) {
+      onSportChange(currentSport);
+    }
+  }, [currentSport, activeSportProp, onSportChange]);
 
   const [showWorkoutPicker, setShowWorkoutPicker] = useState(false);
   const [showAddSport, setShowAddSport] = useState(false);
-  const currentSport = templateSports[sportIdx] ?? templateSports[0];
 
   const goalStreak = useMemo(() => calcGoalStreak(sessions, mainUserProfile.weeklyGoal ?? 3), [sessions, mainUserProfile.weeklyGoal]);
 
@@ -521,17 +535,17 @@ export function DashboardView({
                 />
                 <div className="absolute left-0 top-full mt-2 z-[200] bg-[#1e2130] border border-white/10 rounded-2xl p-3 shadow-2xl">
                   <div className="flex gap-2.5">
-                    {templateSports.map((s, idx) => (
+                    {templateSports.map((s) => (
                       <button
                         key={s}
-                        onClick={() => { setSportIdx(idx); setShowSportMenu(false); }}
+                        onClick={() => { onSportChange(s); setShowSportMenu(false); }}
                         className={cn(
                           'flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all active:scale-95 w-16',
-                          idx === sportIdx
+                          s === currentSport
                             ? 'border-transparent'
                             : 'bg-white/5 border-white/10 opacity-60'
                         )}
-                        style={idx === sportIdx ? { backgroundColor: SPORT_COLORS[s] ?? '#dc2626', borderColor: SPORT_COLORS[s] ?? '#dc2626' } : {}}
+                        style={s === currentSport ? { backgroundColor: SPORT_COLORS[s] ?? '#dc2626', borderColor: SPORT_COLORS[s] ?? '#dc2626' } : {}}
                       >
                         <img
                           src={SPORT_ICONS[s] ?? iconMusculacao}

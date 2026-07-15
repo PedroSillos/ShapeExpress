@@ -104,6 +104,8 @@ interface WorkoutsViewProps {
   isLoggedIn?: boolean;
   initialOpenCreateMenu?: boolean;
   onCreateMenuMounted?: () => void;
+  /** Currently active sport (from global nav state). Used to filter templates. */
+  activeSport?: string;
 }
 
 
@@ -742,6 +744,7 @@ export function WorkoutsView({
   isLoggedIn,
   initialOpenCreateMenu,
   onCreateMenuMounted,
+  activeSport: activeSportProp = '',
 }: WorkoutsViewProps) {
   const [openSettingsId, setOpenSettingsId] = useState<string | null>(null);
   const [selectingSheetTemplate, setSelectingSheetTemplate] = useState<WorkoutTemplate | null>(null);
@@ -762,10 +765,11 @@ export function WorkoutsView({
   const [filterDate, setFilterDate] = useState<string | null>(null);
   const [showDateFilter, setShowDateFilter] = useState(false);
 
+  // Resolve the display sport from the global activeSport prop, falling back to the
+  // user's primary specialty (or guest onboarding answer) when the prop is empty.
   const sport = useMemo(() => {
-    // 1. Logged-in user — use cloud profile specialties
+    if (activeSportProp) return activeSportProp;
     if (mainUserProfile?.specialties?.length) return mainUserProfile.specialties[0];
-    // 2. Guest/onboarding — fallback to local answers
     if (!isLoggedIn) {
       try {
         const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
@@ -773,9 +777,20 @@ export function WorkoutsView({
       } catch {}
     }
     return 'Musculação';
-  }, [mainUserProfile, isLoggedIn]);
+  }, [activeSportProp, mainUserProfile, isLoggedIn]);
 
-  // Sync AI sport picker default with user's primary sport
+  // Filter templates to only show those matching the active sport.
+  const visibleTemplates = useMemo(() => {
+    return templates.filter(t => {
+      const tSport = t.sport ?? (() => {
+        const known = ['Musculação', 'Crossfit', 'Corrida', 'Yoga', 'Natação', 'Ciclismo', 'Halterofilismo', 'Triatlo'];
+        return known.find(s => t.name.toLowerCase().includes(s.toLowerCase())) ?? 'Musculação';
+      })();
+      return tSport === sport;
+    });
+  }, [templates, sport]);
+
+  // Sync AI sport picker default with the active sport
   useEffect(() => {
     if (sport && !aiSelectedSport) setAiSelectedSport(sport);
   }, [sport]);
@@ -839,7 +854,7 @@ export function WorkoutsView({
 
         {/* Templates section */}
         <div className="space-y-4">
-          {templates.length === 0 ? (
+          {visibleTemplates.length === 0 ? (
             <div className="text-center py-14 space-y-5">
               <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto">
                 <img src={iconHalterofilismo} alt="" className="w-10 h-10 brightness-0 invert opacity-20" />
@@ -850,7 +865,7 @@ export function WorkoutsView({
               </div>
             </div>
           ) : (
-            templates.map((template) => (
+            visibleTemplates.map((template) => (
               <TemplateCard
                 key={template.id}
                 template={template}

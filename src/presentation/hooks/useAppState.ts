@@ -132,6 +132,8 @@ export const useAppState = () => {
     setShowLogoutConfirm: nav.setShowLogoutConfirm,
     editingAssessment: nav.editingAssessment,
     setEditingAssessment: nav.setEditingAssessment,
+    activeSport: nav.activeSport,
+    setActiveSport: nav.setActiveSport,
 
     // Auth
     isLoggedIn: auth.isLoggedIn,

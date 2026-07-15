@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { BodyAssessment, WorkoutSession } from "../../domain/entities";
+import type { BodyAssessment } from "../../domain/entities";
 import { STORAGE_KEYS } from "../../shared/lib/storageKeys";
 
 export type AppTab =
@@ -20,10 +20,27 @@ export const useNavigationState = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<BodyAssessment | null>(null);
 
+  // The active sport (modalidade ativa) persists across sessions via localStorage.
+  // Initialised from storage; falls back to '' — screens resolve the real default
+  // from the user's specialties when they detect an empty value.
+  const [activeSport, setActiveSportState] = useState<string>(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEYS.ACTIVE_SPORT) ?? '';
+    } catch {
+      return '';
+    }
+  });
+
+  const setActiveSport = (sport: string) => {
+    setActiveSportState(sport);
+    try { localStorage.setItem(STORAGE_KEYS.ACTIVE_SPORT, sport); } catch {}
+  };
+
   return {
     activeTab, setActiveTab,
     swipeDirection, setSwipeDirection,
     showLogoutConfirm, setShowLogoutConfirm,
     editingAssessment, setEditingAssessment,
+    activeSport, setActiveSport,
   };
 };

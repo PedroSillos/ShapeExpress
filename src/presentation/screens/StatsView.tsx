@@ -14,8 +14,6 @@ import { WorkoutSession, WorkoutTemplate, UserProfile } from '../../domain/entit
 import { EXERCISES } from '../../constants';
 import { BarChart3 } from 'lucide-react';
 import iconHalterofilismo from '@/src/assets/icons/icon-halterofilismo.svg';
-import iconTrophy from '@/src/assets/icons/icon-trophy.svg';
-import iconAlarm from '@/src/assets/icons/icon-alarm.svg';
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
@@ -58,6 +56,19 @@ interface StatsViewProps {
   onGoToWorkouts?: () => void;
   hideHeader?: boolean;
   readOnly?: boolean;
+  /** Currently active sport (from global nav state). Used to filter sessions for stats. */
+  activeSport?: string;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Returns the sport name for a session by looking up the template. */
+function getSportForSession(session: WorkoutSession, templates: WorkoutTemplate[]): string {
+  const t = templates.find(t => t.id === session.workoutId);
+  if (!t) return session.workoutName?.toLowerCase().includes('corrida') ? 'Corrida' : 'Musculação';
+  if (t.sport) return t.sport;
+  const known = ['Musculação', 'Crossfit', 'Corrida', 'Yoga', 'Natação', 'Ciclismo', 'Halterofilismo', 'Triatlo'];
+  return known.find(s => t.name.toLowerCase().includes(s.toLowerCase())) ?? 'Musculação';
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -69,29 +80,38 @@ export function StatsView({
   onGoToWorkouts,
   hideHeader,
   readOnly,
+  activeSport: activeSportProp,
 }: StatsViewProps) {
+  // Resolve sport: prefer global activeSport, then profile specialties, then guest answers.
   const sport = useMemo(() => {
+    if (activeSportProp) return activeSportProp;
     if (mainUserProfile?.specialties?.length) return mainUserProfile.specialties[0];
     try {
       const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
       if (wa?.sports?.length) return wa.sports[0] as string;
     } catch {}
     return 'Musculação';
-  }, [mainUserProfile]);
+  }, [activeSportProp, mainUserProfile]);
+
+  // Filter sessions to only the active sport for all stat calculations.
+  const filteredSessions = useMemo(
+    () => sessions.filter(s => getSportForSession(s, templates) === sport),
+    [sessions, templates, sport],
+  );
 
   const chartData = useMemo(
     () =>
-      [...sessions]
+      [...filteredSessions]
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .slice(0, 7)
         .reverse()
         .map(s => ({ date: format(parseISO(s.date), 'dd/MM'), volume: s.totalVolume })),
-    [sessions],
+    [filteredSessions],
   );
 
   const avgWeightData = useMemo(
     () =>
-      [...sessions]
+      [...filteredSessions]
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         .slice(0, 7)
         .reverse()
@@ -102,7 +122,7 @@ export function StatsView({
             : 0;
           return { date: format(parseISO(s.date), 'dd/MM'), avgWeight: avg };
         }),
-    [sessions],
+    [filteredSessions],
   );
 
   const muscleData = useMemo(() => {
@@ -110,7 +130,7 @@ export function StatsView({
       Peito: 0, Costas: 0, Pernas: 0, Ombros: 0, Braços: 0, Core: 0, 'Full Body': 0,
     };
     let total = 0;
-    sessions.forEach(s => {
+    filteredSessions.forEach(s => {
       s.exercises.forEach(ex => {
         const exercise = EXERCISES.find(e => e.id === ex.exerciseId);
         if (exercise) { counts[exercise.muscleGroup]++; total++; }
@@ -121,22 +141,22 @@ export function StatsView({
       .map(([name, count]) => ({ name, value: Math.round((count / total) * 100) }))
       .filter(item => item.value > 0)
       .sort((a, b) => b.value - a.value);
-  }, [sessions]);
+  }, [filteredSessions]);
 
   const totalVolume = useMemo(
-    () => sessions.reduce((acc, s) => acc + (s.totalVolume ?? 0), 0),
-    [sessions],
+    () => filteredSessions.reduce((acc, s) => acc + (s.totalVolume ?? 0), 0),
+    [filteredSessions],
   );
 
   const avgDuration = useMemo(() => {
-    const withDuration = sessions.filter(s => s.duration && s.duration > 0);
+    const withDuration = filteredSessions.filter(s => s.duration && s.duration > 0);
     if (withDuration.length === 0) return 0;
     return Math.round(withDuration.reduce((acc, s) => acc + (s.duration ?? 0), 0) / withDuration.length);
-  }, [sessions]);
+  }, [filteredSessions]);
 
   // ── Empty state ────────────────────────────────────────────────────────────
 
-  if (sessions.length === 0) {
+  if (filteredSessions.length === 0) {
     return (
       <div className="pb-24">
         {!hideHeader && <StatsHeader sport={sport} />}

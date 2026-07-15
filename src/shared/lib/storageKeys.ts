@@ -53,6 +53,9 @@ export const STORAGE_KEYS = {
 
   /** ISO timestamp of the last time the weekly goal check was run. */
   LAST_GOAL_CHECK: 'shapeexpress_last_goal_check',
+
+  /** The currently active sport (modalidade ativa) chosen by the user in the Dashboard header menu. */
+  ACTIVE_SPORT: 'shapeexpress_active_sport',
 } as const;
 
 /** Union type of all valid storage key values. */
