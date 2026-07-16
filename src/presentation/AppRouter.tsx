@@ -503,6 +503,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
         <CreateWorkoutView
           userProfile={userProfile}
           studentEmail={selectedStudentForWorkouts?.email}
+          initialSport={activeSport}
           onSave={async (t: WorkoutTemplate) => {
             await createTemplate(t);
             if (selectedStudentForWorkouts) api.getStudentTemplates(selectedStudentForWorkouts.email).then(setStudentTemplates);

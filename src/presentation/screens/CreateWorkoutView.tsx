@@ -29,6 +29,7 @@ interface CreateWorkoutViewProps {
   initialTemplate?: WorkoutTemplate;
   userProfile: UserProfile;
   studentEmail?: string;
+  initialSport?: string;
 }
 
 export function CreateWorkoutView({ 
@@ -36,7 +37,8 @@ export function CreateWorkoutView({
   onCancel, 
   initialTemplate,
   userProfile,
-  studentEmail
+  studentEmail,
+  initialSport
 }: CreateWorkoutViewProps) {
   const [step, setStep] = useState<'protocol-info' | 'cycle-list' | 'num-sheets' | 'sheet-names' | 'exercise-selection' | 'exercise-configuration'>(
     initialTemplate 
@@ -67,7 +69,7 @@ export function CreateWorkoutView({
   }, [userProfile]);
 
   const [selectedSport, setSelectedSport] = useState<string>(
-    initialTemplate?.sport ?? defaultSport
+    initialTemplate?.sport ?? initialSport ?? defaultSport
   );
 
   const sport = selectedSport;
@@ -362,28 +364,6 @@ export function CreateWorkoutView({
               placeholder="Ex: Hipertrofia Elite"
               className="w-full bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors"
             />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-1">Modalidade</label>
-            <div className="grid grid-cols-4 gap-2">
-              {ALL_SPORTS.map(s => (
-                <button
-                  key={s.id}
-                  onClick={() => setSelectedSport(s.id)}
-                  className={cn(
-                    'flex flex-col items-center gap-1.5 p-2.5 rounded-2xl border transition-all',
-                    selectedSport === s.id
-                      ? 'border-transparent scale-105'
-                      : 'bg-white/5 border-white/10 opacity-50'
-                  )}
-                  style={selectedSport === s.id ? { backgroundColor: s.bg, borderColor: s.bg } : {}}
-                >
-                  <img src={s.icon} alt={s.label} className="w-5 h-5 brightness-0 invert" />
-                  <span className="text-[9px] font-black text-white text-center leading-tight">{s.label}</span>
-                </button>
-              ))}
-            </div>
           </div>
 
           <div className="space-y-2">
