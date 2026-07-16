@@ -8,6 +8,18 @@
  * - Exercises intentionally do NOT carry a sport attribute; the relationship
  *   is owned here (sport → exercises), not the other way around.
  *
+ * Ciclismo exercise IDs:
+ *   Regra: apenas exercícios sem equipamento (peso corporal) ou que usam bicicleta.
+ *   — Cardio principal —
+ *   37  = Ciclismo              (principal — bicicleta)
+ *   36  = Corrida               (cardio complementar / treino cruzado — peso corporal)
+ *   — Força complementar (peso corporal) —
+ *   10  = Afundo                (quadríceps / unilateral / equilíbrio muscular)
+ *   140 = Elevação unilateral   (panturrilha — peso corporal)
+ *   — Alongamento (peso corporal) —
+ *   12  = Alongamento de isquiotibiais (posteriores da coxa)
+ *   163 = Alongamento de panturrilhas  (mobilidade e prevenção)
+ *
  * Corrida exercise IDs:
  *   — Cardio principal —
  *   36  = Corrida               (principal)
@@ -46,6 +58,21 @@
  *   30  = Tríceps pulley        (tríceps)
  *   — Core —
  *   11  = Prancha abdominal     (core)
+ *
+ * Halterofilismo exercise IDs:
+ *   — Movimentos competitivos —
+ *   156 = Arranco (Snatch)         — levantamento do chão até sobre a cabeça em um movimento
+ *   164 = Arremesso (Clean & Jerk) — levantamento do chão até os ombros + impulso acima da cabeça
+ *   — Acessório olímpico —
+ *   157 = Power Clean              — versão simplificada do arremesso, fundamental para iniciantes
+ *   — Força de base —
+ *   113 = Front squat              — agachamento frontal, base para a fase Clean do arremesso
+ *   2   = Agachamento livre        — back squat, força geral de pernas
+ *   6   = Levantamento terra       — puxada inicial do chão
+ *   4   = Desenvolvimento militar  — transfere para o Jerk (fase de impulso)
+ *   53  = Remada Pendlay           — força de tração / costas
+ *   26  = Encolhimento             — trapézio para o shrug explosivo
+ *   25  = Gêmeos em pé             — extensão de tornozelo na fase de salto
  *
  * Crossfit exercise IDs:
  *   2   = Agachamento livre     — força funcional fundamental
@@ -86,9 +113,9 @@
  */
 export const SPORT_EXERCISE_IDS: Record<string, string[]> = {
   'Musculação':     ['1', '16', '18', '6', '3', '8', '60', '4', '28', '73', '2', '7', '21', '25', '5', '30', '11'],
-  'Halterofilismo': ['6', '2', '21', '4', '3', '1'],
+  'Halterofilismo': ['156', '164', '157', '113', '2', '6', '4', '53', '26', '25'],
   'Corrida':        ['36', '155', '154', '2', '10', '22', '25', '11', '110', '9'],
-  'Ciclismo':       ['37', '7', '19', '25'],
+  'Ciclismo':       ['37', '36', '10', '140', '12', '163'],
   'Natação':        ['147', '148', '149', '150', '151', '152', '153'],
   'Crossfit':       ['2', '6', '4', '14', '156', '157', '9', '54', '3', '11', '33', '38', '36', '10'],
   'Yoga':           ['161', '142', '143', '144', '145', '146', '158', '159', '160', '162'],

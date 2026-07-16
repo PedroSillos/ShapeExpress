@@ -1618,6 +1618,17 @@ export const EXERCISES: Exercise[] = [
     type: "compound",
     youtubeUrl: "https://www.youtube.com/watch?v=lSK1f2sP9C4",
   },
+  {
+    id: "164",
+    name: "Arremesso",
+    muscleGroup: "Full Body",
+    defaultSets: 4,
+    defaultReps: 3,
+    category: "Funcional",
+    equipment: "Barra",
+    type: "compound",
+    youtubeUrl: "https://www.youtube.com/watch?v=kRR3CBPHBZA",
+  },
 
   // Full Body
   {
@@ -1890,6 +1901,21 @@ export const EXERCISES: Exercise[] = [
     equipment: "Peso corporal",
     type: "core",
     inputMode: "duration_only",
+  },
+
+  // Ciclismo — alongamento complementar
+  {
+    id: "163",
+    name: "Alongamento de panturrilhas",
+    muscleGroup: "Pernas",
+    muscleSubgroup: "Panturrilha",
+    defaultSets: 2,
+    defaultReps: 30,
+    category: "Alongamento",
+    equipment: "Peso corporal",
+    type: "isolation",
+    inputMode: "duration_only",
+    youtubeUrl: "https://www.youtube.com/watch?v=GNhNKFNkBpM",
   },
 ];
 
