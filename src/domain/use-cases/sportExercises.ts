@@ -99,6 +99,34 @@
  *   152 = Nado peito       (duration_distance) — exige coordenação braços/pernas
  *   153 = Nado borboleta   (duration_distance) — último estilo, mais técnico
  *
+ * Triatlo exercise IDs:
+ *   União das disciplinas Natação + Ciclismo + Corrida, sem duplicatas.
+ *   Ordem: natação → ciclismo → corrida (sequência das etapas na prova).
+ *   — Natação —
+ *   147 = Flutuação              — técnica base
+ *   148 = Deslizamento           — impulso e alinhamento
+ *   149 = Pernadas               — pernadas isoladas
+ *   150 = Nado crawl             — estilo principal no triatlo
+ *   151 = Nado costas            — equilíbrio corporal
+ *   152 = Nado peito             — coordenação
+ *   153 = Nado borboleta         — estilo avançado
+ *   — Ciclismo —
+ *   37  = Ciclismo               — cardio principal (bicicleta)
+ *   10  = Afundo                 — quadríceps / unilateral (peso corporal)
+ *   140 = Elevação unilateral    — panturrilha (peso corporal)
+ *   12  = Alongamento de isquiotibiais — posteriores da coxa
+ *   163 = Alongamento de panturrilhas  — mobilidade e prevenção
+ *   — Corrida —
+ *   36  = Corrida                — cardio principal
+ *   155 = Trote                  — ritmo moderado
+ *   154 = Caminhada              — recuperação ativa
+ *   2   = Agachamento livre      — pernas
+ *   22  = Elevação pélvica       — glúteos / cadeia posterior
+ *   25  = Gêmeos em pé           — panturrilha
+ *   11  = Prancha abdominal      — core
+ *   110 = Prancha lateral        — core oblíquo
+ *   9   = Flexão de braços       — tronco / postura
+ *
  * Yoga exercise IDs:
  *   161 = Postura da Montanha (Tadasana)                              — postura base (início da sequência)
  *   142 = Postura da criança (Balasana)                               — descanso e abertura de quadril
@@ -119,7 +147,7 @@ export const SPORT_EXERCISE_IDS: Record<string, string[]> = {
   'Natação':        ['147', '148', '149', '150', '151', '152', '153'],
   'Crossfit':       ['2', '6', '4', '14', '156', '157', '9', '54', '3', '11', '33', '38', '36', '10'],
   'Yoga':           ['161', '142', '143', '144', '145', '146', '158', '159', '160', '162'],
-  'Triatlo':        ['36', '37', '150', '11', '10'],
+  'Triatlo':        ['147', '148', '149', '150', '151', '152', '153', '37', '10', '140', '12', '163', '36', '155', '154', '2', '22', '25', '11', '110', '9'],
 };
 
 export const DEFAULT_EXERCISE_IDS = ['1', '2', '3', '4', '5'];
