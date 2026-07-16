@@ -71,6 +71,18 @@
  *   151 = Nado costas      (duration_distance) — equilíbrio corporal e respiração
  *   152 = Nado peito       (duration_distance) — exige coordenação braços/pernas
  *   153 = Nado borboleta   (duration_distance) — último estilo, mais técnico
+ *
+ * Yoga exercise IDs:
+ *   161 = Postura da Montanha (Tadasana)                              — postura base (início da sequência)
+ *   142 = Postura da criança (Balasana)                               — descanso e abertura de quadril
+ *   143 = Postura do cachorro olhando para baixo (Adho Mukha Svanasana) — alongamento total
+ *   144 = Postura do Guerreiro I (Virabhadrasana I)                   — força e equilíbrio
+ *   145 = Postura da árvore (Vrksasana)                               — equilíbrio
+ *   146 = Postura do Pombo (Eka Pada Rajakapotasana)                  — quadril profundo
+ *   158 = Postura do Triângulo (Trikonasana)                          — abertura lateral e equilíbrio
+ *   159 = Postura da Cadeira (Utkatasana)                             — força de pernas
+ *   160 = Postura da Cobra (Bhujangasana)                             — extensão da coluna
+ *   162 = Postura do Meio Senhor dos Peixes (Ardha Matsyendrasana)    — mobilidade de coluna
  */
 export const SPORT_EXERCISE_IDS: Record<string, string[]> = {
   'Musculação':     ['1', '16', '18', '6', '3', '8', '60', '4', '28', '73', '2', '7', '21', '25', '5', '30', '11'],
@@ -79,7 +91,7 @@ export const SPORT_EXERCISE_IDS: Record<string, string[]> = {
   'Ciclismo':       ['37', '7', '19', '25'],
   'Natação':        ['147', '148', '149', '150', '151', '152', '153'],
   'Crossfit':       ['2', '6', '4', '14', '156', '157', '9', '54', '3', '11', '33', '38', '36', '10'],
-  'Yoga':           ['142', '143', '144', '145', '146', '12'],
+  'Yoga':           ['161', '142', '143', '144', '145', '146', '158', '159', '160', '162'],
   'Triatlo':        ['36', '37', '150', '11', '10'],
 };
 
