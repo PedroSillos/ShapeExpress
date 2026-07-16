@@ -21,15 +21,14 @@
  *   163 = Alongamento de panturrilhas  (mobilidade e prevenção)
  *
  * Corrida exercise IDs:
+ *   Regra: apenas exercícios sem equipamento (peso corporal).
  *   — Cardio principal —
  *   36  = Corrida               (principal)
  *   155 = Trote                 (ritmo moderado)
  *   154 = Caminhada             (recuperação ativa)
- *   — Força complementar —
- *   2   = Agachamento livre     (pernas)
- *   10  = Afundo                (unilateral)
- *   22  = Elevação pélvica      (glúteos / cadeia posterior)
- *   25  = Gêmeos em pé          (panturrilha)
+ *   — Força complementar (peso corporal) —
+ *   10  = Afundo                (quadríceps / unilateral)
+ *   140 = Elevação unilateral   (panturrilha — peso corporal)
  *   11  = Prancha abdominal     (core)
  *   110 = Prancha lateral       (core oblíquo)
  *   9   = Flexão de braços      (tronco / postura)
@@ -120,12 +119,10 @@
  *   36  = Corrida                — cardio principal
  *   155 = Trote                  — ritmo moderado
  *   154 = Caminhada              — recuperação ativa
- *   2   = Agachamento livre      — pernas
- *   22  = Elevação pélvica       — glúteos / cadeia posterior
- *   25  = Gêmeos em pé           — panturrilha
  *   11  = Prancha abdominal      — core
  *   110 = Prancha lateral        — core oblíquo
  *   9   = Flexão de braços       — tronco / postura
+ *   (10 e 140 já cobertos pelo bloco Ciclismo acima)
  *
  * Yoga exercise IDs:
  *   161 = Postura da Montanha (Tadasana)                              — postura base (início da sequência)
@@ -142,7 +139,7 @@
 export const SPORT_EXERCISE_IDS: Record<string, string[]> = (() => {
   const musculacao:    string[] = ['1', '16', '18', '6', '3', '8', '60', '4', '28', '73', '2', '7', '21', '25', '5', '30', '11'];
   const halterofilismo: string[] = ['156', '164', '157', '113', '2', '6', '4', '53', '26', '25'];
-  const corrida:       string[] = ['36', '155', '154', '2', '10', '22', '25', '11', '110', '9'];
+  const corrida:       string[] = ['36', '155', '154', '10', '140', '11', '110', '9'];
   const ciclismo:      string[] = ['37', '36', '10', '140', '12', '163'];
   const natacao:       string[] = ['147', '148', '149', '150', '151', '152', '153'];
   const crossfit:      string[] = ['2', '6', '4', '14', '156', '157', '9', '54', '3', '11', '33', '38', '36', '10'];
