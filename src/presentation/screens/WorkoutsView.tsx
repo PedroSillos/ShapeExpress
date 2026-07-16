@@ -129,27 +129,29 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
-function WorkoutsHeader({ sessionCount, sport }: { sessionCount: number; sport: string }) {
+function WorkoutsHeader({ sport, color }: { sport: string; color: string }) {
+  const icon = SPORT_ICONS[sport];
+  // derive a darker shade for the gradient start (darken by ~25%)
+  const hex = color.replace('#', '');
+  const r = Math.max(0, parseInt(hex.substring(0, 2), 16) - 60);
+  const g = Math.max(0, parseInt(hex.substring(2, 4), 16) - 60);
+  const b = Math.max(0, parseInt(hex.substring(4, 6), 16) - 60);
+  const darker = `rgb(${r},${g},${b})`;
+
   return (
     <div
       className="relative overflow-hidden -mx-6 mb-6"
-      style={{ background: 'linear-gradient(135deg, #B45309 0%, #D97706 60%, #F59E0B 100%)' }}
+      style={{ background: `linear-gradient(135deg, ${darker} 0%, ${color} 60%, ${color}cc 100%)` }}
     >
       <div className="px-6 pt-10 pb-8 flex items-end justify-between">
         <div className="space-y-1">
           <h1 className="text-3xl font-black text-white leading-tight">Treinos</h1>
           <p className="text-white/70 text-sm font-semibold">{sport}</p>
-          {sessionCount > 0 && (
-            <div className="flex items-center gap-1.5 mt-2">
-              <img src={iconTrophy} alt="" className="w-4 h-4 brightness-0 invert opacity-80" />
-              <span className="text-white/80 text-xs font-bold">
-                {sessionCount} {sessionCount === 1 ? 'sessão concluída' : 'sessões concluídas'}
-              </span>
-            </div>
-          )}
         </div>
         <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
-          <Dumbbell size={36} className="text-white" />
+          {icon
+            ? <img src={icon} alt={sport} className="w-9 h-9 brightness-0 invert" />
+            : <Dumbbell size={36} className="text-white" />}
         </div>
       </div>
       {/* decorative circles */}
@@ -834,7 +836,7 @@ export function WorkoutsView({
 
   return (
     <div className="pb-24">
-      <WorkoutsHeader sessionCount={sessions.length} sport={sport} />
+      <WorkoutsHeader sport={sport} color={SPORT_COLORS[sport] ?? '#dc2626'} />
 
       <div className="space-y-6">
         {/* Create workout button */}

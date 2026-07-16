@@ -13,15 +13,53 @@ import {
 import { WorkoutSession, WorkoutTemplate, UserProfile } from '../../domain/entities';
 import { EXERCISES } from '../../constants';
 import { BarChart3 } from 'lucide-react';
+import iconMusculacao    from '@/src/assets/icons/icon-musculacao.svg';
 import iconHalterofilismo from '@/src/assets/icons/icon-halterofilismo.svg';
+import iconCorrida       from '@/src/assets/icons/icon-corrida.svg';
+import iconCiclismo      from '@/src/assets/icons/icon-ciclismo.svg';
+import iconNatacao       from '@/src/assets/icons/icon-natacao.svg';
+import iconCrossfit      from '@/src/assets/icons/icon-crossfit.svg';
+import iconTriatlo       from '@/src/assets/icons/icon-triatlo.svg';
+import iconYoga          from '@/src/assets/icons/icon-yoga.svg';
+
+const SPORT_ICONS: Record<string, string> = {
+  'Musculação':     iconMusculacao,
+  'Halterofilismo': iconHalterofilismo,
+  'Corrida':        iconCorrida,
+  'Ciclismo':       iconCiclismo,
+  'Natação':        iconNatacao,
+  'Crossfit':       iconCrossfit,
+  'Triatlo':        iconTriatlo,
+  'Yoga':           iconYoga,
+};
+
+const SPORT_COLORS: Record<string, string> = {
+  'Musculação':     '#dc2626',
+  'Crossfit':       '#ea580c',
+  'Corrida':        '#ca8a04',
+  'Yoga':           '#16a34a',
+  'Natação':        '#2563eb',
+  'Ciclismo':       '#0891b2',
+  'Halterofilismo': '#7c3aed',
+  'Triatlo':        '#db2777',
+};
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 function StatsHeader({ sport }: { sport: string }) {
+  const color = SPORT_COLORS[sport] ?? '#7c3aed';
+  const icon  = SPORT_ICONS[sport];
+
+  const hex = color.replace('#', '');
+  const r = Math.max(0, parseInt(hex.substring(0, 2), 16) - 60);
+  const g = Math.max(0, parseInt(hex.substring(2, 4), 16) - 60);
+  const b = Math.max(0, parseInt(hex.substring(4, 6), 16) - 60);
+  const darker = `rgb(${r},${g},${b})`;
+
   return (
     <div
       className="relative overflow-hidden -mx-6 mb-6"
-      style={{ background: 'linear-gradient(135deg, #6D28D9 0%, #8B5CF6 60%, #A78BFA 100%)' }}
+      style={{ background: `linear-gradient(135deg, ${darker} 0%, ${color} 60%, ${color}cc 100%)` }}
     >
       <div className="px-6 pt-10 pb-8 flex items-end justify-between">
         <div className="space-y-1">
@@ -29,7 +67,9 @@ function StatsHeader({ sport }: { sport: string }) {
           <p className="text-white/70 text-sm font-semibold">{sport}</p>
         </div>
         <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
-          <BarChart3 size={36} className="text-white" />
+          {icon
+            ? <img src={icon} alt={sport} className="w-9 h-9 brightness-0 invert" />
+            : <BarChart3 size={36} className="text-white" />}
         </div>
       </div>
       {/* decorative circles */}
@@ -162,7 +202,7 @@ export function StatsView({
         {!hideHeader && <StatsHeader sport={sport} />}
 
         <div className="bg-dark-card border border-dark-border rounded-3xl overflow-hidden">
-          <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #E53E3E, #E05C2A)' }} />
+          <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, ${SPORT_COLORS[sport] ?? '#E53E3E'}cc, ${SPORT_COLORS[sport] ?? '#E05C2A'})` }} />
           <div className="px-6 py-12 flex flex-col items-center text-center space-y-5">
             <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center">
               <img src={iconHalterofilismo} alt="" className="w-10 h-10 brightness-0 invert opacity-20" />
@@ -187,6 +227,8 @@ export function StatsView({
     );
   }
 
+  const accentGradient = `linear-gradient(90deg, ${SPORT_COLORS[sport] ?? '#E53E3E'}cc, ${SPORT_COLORS[sport] ?? '#E05C2A'})`;
+
   // ── With data ──────────────────────────────────────────────────────────────
 
   return (
@@ -198,10 +240,10 @@ export function StatsView({
         <div>
           <SectionLabel>Média de Peso por Sessão (kg)</SectionLabel>
           <div className="bg-dark-card border border-dark-border rounded-3xl overflow-hidden">
-            <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #E53E3E, #E05C2A)' }} />
+            <div className="h-1 w-full" style={{ background: accentGradient }} />
             <div className="p-4 h-56">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={avgWeightData}>
+                <LineChart data={avgWeightData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" vertical={false} />
                   <XAxis
                     dataKey="date"
@@ -217,6 +259,7 @@ export function StatsView({
                     fontSize={10}
                     tickLine={false}
                     axisLine={false}
+                    width={28}
                   />
                   <Tooltip
                     contentStyle={{
@@ -248,10 +291,10 @@ export function StatsView({
             className="bg-dark-card border border-dark-border rounded-3xl overflow-hidden"
           >
             {/* accent stripe */}
-            <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #E53E3E, #E05C2A)' }} />
+            <div className="h-1 w-full" style={{ background: accentGradient }} />
             <div className="p-4 h-56">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
+                <LineChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--theme-border)" vertical={false} />
                   <XAxis
                     dataKey="date"
@@ -267,6 +310,7 @@ export function StatsView({
                     fontSize={10}
                     tickLine={false}
                     axisLine={false}
+                    width={28}
                   />
                   <Tooltip
                     contentStyle={{
@@ -294,7 +338,7 @@ export function StatsView({
         <div>
           <SectionLabel>Frequência Muscular</SectionLabel>
           <div className="bg-dark-card border border-dark-border rounded-3xl overflow-hidden">
-            <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #E53E3E, #E05C2A)' }} />
+            <div className="h-1 w-full" style={{ background: accentGradient }} />
             <div className="p-4 space-y-4">
               {muscleData.map((item, i) => (
                 <div key={i} className="space-y-1.5">
@@ -307,7 +351,7 @@ export function StatsView({
                       className="h-full rounded-full"
                       style={{
                         width: `${item.value}%`,
-                        background: 'linear-gradient(90deg, #E53E3E, #E05C2A)',
+                        background: accentGradient,
                       }}
                     />
                   </div>

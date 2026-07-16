@@ -1595,6 +1595,30 @@ export const EXERCISES: Exercise[] = [
     type: "compound",
   },
 
+  // Halterofilismo Olímpico
+  {
+    id: "156",
+    name: "Arranco",
+    muscleGroup: "Full Body",
+    defaultSets: 4,
+    defaultReps: 3,
+    category: "Funcional",
+    equipment: "Barra",
+    type: "compound",
+    youtubeUrl: "https://www.youtube.com/watch?v=9xQp2sldyts",
+  },
+  {
+    id: "157",
+    name: "Power Clean",
+    muscleGroup: "Full Body",
+    defaultSets: 4,
+    defaultReps: 3,
+    category: "Funcional",
+    equipment: "Barra",
+    type: "compound",
+    youtubeUrl: "https://www.youtube.com/watch?v=lSK1f2sP9C4",
+  },
+
   // Full Body
   {
     id: "14",
