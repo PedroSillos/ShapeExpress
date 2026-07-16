@@ -115,27 +115,39 @@ async function startServer() {
 
     // Sport-specific exercise pools — must match SPORT_EXERCISE_IDS in sportExercises.ts
     const sportPools: Record<string, string> = {
+      'Musculação':     '1=Supino,16=SupinoInclinado,18=Crucifixo,6=Terra,3=Remada,8=Puxada,60=RemadaUnilateral,4=DevMilitar,28=ElevLateral,73=FacePull,2=Agachamento,7=LegPress,21=Stiff,25=Gemeos,5=Rosca,30=TricepsPulley,11=Prancha',
       'Natação':        '147=Flutuacao,148=Deslizamento,149=Pernadas,150=Crawl,151=Costas,152=Peito,153=Borboleta',
-      'Corrida':        '36=Corrida,155=Trote,154=Caminhada,10=Afundo,25=Gemeos',
-      'Ciclismo':       '37=Ciclismo,7=LegPress,19=Extensora,25=Gemeos',
-      'Crossfit':       '14=KBSwing,2=Agachamento,1=Supino,11=Prancha,38=PularCorda,9=Flexao',
-      'Yoga':           '142=Balasana,143=AdhoMukha,144=Guerreiro,145=Arvore,146=Pombo,12=AlongIsquio',
-      'Triatlo':        '36=Corrida,37=Ciclismo,150=Crawl,11=Prancha,10=Afundo',
-      'Halterofilismo': '6=Terra,2=Agachamento,21=Stiff,4=DevMilitar,3=Remada,1=Supino',
+      'Corrida':        '36=Corrida,155=Trote,154=Caminhada,10=Afundo,140=ElevUnilateral,11=Prancha,110=PranchaLateral,9=Flexao',
+      'Ciclismo':       '37=Ciclismo,36=Corrida,10=Afundo,140=ElevUnilateral,12=AlongIsquio,163=AlongPanturrilha',
+      'Crossfit':       '2=Agachamento,6=Terra,4=DevMilitar,14=KBSwing,156=Arranco,157=PowerClean,9=Flexao,54=BarraFixa,3=Remada,11=Prancha,33=AbdSupra,38=PularCorda,36=Corrida,10=Afundo',
+      'Yoga':           '161=Tadasana,142=Balasana,143=AdhoMukha,144=GuerreiroI,145=Arvore,146=Pombo,158=Triangulo,159=Cadeira,160=Cobra,162=MeioSenhor',
+      'Triatlo':        '147=Flutuacao,150=Crawl,37=Ciclismo,10=Afundo,36=Corrida,11=Prancha,140=ElevUnilateral,155=Trote',
+      'Halterofilismo': '156=Arranco,164=Arremesso,157=PowerClean,113=FrontSquat,2=Agachamento,6=Terra,4=DevMilitar,53=RemadaPendlay,26=Encolhimento,25=Gemeos',
     };
     const primarySport = (sports[0] || '').trim();
-    const sportPoolStr = sportPools[primarySport] || '';
-    const sportNote = sportPoolStr
-      ? `MODALIDADE ${primarySport.toUpperCase()}: use APENAS estes IDs: ${sportPoolStr}.`
-      : 'Musculação: IDs 1=Supino,2=Agachamento,3=Remada,4=DevMilitar,5=Rosca,6=Terra,7=LegPress,8=Puxada,30=TricepsPulley.';
+    const sportPoolStr = sportPools[primarySport] || sportPools['Musculação'];
 
-    const prompt = `Personal trainer: crie treino para modalidade ${sports.join(', ')}, objetivo ${objective || 'condicionamento'}${height ? `, altura ${height}cm` : ''}${weight ? `, peso ${weight}kg` : ''}${age ? `, idade ${age} anos` : ''}.
+    // Build biometric hints so the AI can make a more appropriate selection
+    const bmiHint = (weight && height)
+      ? (() => {
+          const bmi = weight / ((height / 100) ** 2);
+          if (bmi > 30) return 'IMC elevado: prefira exercicios de baixo impacto articular.';
+          if (bmi < 18.5) return 'IMC baixo: priorize exercicios compostos de ganho de massa.';
+          return '';
+        })()
+      : '';
+    const ageHint = age
+      ? (age >= 50 ? 'Idade 50+: evite impacto alto e priorizze mobilidade.' : age <= 18 ? 'Jovem: foque em tecnica e peso corporal.' : '')
+      : '';
+    const biometricContext = [bmiHint, ageHint].filter(Boolean).join(' ');
+
+    const prompt = `Voce e um personal trainer. Crie um treino VARIADO e PERSONALIZADO para: modalidade ${sports.join(', ')}, objetivo ${objective || 'condicionamento geral'}${height ? `, altura ${height}cm` : ''}${weight ? `, peso ${weight}kg` : ''}${age ? `, idade ${age} anos` : ''}.
 Nivel: ${difficulty}
-${sportNote}
-Regras gerais (fallback apenas se modalidade for Musculacao/casa): Casa: apenas IDs 9,10,11,14,33,35,38.
-IDs gerais: 9=Flexao,10=Afundo,11=Prancha,13=RoscaHalter,14=KBSwing,19=Extensora,20=MesaFlexora,21=Stiff,22=ElevPelvica,25=Gemeos,28=ElevLateral,30=TricepsPulley,33=AbdSupra,35=GiroRusso,36=Corrida,37=Ciclismo,38=PularCorda.
-REGRA CRITICA: use EXATAMENTE 3 exercicios, numSets=3 em todos, rest="60s" em todos.
-JSON sem markdown: {"name":"Treino Basico: <modalidade>","exercises":[{"exerciseId":"ID","numSets":3,"sets":"10","rest":"60s"}]}`;
+${biometricContext ? `Contexto biometrico: ${biometricContext}` : ''}
+Pool de exercicios disponiveis (use APENAS estes IDs): ${sportPoolStr}.
+INSTRUCAO DE VARIACAO: escolha 3 exercicios que melhor se encaixem no perfil do usuario. Nao escolha sempre os primeiros da lista — varie a selecao com base no objetivo, nivel e dados biometricos. Dois usuarios diferentes com perfis diferentes devem receber combinacoes diferentes.
+REGRA ESTRUTURAL: use EXATAMENTE 3 exercicios, numSets=3 em todos, rest="60s" em todos.
+Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"exerciseId":"ID","numSets":3,"sets":"REPS","rest":"60s"}]}`;
 
     try {
       const response = await genAI.models.generateContent({

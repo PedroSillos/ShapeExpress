@@ -1811,7 +1811,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "144",
-    name: "Postura do Guerreiro I (Virabhadrasana I)",
+    name: "Postura do guerreiro I (Virabhadrasana I)",
     muscleGroup: "Pernas",
     muscleSubgroup: "Quadríceps",
     defaultSets: 3,
@@ -1834,7 +1834,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "146",
-    name: "Postura do Pombo (Eka Pada Rajakapotasana)",
+    name: "Postura do pombo (Eka Pada Rajakapotasana)",
     muscleGroup: "Pernas",
     muscleSubgroup: "Glúteos",
     defaultSets: 2,
@@ -1846,7 +1846,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "158",
-    name: "Postura do Triângulo (Trikonasana)",
+    name: "Postura do triângulo (Trikonasana)",
     muscleGroup: "Full Body",
     defaultSets: 3,
     defaultReps: 1,
@@ -1857,7 +1857,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "159",
-    name: "Postura da Cadeira (Utkatasana)",
+    name: "Postura da cadeira (Utkatasana)",
     muscleGroup: "Pernas",
     muscleSubgroup: "Quadríceps",
     defaultSets: 3,
@@ -1869,7 +1869,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "160",
-    name: "Postura da Cobra (Bhujangasana)",
+    name: "Postura da cobra (Bhujangasana)",
     muscleGroup: "Costas",
     muscleSubgroup: "Lombar",
     defaultSets: 3,
@@ -1881,7 +1881,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "161",
-    name: "Postura da Montanha (Tadasana)",
+    name: "Postura da montanha (Tadasana)",
     muscleGroup: "Full Body",
     defaultSets: 3,
     defaultReps: 1,
@@ -1892,7 +1892,7 @@ export const EXERCISES: Exercise[] = [
   },
   {
     id: "162",
-    name: "Postura do Meio Senhor dos Peixes (Ardha Matsyendrasana)",
+    name: "Postura do meio senhor dos peixes (Ardha Matsyendrasana)",
     muscleGroup: "Costas",
     muscleSubgroup: "Lombar",
     defaultSets: 3,

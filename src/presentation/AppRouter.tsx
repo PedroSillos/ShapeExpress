@@ -119,6 +119,9 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
         const wa = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; } })();
         objective = wa?.objective;
         experience = wa?.experiences ? (Object.values(wa.experiences)[0] as string | undefined) : undefined;
+        height = wa?.height ? Number(wa.height) : undefined;
+        weight = wa?.weight ? Number(wa.weight) : undefined;
+        age = wa?.birthDate ? new Date().getFullYear() - new Date(wa.birthDate).getFullYear() : undefined;
       }
 
       const now = new Date();
