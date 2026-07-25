@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, ChevronLeft, Search, SlidersHorizontal, Play, Check, Plus, Trash2, Edit } from 'lucide-react';
+import { X, ChevronLeft, ChevronDown, Search, SlidersHorizontal, Play, Check, Plus, Trash2, Edit } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, addMonths, parseISO } from 'date-fns';
 import { cn } from '../../utils/cn';
@@ -22,6 +22,202 @@ import {
   Exercise, 
   UserProfile 
 } from '../../domain/entities';
+
+// ---------------------------------------------------------------------------
+// ProtocolInfoStep — step 1 of the workout creation flow
+// ---------------------------------------------------------------------------
+
+interface ProtocolInfoStepProps {
+  initialTemplate?: WorkoutTemplate;
+  selectedSport: string;
+  sportColor: string;
+  isNameFilled: boolean;
+  protocolName: string;
+  setProtocolName: (v: string) => void;
+  category: WorkoutCategory;
+  setCategory: (v: WorkoutCategory) => void;
+  startDate: string;
+  setStartDate: (v: string) => void;
+  endDate: string;
+  setEndDate: (v: string) => void;
+  onCancel: () => void;
+  onNext: () => void;
+}
+
+function ProtocolInfoStep({
+  initialTemplate,
+  selectedSport,
+  sportColor,
+  isNameFilled,
+  protocolName,
+  setProtocolName,
+  category,
+  setCategory,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
+  onCancel,
+  onNext,
+}: ProtocolInfoStepProps) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const isMulticycle = category === 'multicycle';
+
+  return (
+    <div className="space-y-6 pb-12">
+      {/* Header */}
+      <div
+        className="relative overflow-hidden -mx-6 mb-6"
+        style={{
+          background: `linear-gradient(135deg, color-mix(in srgb, ${sportColor} 80%, #000) 0%, ${sportColor} 100%)`,
+        }}
+      >
+        <div className="px-6 pt-10 pb-8 flex items-end justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-black text-white leading-tight">
+              {initialTemplate ? 'Editar treino' : 'Novo treino'}
+            </h1>
+            <p className="text-white/70 text-sm font-semibold">{selectedSport}</p>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
+              <img
+                src={ALL_SPORTS.find(s => s.id === selectedSport)?.icon ?? iconMusculacao}
+                alt=""
+                className="w-12 h-12 brightness-0 invert"
+              />
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={onCancel}
+          className="absolute top-4 left-4 p-2 bg-black/20 rounded-full text-white/70 hover:text-white"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        {/* decorative circles */}
+        <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute top-4 right-12 w-12 h-12 rounded-full bg-white/5 pointer-events-none" />
+      </div>
+
+      <Card className="space-y-5 p-6">
+        {/* Nome do treino */}
+        <div className="space-y-2">
+          <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-1">
+            Nome do Treino
+          </label>
+          <input
+            type="text"
+            value={protocolName}
+            onChange={(e) => setProtocolName(e.target.value)}
+            placeholder="Ex: Hipertrofia Elite"
+            className="w-full bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors"
+          />
+        </div>
+
+        {/* Toggle seção avançado */}
+        <button
+          onClick={() => setShowAdvanced(v => !v)}
+          className="flex items-center justify-between w-full py-1"
+        >
+          <span
+            className="text-[10px] font-bold uppercase tracking-widest transition-colors"
+            style={{ color: showAdvanced ? sportColor : 'rgba(255,255,255,0.4)' }}
+          >
+            Avançado
+          </span>
+          <ChevronDown
+            size={16}
+            className="transition-transform duration-300"
+            style={{
+              color: showAdvanced ? sportColor : 'rgba(255,255,255,0.3)',
+              transform: showAdvanced ? 'rotate(180deg)' : 'rotate(0deg)',
+            }}
+          />
+        </button>
+
+        {/* Seção avançado colapsável */}
+        <AnimatePresence initial={false}>
+          {showAdvanced && (
+            <motion.div
+              key="advanced"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="space-y-5 pt-1">
+                {/* Toggle Multiciclo */}
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-bold text-white">Multiciclo</p>
+                    <p className="text-[10px] text-white/30">Divide o treino em ciclos com períodos distintos</p>
+                  </div>
+                  <button
+                    role="switch"
+                    aria-checked={isMulticycle}
+                    onClick={() => setCategory(isMulticycle ? 'basic' : 'multicycle')}
+                    className="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none flex-shrink-0"
+                    style={{ backgroundColor: isMulticycle ? sportColor : 'rgba(255,255,255,0.1)' }}
+                  >
+                    <span
+                      className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300"
+                      style={{ transform: isMulticycle ? 'translateX(24px)' : 'translateX(0)' }}
+                    />
+                  </button>
+                </div>
+
+                {/* Datas */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-1">
+                      Início
+                    </label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-1">
+                      Fim
+                    </label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Botão Avançar */}
+        <button
+          onClick={onNext}
+          disabled={!isNameFilled}
+          className={cn(
+            'w-full py-4 rounded-2xl font-bold transition-all active:scale-95',
+            isNameFilled
+              ? 'text-white shadow-lg'
+              : 'bg-white/10 text-white/20 cursor-not-allowed'
+          )}
+          style={isNameFilled ? { backgroundColor: sportColor, boxShadow: `0 8px 24px ${sportColor}40` } : undefined}
+        >
+          Avançar
+        </button>
+      </Card>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 
 interface CreateWorkoutViewProps {
   onSave: (t: WorkoutTemplate) => void;
@@ -323,102 +519,26 @@ export function CreateWorkoutView({
   };
 
   if (step === 'protocol-info') {
+    const sportColor = ALL_SPORTS.find(s => s.id === selectedSport)?.bg ?? '#dc2626';
+    const isNameFilled = protocolName.trim().length > 0;
+
     return (
-      <div className="space-y-6 pb-12">
-        {/* Header */}
-        <div
-          className="relative overflow-hidden -mx-6 mb-6"
-          style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${ALL_SPORTS.find(s => s.id === selectedSport)?.bg ?? '#C0392B'} 80%, #000) 0%, ${ALL_SPORTS.find(s => s.id === selectedSport)?.bg ?? '#E74C3C'} 100%)` }}
-        >
-          <div className="px-6 pt-10 pb-8 flex items-end justify-between">
-            <div className="space-y-1">
-              <h1 className="text-3xl font-black text-white leading-tight">
-                {initialTemplate ? 'Editar treino' : 'Novo treino'}
-              </h1>
-              <p className="text-white/70 text-sm font-semibold">{selectedSport}</p>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
-                <img src={ALL_SPORTS.find(s => s.id === selectedSport)?.icon ?? iconMusculacao} alt="" className="w-12 h-12 brightness-0 invert" />
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={onCancel}
-            className="absolute top-4 left-4 p-2 bg-black/20 rounded-full text-white/70 hover:text-white"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          {/* decorative circles */}
-          <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/5 pointer-events-none" />
-          <div className="absolute top-4 right-12 w-12 h-12 rounded-full bg-white/5 pointer-events-none" />
-        </div>
-
-        <Card className="space-y-6 p-6">
-          <div className="space-y-2">
-            <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-1">Nome do Treino</label>
-            <input 
-              type="text" 
-              value={protocolName}
-              onChange={(e) => setProtocolName(e.target.value)}
-              placeholder="Ex: Hipertrofia Elite"
-              className="w-full bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-1">Categoria</label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setCategory('basic')}
-                className={cn(
-                  "p-4 rounded-2xl border font-bold text-sm transition-all",
-                  category === 'basic' ? "bg-brand-red border-brand-red text-black" : "bg-white/5 border-white/10 text-white/40"
-                )}
-              >
-                Básico
-              </button>
-              <button
-                onClick={() => setCategory('multicycle')}
-                className={cn(
-                  "p-4 rounded-2xl border font-bold text-sm transition-all",
-                  category === 'multicycle' ? "bg-brand-red border-brand-red text-black" : "bg-white/5 border-white/10 text-white/40"
-                )}
-              >
-                Multiciclo
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-1">Início</label>
-              <input 
-                type="date" 
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-1">Fim</label>
-              <input 
-                type="date" 
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-              />
-            </div>
-          </div>
-
-          <button 
-            onClick={handleProtocolInfoNext}
-            className="w-full py-4 red-gradient rounded-2xl text-black font-bold shadow-lg shadow-brand-red/20 active:scale-95 transition-transform"
-          >
-            Avançar
-          </button>
-        </Card>
-      </div>
+      <ProtocolInfoStep
+        initialTemplate={initialTemplate}
+        selectedSport={selectedSport}
+        sportColor={sportColor}
+        isNameFilled={isNameFilled}
+        protocolName={protocolName}
+        setProtocolName={setProtocolName}
+        category={category}
+        setCategory={setCategory}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        onCancel={onCancel}
+        onNext={handleProtocolInfoNext}
+      />
     );
   }
 
