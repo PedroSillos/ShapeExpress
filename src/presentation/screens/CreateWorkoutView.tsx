@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, ChevronLeft, ChevronDown, Search, SlidersHorizontal, Play, Check, Plus, Trash2, Edit } from 'lucide-react';
+import { X, ChevronLeft, ChevronDown, Info, Search, SlidersHorizontal, Play, Check, Plus, Trash2, Edit } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, addMonths, parseISO } from 'date-fns';
 import { cn } from '../../utils/cn';
@@ -61,6 +61,7 @@ function ProtocolInfoStep({
   onNext,
 }: ProtocolInfoStepProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showMulticicloInfo, setShowMulticicloInfo] = useState(false);
   const isMulticycle = category === 'multicycle';
 
   return (
@@ -150,9 +151,15 @@ function ProtocolInfoStep({
               <div className="space-y-5 pt-1">
                 {/* Toggle Multiciclo */}
                 <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
                     <p className="text-sm font-bold text-white">Multiciclo</p>
-                    <p className="text-[10px] text-white/30">Divide o treino em ciclos com períodos distintos</p>
+                    <button
+                      onClick={() => setShowMulticicloInfo(true)}
+                      className="text-white/30 hover:text-white/60 transition-colors"
+                      aria-label="Saiba mais sobre Multiciclo"
+                    >
+                      <Info size={14} />
+                    </button>
                   </div>
                   <button
                     role="switch"
@@ -167,6 +174,55 @@ function ProtocolInfoStep({
                     />
                   </button>
                 </div>
+
+                {/* Modal explicação Multiciclo */}
+                <AnimatePresence>
+                  {showMulticicloInfo && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="fixed inset-0 bg-black/70 z-[300] flex items-end justify-center p-4"
+                      onClick={() => setShowMulticicloInfo(false)}
+                    >
+                      <motion.div
+                        initial={{ y: 40, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 40, opacity: 0 }}
+                        transition={{ duration: 0.22, ease: 'easeOut' }}
+                        className="w-full max-w-md bg-dark-card rounded-3xl p-6 space-y-4"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div
+                          className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                          style={{ backgroundColor: `${sportColor}25` }}
+                        >
+                          <Info size={20} style={{ color: sportColor }} />
+                        </div>
+
+                        <div className="space-y-1">
+                          <h3 className="text-lg font-black text-white">O que é Multiciclo?</h3>
+                          <p className="text-sm text-white/50 leading-relaxed">
+                            Um treino multiciclo é dividido em ciclos com <span className="text-white/80 font-semibold">períodos de tempo definidos</span>.
+                          </p>
+                          <p className="text-sm text-white/50 leading-relaxed">
+                            Você configura os exercícios de cada ciclo separadamente. Útil para definir progressão ao longo do tempo.
+                          </p>
+                          <p className="text-sm text-white/50 leading-relaxed">
+                            <span className="text-white/80 font-semibold">Indicado para usuários avançados.</span>
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => setShowMulticicloInfo(false)}
+                          className="w-full py-3 rounded-2xl font-bold text-sm text-white/60 bg-white/5"
+                        >
+                          Entendi
+                        </button>
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Datas */}
                 <div className="grid grid-cols-2 gap-4">
