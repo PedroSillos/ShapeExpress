@@ -273,7 +273,7 @@ function ProtocolInfoStep({
                               'p-1 rounded-lg transition-colors',
                               inlineCycles.length === 1
                                 ? 'text-white/10 cursor-not-allowed'
-                                : 'text-red-400/50 hover:text-red-400'
+                                : 'text-white/40 hover:text-white/70'
                             )}
                           >
                             <Trash2 size={14} />
@@ -406,7 +406,7 @@ export function CreateWorkoutView({
   initialSport,
   existingTemplates = [],
 }: CreateWorkoutViewProps) {
-  const [step, setStep] = useState<'protocol-info' | 'cycle-list' | 'num-sheets' | 'sheet-names' | 'exercise-selection' | 'exercise-configuration'>(
+  const [step, setStep] = useState<'protocol-info' | 'cycle-list' | 'num-sheets' | 'exercise-selection' | 'exercise-configuration'>(
     initialTemplate 
       ? (initialTemplate.category === 'multicycle' ? 'cycle-list' : 'exercise-selection') 
       : 'protocol-info'
@@ -616,11 +616,10 @@ export function CreateWorkoutView({
       setCategory('basic');
       setStartDate(inlineCycles[0].startDate);
       setEndDate(inlineCycles[0].endDate);
-      // Start with 2 sheets if coming fresh (not editing an existing template)
+      // Start with 1 sheet if coming fresh (not editing an existing template)
       if (!initialTemplate) {
         setSheets([
           { id: Math.random().toString(36).substr(2, 9), name: '', order: 0, exerciseIds: [], exercises: [] },
-          { id: Math.random().toString(36).substr(2, 9), name: '', order: 1, exerciseIds: [], exercises: [] },
         ]);
       }
       setStep('num-sheets');
@@ -647,15 +646,6 @@ export function CreateWorkoutView({
       ...sheet,
       name: sheet.name.trim() || `Treino ${String.fromCharCode(65 + i)}`,
       order: i,
-    })));
-    setStep('exercise-selection');
-  };
-
-  const handleSheetNamesNext = () => {
-    setSheets(prev => prev.map((sheet, i) => ({
-      ...sheet,
-      name: sheet.name.trim() || `Treino ${String.fromCharCode(65 + i)}`,
-      order: i
     })));
     setStep('exercise-selection');
   };
@@ -1042,7 +1032,7 @@ export function CreateWorkoutView({
                     'p-1 rounded-lg transition-colors flex-shrink-0',
                     sheets.length === 1
                       ? 'text-white/10 cursor-not-allowed'
-                      : 'text-red-400/50 hover:text-red-400'
+                      : 'text-white/40 hover:text-white/70'
                   )}
                 >
                   <Trash2 size={14} />
@@ -1070,7 +1060,7 @@ export function CreateWorkoutView({
             )}
             style={allSheetsFilled ? { backgroundColor: sportColor, boxShadow: `0 8px 24px ${sportColor}40` } : undefined}
           >
-            Avançar para Exercícios
+            Avançar
           </button>
         </Card>
       </div>
@@ -1091,13 +1081,7 @@ export function CreateWorkoutView({
     <div className="space-y-6 pb-12">
       <div className="flex items-center gap-4">
         <button 
-          onClick={() => {
-            if (initialTemplate) {
-              onCancel();
-            } else {
-              setStep('sheet-names');
-            }
-          }} 
+          onClick={() => setStep('num-sheets')} 
           className="p-2 bg-white/5 rounded-full"
         >
           <ChevronLeft size={20} />
