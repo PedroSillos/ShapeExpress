@@ -27,19 +27,27 @@ import {
 // ProtocolInfoStep — step 1 of the workout creation flow
 // ---------------------------------------------------------------------------
 
+/** Shared label style — matches "NOME DO TREINO" exactly */
+const LABEL_CLASS = 'text-[10px] text-white/40 font-bold uppercase tracking-widest px-1';
+
+interface InlineCycle {
+  id: string;
+  startDate: string;
+  endDate: string;
+}
+
 interface ProtocolInfoStepProps {
   initialTemplate?: WorkoutTemplate;
   selectedSport: string;
   sportColor: string;
   isNameFilled: boolean;
+  isDuplicateName: boolean;
   protocolName: string;
   setProtocolName: (v: string) => void;
-  category: WorkoutCategory;
-  setCategory: (v: WorkoutCategory) => void;
-  startDate: string;
-  setStartDate: (v: string) => void;
-  endDate: string;
-  setEndDate: (v: string) => void;
+  isMulticycle: boolean;
+  onToggleMulticycle: (next: boolean) => void;
+  inlineCycles: InlineCycle[];
+  setInlineCycles: React.Dispatch<React.SetStateAction<InlineCycle[]>>;
   onCancel: () => void;
   onNext: () => void;
 }
@@ -49,20 +57,63 @@ function ProtocolInfoStep({
   selectedSport,
   sportColor,
   isNameFilled,
+  isDuplicateName,
   protocolName,
   setProtocolName,
-  category,
-  setCategory,
-  startDate,
-  setStartDate,
-  endDate,
-  setEndDate,
+  isMulticycle,
+  onToggleMulticycle,
+  inlineCycles,
+  setInlineCycles,
   onCancel,
   onNext,
 }: ProtocolInfoStepProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showMulticicloInfo, setShowMulticicloInfo] = useState(false);
-  const isMulticycle = category === 'multicycle';
+
+  const canAdvance = isNameFilled && !isDuplicateName;
+
+  const toggleMulticycle = () => {
+    const next = !isMulticycle;
+    onToggleMulticycle(next);
+  };
+
+  const addInlineCycle = () => {
+    const last = inlineCycles[inlineCycles.length - 1];
+    // Next cycle starts exactly 1 month after the previous one started,
+    // keeping the same day-of-month across all cycles.
+    const lastStart = parseISO(last.startDate);
+    const nextStart = addMonths(lastStart, 1);
+    const nextEnd = addMonths(nextStart, 1);
+    // End is the day before the following cycle starts
+    const nextEndMinusOne = new Date(nextEnd.getTime() - 86_400_000);
+    setInlineCycles(prev => [
+      ...prev,
+      {
+        id: Math.random().toString(36).substr(2, 9),
+        startDate: format(nextStart, 'yyyy-MM-dd'),
+        endDate: format(nextEndMinusOne, 'yyyy-MM-dd'),
+      },
+    ]);
+  };
+
+  const removeInlineCycle = (id: string) => {
+    if (inlineCycles.length === 1) return;
+    setInlineCycles(prev => {
+      const filtered = prev.filter(c => c.id !== id);
+      // Recalculate from the first cycle's start, keeping same day-of-month
+      return filtered.map((c, idx) => {
+        if (idx === 0) return c;
+        const firstStart = parseISO(filtered[0].startDate);
+        const newStart = addMonths(firstStart, idx);
+        const newEnd = new Date(addMonths(firstStart, idx + 1).getTime() - 86_400_000);
+        return { ...c, startDate: format(newStart, 'yyyy-MM-dd'), endDate: format(newEnd, 'yyyy-MM-dd') };
+      });
+    });
+  };
+
+  const updateInlineCycle = (id: string, field: 'startDate' | 'endDate', value: string) => {
+    setInlineCycles(prev => prev.map(c => c.id === id ? { ...c, [field]: value } : c));
+  };
 
   return (
     <div className="space-y-6 pb-12">
@@ -104,16 +155,24 @@ function ProtocolInfoStep({
       <Card className="space-y-5 p-6">
         {/* Nome do treino */}
         <div className="space-y-2">
-          <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-1">
-            Nome do Treino
-          </label>
+          <label className={LABEL_CLASS}>Nome do Treino</label>
           <input
             type="text"
             value={protocolName}
             onChange={(e) => setProtocolName(e.target.value)}
-            placeholder="Ex: Hipertrofia Elite"
-            className="w-full bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors"
+            placeholder={`Meu treino de ${selectedSport}`}
+            className={cn(
+              'w-full bg-dark-surface border rounded-2xl p-4 focus:outline-none transition-colors',
+              isDuplicateName
+                ? 'border-red-500/60 focus:border-red-500'
+                : 'border-dark-border focus:border-gray-400'
+            )}
           />
+          {isDuplicateName && (
+            <p className="text-[10px] text-red-400 font-bold px-1">
+              Já existe um treino com este nome.
+            </p>
+          )}
         </div>
 
         {/* Toggle seção avançado */}
@@ -121,17 +180,12 @@ function ProtocolInfoStep({
           onClick={() => setShowAdvanced(v => !v)}
           className="flex items-center justify-between w-full py-1"
         >
-          <span
-            className="text-[10px] font-bold uppercase tracking-widest transition-colors"
-            style={{ color: showAdvanced ? sportColor : 'rgba(255,255,255,0.4)' }}
-          >
-            Avançado
-          </span>
+          <span className={LABEL_CLASS}>Avançado</span>
           <ChevronDown
             size={16}
             className="transition-transform duration-300"
             style={{
-              color: showAdvanced ? sportColor : 'rgba(255,255,255,0.3)',
+              color: 'rgba(255,255,255,0.3)',
               transform: showAdvanced ? 'rotate(180deg)' : 'rotate(0deg)',
             }}
           />
@@ -148,11 +202,12 @@ function ProtocolInfoStep({
               transition={{ duration: 0.25, ease: 'easeInOut' }}
               className="overflow-hidden"
             >
-              <div className="space-y-5 pt-1">
-                {/* Toggle Multiciclo */}
+              <div className="space-y-4 pt-1">
+
+                {/* Multiciclo toggle */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-bold text-white">Multiciclo</p>
+                    <span className={LABEL_CLASS}>Multiciclo</span>
                     <button
                       onClick={() => setShowMulticicloInfo(true)}
                       className="text-white/30 hover:text-white/60 transition-colors"
@@ -164,7 +219,7 @@ function ProtocolInfoStep({
                   <button
                     role="switch"
                     aria-checked={isMulticycle}
-                    onClick={() => setCategory(isMulticycle ? 'basic' : 'multicycle')}
+                    onClick={toggleMulticycle}
                     className="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none flex-shrink-0"
                     style={{ backgroundColor: isMulticycle ? sportColor : 'rgba(255,255,255,0.1)' }}
                   >
@@ -174,6 +229,90 @@ function ProtocolInfoStep({
                     />
                   </button>
                 </div>
+
+                {/* Basic mode: single start/end */}
+                {!isMulticycle && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className={LABEL_CLASS}>Início</label>
+                      <input
+                        type="date"
+                        value={inlineCycles[0].startDate}
+                        onChange={(e) => updateInlineCycle(inlineCycles[0].id, 'startDate', e.target.value)}
+                        className="w-full bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className={LABEL_CLASS}>Fim</label>
+                      <input
+                        type="date"
+                        value={inlineCycles[0].endDate}
+                        onChange={(e) => updateInlineCycle(inlineCycles[0].id, 'endDate', e.target.value)}
+                        className="w-full bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Multicycle mode: list of cycles */}
+                {isMulticycle && (
+                  <div className="space-y-3">
+                    {inlineCycles.map((cycle, idx) => (
+                      <div
+                        key={cycle.id}
+                        className="bg-dark-surface border border-dark-border rounded-2xl p-4 space-y-3"
+                      >
+                        {/* Cycle header */}
+                        <div className="flex items-center justify-between">
+                          <span className={LABEL_CLASS}>Ciclo {idx + 1}</span>
+                          <button
+                            onClick={() => removeInlineCycle(cycle.id)}
+                            disabled={inlineCycles.length === 1}
+                            aria-label={`Remover Ciclo ${idx + 1}`}
+                            className={cn(
+                              'p-1 rounded-lg transition-colors',
+                              inlineCycles.length === 1
+                                ? 'text-white/10 cursor-not-allowed'
+                                : 'text-red-400/50 hover:text-red-400'
+                            )}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+
+                        {/* Cycle dates */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <label className={LABEL_CLASS}>Início</label>
+                            <input
+                              type="date"
+                              value={cycle.startDate}
+                              onChange={(e) => updateInlineCycle(cycle.id, 'startDate', e.target.value)}
+                              className="w-full bg-dark-card border border-dark-border rounded-xl p-3 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className={LABEL_CLASS}>Fim</label>
+                            <input
+                              type="date"
+                              value={cycle.endDate}
+                              onChange={(e) => updateInlineCycle(cycle.id, 'endDate', e.target.value)}
+                              className="w-full bg-dark-card border border-dark-border rounded-xl p-3 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Add cycle */}
+                    <button
+                      onClick={addInlineCycle}
+                      className="w-full py-3 bg-white/5 border border-dashed border-white/10 rounded-2xl text-white/40 font-bold text-xs flex items-center justify-center gap-2 hover:border-white/20 hover:text-white/60 transition-all"
+                    >
+                      <Plus size={14} /> Adicionar ciclo
+                    </button>
+                  </div>
+                )}
 
                 {/* Modal explicação Multiciclo */}
                 <AnimatePresence>
@@ -199,11 +338,11 @@ function ProtocolInfoStep({
                         >
                           <Info size={20} style={{ color: sportColor }} />
                         </div>
-
                         <div className="space-y-1">
                           <h3 className="text-lg font-black text-white">O que é Multiciclo?</h3>
                           <p className="text-sm text-white/50 leading-relaxed">
-                            Um treino multiciclo é dividido em ciclos com <span className="text-white/80 font-semibold">períodos de tempo definidos</span>.
+                            Um treino multiciclo é dividido em ciclos com{' '}
+                            <span className="text-white/80 font-semibold">períodos de tempo definidos</span>.
                           </p>
                           <p className="text-sm text-white/50 leading-relaxed">
                             Você configura os exercícios de cada ciclo separadamente. Útil para definir progressão ao longo do tempo.
@@ -212,7 +351,6 @@ function ProtocolInfoStep({
                             <span className="text-white/80 font-semibold">Indicado para usuários avançados.</span>
                           </p>
                         </div>
-
                         <button
                           onClick={() => setShowMulticicloInfo(false)}
                           className="w-full py-3 rounded-2xl font-bold text-sm text-white/60 bg-white/5"
@@ -223,32 +361,6 @@ function ProtocolInfoStep({
                     </motion.div>
                   )}
                 </AnimatePresence>
-
-                {/* Datas */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-1">
-                      Início
-                    </label>
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-1">
-                      Fim
-                    </label>
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                    />
-                  </div>
-                </div>
               </div>
             </motion.div>
           )}
@@ -257,14 +369,14 @@ function ProtocolInfoStep({
         {/* Botão Avançar */}
         <button
           onClick={onNext}
-          disabled={!isNameFilled}
+          disabled={!canAdvance}
           className={cn(
             'w-full py-4 rounded-2xl font-bold transition-all active:scale-95',
-            isNameFilled
+            canAdvance
               ? 'text-white shadow-lg'
               : 'bg-white/10 text-white/20 cursor-not-allowed'
           )}
-          style={isNameFilled ? { backgroundColor: sportColor, boxShadow: `0 8px 24px ${sportColor}40` } : undefined}
+          style={canAdvance ? { backgroundColor: sportColor, boxShadow: `0 8px 24px ${sportColor}40` } : undefined}
         >
           Avançar
         </button>
@@ -282,6 +394,7 @@ interface CreateWorkoutViewProps {
   userProfile: UserProfile;
   studentEmail?: string;
   initialSport?: string;
+  existingTemplates?: WorkoutTemplate[];
 }
 
 export function CreateWorkoutView({ 
@@ -290,7 +403,8 @@ export function CreateWorkoutView({
   initialTemplate,
   userProfile,
   studentEmail,
-  initialSport
+  initialSport,
+  existingTemplates = [],
 }: CreateWorkoutViewProps) {
   const [step, setStep] = useState<'protocol-info' | 'cycle-list' | 'num-sheets' | 'sheet-names' | 'exercise-selection' | 'exercise-configuration'>(
     initialTemplate 
@@ -300,7 +414,68 @@ export function CreateWorkoutView({
   const [protocolName, setProtocolName] = useState(initialTemplate?.name || '');
   const [category, setCategory] = useState<WorkoutCategory>(initialTemplate?.category || 'basic');
   const [startDate, setStartDate] = useState(initialTemplate?.startDate || format(new Date(), 'yyyy-MM-dd'));
-  const [endDate, setEndDate] = useState(initialTemplate?.endDate || format(addMonths(new Date(), 3), 'yyyy-MM-dd'));
+  const [endDate, setEndDate] = useState(initialTemplate?.endDate || format(addMonths(new Date(), 1), 'yyyy-MM-dd'));
+
+  // Inline cycles used in the protocol-info step.
+  // Seeded from the existing template's cycles (if editing) or a single default cycle.
+  const [inlineCycles, setInlineCycles] = useState<Array<{ id: string; startDate: string; endDate: string }>>(() => {
+    if (initialTemplate?.cycles && initialTemplate.cycles.length > 0) {
+      return initialTemplate.cycles.map(c => ({ id: c.id, startDate: c.startDate, endDate: c.endDate }));
+    }
+    const start = initialTemplate?.startDate || format(new Date(), 'yyyy-MM-dd');
+    const end = initialTemplate?.endDate || format(
+      new Date(addMonths(parseISO(start), 1).getTime() - 86_400_000),
+      'yyyy-MM-dd'
+    );
+    return [{ id: Math.random().toString(36).substr(2, 9), startDate: start, endDate: end }];
+  });
+
+  // Toggle state for the multicycle switch in protocol-info step
+  const [isMulticycleToggle, setIsMulticycleToggle] = useState(
+    initialTemplate?.category === 'multicycle'
+  );
+
+  // Snapshot of cycles before turning the toggle off, so they are restored if re-enabled
+  const savedCyclesRef = React.useRef<Array<{ id: string; startDate: string; endDate: string }>>([]);
+
+  const handleToggleMulticycle = (next: boolean) => {
+    setIsMulticycleToggle(next);
+    if (!next) {
+      // Save current cycles before collapsing
+      savedCyclesRef.current = inlineCycles;
+      setInlineCycles(prev => [prev[0]]);
+    } else {
+      // Restore saved cycles if any (user toggled back on)
+      if (savedCyclesRef.current.length > 1) {
+        setInlineCycles(savedCyclesRef.current);
+        savedCyclesRef.current = [];
+      } else {
+        // First time enabling: add a second cycle automatically
+        setInlineCycles(prev => {
+          const first = prev[0];
+          const nextStart = addMonths(parseISO(first.startDate), 1);
+          const nextEnd = new Date(addMonths(nextStart, 1).getTime() - 86_400_000);
+          return [
+            first,
+            {
+              id: Math.random().toString(36).substr(2, 9),
+              startDate: format(nextStart, 'yyyy-MM-dd'),
+              endDate: format(nextEnd, 'yyyy-MM-dd'),
+            },
+          ];
+        });
+      }
+    }
+  };
+
+  // Duplicate name check — case-insensitive, ignoring the template being edited
+  const isDuplicateName = useMemo(() => {
+    const trimmed = protocolName.trim().toLowerCase();
+    if (!trimmed) return false;
+    return existingTemplates.some(
+      t => t.name.trim().toLowerCase() === trimmed && t.id !== initialTemplate?.id
+    );
+  }, [protocolName, existingTemplates, initialTemplate?.id]);
   
   const [cycles, setCycles] = useState<WorkoutCycle[]>(initialTemplate?.cycles || []);
   const [currentCycleIndex, setCurrentCycleIndex] = useState<number | null>(null);
@@ -379,6 +554,7 @@ export function CreateWorkoutView({
   };
   
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);
+  const [showFichasInfo, setShowFichasInfo] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<MuscleGroup | 'Todos'>('Todos');
   const [selectedMuscleSubgroup, setSelectedMuscleSubgroup] = useState<MuscleSubgroup | 'Todos'>('Todos');
@@ -433,32 +609,46 @@ export function CreateWorkoutView({
 
   const handleProtocolInfoNext = () => {
     if (!protocolName.trim()) return alert('Insira o nome do treino.');
-    if (category === 'basic') {
+    if (isDuplicateName) return;
+
+    if (!isMulticycleToggle || inlineCycles.length === 1) {
+      // Basic flow: single cycle or toggle off
+      setCategory('basic');
+      setStartDate(inlineCycles[0].startDate);
+      setEndDate(inlineCycles[0].endDate);
+      // Start with 2 sheets if coming fresh (not editing an existing template)
+      if (!initialTemplate) {
+        setSheets([
+          { id: Math.random().toString(36).substr(2, 9), name: '', order: 0, exerciseIds: [], exercises: [] },
+          { id: Math.random().toString(36).substr(2, 9), name: '', order: 1, exerciseIds: [], exercises: [] },
+        ]);
+      }
       setStep('num-sheets');
     } else {
+      // Multicycle flow: convert inline cycles to WorkoutCycles
+      setCategory('multicycle');
+      setStartDate(inlineCycles[0].startDate);
+      setEndDate(inlineCycles[inlineCycles.length - 1].endDate);
+      const converted = inlineCycles.map((c, idx) => ({
+        id: c.id,
+        name: `Ciclo ${idx + 1}`,
+        startDate: c.startDate,
+        endDate: c.endDate,
+        sheets: [],
+      }));
+      setCycles(converted);
       setStep('cycle-list');
     }
   };
 
   const handleNumSheetsNext = () => {
-    setSheets(prev => {
-      const newSheets = [...prev];
-      if (numSheets > prev.length) {
-        for (let i = prev.length; i < numSheets; i++) {
-          newSheets.push({ 
-            id: Math.random().toString(36).substr(2, 9), 
-            name: '', 
-            order: i,
-            exerciseIds: [], 
-            exercises: [] 
-          });
-        }
-      } else if (numSheets < prev.length) {
-        return prev.slice(0, numSheets);
-      }
-      return newSheets;
-    });
-    setStep('sheet-names');
+    // Normalise names and go straight to exercise selection
+    setSheets(prev => prev.map((sheet, i) => ({
+      ...sheet,
+      name: sheet.name.trim() || `Treino ${String.fromCharCode(65 + i)}`,
+      order: i,
+    })));
+    setStep('exercise-selection');
   };
 
   const handleSheetNamesNext = () => {
@@ -563,8 +753,11 @@ export function CreateWorkoutView({
       setSheets(cycle.sheets);
       setNumSheets(cycle.sheets.length);
     } else {
-      setSheets([{ id: Math.random().toString(36).substr(2, 9), name: '', order: 0, exerciseIds: [], exercises: [] }]);
-      setNumSheets(1);
+      setSheets([
+        { id: Math.random().toString(36).substr(2, 9), name: '', order: 0, exerciseIds: [], exercises: [] },
+        { id: Math.random().toString(36).substr(2, 9), name: '', order: 1, exerciseIds: [], exercises: [] },
+      ]);
+      setNumSheets(2);
     }
     setActiveSheetIndex(0);
     setStep('num-sheets');
@@ -584,14 +777,13 @@ export function CreateWorkoutView({
         selectedSport={selectedSport}
         sportColor={sportColor}
         isNameFilled={isNameFilled}
+        isDuplicateName={isDuplicateName}
         protocolName={protocolName}
         setProtocolName={setProtocolName}
-        category={category}
-        setCategory={setCategory}
-        startDate={startDate}
-        setStartDate={setStartDate}
-        endDate={endDate}
-        setEndDate={setEndDate}
+        isMulticycle={isMulticycleToggle}
+        onToggleMulticycle={handleToggleMulticycle}
+        inlineCycles={inlineCycles}
+        setInlineCycles={setInlineCycles}
         onCancel={onCancel}
         onNext={handleProtocolInfoNext}
       />
@@ -709,77 +901,178 @@ export function CreateWorkoutView({
   }
 
   if (step === 'num-sheets') {
+    const sportColor = ALL_SPORTS.find(s => s.id === selectedSport)?.bg ?? '#dc2626';
+    const cycleLabel = category === 'multicycle' ? cycles[currentCycleIndex!]?.name : null;
+
+    const addSheet = () => {
+      setSheets(prev => [
+        ...prev,
+        {
+          id: Math.random().toString(36).substr(2, 9),
+          name: '',
+          order: prev.length,
+          exerciseIds: [],
+          exercises: [],
+        },
+      ]);
+    };
+
+    const removeSheet = (id: string) => {
+      if (sheets.length === 1) return;
+      setSheets(prev => prev.filter(s => s.id !== id));
+    };
+
+    const allSheetsFilled = sheets.every(s => s.name.trim().length > 0);
+
     return (
       <div className="space-y-6 pb-12">
-        <div className="flex items-center gap-4">
-          <button onClick={() => setStep(category === 'basic' ? 'protocol-info' : 'cycle-list')} className="p-2 bg-white/5 rounded-full"><ChevronLeft size={20} /></button>
-          <h2 className="text-xl font-bold">{category === 'multicycle' ? `Vezes por Semana: ${cycles[currentCycleIndex!].name}` : 'Quantidade de Vezes por Semana'}</h2>
-        </div>
+        {/* Info modal */}
+        <AnimatePresence>
+          {showFichasInfo && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/70 z-[300] flex items-end justify-center p-4"
+              onClick={() => setShowFichasInfo(false)}
+            >
+              <motion.div
+                initial={{ y: 40, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 40, opacity: 0 }}
+                transition={{ duration: 0.22, ease: 'easeOut' }}
+                className="w-full max-w-md bg-dark-card rounded-3xl p-6 space-y-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div
+                  className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                  style={{ backgroundColor: `${sportColor}25` }}
+                >
+                  <Info size={20} style={{ color: sportColor }} />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-black text-white">O que é uma Ficha?</h3>
+                  <p className="text-sm text-white/50 leading-relaxed">
+                    Uma <span className="text-white/80 font-semibold">ficha</span> representa um dia de treino da semana.
+                  </p>
+                  <p className="text-sm text-white/50 leading-relaxed">
+                    Por exemplo, com <span className="text-white/80 font-semibold">3 fichas</span> você terá Treino A, Treino B e Treino C — cada um com seus próprios exercícios.
+                  </p>
+                  <p className="text-sm text-white/50 leading-relaxed">
+                    Você alterna entre as fichas a cada sessão ao longo da semana.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowFichasInfo(false)}
+                  className="w-full py-3 rounded-2xl font-bold text-sm text-white/60 bg-white/5"
+                >
+                  Entendi
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <Card className="space-y-6 p-6">
-          <div className="space-y-4">
-            <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-1">Quantidade de Vezes por Semana</label>
-            <div className="flex items-center justify-between bg-dark-surface border border-dark-border rounded-2xl p-4">
-              <button 
-                onClick={() => setNumSheets(Math.max(1, numSheets - 1))}
-                className="w-10 h-10 rounded-full border border-dark-border flex items-center justify-center text-xl font-bold"
-              >
-                -
-              </button>
-              <span className="text-4xl font-display font-bold text-brand-red">{numSheets}</span>
-              <button 
-                onClick={() => setNumSheets(Math.min(30, numSheets + 1))}
-                className="w-10 h-10 rounded-full border border-dark-border flex items-center justify-center text-xl font-bold"
-              >
-                +
-              </button>
+        {/* Header */}
+        <div
+          className="relative overflow-hidden -mx-6 mb-6"
+          style={{
+            background: `linear-gradient(135deg, color-mix(in srgb, ${sportColor} 80%, #000) 0%, ${sportColor} 100%)`,
+          }}
+        >
+          <div className="px-6 pt-10 pb-8 flex items-end justify-between">
+            <div className="space-y-1">
+              <h1 className="text-3xl font-black text-white leading-tight">
+                {cycleLabel ?? 'Fichas'}
+              </h1>
+              <p className="text-white/70 text-sm font-semibold">{protocolName}</p>
             </div>
-          </div>
-
-          <button 
-            onClick={handleNumSheetsNext}
-            className="w-full py-4 red-gradient rounded-2xl text-black font-bold shadow-lg shadow-brand-red/20 active:scale-95 transition-transform"
-          >
-            Avançar
-          </button>
-        </Card>
-      </div>
-    );
-  }
-
-  if (step === 'sheet-names') {
-    return (
-      <div className="space-y-6 pb-12">
-        <div className="flex items-center gap-4">
-          <button onClick={() => setStep('num-sheets')} className="p-2 bg-white/5 rounded-full"><ChevronLeft size={20} /></button>
-          <h2 className="text-xl font-bold">Nomear Vezes por Semana</h2>
-        </div>
-
-        <div className="space-y-4">
-          {sheets.map((sheet, index) => (
-            <div key={sheet.id} className="space-y-2">
-              <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest px-1">Treino {index + 1}</label>
-              <input 
-                type="text" 
-                value={sheet.name}
-                placeholder={`Ex: Treino ${String.fromCharCode(65 + index)}`}
-                onChange={(e) => {
-                  const newSheets = [...sheets];
-                  newSheets[index].name = e.target.value;
-                  setSheets(newSheets);
-                }}
-                className="w-full bg-dark-card border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors"
+            <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
+              <img
+                src={ALL_SPORTS.find(s => s.id === selectedSport)?.icon ?? iconMusculacao}
+                alt=""
+                className="w-12 h-12 brightness-0 invert"
               />
             </div>
-          ))}
+          </div>
+          <button
+            onClick={() => setStep(category === 'basic' ? 'protocol-info' : 'cycle-list')}
+            className="absolute top-4 left-4 p-2 bg-black/20 rounded-full text-white/70 hover:text-white"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/5 pointer-events-none" />
+          <div className="absolute top-4 right-12 w-12 h-12 rounded-full bg-white/5 pointer-events-none" />
         </div>
 
-        <button 
-          onClick={handleSheetNamesNext}
-          className="w-full py-4 red-gradient rounded-2xl text-black font-bold shadow-lg shadow-brand-red/20 active:scale-95 transition-transform"
-        >
-          Avançar para Exercícios
-        </button>
+        <Card className="space-y-4 p-6">
+          {/* Info icon aligned right */}
+          <div className="flex justify-end">
+            <button
+              onClick={() => setShowFichasInfo(true)}
+              className="text-white/30 hover:text-white/60 transition-colors"
+              aria-label="O que é uma ficha?"
+            >
+              <Info size={14} />
+            </button>
+          </div>
+
+          {/* Sheet cards */}
+          <div className="space-y-3">
+            {sheets.map((sheet, index) => (
+              <div key={sheet.id} className="flex items-center gap-3">
+                <input
+                  type="text"
+                  value={sheet.name}
+                  placeholder={`Ficha ${String.fromCharCode(65 + index)}`}
+                  onChange={(e) => {
+                    setSheets(prev => {
+                      const updated = [...prev];
+                      updated[index] = { ...updated[index], name: e.target.value };
+                      return updated;
+                    });
+                  }}
+                  className="flex-1 bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+                />
+                <button
+                  onClick={() => removeSheet(sheet.id)}
+                  disabled={sheets.length === 1}
+                  aria-label={`Remover Ficha ${index + 1}`}
+                  className={cn(
+                    'p-1 rounded-lg transition-colors flex-shrink-0',
+                    sheets.length === 1
+                      ? 'text-white/10 cursor-not-allowed'
+                      : 'text-red-400/50 hover:text-red-400'
+                  )}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+
+            {/* Add sheet button */}
+            <button
+              onClick={addSheet}
+              className="w-full py-3 bg-white/5 border border-dashed border-white/10 rounded-2xl text-white/40 font-bold text-xs flex items-center justify-center gap-2 hover:border-white/20 hover:text-white/60 transition-all"
+            >
+              <Plus size={14} /> Adicionar ficha
+            </button>
+          </div>
+
+          <button
+            onClick={handleNumSheetsNext}
+            disabled={!allSheetsFilled}
+            className={cn(
+              'w-full py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all',
+              allSheetsFilled
+                ? 'text-white'
+                : 'bg-white/10 text-white/20 cursor-not-allowed'
+            )}
+            style={allSheetsFilled ? { backgroundColor: sportColor, boxShadow: `0 8px 24px ${sportColor}40` } : undefined}
+          >
+            Avançar para Exercícios
+          </button>
+        </Card>
       </div>
     );
   }

@@ -507,6 +507,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           userProfile={userProfile}
           studentEmail={selectedStudentForWorkouts?.email}
           initialSport={activeSport}
+          existingTemplates={selectedStudentForWorkouts ? studentTemplates : filteredTemplates}
           onSave={async (t: WorkoutTemplate) => {
             await createTemplate(t);
             if (selectedStudentForWorkouts) api.getStudentTemplates(selectedStudentForWorkouts.email).then(setStudentTemplates);
@@ -521,6 +522,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           userProfile={userProfile}
           studentEmail={selectedStudentForWorkouts?.email || editingTemplate.userId}
           initialTemplate={editingTemplate}
+          existingTemplates={selectedStudentForWorkouts ? studentTemplates : filteredTemplates}
           onSave={async (t: WorkoutTemplate) => {
             await updateTemplate(t);
             setEditingTemplate(null);
