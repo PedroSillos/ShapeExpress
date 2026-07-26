@@ -1088,16 +1088,16 @@ export function CreateWorkoutView({
           background: `linear-gradient(135deg, color-mix(in srgb, ${sportColor} 80%, #000) 0%, ${sportColor} 100%)`,
         }}
       >
-        <div className="px-6 pt-6 pb-6 flex items-center justify-between">
+        <div className="px-6 pt-10 pb-8 flex items-end justify-between">
           <div className="space-y-1 flex-1 pr-4">
-            <h1 className="text-3xl font-black text-white leading-tight">Selecionar Exercícios</h1>
+            <h1 className="text-2xl font-black text-white leading-tight">Selecionar Exercícios</h1>
             <p className="text-white/70 text-sm font-semibold">{protocolName}</p>
           </div>
-          <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center flex-shrink-0">
             <img
               src={ALL_SPORTS.find(s => s.id === selectedSport)?.icon ?? iconMusculacao}
               alt=""
-              className="w-8 h-8 brightness-0 invert"
+              className="w-12 h-12 brightness-0 invert"
             />
           </div>
         </div>
