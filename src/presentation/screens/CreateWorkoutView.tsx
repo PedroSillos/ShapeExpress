@@ -1080,10 +1080,10 @@ export function CreateWorkoutView({
   const sportColor = ALL_SPORTS.find(s => s.id === selectedSport)?.bg ?? '#dc2626';
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Header — matches num-sheets step exactly */}
+    <div className="fixed inset-0 z-40 bg-dark-surface flex flex-col">
+      {/* Header — fixed at top */}
       <div
-        className="relative overflow-hidden -mx-6 mb-6"
+        className="relative overflow-hidden flex-shrink-0"
         style={{
           background: `linear-gradient(135deg, color-mix(in srgb, ${sportColor} 80%, #000) 0%, ${sportColor} 100%)`,
         }}
@@ -1111,29 +1111,29 @@ export function CreateWorkoutView({
         <div className="absolute top-4 right-12 w-12 h-12 rounded-full bg-white/5 pointer-events-none" />
       </div>
 
-      {/* Content */}
-      <div className="space-y-4">
+      {/* Scrollable middle — tabs + search + filters + exercise list */}
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
         {/* Sheet Tabs */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-          {sheets.map((sheet, index) => (
-            <button
-              key={sheet.id}
-              onClick={() => setActiveSheetIndex(index)}
-              className={cn(
-                "px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap transition-all",
-                activeSheetIndex === index
-                  ? "text-white shadow-lg"
-                  : "bg-white/5 text-white/40"
-              )}
-              style={
-                activeSheetIndex === index
-                  ? { backgroundColor: sportColor, boxShadow: `0 4px 16px ${sportColor}40` }
-                  : undefined
-              }
-            >
-              {sheet.name} ({(sheet.exerciseIds?.length || sheet.exercises?.length || 0)})
-            </button>
-          ))}
+          {sheets.map((sheet, index) => {
+            const isActive = activeSheetIndex === index;
+            const isLocked = index > 0 && sheets.slice(0, index).some(s => (s.exerciseIds?.length || 0) === 0);
+            return (
+              <button
+                key={sheet.id}
+                onClick={() => { if (!isLocked) setActiveSheetIndex(index); }}
+                disabled={isLocked}
+                className={cn(
+                  "px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap transition-all",
+                  isActive ? "text-white shadow-lg" : isLocked ? "bg-white/5 text-white/20 cursor-not-allowed" : "bg-white/5 text-white/40"
+                )}
+                style={isActive ? { backgroundColor: sportColor, boxShadow: `0 4px 16px ${sportColor}40` } : undefined}
+              >
+                {sheet.name} ({(sheet.exerciseIds?.length || sheet.exercises?.length || 0)})
+                {isLocked && <span className="ml-1 opacity-50">🔒</span>}
+              </button>
+            );
+          })}
         </div>
 
         {/* Search + filters */}
@@ -1154,13 +1154,18 @@ export function CreateWorkoutView({
               className={cn(
                 "p-3 rounded-2xl border transition-all flex items-center justify-center gap-2",
                 showFilters || selectedMuscleGroup !== 'Todos' || selectedEquipment !== 'Todos' || selectedCategory !== 'Todos'
-                  ? "bg-brand-red/10 border-brand-red/30 text-brand-red"
+                  ? "border-transparent"
                   : "bg-dark-card border-dark-border text-white/40"
               )}
+              style={
+                showFilters || selectedMuscleGroup !== 'Todos' || selectedEquipment !== 'Todos' || selectedCategory !== 'Todos'
+                  ? { backgroundColor: `${sportColor}1a`, borderColor: `${sportColor}4d`, color: sportColor }
+                  : undefined
+              }
             >
               <SlidersHorizontal size={20} />
               {(selectedMuscleGroup !== 'Todos' || selectedEquipment !== 'Todos' || selectedCategory !== 'Todos') && !showFilters && (
-                <span className="w-2 h-2 bg-brand-red rounded-full" />
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: sportColor }} />
               )}
             </button>
           </div>
@@ -1170,7 +1175,8 @@ export function CreateWorkoutView({
               {selectedCategory !== 'Todos' && (
                 <button
                   onClick={() => setSelectedCategory('Todos')}
-                  className="px-3 py-1 bg-brand-red/10 border border-brand-red/20 rounded-full text-[10px] font-bold text-brand-red flex items-center gap-1"
+                  className="px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1"
+                  style={{ backgroundColor: `${sportColor}1a`, border: `1px solid ${sportColor}33`, color: sportColor }}
                 >
                   {selectedCategory} <X size={10} />
                 </button>
@@ -1178,7 +1184,8 @@ export function CreateWorkoutView({
               {selectedEquipment !== 'Todos' && (
                 <button
                   onClick={() => setSelectedEquipment('Todos')}
-                  className="px-3 py-1 bg-brand-red/10 border border-brand-red/20 rounded-full text-[10px] font-bold text-brand-red flex items-center gap-1"
+                  className="px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1"
+                  style={{ backgroundColor: `${sportColor}1a`, border: `1px solid ${sportColor}33`, color: sportColor }}
                 >
                   {selectedEquipment} <X size={10} />
                 </button>
@@ -1186,7 +1193,8 @@ export function CreateWorkoutView({
               {selectedMuscleGroup !== 'Todos' && (
                 <button
                   onClick={() => { setSelectedMuscleGroup('Todos'); setSelectedMuscleSubgroup('Todos'); }}
-                  className="px-3 py-1 bg-brand-red/10 border border-brand-red/20 rounded-full text-[10px] font-bold text-brand-red flex items-center gap-1"
+                  className="px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1"
+                  style={{ backgroundColor: `${sportColor}1a`, border: `1px solid ${sportColor}33`, color: sportColor }}
                 >
                   {selectedMuscleGroup} <X size={10} />
                 </button>
@@ -1194,7 +1202,8 @@ export function CreateWorkoutView({
               {selectedMuscleSubgroup !== 'Todos' && (
                 <button
                   onClick={() => setSelectedMuscleSubgroup('Todos')}
-                  className="px-3 py-1 bg-brand-red/10 border border-brand-red/20 rounded-full text-[10px] font-bold text-brand-red flex items-center gap-1"
+                  className="px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1"
+                  style={{ backgroundColor: `${sportColor}1a`, border: `1px solid ${sportColor}33`, color: sportColor }}
                 >
                   {selectedMuscleSubgroup} <X size={10} />
                 </button>
@@ -1215,12 +1224,12 @@ export function CreateWorkoutView({
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat as any)}
-                      className={cn(
-                        "px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border",
+                      className="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border"
+                      style={
                         selectedCategory === cat
-                          ? "bg-brand-red border-brand-red text-white"
-                          : "bg-white/5 border-white/10 text-white/40 hover:border-white/20"
-                      )}
+                          ? { backgroundColor: sportColor, borderColor: sportColor, color: '#fff' }
+                          : undefined
+                      }
                     >
                       {cat}
                     </button>
@@ -1232,12 +1241,12 @@ export function CreateWorkoutView({
                     <button
                       key={eq}
                       onClick={() => setSelectedEquipment(eq as any)}
-                      className={cn(
-                        "px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border",
+                      className="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border"
+                      style={
                         selectedEquipment === eq
-                          ? "bg-brand-red border-brand-red text-white"
-                          : "bg-white/5 border-white/10 text-white/40 hover:border-white/20"
-                      )}
+                          ? { backgroundColor: sportColor, borderColor: sportColor, color: '#fff' }
+                          : undefined
+                      }
                     >
                       {eq}
                     </button>
@@ -1249,12 +1258,12 @@ export function CreateWorkoutView({
                     <button
                       key={group}
                       onClick={() => { setSelectedMuscleGroup(group as any); setSelectedMuscleSubgroup('Todos'); }}
-                      className={cn(
-                        "px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border",
+                      className="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border"
+                      style={
                         selectedMuscleGroup === group
-                          ? "bg-brand-red border-brand-red text-white"
-                          : "bg-white/5 border-white/10 text-white/40 hover:border-white/20"
-                      )}
+                          ? { backgroundColor: sportColor, borderColor: sportColor, color: '#fff' }
+                          : undefined
+                      }
                     >
                       {group}
                     </button>
@@ -1267,12 +1276,12 @@ export function CreateWorkoutView({
                       <button
                         key={sub}
                         onClick={() => setSelectedMuscleSubgroup(sub as any)}
-                        className={cn(
-                          "px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border",
+                        className="px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border"
+                        style={
                           selectedMuscleSubgroup === sub
-                            ? "bg-brand-red border-brand-red text-white"
-                            : "bg-white/5 border-white/10 text-white/40 hover:border-white/20"
-                        )}
+                            ? { backgroundColor: sportColor, borderColor: sportColor, color: '#fff' }
+                            : undefined
+                        }
                       >
                         {sub}
                       </button>
@@ -1284,9 +1293,15 @@ export function CreateWorkoutView({
           </AnimatePresence>
         </div>
 
-        {/* Exercise list — scrollable container */}
-        <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1 custom-scrollbar">
-          {filteredExercises.map(ex => {
+        {/* Exercise list — selected first */}
+        <div className="space-y-2 pr-1 custom-scrollbar">
+          {[...filteredExercises]
+            .sort((a, b) => {
+              const aSelected = activeSheet.exerciseIds.includes(a.id) ? 0 : 1;
+              const bSelected = activeSheet.exerciseIds.includes(b.id) ? 0 : 1;
+              return aSelected - bSelected;
+            })
+            .map(ex => {
             const isSelected = activeSheet.exerciseIds.includes(ex.id);
             return (
               <div
@@ -1294,8 +1309,9 @@ export function CreateWorkoutView({
                 onClick={() => toggleExercise(ex.id)}
                 className={cn(
                   "flex justify-between items-center p-4 rounded-2xl border cursor-pointer transition-all",
-                  isSelected ? "bg-brand-red/5 border-brand-red/30" : "bg-dark-card border-dark-border hover:border-white/10"
+                  isSelected ? "bg-dark-card border-transparent" : "bg-dark-card border-dark-border hover:border-white/10"
                 )}
+                style={isSelected ? { borderColor: `${sportColor}4d`, backgroundColor: `${sportColor}0d` } : undefined}
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -1303,7 +1319,8 @@ export function CreateWorkoutView({
                     {ex.youtubeUrl && (
                       <button
                         onClick={(e) => { e.stopPropagation(); setSelectedExerciseForVideo(ex); }}
-                        className="p-1 bg-red-500/10 text-red-500 rounded-full hover:bg-red-500/20 transition-colors"
+                        className="p-1 rounded-full transition-colors"
+                        style={{ backgroundColor: `${sportColor}1a`, color: sportColor }}
                       >
                         <Play size={10} fill="currentColor" />
                       </button>
@@ -1314,7 +1331,7 @@ export function CreateWorkoutView({
                     {ex.muscleSubgroup && (
                       <>
                         <span className="text-[10px] text-white/20">•</span>
-                        <p className="text-[10px] text-brand-red/80 font-bold uppercase">{ex.muscleSubgroup}</p>
+                        <p className="text-[10px] font-bold uppercase" style={{ color: `${sportColor}cc` }}>{ex.muscleSubgroup}</p>
                       </>
                     )}
                     <span className="text-[10px] text-white/20">•</span>
@@ -1323,10 +1340,10 @@ export function CreateWorkoutView({
                     <p className="text-[10px] text-white/40 font-bold uppercase">{ex.equipment}</p>
                   </div>
                 </div>
-                <div className={cn(
-                  "w-6 h-6 rounded-full border flex items-center justify-center transition-colors flex-shrink-0 ml-3",
-                  isSelected ? "bg-brand-red border-brand-red" : "border-white/20"
-                )}>
+                <div
+                  className="w-6 h-6 rounded-full border flex items-center justify-center transition-colors flex-shrink-0 ml-3"
+                  style={isSelected ? { backgroundColor: sportColor, borderColor: sportColor } : undefined}
+                >
                   {isSelected && <Check size={14} strokeWidth={4} className="text-white" />}
                 </div>
               </div>
@@ -1335,31 +1352,33 @@ export function CreateWorkoutView({
         </div>
       </div>
 
-      {/* Action button — in flow, below list */}
-      <button
-        onClick={() => {
-          if (activeSheetIndex < sheets.length - 1) {
-            setActiveSheetIndex(activeSheetIndex + 1);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          } else {
-            handleExerciseSelectionNext();
+      {/* Footer — fixed at bottom, always visible */}
+      <div className="flex-shrink-0 px-6 pt-3 pb-8 bg-dark-surface border-t border-dark-border">
+        <button
+          onClick={() => {
+            if (activeSheetIndex < sheets.length - 1) {
+              setActiveSheetIndex(activeSheetIndex + 1);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+              handleExerciseSelectionNext();
+            }
+          }}
+          disabled={activeSheet.exerciseIds.length === 0}
+          className={cn(
+            "w-full py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all",
+            activeSheet.exerciseIds.length === 0
+              ? "bg-white/10 text-white/20 cursor-not-allowed"
+              : "text-white"
+          )}
+          style={
+            activeSheet.exerciseIds.length > 0
+              ? { backgroundColor: sportColor, boxShadow: `0 8px 24px ${sportColor}40` }
+              : undefined
           }
-        }}
-        disabled={activeSheet.exerciseIds.length === 0}
-        className={cn(
-          "w-full py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all",
-          activeSheet.exerciseIds.length === 0
-            ? "bg-white/10 text-white/20 cursor-not-allowed"
-            : "text-white"
-        )}
-        style={
-          activeSheet.exerciseIds.length > 0
-            ? { backgroundColor: sportColor, boxShadow: `0 8px 24px ${sportColor}40` }
-            : undefined
-        }
-      >
-        {activeSheetIndex < sheets.length - 1 ? 'Próximo Treino' : 'Configurar Exercícios'}
-      </button>
+        >
+          {activeSheetIndex < sheets.length - 1 ? 'Próxima ficha' : 'Avançar'}
+        </button>
+      </div>
 
       {/* Video Modal */}
       <AnimatePresence>
