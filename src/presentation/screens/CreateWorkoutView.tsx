@@ -1077,61 +1077,90 @@ export function CreateWorkoutView({
     );
   }
 
+  const sportColor = ALL_SPORTS.find(s => s.id === selectedSport)?.bg ?? '#dc2626';
+
   return (
     <div className="space-y-6 pb-12">
-      <div className="flex items-center gap-4">
-        <button 
-          onClick={() => setStep('num-sheets')} 
-          className="p-2 bg-white/5 rounded-full"
+      {/* Header — matches num-sheets step exactly */}
+      <div
+        className="relative overflow-hidden -mx-6 mb-6"
+        style={{
+          background: `linear-gradient(135deg, color-mix(in srgb, ${sportColor} 80%, #000) 0%, ${sportColor} 100%)`,
+        }}
+      >
+        <div className="px-6 pt-6 pb-6 flex items-center justify-between">
+          <div className="space-y-1 flex-1 pr-4">
+            <h1 className="text-3xl font-black text-white leading-tight">Selecionar Exercícios</h1>
+            <p className="text-white/70 text-sm font-semibold">{protocolName}</p>
+          </div>
+          <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center flex-shrink-0">
+            <img
+              src={ALL_SPORTS.find(s => s.id === selectedSport)?.icon ?? iconMusculacao}
+              alt=""
+              className="w-8 h-8 brightness-0 invert"
+            />
+          </div>
+        </div>
+        <button
+          onClick={() => setStep('num-sheets')}
+          className="absolute top-4 left-4 p-2 bg-black/20 rounded-full text-white/70 hover:text-white"
         >
           <ChevronLeft size={20} />
         </button>
-        <h2 className="text-xl font-bold">Selecionar Exercícios</h2>
+        <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute top-4 right-12 w-12 h-12 rounded-full bg-white/5 pointer-events-none" />
       </div>
 
-      {/* Sheet Tabs */}
-      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-        {sheets.map((sheet, index) => (
-          <button
-            key={sheet.id}
-            onClick={() => setActiveSheetIndex(index)}
-            className={cn(
-              "px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border",
-              activeSheetIndex === index 
-                ? "bg-brand-red border-brand-red text-black shadow-lg shadow-brand-red/20" 
-                : "bg-white/5 border-white/10 text-white/40"
-            )}
-          >
-            {sheet.name} ({(sheet.exerciseIds?.length || sheet.exercises?.length || 0)})
-          </button>
-        ))}
-      </div>
-
+      {/* Content */}
       <div className="space-y-4">
+        {/* Sheet Tabs */}
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+          {sheets.map((sheet, index) => (
+            <button
+              key={sheet.id}
+              onClick={() => setActiveSheetIndex(index)}
+              className={cn(
+                "px-6 py-3 rounded-2xl text-xs font-bold whitespace-nowrap transition-all",
+                activeSheetIndex === index
+                  ? "text-white shadow-lg"
+                  : "bg-white/5 text-white/40"
+              )}
+              style={
+                activeSheetIndex === index
+                  ? { backgroundColor: sportColor, boxShadow: `0 4px 16px ${sportColor}40` }
+                  : undefined
+              }
+            >
+              {sheet.name} ({(sheet.exerciseIds?.length || sheet.exercises?.length || 0)})
+            </button>
+          ))}
+        </div>
+
+        {/* Search + filters */}
         <div className="space-y-3">
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Buscar exercícios..."
                 className="w-full bg-dark-card border border-dark-border rounded-2xl pl-12 pr-4 py-3 focus:outline-none focus:border-gray-400 transition-colors text-sm"
               />
             </div>
-            <button 
+            <button
               onClick={() => setShowFilters(!showFilters)}
               className={cn(
                 "p-3 rounded-2xl border transition-all flex items-center justify-center gap-2",
                 showFilters || selectedMuscleGroup !== 'Todos' || selectedEquipment !== 'Todos' || selectedCategory !== 'Todos'
-                  ? "bg-brand-red/10 border-brand-red/30 text-brand-red" 
+                  ? "bg-brand-red/10 border-brand-red/30 text-brand-red"
                   : "bg-dark-card border-dark-border text-white/40"
               )}
             >
               <SlidersHorizontal size={20} />
               {(selectedMuscleGroup !== 'Todos' || selectedEquipment !== 'Todos' || selectedCategory !== 'Todos') && !showFilters && (
-                <span className="w-2 h-2 bg-brand-red rounded-full"></span>
+                <span className="w-2 h-2 bg-brand-red rounded-full" />
               )}
             </button>
           </div>
@@ -1139,7 +1168,7 @@ export function CreateWorkoutView({
           {!showFilters && (selectedMuscleGroup !== 'Todos' || selectedEquipment !== 'Todos' || selectedCategory !== 'Todos') && (
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
               {selectedCategory !== 'Todos' && (
-                <button 
+                <button
                   onClick={() => setSelectedCategory('Todos')}
                   className="px-3 py-1 bg-brand-red/10 border border-brand-red/20 rounded-full text-[10px] font-bold text-brand-red flex items-center gap-1"
                 >
@@ -1147,7 +1176,7 @@ export function CreateWorkoutView({
                 </button>
               )}
               {selectedEquipment !== 'Todos' && (
-                <button 
+                <button
                   onClick={() => setSelectedEquipment('Todos')}
                   className="px-3 py-1 bg-brand-red/10 border border-brand-red/20 rounded-full text-[10px] font-bold text-brand-red flex items-center gap-1"
                 >
@@ -1155,18 +1184,15 @@ export function CreateWorkoutView({
                 </button>
               )}
               {selectedMuscleGroup !== 'Todos' && (
-                <button 
-                  onClick={() => {
-                    setSelectedMuscleGroup('Todos');
-                    setSelectedMuscleSubgroup('Todos');
-                  }}
+                <button
+                  onClick={() => { setSelectedMuscleGroup('Todos'); setSelectedMuscleSubgroup('Todos'); }}
                   className="px-3 py-1 bg-brand-red/10 border border-brand-red/20 rounded-full text-[10px] font-bold text-brand-red flex items-center gap-1"
                 >
                   {selectedMuscleGroup} <X size={10} />
                 </button>
               )}
               {selectedMuscleSubgroup !== 'Todos' && (
-                <button 
+                <button
                   onClick={() => setSelectedMuscleSubgroup('Todos')}
                   className="px-3 py-1 bg-brand-red/10 border border-brand-red/20 rounded-full text-[10px] font-bold text-brand-red flex items-center gap-1"
                 >
@@ -1178,7 +1204,7 @@ export function CreateWorkoutView({
 
           <AnimatePresence>
             {showFilters && (
-              <motion.div 
+              <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
@@ -1191,8 +1217,8 @@ export function CreateWorkoutView({
                       onClick={() => setSelectedCategory(cat as any)}
                       className={cn(
                         "px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border",
-                        selectedCategory === cat 
-                          ? "bg-brand-red border-brand-red text-black" 
+                        selectedCategory === cat
+                          ? "bg-brand-red border-brand-red text-white"
                           : "bg-white/5 border-white/10 text-white/40 hover:border-white/20"
                       )}
                     >
@@ -1208,8 +1234,8 @@ export function CreateWorkoutView({
                       onClick={() => setSelectedEquipment(eq as any)}
                       className={cn(
                         "px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border",
-                        selectedEquipment === eq 
-                          ? "bg-brand-red border-brand-red text-black" 
+                        selectedEquipment === eq
+                          ? "bg-brand-red border-brand-red text-white"
                           : "bg-white/5 border-white/10 text-white/40 hover:border-white/20"
                       )}
                     >
@@ -1222,14 +1248,11 @@ export function CreateWorkoutView({
                   {['Todos', 'Peito', 'Costas', 'Pernas', 'Ombros', 'Braços', 'Core', 'Full Body'].map((group) => (
                     <button
                       key={group}
-                      onClick={() => {
-                        setSelectedMuscleGroup(group as any);
-                        setSelectedMuscleSubgroup('Todos');
-                      }}
+                      onClick={() => { setSelectedMuscleGroup(group as any); setSelectedMuscleSubgroup('Todos'); }}
                       className={cn(
                         "px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border",
-                        selectedMuscleGroup === group 
-                          ? "bg-brand-red border-brand-red text-black" 
+                        selectedMuscleGroup === group
+                          ? "bg-brand-red border-brand-red text-white"
                           : "bg-white/5 border-white/10 text-white/40 hover:border-white/20"
                       )}
                     >
@@ -1246,8 +1269,8 @@ export function CreateWorkoutView({
                         onClick={() => setSelectedMuscleSubgroup(sub as any)}
                         className={cn(
                           "px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border",
-                          selectedMuscleSubgroup === sub 
-                            ? "bg-brand-red border-brand-red text-black" 
+                          selectedMuscleSubgroup === sub
+                            ? "bg-brand-red border-brand-red text-white"
                             : "bg-white/5 border-white/10 text-white/40 hover:border-white/20"
                         )}
                       >
@@ -1261,11 +1284,12 @@ export function CreateWorkoutView({
           </AnimatePresence>
         </div>
 
-        <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
+        {/* Exercise list — scrollable container */}
+        <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1 custom-scrollbar">
           {filteredExercises.map(ex => {
             const isSelected = activeSheet.exerciseIds.includes(ex.id);
             return (
-              <div 
+              <div
                 key={ex.id}
                 onClick={() => toggleExercise(ex.id)}
                 className={cn(
@@ -1277,23 +1301,20 @@ export function CreateWorkoutView({
                   <div className="flex items-center gap-2">
                     <h4 className="font-bold text-sm">{ex.name}</h4>
                     {ex.youtubeUrl && (
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedExerciseForVideo(ex);
-                        }}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setSelectedExerciseForVideo(ex); }}
                         className="p-1 bg-red-500/10 text-red-500 rounded-full hover:bg-red-500/20 transition-colors"
                       >
                         <Play size={10} fill="currentColor" />
                       </button>
                     )}
                   </div>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
                     <p className="text-[10px] text-white/40 font-bold uppercase">{ex.muscleGroup}</p>
                     {ex.muscleSubgroup && (
                       <>
                         <span className="text-[10px] text-white/20">•</span>
-                        <p className="text-[10px] text-brand-red/60 font-bold uppercase">{ex.muscleSubgroup}</p>
+                        <p className="text-[10px] text-brand-red/80 font-bold uppercase">{ex.muscleSubgroup}</p>
                       </>
                     )}
                     <span className="text-[10px] text-white/20">•</span>
@@ -1303,10 +1324,10 @@ export function CreateWorkoutView({
                   </div>
                 </div>
                 <div className={cn(
-                  "w-6 h-6 rounded-full border flex items-center justify-center transition-colors",
-                  isSelected ? "bg-brand-red border-brand-red text-black" : "border-white/10"
+                  "w-6 h-6 rounded-full border flex items-center justify-center transition-colors flex-shrink-0 ml-3",
+                  isSelected ? "bg-brand-red border-brand-red" : "border-white/20"
                 )}>
-                  {isSelected && <Check size={14} strokeWidth={4} />}
+                  {isSelected && <Check size={14} strokeWidth={4} className="text-white" />}
                 </div>
               </div>
             );
@@ -1314,27 +1335,31 @@ export function CreateWorkoutView({
         </div>
       </div>
 
-      <div className="pt-4">
-        <button 
-          onClick={() => {
-            if (activeSheetIndex < sheets.length - 1) {
-              setActiveSheetIndex(activeSheetIndex + 1);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            } else {
-              handleExerciseSelectionNext();
-            }
-          }}
-          disabled={activeSheet.exerciseIds.length === 0}
-          className={cn(
-            "w-full py-4 rounded-2xl text-black font-bold shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2",
-            activeSheet.exerciseIds.length === 0 
-              ? "bg-white/10 text-white/20 cursor-not-allowed" 
-              : "red-gradient shadow-brand-red/20"
-          )}
-        >
-          {activeSheetIndex < sheets.length - 1 ? 'Próximo Treino' : 'Configurar Exercícios'}
-        </button>
-      </div>
+      {/* Action button — in flow, below list */}
+      <button
+        onClick={() => {
+          if (activeSheetIndex < sheets.length - 1) {
+            setActiveSheetIndex(activeSheetIndex + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            handleExerciseSelectionNext();
+          }
+        }}
+        disabled={activeSheet.exerciseIds.length === 0}
+        className={cn(
+          "w-full py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all",
+          activeSheet.exerciseIds.length === 0
+            ? "bg-white/10 text-white/20 cursor-not-allowed"
+            : "text-white"
+        )}
+        style={
+          activeSheet.exerciseIds.length > 0
+            ? { backgroundColor: sportColor, boxShadow: `0 8px 24px ${sportColor}40` }
+            : undefined
+        }
+      >
+        {activeSheetIndex < sheets.length - 1 ? 'Próximo Treino' : 'Configurar Exercícios'}
+      </button>
 
       {/* Video Modal */}
       <AnimatePresence>
