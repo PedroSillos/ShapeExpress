@@ -1010,33 +1010,36 @@ export function CreateWorkoutView({
           {/* Sheet cards */}
           <div className="space-y-3">
             {sheets.map((sheet, index) => (
-              <div key={sheet.id} className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={sheet.name}
-                  placeholder={`Ficha ${String.fromCharCode(65 + index)}`}
-                  onChange={(e) => {
-                    setSheets(prev => {
-                      const updated = [...prev];
-                      updated[index] = { ...updated[index], name: e.target.value };
-                      return updated;
-                    });
-                  }}
-                  className="flex-1 bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors text-sm"
-                />
-                <button
-                  onClick={() => removeSheet(sheet.id)}
-                  disabled={sheets.length === 1}
-                  aria-label={`Remover Ficha ${index + 1}`}
-                  className={cn(
-                    'p-1 rounded-lg transition-colors flex-shrink-0',
-                    sheets.length === 1
-                      ? 'text-white/10 cursor-not-allowed'
-                      : 'text-white/40 hover:text-white/70'
-                  )}
-                >
-                  <Trash2 size={14} />
-                </button>
+              <div key={sheet.id} className="space-y-1.5">
+                <p className={LABEL_CLASS}>Nome da ficha</p>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={sheet.name}
+                    placeholder={`Ficha ${String.fromCharCode(65 + index)}`}
+                    onChange={(e) => {
+                      setSheets(prev => {
+                        const updated = [...prev];
+                        updated[index] = { ...updated[index], name: e.target.value };
+                        return updated;
+                      });
+                    }}
+                    className="flex-1 bg-dark-surface border border-dark-border rounded-2xl p-4 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+                  />
+                  <button
+                    onClick={() => removeSheet(sheet.id)}
+                    disabled={sheets.length === 1}
+                    aria-label={`Remover Ficha ${index + 1}`}
+                    className={cn(
+                      'p-1 rounded-lg transition-colors flex-shrink-0',
+                      sheets.length === 1
+                        ? 'text-white/10 cursor-not-allowed'
+                        : 'text-white/40 hover:text-white/70'
+                    )}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
             ))}
 
