@@ -72,14 +72,21 @@ export const useWorkoutState = (
   };
 
   const createTemplate = async (t: WorkoutTemplate, silent = false) => {
+    // Always stamp userId so Firestore queries and Security Rules work correctly.
+    // If the template already has a userId (e.g. trainer creating for a student), keep it.
+    const templateToSave: WorkoutTemplate = {
+      ...t,
+      userId: t.userId ?? currentUser?.email ?? 'guest',
+    };
+
     if (!currentUser) {
-      setTemplates((prev) => { const next = [...prev, t]; saveLocalTemplates(next); return next; });
+      setTemplates((prev) => { const next = [...prev, templateToSave]; saveLocalTemplates(next); return next; });
       if (!silent) toast.success("Treino criado!");
       return;
     }
     try {
-      await setDoc(doc(db, "templates", t.id), sanitize(t));
-      setTemplates((prev) => [...prev, t]);
+      await setDoc(doc(db, "templates", templateToSave.id), sanitize(templateToSave));
+      setTemplates((prev) => [...prev, templateToSave]);
       if (!silent) toast.success("Treino criado!");
     } catch (e: any) {
       toast.error("Erro ao criar treino: " + e.message);
@@ -87,14 +94,19 @@ export const useWorkoutState = (
   };
 
   const updateTemplate = async (t: WorkoutTemplate) => {
+    const templateToSave: WorkoutTemplate = {
+      ...t,
+      userId: t.userId ?? currentUser?.email ?? 'guest',
+    };
+
     if (!currentUser) {
-      setTemplates((prev) => { const next = prev.map((old) => (old.id === t.id ? t : old)); saveLocalTemplates(next); return next; });
+      setTemplates((prev) => { const next = prev.map((old) => (old.id === t.id ? templateToSave : old)); saveLocalTemplates(next); return next; });
       toast.success("Treino atualizado!");
       return;
     }
     try {
-      await setDoc(doc(db, "templates", t.id), sanitize(t));
-      setTemplates((prev) => prev.map((old) => (old.id === t.id ? t : old)));
+      await setDoc(doc(db, "templates", templateToSave.id), sanitize(templateToSave));
+      setTemplates((prev) => prev.map((old) => (old.id === t.id ? templateToSave : old)));
       toast.success("Treino atualizado!");
     } catch (e: any) {
       toast.error("Erro ao atualizar treino: " + e.message);

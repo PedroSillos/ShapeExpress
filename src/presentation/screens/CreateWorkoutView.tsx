@@ -1071,11 +1071,15 @@ export function CreateWorkoutView({
   }
 
   if (step === 'exercise-configuration') {
+    const sportColor = ALL_SPORTS.find(s => s.id === selectedSport)?.bg ?? '#dc2626';
     return (
       <ConfigureExercisesView 
         sheets={sheets}
         onSave={handleFinalSave}
         onBack={() => setStep('exercise-selection')}
+        sportColor={sportColor}
+        sportId={selectedSport}
+        protocolName={protocolName}
       />
     );
   }
