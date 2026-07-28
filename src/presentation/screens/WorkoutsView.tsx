@@ -6,12 +6,9 @@ import {
   Settings,
   Edit,
   Trash2,
-  Clock,
-  Flame,
   X,
   ChevronLeft,
   ChevronRight,
-  Play,
   ShoppingBag,
   Sparkles,
   Calendar as CalendarIcon,
@@ -29,13 +26,8 @@ import {
   UserCalorieProfile,
   BodyAssessment,
   UserProfile,
-  WorkoutSheet,
   fullName,
 } from '../../domain/entities';
-import {
-  estimateWorkoutDuration,
-  estimateWorkoutCalories,
-} from '../../domain/use-cases/workoutEstimation';
 import { Badge } from '../components/Badge';
 import { DeleteSessionModal } from '../components/AppModals';
 import { cn } from '../../utils/cn';
@@ -219,49 +211,10 @@ function TemplateCard({
     setIsRenaming(false);
   };
 
-  const getNextSheetInfo = () => {
-    let sheets: WorkoutSheet[] = [];
-    let cycleName = '';
-
-    if (template.category === 'multicycle' && template.cycles) {
-      const now = new Date();
-      const currentCycle = template.cycles.find((c) => {
-        const start = parseISO(c.startDate);
-        const end = parseISO(c.endDate);
-        return now >= start && now <= end;
-      });
-      if (currentCycle) {
-        sheets = currentCycle.sheets;
-        cycleName = currentCycle.name;
-      }
-    } else if (template.sheets) {
-      sheets = template.sheets;
-    }
-
-    if (sheets.length === 0) return null;
-    const workoutSessions = sessions.filter((s) => s.workoutId === template.id);
-    const nextIndex = workoutSessions.length % sheets.length;
-    return { sheet: sheets[nextIndex], index: nextIndex, cycleName };
-  };
-
-  const nextSheetInfo = getNextSheetInfo();
-
   const trainer =
     template.creatorEmail && template.creatorEmail !== mainUserProfile.email
       ? trainers.find((t) => t.email === template.creatorEmail)
       : null;
-
-  const completedCount = sessions.filter((s) => s.workoutId === template.id).length;
-
-  const handleStart = () => {
-    if (template.category === 'multicycle') {
-      if (nextSheetInfo) onStartWorkout(template, nextSheetInfo.index);
-    } else if (hasSheets && template.sheets!.length > 1) {
-      onSelectSheet(template);
-    } else {
-      onStartWorkout(template, 0);
-    }
-  };
 
   return (
     <motion.div
@@ -296,18 +249,7 @@ function TemplateCard({
               ) : (
                 <h3 className="text-base font-black text-white leading-snug">{template.name}</h3>
               )}
-              {!isRenaming && (
-                <Badge
-                  className={cn(
-                    'text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider',
-                    template.category === 'multicycle'
-                      ? 'bg-brand-red/20 text-brand-red border border-brand-red/30'
-                      : 'bg-white/8 text-white/40 border border-white/10'
-                  )}
-                >
-                  {template.category === 'multicycle' ? 'Multiciclo' : 'Básico'}
-                </Badge>
-              )}
+
             </div>
             {trainer && (
               <p className="text-[10px] text-brand-red font-bold uppercase tracking-wider">
@@ -373,60 +315,9 @@ function TemplateCard({
           </div>
         </div>
 
-        {/* Stats row — only shown when there's an active sheet with estimates */}
-        {nextSheetInfo && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/6 border border-white/8">
-              <Clock size={11} className="text-white/40" />
-              <span className="text-[10px] font-bold text-white/50">
-                {estimateWorkoutDuration(nextSheetInfo.sheet.exercises, userProfile, exerciseStats)} min
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/6 border border-white/8">
-              <Flame size={11} className="text-orange-400/70" />
-              <span className="text-[10px] font-bold text-orange-400/70">
-                {Math.round(
-                  estimateWorkoutCalories(
-                    nextSheetInfo.sheet.exercises,
-                    assessments.length > 0 ? assessments[0].weight : mainUserProfile?.initialWeight,
-                    userProfile,
-                    exerciseStats,
-                    calorieProfile
-                  )
-                )}{' '}
-                kcal
-              </span>
-            </div>
-          </div>
-        )}
 
-        {/* Next session pill (duolingo style) */}
-        {nextSheetInfo && (
-          <button
-            onClick={handleStart}
-            className="w-full flex items-center justify-between p-3.5 rounded-2xl active:scale-95 transition-all border"
-            style={{
-              background: 'linear-gradient(135deg, rgba(229,62,62,0.12) 0%, rgba(224,92,42,0.08) 100%)',
-              borderColor: 'rgba(229,62,62,0.25)',
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-brand-red/20 flex items-center justify-center shrink-0">
-                <img src={iconHalterofilismo} alt="" className="w-5 h-5 brightness-0 invert" />
-              </div>
-              <div className="text-left">
-                <p className="text-xs font-black text-white leading-tight">{nextSheetInfo.sheet.name}</p>
-                <p className="text-[10px] text-white/40 font-bold mt-0.5">
-                  {nextSheetInfo.sheet.exercises.length} exercícios
-                  {nextSheetInfo.cycleName ? ` · ${nextSheetInfo.cycleName}` : ''}
-                </p>
-              </div>
-            </div>
-            <div className="w-8 h-8 rounded-xl bg-brand-red flex items-center justify-center shrink-0 shadow-lg shadow-brand-red/40">
-              <Play size={14} className="text-white fill-white ml-0.5" />
-            </div>
-          </button>
-        )}
+
+
 
 
 
@@ -837,7 +728,11 @@ export function WorkoutsView({
         {/* Create workout button */}
         <button
           onClick={() => setShowCreateMenu(true)}
-          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-black text-sm text-white border border-brand-red/50 bg-brand-red/15 active:scale-95 transition-transform hover:bg-brand-red/25 hover:border-brand-red"
+          className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-black text-sm text-white active:scale-95 transition-transform"
+          style={{
+            background: `color-mix(in srgb, ${SPORT_COLORS[sport] ?? '#dc2626'} 15%, transparent)`,
+            border: `1px solid color-mix(in srgb, ${SPORT_COLORS[sport] ?? '#dc2626'} 50%, transparent)`,
+          }}
         >
           Adicionar treino
         </button>
