@@ -396,6 +396,9 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             const t = filteredTemplates.find(tmpl => tmpl.id === id);
             if (t) await updateTemplate({ ...t, name });
           }}
+          onUpdateTemplate={async (t: WorkoutTemplate) => {
+            await updateTemplate(t);
+          }}
           onGoToStore={() => switchTab('store')}
           onEditSession={(s: WorkoutSession) => setEditingSession(s)}
           onDeleteSession={deleteSession}

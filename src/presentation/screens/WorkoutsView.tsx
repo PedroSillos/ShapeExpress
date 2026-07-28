@@ -13,6 +13,9 @@ import {
   Sparkles,
   Calendar as CalendarIcon,
   Pen,
+  Check,
+  Search,
+  GripVertical,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, parseISO, startOfMonth, endOfMonth, startOfWeek, addDays, isSameMonth, addMonths, subMonths } from 'date-fns';
@@ -77,6 +80,7 @@ interface WorkoutsViewProps {
   onGenerateWithAI: (sport: string) => void;
   onDeleteWorkout: (id: string) => void;
   onRenameWorkout: (id: string, name: string) => void;
+  onUpdateTemplate?: (t: WorkoutTemplate) => void;
   onGoToStore: () => void;
   onEditSession: (s: WorkoutSession) => void;
   onDeleteSession: (id: string) => void;
@@ -169,6 +173,7 @@ interface TemplateCardProps {
   setOpenSettingsId: (id: string | null) => void;
   onDeleteWorkout: (id: string) => void;
   onRenameWorkout: (id: string, name: string) => void;
+  onUpdateTemplate?: (t: WorkoutTemplate) => void;
   onStartWorkout: (t: WorkoutTemplate, sheetIndex?: number) => void;
   onSelectSheet: (t: WorkoutTemplate) => void;
   onCreateAd?: (t: WorkoutTemplate) => void;
@@ -188,6 +193,7 @@ function TemplateCard({
   setOpenSettingsId,
   onDeleteWorkout,
   onRenameWorkout,
+  onUpdateTemplate,
   onStartWorkout,
   onSelectSheet,
   onCreateAd,
@@ -198,6 +204,110 @@ function TemplateCard({
   const [selectedCycleIdx, setSelectedCycleIdx] = useState(0);
   const [selectedSheetIdx, setSelectedSheetIdx] = useState(0);
   const renameInputRef = useRef<HTMLInputElement>(null);
+  // Touch-based drag-to-reorder state
+  const dragFromIdx = useRef<number>(-1);
+
+  // ── Inline edit state ──────────────────────────────────────────────────────
+  const [isEditing, setIsEditing] = useState(false);
+  // Deep clone of template used while editing — discarded on cancel
+  const [editDraft, setEditDraft] = useState<WorkoutTemplate>(template);
+  // Exercise search modal
+  const [showExSearch, setShowExSearch] = useState(false);
+  const [exSearchQuery, setExSearchQuery] = useState('');
+
+  // Keep draft in sync if template prop changes externally
+  useEffect(() => {
+    if (!isEditing) setEditDraft(template);
+  }, [template, isEditing]);
+
+  const startEditing = () => {
+    setEditDraft(JSON.parse(JSON.stringify(template)));
+    setOpenSettingsId(null);
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    if (!confirm('Descartar as alterações feitas no treino?')) return;
+    setIsEditing(false);
+    setEditDraft(template);
+  };
+
+  const commitEdit = () => {
+    if (!confirm('Salvar as alterações no treino?')) return;
+    onUpdateTemplate?.(editDraft);
+    setIsEditing(false);
+  };
+
+  // ── Helpers to mutate editDraft exercises ─────────────────────────────────
+  /** Returns the exercises array for the currently visible sheet/cycle in draft */
+  const getDraftExercises = (): WorkoutTemplateExercise[] => {
+    if (editDraft.category === 'multicycle' && editDraft.cycles?.length) {
+      const ci = Math.min(selectedCycleIdx, editDraft.cycles.length - 1);
+      const sheets = editDraft.cycles[ci].sheets ?? [];
+      const si = Math.min(selectedSheetIdx, Math.max(0, sheets.length - 1));
+      return sheets[si]?.exercises ?? [];
+    }
+    if (editDraft.sheets?.length) {
+      const si = Math.min(selectedSheetIdx, editDraft.sheets.length - 1);
+      return editDraft.sheets[si]?.exercises ?? [];
+    }
+    return editDraft.exercises ?? [];
+  };
+
+  /** Replaces the exercises array for the currently visible sheet/cycle in draft */
+  const setDraftExercises = (exs: WorkoutTemplateExercise[]) => {
+    setEditDraft(prev => {
+      const next = JSON.parse(JSON.stringify(prev)) as WorkoutTemplate;
+      if (next.category === 'multicycle' && next.cycles?.length) {
+        const ci = Math.min(selectedCycleIdx, next.cycles.length - 1);
+        const sheets = next.cycles[ci].sheets ?? [];
+        const si = Math.min(selectedSheetIdx, Math.max(0, sheets.length - 1));
+        if (sheets[si]) sheets[si].exercises = exs;
+      } else if (next.sheets?.length) {
+        const si = Math.min(selectedSheetIdx, next.sheets.length - 1);
+        if (next.sheets[si]) next.sheets[si].exercises = exs;
+      } else {
+        next.exercises = exs;
+      }
+      return next;
+    });
+  };
+
+  const updateDraftExField = (idx: number, field: 'numSets' | 'sets', value: string) => {
+    const exs = getDraftExercises().map((ex, i) => {
+      if (i !== idx) return ex;
+      if (field === 'numSets') return { ...ex, numSets: Math.max(1, parseInt(value) || 1) };
+      return { ...ex, sets: value };
+    });
+    setDraftExercises(exs);
+  };
+
+  const removeDraftEx = (idx: number) => {
+    setDraftExercises(getDraftExercises().filter((_, i) => i !== idx));
+  };
+
+  const reorderDraftEx = (fromIdx: number, toIdx: number) => {
+    if (fromIdx === toIdx) return;
+    const exs = [...getDraftExercises()];
+    const [moved] = exs.splice(fromIdx, 1);
+    exs.splice(toIdx, 0, moved);
+    setDraftExercises(exs);
+  };
+
+  const addDraftEx = (exerciseId: string) => {
+    const already = getDraftExercises().some(e => e.exerciseId === exerciseId);
+    if (already) return;
+    const newEx: WorkoutTemplateExercise = { exerciseId, sets: '8-10', numSets: 3, rest: '60s' };
+    setDraftExercises([...getDraftExercises(), newEx]);
+    setShowExSearch(false);
+    setExSearchQuery('');
+  };
+
+  const filteredExercises = useMemo(() => {
+    const q = exSearchQuery.trim().toLowerCase();
+    if (!q) return EXERCISES.slice(0, 40);
+    return EXERCISES.filter(e => e.name.toLowerCase().includes(q)).slice(0, 40);
+  }, [exSearchQuery]);
 
   const startRename = () => {
     setRenameValue(template.name);
@@ -314,6 +424,7 @@ function TemplateCard({
                       <Pen size={13} /> Renomear
                     </button>
                     <button
+                      onClick={startEditing}
                       className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold hover:bg-white/5 transition-colors border-t border-dark-border"
                     >
                       <Edit size={13} /> Editar
@@ -408,9 +519,91 @@ function TemplateCard({
                     transition={{ duration: 0.15 }}
                     className="space-y-1.5"
                   >
-                    {(activeSheet?.exercises ?? []).map((ex, idx) => {
+                    {(isEditing ? getDraftExercises() : (activeSheet?.exercises ?? [])).map((ex, idx) => {
                       const exercise = EXERCISES.find(e => e.id === ex.exerciseId);
                       if (!exercise) return null;
+                      if (isEditing) {
+                        return (
+                          <div
+                            key={ex.exerciseId + idx}
+                            data-drag-idx={idx}
+                            className="flex items-center gap-2 px-2 py-2.5 rounded-xl bg-white/6 border border-white/10 transition-opacity"
+                          >
+                            {/* Drag handle — pointer events work on both mouse and touch */}
+                            <span
+                              className="text-white/25 active:text-white/60 cursor-grab active:cursor-grabbing shrink-0 select-none p-0.5"
+                              title="Segurar para reordenar"
+                              onPointerDown={e => {
+                                dragFromIdx.current = idx;
+                                (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                              }}
+                              onPointerUp={e => {
+                                const from = dragFromIdx.current;
+                                dragFromIdx.current = -1;
+                                if (from === -1 || from === idx) return;
+                                // Find target by walking up from the element under the pointer
+                                const el = document.elementFromPoint(e.clientX, e.clientY);
+                                const target = el?.closest('[data-drag-idx]') as HTMLElement | null;
+                                const to = target ? parseInt(target.dataset.dragIdx ?? '-1') : -1;
+                                if (to >= 0 && to !== from) reorderDraftEx(from, to);
+                              }}
+                              onPointerMove={e => {
+                                if (dragFromIdx.current === -1) return;
+                                const el = document.elementFromPoint(e.clientX, e.clientY);
+                                const target = el?.closest('[data-drag-idx]') as HTMLElement | null;
+                                const to = target ? parseInt(target.dataset.dragIdx ?? '-1') : -1;
+                                if (to >= 0 && to !== dragFromIdx.current) {
+                                  reorderDraftEx(dragFromIdx.current, to);
+                                  dragFromIdx.current = to;
+                                }
+                              }}
+                            >
+                              <GripVertical size={16} />
+                            </span>
+
+                            {/* Number */}
+                            <span className="text-xs font-black text-white/25 w-4 shrink-0 text-center tabular-nums">{idx + 1}</span>
+
+                            {/* Divider */}
+                            <span className="w-px self-stretch bg-white/10 shrink-0" />
+
+                            {/* Name + inputs */}
+                            <div className="flex-1 min-w-0 flex items-center gap-3">
+                              <p className="text-xs font-bold text-white/85 truncate flex-1 min-w-0">{exercise.name}</p>
+                              <div className="flex items-end gap-1.5 shrink-0">
+                                <div className="flex flex-col items-center gap-0.5">
+                                  <span className="text-[9px] font-bold text-white/30 uppercase tracking-wide">séries</span>
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    value={ex.numSets}
+                                    onChange={e => updateDraftExField(idx, 'numSets', e.target.value)}
+                                    className="w-9 text-center text-xs font-bold bg-white/10 border border-white/15 rounded-lg px-1 py-0.5 outline-none text-white"
+                                  />
+                                </div>
+                                <span className="text-white/25 text-xs mb-0.5">×</span>
+                                <div className="flex flex-col items-center gap-0.5">
+                                  <span className="text-[9px] font-bold text-white/30 uppercase tracking-wide">reps.</span>
+                                  <input
+                                    type="text"
+                                    value={ex.sets}
+                                    onChange={e => updateDraftExField(idx, 'sets', e.target.value)}
+                                    className="w-9 text-center text-xs font-bold bg-white/10 border border-white/15 rounded-lg px-1 py-0.5 outline-none text-white"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Delete */}
+                            <button
+                              onClick={() => confirm(`Remover "${exercise.name}" do treino?`) && removeDraftEx(idx)}
+                              className="p-1.5 text-white/25 hover:text-white/60 active:scale-90 transition-all shrink-0"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        );
+                      }
                       return (
                         <div key={ex.exerciseId + idx} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/4 border border-white/6">
                           <span className="text-sm font-black text-white/30 w-5 shrink-0 text-center tabular-nums">{idx + 1}</span>
@@ -420,6 +613,14 @@ function TemplateCard({
                         </div>
                       );
                     })}
+                    {isEditing && (
+                      <button
+                        onClick={() => setShowExSearch(true)}
+                        className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-dashed border-white/15 text-xs font-bold text-white/40 hover:text-white/70 hover:border-white/25 active:scale-95 transition-all"
+                      >
+                        <Plus size={13} /> Adicionar exercício
+                      </button>
+                    )}
                   </motion.div>
                 </AnimatePresence>
               </div>
@@ -478,9 +679,90 @@ function TemplateCard({
                   transition={{ duration: 0.15 }}
                   className="space-y-1.5"
                 >
-                  {activeSheet.exercises.map((ex, idx) => {
+                  {(isEditing ? getDraftExercises() : activeSheet.exercises).map((ex, idx) => {
                     const exercise = EXERCISES.find(e => e.id === ex.exerciseId);
                     if (!exercise) return null;
+                    if (isEditing) {
+                      return (
+                        <div
+                          key={ex.exerciseId + idx}
+                          data-drag-idx={idx}
+                          className="flex items-center gap-2 px-2 py-2.5 rounded-xl bg-white/6 border border-white/10 transition-opacity"
+                        >
+                          {/* Drag handle — pointer events work on both mouse and touch */}
+                          <span
+                            className="text-white/25 active:text-white/60 cursor-grab active:cursor-grabbing shrink-0 select-none p-0.5"
+                            title="Segurar para reordenar"
+                            onPointerDown={e => {
+                              dragFromIdx.current = idx;
+                              (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                            }}
+                            onPointerUp={e => {
+                              const from = dragFromIdx.current;
+                              dragFromIdx.current = -1;
+                              if (from === -1 || from === idx) return;
+                              const el = document.elementFromPoint(e.clientX, e.clientY);
+                              const target = el?.closest('[data-drag-idx]') as HTMLElement | null;
+                              const to = target ? parseInt(target.dataset.dragIdx ?? '-1') : -1;
+                              if (to >= 0 && to !== from) reorderDraftEx(from, to);
+                            }}
+                            onPointerMove={e => {
+                              if (dragFromIdx.current === -1) return;
+                              const el = document.elementFromPoint(e.clientX, e.clientY);
+                              const target = el?.closest('[data-drag-idx]') as HTMLElement | null;
+                              const to = target ? parseInt(target.dataset.dragIdx ?? '-1') : -1;
+                              if (to >= 0 && to !== dragFromIdx.current) {
+                                reorderDraftEx(dragFromIdx.current, to);
+                                dragFromIdx.current = to;
+                              }
+                            }}
+                          >
+                            <GripVertical size={16} />
+                          </span>
+
+                          {/* Number */}
+                          <span className="text-xs font-black text-white/25 w-4 shrink-0 text-center tabular-nums">{idx + 1}</span>
+
+                          {/* Divider */}
+                          <span className="w-px self-stretch bg-white/10 shrink-0" />
+
+                          {/* Name + inputs */}
+                          <div className="flex-1 min-w-0 flex items-center gap-3">
+                            <p className="text-xs font-bold text-white/85 truncate flex-1 min-w-0">{exercise.name}</p>
+                            <div className="flex items-end gap-1.5 shrink-0">
+                              <div className="flex flex-col items-center gap-0.5">
+                                <span className="text-[9px] font-bold text-white/30 uppercase tracking-wide">séries</span>
+                                <input
+                                  type="number"
+                                  min={1}
+                                  value={ex.numSets}
+                                  onChange={e => updateDraftExField(idx, 'numSets', e.target.value)}
+                                  className="w-9 text-center text-xs font-bold bg-white/10 border border-white/15 rounded-lg px-1 py-0.5 outline-none text-white"
+                                />
+                              </div>
+                              <span className="text-white/25 text-xs mb-0.5">×</span>
+                              <div className="flex flex-col items-center gap-0.5">
+                                <span className="text-[9px] font-bold text-white/30 uppercase tracking-wide">reps.</span>
+                                <input
+                                  type="text"
+                                  value={ex.sets}
+                                  onChange={e => updateDraftExField(idx, 'sets', e.target.value)}
+                                  className="w-9 text-center text-xs font-bold bg-white/10 border border-white/15 rounded-lg px-1 py-0.5 outline-none text-white"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Delete */}
+                          <button
+                            onClick={() => confirm(`Remover "${exercise.name}" do treino?`) && removeDraftEx(idx)}
+                            className="p-1.5 text-white/25 hover:text-white/60 active:scale-90 transition-all shrink-0"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      );
+                    }
                     return (
                       <div key={ex.exerciseId + idx} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/4 border border-white/6">
                         <span className="text-sm font-black text-white/30 w-5 shrink-0 text-center tabular-nums">{idx + 1}</span>
@@ -490,11 +772,38 @@ function TemplateCard({
                       </div>
                     );
                   })}
+                  {isEditing && (
+                    <button
+                      onClick={() => setShowExSearch(true)}
+                      className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl border border-dashed border-white/15 text-xs font-bold text-white/40 hover:text-white/70 hover:border-white/25 active:scale-95 transition-all"
+                    >
+                      <Plus size={13} /> Adicionar exercício
+                    </button>
+                  )}
                 </motion.div>
               </AnimatePresence>
             </div>
           );
         })()}
+
+        {/* Edit mode bottom toolbar */}
+        {isEditing && (
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              onClick={cancelEditing}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-white/50 bg-white/5 border border-white/10 hover:bg-white/10 active:scale-95 transition-all"
+            >
+              <X size={13} /> Descartar
+            </button>
+            <button
+              onClick={commitEdit}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold text-white active:scale-95 transition-all"
+              style={{ backgroundColor: SPORT_COLORS[sport] ?? '#dc2626' }}
+            >
+              <Check size={13} /> Salvar
+            </button>
+          </div>
+        )}
 
         {mainUserProfile.userType === 'treinador' && onCreateAd && (
           <button
@@ -505,6 +814,83 @@ function TemplateCard({
           </button>
         )}
       </div>
+
+      {/* Exercise search bottom-sheet (only while editing) */}
+      <AnimatePresence>
+        {showExSearch && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => { setShowExSearch(false); setExSearchQuery(''); }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200]"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: '100%' }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: '100%' }}
+              transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+              className="fixed bottom-0 left-0 right-0 bg-dark-card border-t border-dark-border rounded-t-3xl z-[210] flex flex-col"
+              style={{ maxHeight: '70vh' }}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 pt-5 pb-3 shrink-0">
+                <h3 className="text-base font-black">Adicionar exercício</h3>
+                <button onClick={() => { setShowExSearch(false); setExSearchQuery(''); }} className="p-2 text-white/20 hover:text-white">
+                  <X size={18} />
+                </button>
+              </div>
+              {/* Search input */}
+              <div className="px-5 pb-3 shrink-0">
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/5 border border-white/10">
+                  <Search size={14} className="text-white/30 shrink-0" />
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="Buscar exercício…"
+                    value={exSearchQuery}
+                    onChange={e => setExSearchQuery(e.target.value)}
+                    className="flex-1 bg-transparent text-sm text-white placeholder:text-white/25 outline-none"
+                  />
+                  {exSearchQuery && (
+                    <button onClick={() => setExSearchQuery('')} className="text-white/30 hover:text-white">
+                      <X size={13} />
+                    </button>
+                  )}
+                </div>
+              </div>
+              {/* Exercise list */}
+              <div className="overflow-y-auto flex-1 px-5 pb-6 space-y-1">
+                {filteredExercises.map(ex => {
+                  const alreadyAdded = getDraftExercises().some(e => e.exerciseId === ex.id);
+                  return (
+                    <button
+                      key={ex.id}
+                      disabled={alreadyAdded}
+                      onClick={() => addDraftEx(ex.id)}
+                      className={cn(
+                        'w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-all active:scale-95',
+                        alreadyAdded
+                          ? 'opacity-40 cursor-not-allowed bg-white/3'
+                          : 'bg-white/5 hover:bg-white/8 border border-white/6',
+                      )}
+                    >
+                      <div>
+                        <p className="text-sm font-bold text-white leading-snug">{ex.name}</p>
+                        <p className="text-[10px] text-white/30 mt-0.5">{ex.muscleGroup}</p>
+                      </div>
+                      {alreadyAdded
+                        ? <Check size={14} className="text-white/30 shrink-0" />
+                        : <Plus size={14} className="text-white/40 shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -723,6 +1109,7 @@ export function WorkoutsView({
   onGenerateWithAI,
   onDeleteWorkout,
   onRenameWorkout,
+  onUpdateTemplate,
   onGoToStore,
   onEditSession,
   onDeleteSession,
@@ -875,6 +1262,7 @@ export function WorkoutsView({
                 setOpenSettingsId={setOpenSettingsId}
                 onDeleteWorkout={onDeleteWorkout}
                 onRenameWorkout={onRenameWorkout}
+                onUpdateTemplate={onUpdateTemplate}
                 onStartWorkout={onStartWorkout}
                 onSelectSheet={setSelectingSheetTemplate}
                 onCreateAd={onCreateAd}
