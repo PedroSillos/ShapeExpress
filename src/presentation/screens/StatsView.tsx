@@ -213,14 +213,7 @@ export function StatsView({
                 Complete seu primeiro treino para ver as suas estatísticas
               </p>
             </div>
-            {!readOnly && onGoToWorkouts && (
-              <button
-                onClick={onGoToWorkouts}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-black text-sm text-white border border-brand-red/50 bg-brand-red/15 active:scale-95 transition-transform hover:bg-brand-red/25 hover:border-brand-red"
-              >
-                Ir para treinos
-              </button>
-            )}
+
           </div>
         </div>
       </div>

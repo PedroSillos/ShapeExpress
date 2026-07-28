@@ -31,6 +31,17 @@ import { cn } from '../../utils/cn';
 import { getYouTubeEmbedUrl } from '../../utils/youtube';
 import { EXERCISES } from '../../constants';
 
+const SPORT_COLORS: Record<string, string> = {
+  'Musculação':     '#dc2626',
+  'Crossfit':       '#ea580c',
+  'Corrida':        '#ca8a04',
+  'Yoga':           '#16a34a',
+  'Natação':        '#2563eb',
+  'Ciclismo':       '#0891b2',
+  'Halterofilismo': '#7c3aed',
+  'Triatlo':        '#db2777',
+};
+
 interface ActiveWorkoutViewProps {
   session: WorkoutSession;
   setSession: (s: WorkoutSession) => void;
@@ -92,6 +103,21 @@ export function ActiveWorkoutView({
   exerciseStats,
   mainUserProfile
 }: ActiveWorkoutViewProps) {
+  const sportColor = (() => {
+    // Prefer the sport from the active workout's template
+    const template = templates.find(t => t.id === session.workoutId);
+    const sport = template?.sport ?? mainUserProfile?.specialties?.[0] ?? '';
+    return SPORT_COLORS[sport] ?? '#dc2626';
+  })();
+  const sportColorAlpha = (alpha: number) => {
+    // Convert hex color to rgba string for opacity variants
+    const hex = sportColor.replace('#', '');
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  };
+
   const sessionRef = React.useRef(session);
   React.useEffect(() => { sessionRef.current = session; }, [session]);
   const [activeExerciseIndex, setActiveExerciseIndex] = useState(0);
@@ -321,8 +347,8 @@ export function ActiveWorkoutView({
     return (
       <div className="fixed inset-0 bg-dark-surface z-[100] flex flex-col items-center justify-center gap-8 p-6">
         <p className="text-white/40 font-bold uppercase tracking-widest text-sm">Descansando...</p>
-        <div className="w-40 h-40 rounded-full border-4 border-brand-red/30 flex items-center justify-center">
-          <span className="text-6xl font-black text-brand-red font-mono">{restCountdown}</span>
+        <div className="w-40 h-40 rounded-full border-4 flex items-center justify-center" style={{ borderColor: sportColorAlpha(0.3) }}>
+          <span className="text-6xl font-black font-mono" style={{ color: sportColor }}>{restCountdown}</span>
         </div>
         <button
           onClick={() => { setRestCountdown(null); goNext(); }}
@@ -342,9 +368,13 @@ export function ActiveWorkoutView({
         {(() => {
           const ratio = totalSets > 0 ? completedSets / totalSets : 0;
           const t = completedSets === 0 ? 0 : 0.5 + ratio * 0.5;
+          const hex = sportColor.replace('#', '');
+          const sr = parseInt(hex.slice(0, 2), 16);
+          const sg = parseInt(hex.slice(2, 4), 16);
+          const sb = parseInt(hex.slice(4, 6), 16);
           const color = t === 0
             ? 'rgba(255,255,255,0.4)'
-            : `rgb(${Math.round(255 + t * (220 - 255))},${Math.round(255 + t * (38 - 255))},${Math.round(255 + t * (38 - 255))})`;
+            : `rgb(${Math.round(255 + t * (sr - 255))},${Math.round(255 + t * (sg - 255))},${Math.round(255 + t * (sb - 255))})`;
           return <ProgressBar progress={15 + ratio * 85} max={100} className="h-3" color={color} />;
         })()}
       </div>
@@ -428,9 +458,9 @@ export function ActiveWorkoutView({
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="relative w-full max-w-sm bg-dark-surface border border-white/10 rounded-3xl p-8 shadow-2xl overflow-hidden"
             >
-              <div className="absolute top-0 left-0 w-full h-1 bg-brand-red" />
+              <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: sportColor }} />
               <div className="flex flex-col items-center text-center space-y-6">
-                <div className="w-16 h-16 rounded-2xl bg-brand-red/10 flex items-center justify-center text-brand-red">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ backgroundColor: sportColorAlpha(0.1), color: sportColor }}>
                   <CheckCircle2 size={32} />
                 </div>
                 <div className="space-y-2">
@@ -453,7 +483,8 @@ export function ActiveWorkoutView({
                       });
                       setShowConfirmFinish(false);
                     }}
-                    className="py-4 bg-brand-red text-black rounded-2xl font-bold text-sm hover:bg-brand-red/90 transition-colors shadow-lg shadow-brand-red/20"
+                    className="py-4 text-black rounded-2xl font-bold text-sm transition-colors shadow-lg"
+                    style={{ backgroundColor: sportColor, boxShadow: `0 8px 16px ${sportColorAlpha(0.2)}` }}
                   >
                     Finalizar
                   </button>
@@ -536,8 +567,9 @@ export function ActiveWorkoutView({
                         onClick={() => { if (isUnlocked) { setActiveExerciseIndex(i); setActiveSetIndex(0); } }}
                         className={cn(
                           'px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-colors',
-                          i === activeExerciseIndex ? 'bg-brand-red text-black' : isUnlocked ? 'bg-white/5 text-white/40' : 'bg-white/5 text-white/20 opacity-40'
+                          i === activeExerciseIndex ? 'text-black' : isUnlocked ? 'bg-white/5 text-white/40' : 'bg-white/5 text-white/20 opacity-40'
                         )}
+                        style={i === activeExerciseIndex ? { backgroundColor: sportColor } : undefined}
                       >
                         {EXERCISES.find(e => e.id === ex.exerciseId)?.name}
                       </button>
@@ -577,8 +609,9 @@ export function ActiveWorkoutView({
                       onClick={() => { if (isUnlocked) setActiveSetIndex(si); }}
                       className={cn(
                         'px-6 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors',
-                        si === activeSetIndex ? 'bg-brand-red text-black' : isUnlocked ? 'bg-white/5 text-white/40' : 'bg-white/5 text-white/20 opacity-40'
+                        si === activeSetIndex ? 'text-black' : isUnlocked ? 'bg-white/5 text-white/40' : 'bg-white/5 text-white/20 opacity-40'
                       )}
+                      style={si === activeSetIndex ? { backgroundColor: sportColor } : undefined}
                     >
                       {si + 1}/{activeExercise.sets.length}
                     </button>
@@ -611,7 +644,10 @@ export function ActiveWorkoutView({
 
                       return (
                         <div className="rounded-2xl border border-white/5 overflow-hidden">
-                          <div className={cn('relative z-10 p-6 space-y-4', set.completed ? 'bg-brand-red/10' : 'bg-white/5')}>
+                          <div
+                            className={cn('relative z-10 p-6 space-y-4', !set.completed && 'bg-white/5')}
+                            style={set.completed ? { backgroundColor: sportColorAlpha(0.1) } : undefined}
+                          >
                             {activeExercise.sets.length > 1 && (
                               <button onClick={() => setShowConfirmDeleteSet(true)} className="absolute top-3 right-3 p-1.5 bg-white/5 rounded-lg text-white/30 hover:text-white/60 transition-colors">
                                 <Trash2 size={14} />
@@ -702,8 +738,13 @@ export function ActiveWorkoutView({
                                     }}
                                     className={cn(
                                       'p-3 border rounded-xl active:scale-95 transition-transform shrink-0',
-                                      timerRunning ? 'bg-brand-red/20 border-brand-red text-brand-red' : 'bg-black/40 border-white/10 text-white/60'
+                                      timerRunning ? 'border-transparent' : 'bg-black/40 border-white/10 text-white/60'
                                     )}
+                                    style={timerRunning ? {
+                                      backgroundColor: sportColorAlpha(0.2),
+                                      borderColor: sportColor,
+                                      color: sportColor
+                                    } : undefined}
                                   >
                                     {timerRunning ? <Square size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
                                   </button>
@@ -737,7 +778,8 @@ export function ActiveWorkoutView({
                           setActiveSetIndex(flatSteps[nextIncomplete].si);
                         }
                       }
-                    }} className={cn('mt-3 w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm transition-colors disabled:cursor-not-allowed', set.completed ? 'bg-white/5 text-white/40' : isSetReadyToComplete(set, getInputMode(exerciseDetails ?? { inputMode: undefined } as any)) ? 'bg-brand-red text-black' : 'bg-white/10 text-white/60 opacity-50')}>
+                    }} className={cn('mt-3 w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm transition-colors disabled:cursor-not-allowed', set.completed ? 'bg-white/5 text-white/40' : isSetReadyToComplete(set, getInputMode(exerciseDetails ?? { inputMode: undefined } as any)) ? 'text-black' : 'bg-white/10 text-white/60 opacity-50')}
+                    style={(!set.completed && isSetReadyToComplete(set, getInputMode(exerciseDetails ?? { inputMode: undefined } as any))) ? { backgroundColor: sportColor } : undefined}>
                       <CheckCircle2 size={18} fill={set.completed ? 'currentColor' : 'none'} stroke="currentColor" />
                       {set.completed ? 'Série concluída' : set.corrected ? 'Corrigir série' : 'Concluir série'}
                     </button>
@@ -770,8 +812,9 @@ export function ActiveWorkoutView({
             onClick={goNext}
             className={cn(
               'p-3 rounded-xl font-bold disabled:opacity-20',
-              isLastStep ? 'bg-brand-red text-black px-5 text-xs' : 'bg-white/5'
+              isLastStep ? 'text-black px-5 text-xs' : 'bg-white/5'
             )}
+            style={isLastStep ? { backgroundColor: sportColor } : undefined}
           >
             {isLastStep ? 'Finalizar' : <ChevronRight size={20} />}
           </button>
