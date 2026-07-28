@@ -478,11 +478,13 @@ export function DashboardView({
     return sessions.filter(s => { try { return parseISO(s.date) >= weekStart; } catch { return false; } }).length;
   }, [sessions]);
 
-  // currentTemplate: most recently used template of the active sport
+  // currentTemplate: most recently used template of the active sport.
+  // Returns null (→ "Criar primeiro treino" banner) when no template belongs to the
+  // current sport. Never falls back to a template from a different sport.
   const currentTemplate = useMemo(() => {
-    const sportTemplates = templates.filter(t => (t.sport ?? getSportForWorkout(t.id, templates)) === currentSport);
-    if (sportTemplates.length === 0) return templates[0] ?? null;
-    // Sort by most recent session
+    const sportTemplates = templates.filter(t => getSportForWorkout(t.id, templates) === currentSport);
+    if (sportTemplates.length === 0) return null;
+    // Sort by most recent session; templates never used come last.
     const lastSessionDate = (t: typeof templates[0]) =>
       sessions.filter(s => s.workoutId === t.id).map(s => s.date).sort().at(-1) ?? '';
     return [...sportTemplates].sort((a, b) => lastSessionDate(b).localeCompare(lastSessionDate(a)))[0];

@@ -568,9 +568,9 @@ function TemplateCard({
                             <span className="w-px self-stretch bg-white/10 shrink-0" />
 
                             {/* Name + inputs */}
-                            <div className="flex-1 min-w-0 flex items-center gap-3">
-                              <p className="text-xs font-bold text-white/85 truncate flex-1 min-w-0">{exercise.name}</p>
-                              <div className="flex items-end gap-1.5 shrink-0">
+                            <div className="flex-1 min-w-0 flex flex-col gap-2">
+                              <p className="text-xs font-bold text-white/85 truncate text-center">{exercise.name}</p>
+                              <div className="flex items-end justify-center gap-1.5">
                                 <div className="flex flex-col items-center gap-0.5">
                                   <span className="text-[9px] font-bold text-white/30 uppercase tracking-wide">séries</span>
                                   <input
