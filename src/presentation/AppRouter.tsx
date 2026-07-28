@@ -42,7 +42,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     isLoggedIn,
     activeWorkout, setActiveWorkout,
     editingSession, setEditingSession,
-    editingTemplate, setEditingTemplate,
     editingAssessment, setEditingAssessment,
     userProfile, setUserProfile,
     currentUserEmail,
@@ -392,7 +391,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onStartWorkout={startWorkout}
           onCreateWorkout={() => setActiveTab('create-workout')}
           onGenerateWithAI={handleGenerateWithAI}
-          onEditWorkout={(t: WorkoutTemplate) => { setEditingTemplate(t); setActiveTab('edit-workout'); }}
           onDeleteWorkout={(id: string) => setDeletingTemplateId(id)}
           onRenameWorkout={async (id: string, name: string) => {
             const t = filteredTemplates.find(tmpl => tmpl.id === id);
@@ -483,7 +481,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
         <WorkoutTemplatesView
           studentName={selectedStudentForWorkouts.name}
           templates={studentTemplates}
-          onSelect={(t: WorkoutTemplate) => { setEditingTemplate(t); setActiveTab('edit-workout'); }}
+          onSelect={() => {}}
           onAdd={() => setActiveTab('create-workout')}
           onDelete={async (id: string) => {
             await deleteTemplate(id);
@@ -506,6 +504,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
         <CreateWorkoutView
           userProfile={userProfile}
           studentEmail={selectedStudentForWorkouts?.email}
+          creatorEmail={userProfile?.email}
           initialSport={activeSport}
           existingTemplates={selectedStudentForWorkouts ? studentTemplates : filteredTemplates}
           onSave={async (t: WorkoutTemplate) => {
@@ -516,22 +515,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onCancel={() => setActiveTab(selectedStudentForWorkouts ? 'student-workouts' : 'workouts')}
         />
       );
-    case 'edit-workout':
-      return editingTemplate ? (
-        <CreateWorkoutView
-          userProfile={userProfile}
-          studentEmail={selectedStudentForWorkouts?.email || editingTemplate.userId}
-          initialTemplate={editingTemplate}
-          existingTemplates={selectedStudentForWorkouts ? studentTemplates : filteredTemplates}
-          onSave={async (t: WorkoutTemplate) => {
-            await updateTemplate(t);
-            setEditingTemplate(null);
-            if (selectedStudentForWorkouts) api.getStudentTemplates(selectedStudentForWorkouts.email).then(setStudentTemplates);
-            setActiveTab(selectedStudentForWorkouts ? 'student-workouts' : 'workouts');
-          }}
-          onCancel={() => { setEditingTemplate(null); setActiveTab(selectedStudentForWorkouts ? 'student-workouts' : 'workouts'); }}
-        />
-      ) : null;
     case 'new-assessment':
       return (
         <NewAssessmentView

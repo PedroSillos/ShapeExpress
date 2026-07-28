@@ -47,7 +47,6 @@ export const useWorkoutState = (
     try { s ? localStorage.setItem(STORAGE_KEYS.ACTIVE_WORKOUT, JSON.stringify(s)) : localStorage.removeItem(STORAGE_KEYS.ACTIVE_WORKOUT); } catch {}
   };
   const [lastCompletedSession, setLastCompletedSession] = useState<WorkoutSession | null>(null);
-  const [editingTemplate, setEditingTemplate] = useState<WorkoutTemplate | null>(null);
   const [editingSession, setEditingSession] = useState<WorkoutSession | null>(null);
   const [deletingTemplateId, setDeletingTemplateId] = useState<string | null>(null);
   const [deletingSessionId, setDeletingSessionId] = useState<string | null>(null);
@@ -246,7 +245,6 @@ export const useWorkoutState = (
     templates, setTemplates,
     activeWorkout, setActiveWorkout,
     lastCompletedSession, setLastCompletedSession,
-    editingTemplate, setEditingTemplate,
     editingSession, setEditingSession,
     deletingTemplateId, setDeletingTemplateId,
     deletingSessionId, setDeletingSessionId,

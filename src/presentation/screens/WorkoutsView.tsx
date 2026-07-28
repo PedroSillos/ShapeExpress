@@ -83,7 +83,6 @@ interface WorkoutsViewProps {
   onStartWorkout: (t: WorkoutTemplate, sheetIndex?: number) => void;
   onCreateWorkout: () => void;
   onGenerateWithAI: (sport: string) => void;
-  onEditWorkout: (t: WorkoutTemplate) => void;
   onDeleteWorkout: (id: string) => void;
   onRenameWorkout: (id: string, name: string) => void;
   onGoToStore: () => void;
@@ -176,7 +175,6 @@ interface TemplateCardProps {
   trainers: UserProfile[];
   openSettingsId: string | null;
   setOpenSettingsId: (id: string | null) => void;
-  onEditWorkout: (t: WorkoutTemplate) => void;
   onDeleteWorkout: (id: string) => void;
   onRenameWorkout: (id: string, name: string) => void;
   onStartWorkout: (t: WorkoutTemplate, sheetIndex?: number) => void;
@@ -196,7 +194,6 @@ function TemplateCard({
   trainers,
   openSettingsId,
   setOpenSettingsId,
-  onEditWorkout,
   onDeleteWorkout,
   onRenameWorkout,
   onStartWorkout,
@@ -359,7 +356,6 @@ function TemplateCard({
                       <Pen size={13} /> Renomear
                     </button>
                     <button
-                      onClick={() => { onEditWorkout(template); setOpenSettingsId(null); }}
                       className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold hover:bg-white/5 transition-colors border-t border-dark-border"
                     >
                       <Edit size={13} /> Editar
@@ -725,7 +721,6 @@ export function WorkoutsView({
   onStartWorkout,
   onCreateWorkout,
   onGenerateWithAI,
-  onEditWorkout,
   onDeleteWorkout,
   onRenameWorkout,
   onGoToStore,
@@ -874,7 +869,6 @@ export function WorkoutsView({
                 trainers={trainers}
                 openSettingsId={openSettingsId}
                 setOpenSettingsId={setOpenSettingsId}
-                onEditWorkout={onEditWorkout}
                 onDeleteWorkout={onDeleteWorkout}
                 onRenameWorkout={onRenameWorkout}
                 onStartWorkout={onStartWorkout}

@@ -392,7 +392,10 @@ interface CreateWorkoutViewProps {
   onCancel: () => void;
   initialTemplate?: WorkoutTemplate;
   userProfile: UserProfile;
+  /** Email of the user who owns the workout (e.g. a student). Defaults to userProfile.email. */
   studentEmail?: string;
+  /** Email of the user who is creating/editing the workout. Defaults to userProfile.email. */
+  creatorEmail?: string;
   initialSport?: string;
   existingTemplates?: WorkoutTemplate[];
 }
@@ -403,6 +406,7 @@ export function CreateWorkoutView({
   initialTemplate,
   userProfile,
   studentEmail,
+  creatorEmail,
   initialSport,
   existingTemplates = [],
 }: CreateWorkoutViewProps) {
@@ -681,7 +685,8 @@ export function CreateWorkoutView({
       clearDraft();
       onSave({
         id: initialTemplate?.id || Date.now().toString(),
-        userId: studentEmail,
+        userId: studentEmail ?? userProfile?.email,
+        creatorEmail: creatorEmail ?? userProfile?.email,
         name: protocolName,
         sport: selectedSport,
         category,
@@ -708,7 +713,8 @@ export function CreateWorkoutView({
     clearDraft();
     onSave({
       id: initialTemplate?.id || Date.now().toString(),
-      userId: studentEmail,
+      userId: studentEmail ?? userProfile?.email,
+      creatorEmail: creatorEmail ?? userProfile?.email,
       name: protocolName,
       sport: selectedSport,
       category,

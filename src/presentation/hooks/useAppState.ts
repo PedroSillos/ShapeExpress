@@ -166,8 +166,6 @@ export const useAppState = () => {
     setActiveWorkout: workout.setActiveWorkout,
     lastCompletedSession: workout.lastCompletedSession,
     setLastCompletedSession: workout.setLastCompletedSession,
-    editingTemplate: workout.editingTemplate,
-    setEditingTemplate: workout.setEditingTemplate,
     editingSession: workout.editingSession,
     setEditingSession: workout.setEditingSession,
     deletingTemplateId: workout.deletingTemplateId,
