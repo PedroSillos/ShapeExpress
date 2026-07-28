@@ -195,6 +195,8 @@ function TemplateCard({
   const hasSheets = !!(template.sheets && template.sheets.length > 0);
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(template.name);
+  const [selectedCycleIdx, setSelectedCycleIdx] = useState(0);
+  const [selectedSheetIdx, setSelectedSheetIdx] = useState(0);
   const renameInputRef = useRef<HTMLInputElement>(null);
 
   const startRename = () => {
@@ -321,28 +323,102 @@ function TemplateCard({
 
 
 
-        {/* Exercise list */}
+        {/* Exercise list — tabbed cycles + tabbed sheets */}
         {(() => {
-          // Collect sheets to display
+          const sportColor = SPORT_COLORS[sport] ?? '#dc2626';
+
+          // ── Multicycle ────────────────────────────────────────────────────
+          if (template.category === 'multicycle' && template.cycles && template.cycles.length > 0) {
+            const cycles = template.cycles;
+            const hasMultipleCycles = cycles.length > 1;
+            const clampedCycleIdx = Math.min(selectedCycleIdx, cycles.length - 1);
+            const activeCycle = cycles[clampedCycleIdx];
+            const sheets = activeCycle.sheets ?? [];
+            const hasMultipleSheets = sheets.length > 1;
+            const clampedSheetIdx = Math.min(selectedSheetIdx, Math.max(0, sheets.length - 1));
+            const activeSheet = sheets[clampedSheetIdx];
+
+            return (
+              <div className="space-y-2">
+                {/* Cycle tabs */}
+                {hasMultipleCycles && (
+                  <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+                    {cycles.map((cycle, ci) => {
+                      const isActive = ci === clampedCycleIdx;
+                      return (
+                        <button
+                          key={ci}
+                          onClick={() => { setSelectedCycleIdx(ci); setSelectedSheetIdx(0); }}
+                          className={cn(
+                            'shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all active:scale-95',
+                            isActive ? 'text-white' : 'text-white/30 bg-white/5 hover:text-white/60',
+                          )}
+                          style={isActive ? { backgroundColor: sportColor } : {}}
+                        >
+                          {cycle.name ?? `Ciclo ${ci + 1}`}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Sheet tabs */}
+                {hasMultipleSheets && (
+                  <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+                    {sheets.map((sheet, si) => {
+                      const isActive = si === clampedSheetIdx;
+                      return (
+                        <button
+                          key={si}
+                          onClick={() => setSelectedSheetIdx(si)}
+                          className={cn(
+                            'shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all active:scale-95',
+                            isActive
+                              ? 'text-white bg-white/15'
+                              : 'text-white/30 bg-white/5 hover:text-white/60',
+                          )}
+                        >
+                          {sheet.name ?? `Ficha ${si + 1}`}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Exercises */}
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={`${clampedCycleIdx}-${clampedSheetIdx}`}
+                    initial={{ opacity: 0, x: 8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -8 }}
+                    transition={{ duration: 0.15 }}
+                    className="space-y-1.5"
+                  >
+                    {(activeSheet?.exercises ?? []).map((ex, idx) => {
+                      const exercise = EXERCISES.find(e => e.id === ex.exerciseId);
+                      if (!exercise) return null;
+                      return (
+                        <div key={ex.exerciseId + idx} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/4 border border-white/6">
+                          <span className="text-sm font-black text-white/30 w-5 shrink-0 text-center tabular-nums">{idx + 1}</span>
+                          <span className="w-px h-4 bg-white/10 shrink-0" />
+                          <span className="text-sm font-bold text-white/80 flex-1 truncate">{exercise.name}</span>
+                          <span className="text-xs font-bold text-white/40 shrink-0 tabular-nums">{ex.numSets} × {ex.sets}</span>
+                        </div>
+                      );
+                    })}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            );
+          }
+
+          // ── Non-multicycle ────────────────────────────────────────────────
           let sheetsToShow: { label: string | null; exercises: WorkoutTemplateExercise[] }[] = [];
 
-          if (template.category === 'multicycle') {
-            // Show only the active cycle's sheets (same logic as nextSheetInfo)
-            const now = new Date();
-            const activeCycle = template.cycles?.find(c => {
-              const start = parseISO(c.startDate);
-              const end = parseISO(c.endDate);
-              return now >= start && now <= end;
-            }) ?? template.cycles?.[0];
-            if (activeCycle) {
-              sheetsToShow = activeCycle.sheets.map(s => ({
-                label: s.name,
-                exercises: s.exercises ?? [],
-              }));
-            }
-          } else if (hasSheets && template.sheets) {
+          if (hasSheets && template.sheets) {
             sheetsToShow = template.sheets.map(s => ({
-              label: template.sheets!.length > 1 ? s.name : null,
+              label: s.name,
               exercises: s.exercises ?? [],
             }));
           } else if (template.exercises && template.exercises.length > 0) {
@@ -351,38 +427,58 @@ function TemplateCard({
 
           if (sheetsToShow.length === 0) return null;
 
+          const hasMultipleSheets = sheetsToShow.length > 1;
+          const clampedIdx = Math.min(selectedSheetIdx, sheetsToShow.length - 1);
+          const activeSheet = sheetsToShow[clampedIdx];
+
           return (
-            <div className="space-y-3">
-              {sheetsToShow.map((sheet, si) => (
-                <div key={si} className="space-y-1.5">
-                  {sheet.label && (
-                    <p className="text-[10px] font-black text-white/30 uppercase tracking-widest px-1">
-                      {sheet.label}
-                    </p>
-                  )}
-                  {sheet.exercises.map((ex, idx) => {
-                    const exercise = EXERCISES.find(e => e.id === ex.exerciseId);
-                    if (!exercise) return null;
+            <div className="space-y-2">
+              {/* Sheet tabs */}
+              {hasMultipleSheets && (
+                <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+                  {sheetsToShow.map((sheet, si) => {
+                    const isActive = si === clampedIdx;
                     return (
-                      <div
-                        key={ex.exerciseId + idx}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/4 border border-white/6"
+                      <button
+                        key={si}
+                        onClick={() => setSelectedSheetIdx(si)}
+                        className={cn(
+                          'shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all active:scale-95',
+                          isActive ? 'text-white' : 'text-white/30 bg-white/5 hover:text-white/60',
+                        )}
+                        style={isActive ? { backgroundColor: sportColor } : {}}
                       >
-                        <span className="text-sm font-black text-white/30 w-5 shrink-0 text-center tabular-nums">
-                          {idx + 1}
-                        </span>
-                        <span className="w-px h-4 bg-white/10 shrink-0" />
-                        <span className="text-sm font-bold text-white/80 flex-1 truncate">
-                          {exercise.name}
-                        </span>
-                        <span className="text-xs font-bold text-white/40 shrink-0 tabular-nums">
-                          {ex.numSets} × {ex.sets}
-                        </span>
-                      </div>
+                        {sheet.label ?? `Ficha ${si + 1}`}
+                      </button>
                     );
                   })}
                 </div>
-              ))}
+              )}
+
+              {/* Exercises */}
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={clampedIdx}
+                  initial={{ opacity: 0, x: 8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -8 }}
+                  transition={{ duration: 0.15 }}
+                  className="space-y-1.5"
+                >
+                  {activeSheet.exercises.map((ex, idx) => {
+                    const exercise = EXERCISES.find(e => e.id === ex.exerciseId);
+                    if (!exercise) return null;
+                    return (
+                      <div key={ex.exerciseId + idx} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/4 border border-white/6">
+                        <span className="text-sm font-black text-white/30 w-5 shrink-0 text-center tabular-nums">{idx + 1}</span>
+                        <span className="w-px h-4 bg-white/10 shrink-0" />
+                        <span className="text-sm font-bold text-white/80 flex-1 truncate">{exercise.name}</span>
+                        <span className="text-xs font-bold text-white/40 shrink-0 tabular-nums">{ex.numSets} × {ex.sets}</span>
+                      </div>
+                    );
+                  })}
+                </motion.div>
+              </AnimatePresence>
             </div>
           );
         })()}
