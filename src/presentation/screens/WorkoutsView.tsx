@@ -258,10 +258,24 @@ function TemplateCard({
                 por {fullName(trainer)}
               </p>
             )}
-            <p className="text-[10px] text-white/25 font-bold uppercase tracking-wide">
-              {format(parseISO(template.startDate), 'dd/MM/yy')} –{' '}
-              {format(parseISO(template.endDate), 'dd/MM/yy')}
-            </p>
+            {/* Show cycle dates when multicycle with 2+ cycles, otherwise show template dates */}
+            {(() => {
+              const isMulticycleWithMany =
+                template.category === 'multicycle' &&
+                template.cycles &&
+                template.cycles.length > 1;
+              const activeCycle = isMulticycleWithMany
+                ? template.cycles![Math.min(selectedCycleIdx, template.cycles!.length - 1)]
+                : null;
+              const startDate = activeCycle?.startDate ?? template.startDate;
+              const endDate = activeCycle?.endDate ?? template.endDate;
+              return (
+                <p className="text-[10px] text-white/25 font-bold uppercase tracking-wide">
+                  {format(parseISO(startDate), 'dd/MM/yy')} –{' '}
+                  {format(parseISO(endDate), 'dd/MM/yy')}
+                </p>
+              );
+            })()}
           </div>
 
           {/* Settings menu */}
@@ -373,10 +387,9 @@ function TemplateCard({
                           onClick={() => setSelectedSheetIdx(si)}
                           className={cn(
                             'shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all active:scale-95',
-                            isActive
-                              ? 'text-white bg-white/15'
-                              : 'text-white/30 bg-white/5 hover:text-white/60',
+                            isActive ? 'text-white' : 'text-white/30 bg-white/5 hover:text-white/60',
                           )}
+                          style={isActive ? { backgroundColor: sportColor } : {}}
                         >
                           {sheet.name ?? `Ficha ${si + 1}`}
                         </button>
