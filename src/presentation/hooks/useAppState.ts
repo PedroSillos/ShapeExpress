@@ -1,5 +1,7 @@
 import { useMemo, useEffect } from "react";
+import { format, parseISO, startOfWeek, subWeeks } from "date-fns";
 import { db } from "../../firebase";
+import type { WorkoutSession } from "../../domain/entities";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
 import { useAuthState } from "./useAuthState";
@@ -45,6 +47,47 @@ export const useAppState = () => {
     progress.resetProgressStates();
     students.resetStudentsStates();
   };
+
+  // Same logic as DashboardView.calcGoalStreak — counts consecutive weeks where
+  // the user met their weekly training goal, using the current week as the anchor.
+  const goalStreak = useMemo(() => {
+    const sessions: WorkoutSession[] = workout.userSessions;
+    const weeklyGoal = profile.userProfile?.weeklyGoal ?? 3;
+    if (sessions.length === 0 || weeklyGoal <= 0) return 0;
+
+    const byWeek: Record<string, Set<string>> = {};
+    sessions.forEach(s => {
+      try {
+        const dayKey  = format(parseISO(s.date), 'yyyy-MM-dd');
+        const weekKey = format(startOfWeek(parseISO(s.date), { weekStartsOn: 0 }), 'yyyy-MM-dd');
+        if (!byWeek[weekKey]) byWeek[weekKey] = new Set();
+        byWeek[weekKey].add(dayKey);
+      } catch {}
+    });
+
+    let streak = 0;
+    let weekCursor = startOfWeek(new Date(), { weekStartsOn: 0 });
+
+    for (let i = 0; i < 104; i++) {
+      const key = format(weekCursor, 'yyyy-MM-dd');
+      const distinctDays = byWeek[key]?.size ?? 0;
+
+      if (i === 0) {
+        streak += distinctDays;
+        weekCursor = subWeeks(weekCursor, 1);
+        continue;
+      }
+
+      if (distinctDays >= weeklyGoal) {
+        streak += distinctDays;
+        weekCursor = subWeeks(weekCursor, 1);
+      } else {
+        break;
+      }
+    }
+
+    return streak;
+  }, [workout.userSessions, profile.userProfile?.weeklyGoal]);
 
   // Compose the api object — same shape as before, zero breaking changes
   const api = useMemo(() => ({
@@ -191,7 +234,7 @@ export const useAppState = () => {
     setStagnationReports: progress.setStagnationReports,
     progressScore: progress.progressScore,
     setProgressScore: progress.setProgressScore,
-    calculatedStreak: progress.calculatedStreak,
+    goalStreak,
     personalRecords: progress.personalRecords,
 
     // Students

@@ -17,45 +17,6 @@ export const useProgressState = (
   const [stagnationReports, setStagnationReports] = useState<StagnationReport[]>([]);
   const [progressScore, setProgressScore] = useState<ProgressScore | null>(null);
 
-  const calculatedStreak = useMemo(() => {
-    if (userSessions.length === 0) return 0;
-
-    let sessionDates = Array.from(
-      new Set(
-        userSessions.map((s) => {
-          try { return format(parseISO(s.date), "yyyy-MM-dd"); }
-          catch (e) { return ""; }
-        }),
-      ),
-    ).filter((d) => d !== "").sort((a, b) => b.localeCompare(a));
-
-    if (userStats.streakResetDate) {
-      sessionDates = sessionDates.filter((d) => d > userStats.streakResetDate!);
-    }
-
-    if (sessionDates.length === 0) return 0;
-
-    const today = format(new Date(), "yyyy-MM-dd");
-    const yesterday = format(new Date(Date.now() - 86400000), "yyyy-MM-dd");
-
-    if (sessionDates[0] !== today && sessionDates[0] !== yesterday) return 0;
-
-    let streak = 1;
-    let currentDate = parseISO(sessionDates[0]);
-
-    for (let i = 1; i < sessionDates.length; i++) {
-      const expectedPrevDate = new Date(currentDate.getTime() - 86400000);
-      const expectedPrevDateStr = format(expectedPrevDate, "yyyy-MM-dd");
-      if (sessionDates[i] === expectedPrevDateStr) {
-        streak++;
-        currentDate = expectedPrevDate;
-      } else {
-        break;
-      }
-    }
-    return streak;
-  }, [userSessions, userStats.streakResetDate]);
-
   const personalRecords = useMemo(() => {
     const prs: { [key: string]: { weight: number; date: string; name: string } } = {};
     userSessions.forEach((session) => {
@@ -83,7 +44,6 @@ export const useProgressState = (
     progressionAlerts, setProgressionAlerts,
     stagnationReports, setStagnationReports,
     progressScore, setProgressScore,
-    calculatedStreak,
     personalRecords,
     resetProgressStates,
   };

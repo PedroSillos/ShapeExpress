@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { format, parseISO } from 'date-fns';
 import { motion, AnimatePresence, MotionConfig } from 'motion/react';
 import { Toaster, toast } from 'sonner';
 
@@ -198,11 +199,26 @@ export default function App() {
   }
 
   if (lastCompletedSession) {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const todaySessions = appState.userSessions.filter((s: any) => {
+      try { return format(parseISO(s.date), 'yyyy-MM-dd') === today; }
+      catch { return false; }
+    });
+    // Show streak screen only if this is the first (or only) workout of the day
+    const isFirstWorkoutOfDay = todaySessions.length <= 1;
     return (
       <>
         <WorkoutDoneScreen
           session={lastCompletedSession}
-          onContinue={() => { setLastCompletedSession(null); setStagnationReports([]); setActiveTab('dashboard'); }}
+          onContinue={() => {
+            setLastCompletedSession(null);
+            setStagnationReports([]);
+            if (isFirstWorkoutOfDay) {
+              setShowOnboardingStreak(true);
+            } else {
+              setActiveTab('dashboard');
+            }
+          }}
         />
         <AnimatePresence>{showingSplash && <SplashScreen key="splash" />}</AnimatePresence>
       </>
@@ -212,7 +228,17 @@ export default function App() {
   if (showOnboardingStreak) {
     return (
       <>
-        <OnboardingStreakScreen onContinue={() => { setShowOnboardingStreak(false); setShowSuggestProfile(true); }} />
+        <OnboardingStreakScreen
+          streak={appState.goalStreak || 1}
+          onContinue={() => {
+            setShowOnboardingStreak(false);
+            if (isLoggedIn) {
+              setActiveTab('dashboard');
+            } else {
+              setShowSuggestProfile(true);
+            }
+          }}
+        />
         <AnimatePresence>{showingSplash && <SplashScreen key="splash" />}</AnimatePresence>
       </>
     );

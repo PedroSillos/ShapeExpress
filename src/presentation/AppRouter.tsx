@@ -63,7 +63,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     highlightSessionId, setHighlightSessionId,
     setShowLogoutConfirm,
     progressScore,
-    calculatedStreak, personalRecords,
+    goalStreak, personalRecords,
     api, switchTab,
     onShowSuggestProfile, onShowStreak,
     storeItems, myPurchases, myListings, isLoadingItems,
@@ -340,7 +340,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     case 'dashboard':
       return (
         <DashboardView
-          userStats={{ ...userStats, streak: calculatedStreak }}
+          userStats={{ ...userStats, streak: goalStreak }}
           sessions={userSessions}
           templates={filteredTemplates}
           onStartWorkout={(template?: WorkoutTemplate) => {
@@ -548,7 +548,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
         <ProfileUserView
           userProfile={{ ...userProfile, email: userProfile.email || currentUserEmail || '' }}
           userStats={userStats}
-          streak={state.calculatedStreak ?? userStats.streak ?? 0}
+          streak={state.goalStreak ?? userStats.streak ?? 0}
           sports={sports}
           friendsCount={friendsCount}
           onAddFriends={() => switchTab(userProfile?.userType === 'treinador' ? 'students' : 'trainers')}
