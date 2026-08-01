@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { ChevronLeft, Download, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { toast } from 'sonner';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '@/src/firebase';
 import type { UserProfile } from '@/src/domain/entities';
@@ -41,7 +40,6 @@ export function EditProfileView({
   // ── Save name ─────────────────────────────────────────────────────────────
   async function handleSave() {
     if (!firstName.trim()) {
-      toast.error('O nome não pode ficar em branco.');
       return;
     }
     setIsSaving(true);
@@ -58,9 +56,7 @@ export function EditProfileView({
     setIsSendingReset(true);
     try {
       await sendPasswordResetEmail(auth, userProfile.email);
-      toast.success('Email de redefinição de senha enviado!');
     } catch {
-      toast.error('Não foi possível enviar o email de redefinição.');
     } finally {
       setIsSendingReset(false);
     }
@@ -76,7 +72,6 @@ export function EditProfileView({
     a.download = `shape-express-perfil-${userProfile.email}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success('Dados exportados!');
   }
 
   // ── Delete account ─────────────────────────────────────────────────────────
@@ -85,7 +80,6 @@ export function EditProfileView({
     try {
       await onDeleteAccount();
     } catch {
-      toast.error('Não foi possível excluir a conta. Tente novamente.');
       setIsDeletingAccount(false);
       setShowDeleteConfirm(false);
     }

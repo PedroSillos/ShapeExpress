@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { toast } from "sonner";
 import { db } from "../../firebase";
 import { doc, setDoc, deleteDoc, collection, query, where, getDocs } from "firebase/firestore";
 import type { WorkoutTemplate, WorkoutSession, UserProfile } from "../../domain/entities";
@@ -80,15 +79,12 @@ export const useWorkoutState = (
 
     if (!currentUser) {
       setTemplates((prev) => { const next = [...prev, templateToSave]; saveLocalTemplates(next); return next; });
-      if (!silent) toast.success("Treino criado!");
       return;
     }
     try {
       await setDoc(doc(db, "templates", templateToSave.id), sanitize(templateToSave));
       setTemplates((prev) => [...prev, templateToSave]);
-      if (!silent) toast.success("Treino criado!");
     } catch (e: any) {
-      toast.error("Erro ao criar treino: " + e.message);
     }
   };
 
@@ -100,30 +96,24 @@ export const useWorkoutState = (
 
     if (!currentUser) {
       setTemplates((prev) => { const next = prev.map((old) => (old.id === t.id ? templateToSave : old)); saveLocalTemplates(next); return next; });
-      toast.success("Treino atualizado!");
       return;
     }
     try {
       await setDoc(doc(db, "templates", templateToSave.id), sanitize(templateToSave));
       setTemplates((prev) => prev.map((old) => (old.id === t.id ? templateToSave : old)));
-      toast.success("Treino atualizado!");
     } catch (e: any) {
-      toast.error("Erro ao atualizar treino: " + e.message);
     }
   };
 
   const deleteTemplate = async (id: string) => {
     if (!currentUser) {
       setTemplates((prev) => { const next = prev.filter((t) => t.id !== id); saveLocalTemplates(next); return next; });
-      toast.success("Treino removido.");
       return;
     }
     try {
       await deleteDoc(doc(db, "templates", id));
       setTemplates((prev) => prev.filter((t) => t.id !== id));
-      toast.success("Treino removido.");
     } catch (e: any) {
-      toast.error("Erro ao remover treino: " + e.message);
     }
   };
 
@@ -143,15 +133,12 @@ export const useWorkoutState = (
   const createSession = async (s: WorkoutSession) => {
     if (!currentUser) {
       setSessions((prev) => { const next = [s, ...prev]; saveLocalSessions(next); return next; });
-      toast.success("Treino finalizado!");
       return;
     }
     try {
       await setDoc(doc(db, "sessions", s.id), sanitize(s));
       setSessions((prev) => [s, ...prev]);
-      toast.success("Treino finalizado!");
     } catch (e: any) {
-      toast.error("Erro ao salvar sessão: " + e.message);
     }
   };
 
@@ -164,22 +151,18 @@ export const useWorkoutState = (
       await setDoc(doc(db, "sessions", s.id), sanitize(s));
       setSessions((prev) => prev.map((old) => (old.id === s.id ? s : old)));
     } catch (e: any) {
-      toast.error("Erro ao atualizar sessão: " + e.message);
     }
   };
 
   const deleteSession = async (id: string) => {
     if (!currentUser) {
       setSessions((prev) => { const next = prev.filter((s) => s.id !== id); saveLocalSessions(next); return next; });
-      toast.success("Sessão removida.");
       return;
     }
     try {
       await deleteDoc(doc(db, "sessions", id));
       setSessions((prev) => prev.filter((s) => s.id !== id));
-      toast.success("Sessão removida.");
     } catch (e: any) {
-      toast.error("Erro ao remover sessão: " + e.message);
     }
   };
 

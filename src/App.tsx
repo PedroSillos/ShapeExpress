@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { motion, AnimatePresence, MotionConfig } from 'motion/react';
-import { Toaster, toast } from 'sonner';
 
 import { useAppState } from './presentation/hooks/useAppState';
 import { useDataSync } from './presentation/hooks/useDataSync';
@@ -104,7 +103,6 @@ export default function App() {
       window.history.replaceState({}, '', window.location.pathname);
 
       if (canceled === 'true') {
-        toast('Pagamento cancelado.');
         setActiveTab('store' as any);
         return;
       }
@@ -113,10 +111,8 @@ export default function App() {
         setActiveTab('store' as any);
         api.verifyCheckoutSession(sessionId, itemId)
           .then(() => {
-            toast.success('Compra realizada! O treino já está disponível em Meus Treinos.');
           })
           .catch(() => {
-            toast.error('Erro ao confirmar pagamento. Entre em contato com o suporte.');
           });
       }
     }
@@ -263,7 +259,6 @@ export default function App() {
     return (
       <>
         <MotionConfig transition={currentAnimations === 'reduced' ? { duration: 0 } : undefined}>
-          <Toaster position="top-center" richColors />
           <AppRouter state={routerState} workout={workout} dataSync={dataSync} />
         </MotionConfig>
         <AnimatePresence>{showingSplash && <SplashScreen key="splash" />}</AnimatePresence>
@@ -274,7 +269,6 @@ export default function App() {
   return (
     <MotionConfig transition={currentAnimations === 'reduced' ? { duration: 0 } : undefined}>
       <div className="min-h-screen pb-24 max-w-md mx-auto relative overflow-x-hidden">
-        <Toaster position="top-center" richColors />
 
         <main className="flex-1 flex flex-col">
           <AnimatePresence mode="wait">

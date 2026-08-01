@@ -4,7 +4,6 @@ import {
   ChevronLeft, Trophy, ShieldCheck, AlertTriangle, UserCheck,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { toast } from 'sonner';
 import { UserProfile, fullName } from '@/src/domain/entities';
 import { TrainerCard } from '../components/TrainerCard';
 
@@ -248,7 +247,6 @@ export function TrainersScreen({
                         setShowConnectPopup(false);
                         setConnectCode('');
                       } catch {
-                        toast.error('Código inválido ou erro na conexão.');
                       } finally {
                         setIsConnecting(false);
                       }
@@ -350,7 +348,6 @@ export function TrainersScreen({
                             );
                             setSelectedTrainer(null);
                           } catch {
-                            toast.error('Erro ao solicitar conexão.');
                           }
                         }}
                         className="w-full py-4 bg-brand-red text-black rounded-2xl font-bold uppercase tracking-widest shadow-lg shadow-brand-red/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"

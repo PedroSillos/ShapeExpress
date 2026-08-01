@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { toast } from "sonner";
 import { db } from "../../firebase";
 import {
   doc, getDoc, setDoc, deleteDoc, updateDoc,
@@ -134,9 +133,7 @@ export const useStudentsState = (
     try {
       const qTr = query(collection(db, "users"), where("personalCode", "==", trainerCode));
       const trainerSnap = await getDocs(qTr);
-      if (trainerSnap.empty) { toast.error("Treinador não encontrado com esse código."); return; }
       const trainer = trainerSnap.docs[0].data() as UserProfile;
-      if (trainer.email === currentUser.email) { toast.error("Você não pode conectar consigo mesmo."); return; }
 
       const checkQ = query(
         collection(db, "connections"),
@@ -144,7 +141,6 @@ export const useStudentsState = (
         where("trainerEmail", "==", trainer.email.toLowerCase()),
       );
       const checkSnap = await getDocs(checkQ);
-      if (!checkSnap.empty) { toast.error("Você já enviou uma solicitação para este treinador."); return; }
 
       const newConnection: TrainerConnection = {
         id: Date.now().toString(),
@@ -156,10 +152,8 @@ export const useStudentsState = (
       };
       await setDoc(doc(db, "connections", newConnection.id), newConnection);
       setStudentConnections((prev) => [...prev, newConnection]);
-      toast.success("Solicitação enviada! Aguarde o aceite.");
     } catch (e: any) {
       console.error(e);
-      toast.error("Erro ao enviar solicitação.");
     }
   };
 
@@ -207,7 +201,6 @@ export const useStudentsState = (
       if (status === "rejected") {
         await deleteDoc(connRef);
         setTrainerConnections((prev) => prev.filter((c) => c.id !== id));
-        toast.success("Solicitação recusada.");
       } else {
         const connectionDoc = await getDoc(connRef);
         if (connectionDoc.exists()) {
@@ -219,12 +212,10 @@ export const useStudentsState = (
             if (prev.some((s) => (s.email || "").toLowerCase() === (newStudent.email || "").toLowerCase())) return prev;
             return [...prev, newStudent];
           });
-          toast.success("Aluno conectado com sucesso!");
         }
       }
     } catch (e) {
       console.error(e);
-      toast.error("Erro ao responder solicitação.");
     }
   };
 
@@ -240,11 +231,9 @@ export const useStudentsState = (
       if (!snap.empty) {
         for (const d of snap.docs) await deleteDoc(d.ref);
         setStudentConnections((prev) => prev.filter((c) => c.trainerEmail !== trainerEmail));
-        toast.success("Treinador desconectado com sucesso.");
       }
     } catch (e) {
       console.error(e);
-      toast.error("Erro ao desconectar treinador.");
     }
   };
 
@@ -261,11 +250,9 @@ export const useStudentsState = (
         for (const d of snap.docs) await deleteDoc(d.ref);
         setTrainerConnections((prev) => prev.filter((c) => c.studentEmail !== studentEmail));
         setStudents((prev) => prev.filter((s) => s.email !== studentEmail));
-        toast.success("Aluno desconectado com sucesso.");
       }
     } catch (e) {
       console.error(e);
-      toast.error("Erro ao desconectar aluno.");
     }
   };
 

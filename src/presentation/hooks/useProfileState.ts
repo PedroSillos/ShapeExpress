@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { toast } from "sonner";
 import { db } from "../../firebase";
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import type {
@@ -150,9 +149,7 @@ export const useProfileState = (currentUser: { email: string } | null) => {
     try {
       await setDoc(doc(db, "users", currentUser.email), p, { merge: true });
       setUserProfile(p);
-      toast.success("Perfil atualizado!");
     } catch (e: any) {
-      toast.error("Erro ao atualizar perfil: " + e.message);
     }
   };
 

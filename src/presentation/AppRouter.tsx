@@ -1,4 +1,3 @@
-import { toast } from 'sonner';
 import { useRef, useState } from 'react';
 import { Student, UserProfile, WorkoutTemplate, WorkoutSession, StoreItem, StorePurchase } from '../domain/entities';
 import { DEFAULT_PROFILE } from '../constants';
@@ -266,7 +265,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
 
             // api.createTemplate handles both React state update AND localStorage (pending-templates)
             // atomically — do NOT call state.setTemplates or push to localStorage separately.
-            // silent=true: the user is about to start the workout, no need for a toast.
             await api.createTemplate(template, true);
 
             try { localStorage.setItem(STORAGE_KEYS.WELCOME_ANSWERS, JSON.stringify(answers)); } catch {}

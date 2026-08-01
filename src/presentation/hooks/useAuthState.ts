@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { toast } from "sonner";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 import { tokenStore } from "../../data/services/tokenStore";
@@ -165,7 +164,6 @@ export const useAuthState = () => {
         const snap = await getDoc(doc(db, "users", email));
         if (snap.exists()) userDoc = snap.data();
       } catch (e) {}
-      toast.success("Bem-vindo de volta!");
       localStorage.setItem(STORAGE_KEYS.TOKEN, email);
       setToken(email);
       setCurrentUser({ email });
@@ -176,9 +174,7 @@ export const useAuthState = () => {
       return { token: freshIdToken, user: userDoc || { email, name: email.split("@")[0] } };
     } catch (e: any) {
       if (e.code === "auth/operation-not-allowed") {
-        toast.error("O login por Email/Senha não está habilitado no console do Firebase.");
       } else {
-        toast.error(getFirebaseErrorMessage(e));
       }
       throw new Error(getFirebaseErrorMessage(e));
     }
@@ -222,7 +218,6 @@ export const useAuthState = () => {
           });
         }
       } catch (e) {}
-      toast.success("Bem-vindo!");
       localStorage.setItem(STORAGE_KEYS.TOKEN, email);
       setToken(email);
       setCurrentUser({ email });
@@ -230,7 +225,6 @@ export const useAuthState = () => {
       if (isNewAccount) await uploadLocalDataToFirestore(email);
       return { token: freshIdToken, user: userDoc };
     } catch (e: any) {
-      toast.error(getFirebaseErrorMessage(e));
       throw new Error(getFirebaseErrorMessage(e));
     }
   };
@@ -262,7 +256,6 @@ export const useAuthState = () => {
           completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: data.email,
         });
       } catch (e) {}
-      toast.success("Conta criada com sucesso!");
       localStorage.setItem(STORAGE_KEYS.TOKEN, data.email);
       setToken(data.email);
       setCurrentUser({ email: data.email });
@@ -271,9 +264,7 @@ export const useAuthState = () => {
       return { token: freshIdToken, user: userProfile };
     } catch (e: any) {
       if (e.code === "auth/operation-not-allowed") {
-        toast.error("O login por Email/Senha não está habilitado no console do Firebase.");
       } else if (e.code !== "auth/email-already-in-use") {
-        toast.error(getFirebaseErrorMessage(e));
       }
       throw e;
     }
@@ -282,10 +273,8 @@ export const useAuthState = () => {
   const forgotPassword = async (email: string) => {
     try {
       await sendPasswordResetEmail(auth, email);
-      toast.success("Email de recuperação enviado!");
       return { message: "Email enviado" };
     } catch (e: any) {
-      toast.error(getFirebaseErrorMessage(e));
       throw new Error(getFirebaseErrorMessage(e));
     }
   };
@@ -299,7 +288,6 @@ export const useAuthState = () => {
       await deleteDoc(doc(db, "stats", email));
       await deleteUser(firebaseUser);
     } catch (e: any) {
-      toast.error("Erro ao deletar conta: " + e.message);
       throw e;
     }
     Object.keys(localStorage)
@@ -313,7 +301,6 @@ export const useAuthState = () => {
     setCurrentUser(null);
     setIsLoggedIn(false);
     onLogout?.();
-    toast.success("Conta deletada com sucesso.");
   };
 
   const logout = async (onLogout?: () => void) => {
@@ -329,7 +316,6 @@ export const useAuthState = () => {
     setCurrentUser(null);
     setIsLoggedIn(false);
     onLogout?.();
-    toast.success("Até logo!");
   };
 
   const loginWithPhone = async (phoneNumber: string, recaptchaContainer: HTMLElement): Promise<ConfirmationResult> => {
@@ -339,7 +325,6 @@ export const useAuthState = () => {
       verifier.clear();
       return result;
     } catch (e: any) {
-      toast.error(getFirebaseErrorMessage(e));
       throw new Error(getFirebaseErrorMessage(e));
     }
   };
@@ -383,7 +368,6 @@ export const useAuthState = () => {
           });
         }
       } catch (e) {}
-      toast.success("Bem-vindo!");
       localStorage.setItem(STORAGE_KEYS.TOKEN, docId);
       setToken(docId);
       setCurrentUser({ email: docId });
@@ -391,7 +375,6 @@ export const useAuthState = () => {
       if (isNewAccount) await uploadLocalDataToFirestore(docId);
       return { token: freshIdToken, user: userDoc };
     } catch (e: any) {
-      toast.error(getFirebaseErrorMessage(e));
       throw new Error(getFirebaseErrorMessage(e));
     }
   };

@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Search, X, Dumbbell, Star, ShoppingBag } from 'lucide-react';
 import { motion } from 'motion/react';
-import { toast } from 'sonner';
 import { StoreItem, StorePurchase } from '@/src/domain/entities';
 import iconTrophy from '@/src/assets/icons/icon-trophy.svg';
 
@@ -172,7 +171,6 @@ export function StoreTab({
         window.location.href = url;
       } catch (err) {
         console.error('[StoreTab] checkout error:', err);
-        toast.error('Erro ao iniciar pagamento. Tente novamente.');
       } finally {
         setBuyingId(null);
       }
