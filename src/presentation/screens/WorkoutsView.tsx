@@ -1459,17 +1459,31 @@ export function WorkoutsView({
                   </button>
                 </div>
                 <div className="space-y-3">
+                  {/* Comprar novo treino — destaque principal */}
                   <button
                     onClick={() => { setShowCreateMenu(false); onGoToStore(); }}
-                    className="w-full flex items-center gap-4 p-4 rounded-2xl active:scale-95 transition-transform"
-                    style={{ background: 'rgba(22, 163, 74, 0.12)', border: '1px solid rgba(22, 163, 74, 0.25)' }}
+                    className="w-full flex items-center gap-4 p-4 rounded-2xl active:scale-95 transition-transform relative overflow-hidden"
+                    style={{
+                      background: 'rgba(22, 163, 74, 0.18)',
+                      border: '1px solid rgba(22, 163, 74, 0.6)',
+                      boxShadow: '0 0 16px rgba(22, 163, 74, 0.25), inset 0 1px 0 rgba(255,255,255,0.08)',
+                    }}
                   >
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#16A34A' }}>
+                    {/* shimmer sweep */}
+                    <span
+                      className="pointer-events-none absolute inset-0 rounded-2xl"
+                      style={{
+                        background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.10) 50%, transparent 60%)',
+                        backgroundSize: '200% 100%',
+                        animation: 'shimmer-sweep 2.4s linear infinite',
+                      }}
+                    />
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 relative" style={{ background: '#16A34A', boxShadow: '0 0 10px rgba(22, 163, 74, 0.5)' }}>
                       <ShoppingBag size={18} className="text-white" />
                     </div>
-                    <div className="text-left">
+                    <div className="text-left relative">
                       <p className="font-bold text-sm text-white">Comprar novo treino</p>
-                      <p className="text-xs text-white/35 mt-0.5">Adquira um treino na Loja</p>
+                      <p className="text-xs text-white/50 mt-0.5">Adquira um treino na Loja</p>
                     </div>
                   </button>
                   <button
