@@ -34,7 +34,7 @@ import {
 import { Badge } from '../components/Badge';
 import { DeleteSessionModal } from '../components/AppModals';
 import { cn } from '../../utils/cn';
-import { EXERCISES } from '../../constants';
+import { EXERCISES } from '@/src/domain/entities/exercises';
 import iconHalterofilismo from '@/src/assets/icons/icon-halterofilismo.svg';
 import iconFlame from '@/src/assets/icons/icon-flame.svg';
 import iconAlarm from '@/src/assets/icons/icon-alarm.svg';

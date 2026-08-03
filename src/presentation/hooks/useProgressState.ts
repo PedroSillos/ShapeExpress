@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { format, parseISO } from "date-fns";
-import { EXERCISES } from "../../constants";
+import { EXERCISES } from '@/src/domain/entities/exercises';
 import type {
   ProgressionAlert,
   StagnationReport,

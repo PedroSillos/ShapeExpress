@@ -11,7 +11,7 @@ import {
 } from '../../domain/use-cases/workoutEstimation';
 import { analyzeExerciseStagnation } from '../../domain/use-cases/analyzeStagnation';
 import { addSportXp, SPORT_XP_PER_WORKOUT } from '../../domain/use-cases/sportLevel';
-import { EXERCISES } from '../../constants';
+import { EXERCISES } from '@/src/domain/entities/exercises';
 import { getInputMode } from '../../domain/use-cases/exerciseInputMode';
 
 interface UseWorkoutParams {

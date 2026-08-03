@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { format, addMonths, parseISO } from 'date-fns';
 import { cn } from '../../utils/cn';
 import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
-import { EXERCISES } from '../../constants';
+import { EXERCISES } from '@/src/domain/entities/exercises';
 import { Card } from '../components/Card';
 import { ConfigureExercisesView } from '../components/ConfigureExercisesView';
 import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';

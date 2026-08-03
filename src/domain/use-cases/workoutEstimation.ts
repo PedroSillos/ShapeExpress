@@ -6,7 +6,7 @@ import {
   UserCalorieProfile,
   UserProfile,
 } from '../entities';
-import { EXERCISES } from '../../constants';
+import { EXERCISES } from '@/src/domain/entities/exercises';
 
 // Base weight as % of body weight per muscle group and exercise type
 export function estimateInitialWeight(

@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { ChevronLeft, Play, Dumbbell, TrendingUp, History, Edit, RefreshCw, X, Plus, Search, SlidersHorizontal, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../utils/cn';
-import { EXERCISES } from '../../constants';
+import { EXERCISES } from '@/src/domain/entities/exercises';
 import { WorkoutSheet, WorkoutTemplateExercise, Exercise, MuscleGroup, MuscleSubgroup, ExerciseCategory, Equipment } from '../../domain/entities';
 import { getInputMode } from '../../domain/use-cases/exerciseInputMode';
 import { ALL_SPORTS } from '../../features/sports/constants';

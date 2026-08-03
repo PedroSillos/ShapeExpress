@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 import { WorkoutSession, WorkoutTemplate, UserProfile } from '../../domain/entities';
-import { EXERCISES } from '../../constants';
+import { EXERCISES } from '@/src/domain/entities/exercises';
 import { BarChart3 } from 'lucide-react';
 import iconMusculacao    from '@/src/assets/icons/icon-musculacao.svg';
 import iconHalterofilismo from '@/src/assets/icons/icon-halterofilismo.svg';
