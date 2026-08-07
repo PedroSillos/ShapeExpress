@@ -32,11 +32,11 @@ import { getYouTubeEmbedUrl } from '../../utils/youtube';
 import { EXERCISES } from '@/src/domain/entities/exercises';
 
 const SPORT_COLORS: Record<string, string> = {
-  'Musculação':     '#dc2626',
+  'MusculaÃ§Ã£o':     '#dc2626',
   'Crossfit':       '#ea580c',
   'Corrida':        '#ca8a04',
   'Yoga':           '#16a34a',
-  'Natação':        '#2563eb',
+  'NataÃ§Ã£o':        '#2563eb',
   'Ciclismo':       '#0891b2',
   'Halterofilismo': '#7c3aed',
   'Triatlo':        '#db2777',
@@ -293,7 +293,7 @@ export function ActiveWorkoutView({
     const remainingSets = newExercises[activeExerciseIndex].sets;
     const nextIncomplete = remainingSets.findIndex((s, i) => i >= setIndex && !s.completed && !s.corrected);
     const target = nextIncomplete !== -1 ? nextIncomplete : Math.max(0, setIndex - 1);
-    // Update session first, then navigate — React 19 batches these so target render happens once
+    // Update session first, then navigate Â— React 19 batches these so target render happens once
     setSession({ ...session, exercises: newExercises });
     setActiveSetIndex(target);
   };
@@ -337,7 +337,7 @@ export function ActiveWorkoutView({
       <div className="fixed inset-0 bg-dark-surface z-[100] flex flex-col items-center justify-center p-6 text-center">
         <Dumbbell size={48} className="text-white/10 mb-4" />
         <h2 className="text-xl font-bold mb-2">Treino vazio</h2>
-        <p className="text-sm text-white/40 mb-6">Este treino não possui exercícios configurados.</p>
+        <p className="text-sm text-white/40 mb-6">Este treino nÃ£o possui exercÃ­cios configurados.</p>
         <button onClick={onCancel} className="px-8 py-4 bg-white/5 rounded-2xl font-bold">Voltar</button>
       </div>
     );
@@ -402,7 +402,7 @@ export function ActiveWorkoutView({
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold">Descartar treino?</h3>
-                  <p className="text-white/40 text-sm">Tem certeza que deseja cancelar? Todo o progresso deste treino será perdido.</p>
+                  <p className="text-white/40 text-sm">Tem certeza que deseja cancelar? Todo o progresso deste treino serÃ¡ perdido.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3 w-full pt-4">
                   <button 
@@ -431,8 +431,8 @@ export function ActiveWorkoutView({
               <div className="flex flex-col items-center text-center space-y-6">
                 <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500"><Trash2 size={32} /></div>
                 <div className="space-y-2">
-                  <h3 className="text-xl font-bold">Remover série?</h3>
-                  <p className="text-white/40 text-sm">Esta série será removida do treino.</p>
+                  <h3 className="text-xl font-bold">Remover sÃ©rie?</h3>
+                  <p className="text-white/40 text-sm">Esta sÃ©rie serÃ¡ removida do treino.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3 w-full pt-4">
                   <button onClick={() => setShowConfirmDeleteSet(false)} className="py-4 bg-white/5 border border-white/5 rounded-2xl font-bold text-sm">Cancelar</button>
@@ -465,7 +465,7 @@ export function ActiveWorkoutView({
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold">Finalizar treino?</h3>
-                  <p className="text-white/40 text-sm">Você completou todos os exercícios de hoje? Seu progresso será salvo no histórico.</p>
+                  <p className="text-white/40 text-sm">VocÃª completou todos os exercÃ­cios de hoje? Seu progresso serÃ¡ salvo no histÃ³rico.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3 w-full pt-4">
                   <button 
@@ -510,7 +510,7 @@ export function ActiveWorkoutView({
               className="relative w-full max-w-lg bg-dark-surface border border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden"
             >
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold">Execução: {exerciseDetails.name}</h3>
+                <h3 className="font-bold">ExecuÃ§Ã£o: {exerciseDetails.name}</h3>
                 <button onClick={() => setShowVideoModal(false)} className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors">
                   <X size={20} />
                 </button>
@@ -520,7 +520,7 @@ export function ActiveWorkoutView({
                 <div className="w-full aspect-video bg-black rounded-2xl overflow-hidden border border-white/10 relative">
                   <iframe 
                     src={getYouTubeEmbedUrl(exerciseDetails.youtubeUrl)!}
-                    title={`Vídeo de execução: ${exerciseDetails.name}`}
+                    title={`VÃ­deo de execuÃ§Ã£o: ${exerciseDetails.name}`}
                     className="absolute inset-0 w-full h-full"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -529,7 +529,7 @@ export function ActiveWorkoutView({
                 </div>
               ) : (
                 <div className="p-8 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
-                  <p className="text-sm text-white/40">Vídeo não disponível para incorporação.</p>
+                  <p className="text-sm text-white/40">VÃ­deo nÃ£o disponÃ­vel para incorporaÃ§Ã£o.</p>
                   <a href={exerciseDetails.youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-brand-red font-bold mt-2 block">Ver no YouTube</a>
                 </div>
               )}
@@ -556,7 +556,7 @@ export function ActiveWorkoutView({
         >
           {activeExercise ? (
             <>
-              {/* Tabs + info card — physically connected */}
+              {/* Tabs + info card Â— physically connected */}
               <div>
                 <div className="flex items-start gap-2 overflow-x-auto no-scrollbar" style={{overflowY: 'visible'}}>
                   {(session.exercises || []).map((ex, i) => {
@@ -582,13 +582,13 @@ export function ActiveWorkoutView({
                       if (exerciseDetails?.youtubeUrl) {
                         setShowVideoModal(true);
                       } else {
-                        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent((exerciseDetails?.name ?? '') + ' como fazer exercício')}`, '_blank');
+                        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent((exerciseDetails?.name ?? '') + ' como fazer exercÃ­cio')}`, '_blank');
                       }
                     }}
                     className="w-full flex items-center justify-center gap-2 py-3 bg-black/40 border border-white/10 rounded-xl text-sm font-bold text-white/60"
                   >
                     <Play size={14} fill="currentColor" />
-                    Ver vídeo
+                    Ver vÃ­deo
                   </button>
                   <div className="flex gap-2">
                     <Badge className="bg-black/40 text-white/60 text-xs px-3 py-1 rounded-full font-bold">{exerciseDetails?.muscleGroup}</Badge>
@@ -626,7 +626,7 @@ export function ActiveWorkoutView({
                 if (!set) return null;
                 return (
                   <>
-                    {/* Set inputs — conditional by inputMode */}
+                    {/* Set inputs Â— conditional by inputMode */}
                     {(() => {
                       const inputMode = getInputMode(exerciseDetails ?? { inputMode: undefined } as any);
                       const formatDuration = (secs: number) => {
@@ -666,7 +666,7 @@ export function ActiveWorkoutView({
                                   </div>
                                 </div>
                                 <div className="space-y-2">
-                                  <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">Repetições</p>
+                                  <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">RepetiÃ§Ãµes</p>
                                   <div className="flex items-center gap-2 w-full">
                                     <StepperButton label="-" onStep={() => { const r = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].reps; updateSet(activeSetIndex, { reps: Math.max(0, r - 1) }); }} />
                                     <input type="number" value={set.reps || ''} onChange={(e) => updateSet(activeSetIndex, { reps: Number(e.target.value) })} className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none" placeholder="0" />
@@ -679,7 +679,7 @@ export function ActiveWorkoutView({
                             {/* reps_only */}
                             {inputMode === 'reps_only' && (
                               <div className="space-y-2">
-                                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">Repetições</p>
+                                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">RepetiÃ§Ãµes</p>
                                 <div className="flex items-center gap-2 w-full">
                                   <StepperButton label="-" onStep={() => { const r = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].reps; updateSet(activeSetIndex, { reps: Math.max(0, r - 1) }); }} />
                                   <input type="number" value={set.reps || ''} onChange={(e) => updateSet(activeSetIndex, { reps: Number(e.target.value) })} className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none" placeholder="0" />
@@ -688,11 +688,11 @@ export function ActiveWorkoutView({
                               </div>
                             )}
 
-                            {/* duration fields — shared between duration_distance, duration_only */}
+                            {/* duration fields Â— shared between duration_distance, duration_only */}
                             {(inputMode === 'duration_distance' || inputMode === 'duration_only') && (
                               <div className="space-y-2">
                                 <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">
-                                  {timerRunning || (timerRemaining !== null && timerRemaining > 0) ? 'Tempo restante' : 'Duração (min:ss)'}
+                                  {timerRunning || (timerRemaining !== null && timerRemaining > 0) ? 'Tempo restante' : 'DuraÃ§Ã£o (min:ss)'}
                                 </p>
                                 <div className="flex items-center gap-2 w-full">
                                   {/* Reset to target */}
@@ -752,10 +752,10 @@ export function ActiveWorkoutView({
                               </div>
                             )}
 
-                            {/* distance — only for duration_distance */}
+                            {/* distance Â— only for duration_distance */}
                             {inputMode === 'duration_distance' && (
                               <div className="space-y-2">
-                                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">Distância (m)</p>
+                                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">DistÃ¢ncia (m)</p>
                                 <div className="flex items-center gap-2 w-full">
                                   <StepperButton label="-" onStep={() => { const d = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].distanceMeters ?? 0; updateSet(activeSetIndex, { distanceMeters: Math.max(0, d - 100) }); }} />
                                   <input type="number" value={set.distanceMeters ?? ''} onChange={(e) => updateSet(activeSetIndex, { distanceMeters: Number(e.target.value) })} className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none" placeholder="0" />
@@ -781,7 +781,7 @@ export function ActiveWorkoutView({
                     }} className={cn('mt-3 w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm transition-colors disabled:cursor-not-allowed', set.completed ? 'bg-white/5 text-white/40' : isSetReadyToComplete(set, getInputMode(exerciseDetails ?? { inputMode: undefined } as any)) ? 'text-black' : 'bg-white/10 text-white/60 opacity-50')}
                     style={(!set.completed && isSetReadyToComplete(set, getInputMode(exerciseDetails ?? { inputMode: undefined } as any))) ? { backgroundColor: sportColor } : undefined}>
                       <CheckCircle2 size={18} fill={set.completed ? 'currentColor' : 'none'} stroke="currentColor" />
-                      {set.completed ? 'Série concluída' : set.corrected ? 'Corrigir série' : 'Concluir série'}
+                      {set.completed ? 'SÃ©rie concluÃ­da' : set.corrected ? 'Corrigir sÃ©rie' : 'Concluir sÃ©rie'}
                     </button>
                   </>
                 );
