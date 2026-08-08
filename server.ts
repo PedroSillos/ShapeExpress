@@ -141,13 +141,17 @@ async function startServer() {
       : '';
     const biometricContext = [bmiHint, ageHint].filter(Boolean).join(' ');
 
+    // Exercise IDs that use duration input (not reps)
+    const durationExerciseIds = new Set(['36', '37', '38', '147', '148', '149', '150', '151', '152', '153', '154', '155', '156', '157', '158', '159', '160', '161', '162', '163']);
+
     const prompt = `Voce e um personal trainer. Crie um treino VARIADO e PERSONALIZADO para: modalidade ${sports.join(', ')}, objetivo ${objective || 'condicionamento geral'}${height ? `, altura ${height}cm` : ''}${weight ? `, peso ${weight}kg` : ''}${age ? `, idade ${age} anos` : ''}.
 Nivel: ${difficulty}
 ${biometricContext ? `Contexto biometrico: ${biometricContext}` : ''}
 Pool de exercicios disponiveis (use APENAS estes IDs): ${sportPoolStr}.
 INSTRUCAO DE VARIACAO: escolha 3 exercicios que melhor se encaixem no perfil do usuario. Nao escolha sempre os primeiros da lista — varie a selecao com base no objetivo, nivel e dados biometricos. Dois usuarios diferentes com perfis diferentes devem receber combinacoes diferentes.
 REGRA ESTRUTURAL: use EXATAMENTE 3 exercicios, numSets=3 em todos, rest="60s" em todos.
-Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"exerciseId":"ID","numSets":3,"sets":"REPS","rest":"60s"}]}`;
+REGRA DE SETS: Para exercicios de duracao/cardio (corrida, ciclismo, natacao, trote, caminhada, pular corda e similares) use sets="5 min". Para exercicios de forca/repeticoes use sets=numero (ex: sets="10"). Use o campo sets conforme o tipo do exercicio.
+Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"exerciseId":"ID","numSets":3,"sets":"VALOR","rest":"60s"}]}`;
 
     try {
       const response = await genAI.models.generateContent({
@@ -164,7 +168,14 @@ Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"e
         console.error('Generate workout JSON parse error. Raw response:', raw);
         return res.status(500).json({ error: 'Resposta da IA em formato inválido.' });
       }
-      parsed.exercises = (parsed.exercises || []).slice(0, 3).map((e: any) => ({ ...e, numSets: 3, rest: '60s' }));
+      parsed.exercises = (parsed.exercises || []).slice(0, 3).map((e: any) => {
+        // Safety net: if a duration exercise got a plain numeric sets value from AI, replace with '5 min'
+        const sets = String(e.sets ?? '10');
+        const correctedSets = durationExerciseIds.has(String(e.exerciseId)) && /^\d+$/.test(sets.trim())
+          ? '5 min'
+          : sets;
+        return { ...e, sets: correctedSets, numSets: 3, rest: '60s' };
+      });
       res.json(parsed);
     } catch (error: any) {
       console.error('Generate workout error:', error?.message || error);

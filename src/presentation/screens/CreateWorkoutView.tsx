@@ -5,6 +5,7 @@ import { format, addMonths, parseISO } from 'date-fns';
 import { cn } from '../../utils/cn';
 import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 import { EXERCISES } from '@/src/domain/entities/exercises';
+import { getInputMode } from '../../domain/use-cases/exerciseInputMode';
 import { Card } from '../components/Card';
 import { ConfigureExercisesView } from '../components/ConfigureExercisesView';
 import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
@@ -598,9 +599,15 @@ export function CreateWorkoutView({
         sheet.exercises = sheet.exercises.filter(e => e.exerciseId !== id);
       } else {
         sheet.exerciseIds = [...sheet.exerciseIds, id];
+        const exerciseData = EXERCISES.find(e => e.id === id);
+        const exInputMode = getInputMode(exerciseData ?? { inputMode: undefined } as any);
+        const defaultSets =
+          exInputMode === 'duration_only' || exInputMode === 'duration_distance'
+            ? '5 min'
+            : '10';
         sheet.exercises = [...sheet.exercises, {
           exerciseId: id,
-          sets: '8-10',
+          sets: defaultSets,
           numSets: 3,
           rest: '1 min',
           notes: ''

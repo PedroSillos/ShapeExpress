@@ -10,7 +10,7 @@ import {
   Scale,
   Trash2,
   Clock,
-  Square,
+  Pause,
   RotateCcw,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -634,13 +634,6 @@ export function ActiveWorkoutView({
                         const s = secs % 60;
                         return `${m}:${s.toString().padStart(2, '0')}`;
                       };
-                      const parseDuration = (val: string): number => {
-                        if (val.includes(':')) {
-                          const [m, s] = val.split(':').map(Number);
-                          return (m || 0) * 60 + (s || 0);
-                        }
-                        return Number(val) || 0;
-                      };
 
                       return (
                         <div className="rounded-2xl border border-white/5 overflow-hidden">
@@ -706,7 +699,7 @@ export function ActiveWorkoutView({
                                   >
                                     <RotateCcw size={20} />
                                   </button>
-                                  {/* Display: countdown when running, editable target when stopped */}
+                                  {/* Display: countdown when running, read-only target when stopped */}
                                   {timerRunning || (timerRemaining !== null && timerRemaining > 0) ? (
                                     <div className={cn(
                                       'min-w-0 flex-1 rounded-xl py-4 px-3 text-center font-bold text-2xl font-mono border',
@@ -715,15 +708,11 @@ export function ActiveWorkoutView({
                                       {formatDuration(timerRemaining ?? 0)}
                                     </div>
                                   ) : (
-                                    <input
-                                      type="text"
-                                      value={set.durationSeconds ? formatDuration(set.durationSeconds) : ''}
-                                      onChange={(e) => updateSet(activeSetIndex, { durationSeconds: parseDuration(e.target.value) })}
-                                      className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400"
-                                      placeholder="0:00"
-                                    />
+                                    <div className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white font-mono">
+                                      {formatDuration(set.durationSeconds ?? 0)}
+                                    </div>
                                   )}
-                                  {/* Start / stop */}
+                                  {/* Start / pause */}
                                   <button
                                     onTouchStart={(e) => e.preventDefault()}
                                     onClick={() => {
@@ -746,7 +735,7 @@ export function ActiveWorkoutView({
                                       color: sportColor
                                     } : undefined}
                                   >
-                                    {timerRunning ? <Square size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
+                                    {timerRunning ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
                                   </button>
                                 </div>
                               </div>

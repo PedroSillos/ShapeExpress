@@ -271,7 +271,15 @@ export function ConfigureExercisesView({
           if (isDuration) {
             // For cardio/duration exercises: configure duration per set (in seconds)
             const durationOptions = ['30s', '1 min', '2 min', '5 min', '10 min', '30 min', 'Personalizado'];
-            const isCustomDuration = !durationOptions.slice(0, 6).includes(currentConfig.sets);
+            const looksLikeDuration = (v: string) =>
+              /^\d+$/.test(v) || /^\d+:\d+$/.test(v) || /^\d+s$/i.test(v) || /^\d+ min$/.test(v);
+            const isValidDurationValue = durationOptions.slice(0, 6).includes(currentConfig.sets) || looksLikeDuration(currentConfig.sets);
+            // If sets contains a reps value (legacy data), auto-correct to default
+            if (!isValidDurationValue) {
+              updateConfig({ sets: '5 min' });
+            }
+            const isCustomDuration = !durationOptions.slice(0, 6).includes(currentConfig.sets)
+              && looksLikeDuration(currentConfig.sets);
             return (
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
@@ -315,10 +323,9 @@ export function ConfigureExercisesView({
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                       <input
                         type="text"
-                        inputMode="numeric"
                         value={currentConfig.sets}
                         onChange={(e) => updateConfig({ sets: e.target.value })}
-                        placeholder="ex: 45s ou 1:30"
+                        placeholder="ex: 1:30 ou 90s"
                         className="w-full bg-dark-card border border-white/5 rounded-xl p-3 focus:ring-0 focus:outline-none text-center font-bold text-sm"
                         style={{ color: sportColor }}
                       />

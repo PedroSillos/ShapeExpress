@@ -14,6 +14,31 @@ import { addSportXp, SPORT_XP_PER_WORKOUT } from '../../domain/use-cases/sportLe
 import { EXERCISES } from '@/src/domain/entities/exercises';
 import { getInputMode } from '../../domain/use-cases/exerciseInputMode';
 
+/**
+ * Converts a config.sets duration string into seconds.
+ * Handles preset labels ("30s", "1 min", "2 min", "5 min", "10 min", "30 min")
+ * and custom values ("1:30" for min:ss, or plain numbers treated as seconds).
+ */
+function parseConfigDuration(val: string): number {
+  const presets: Record<string, number> = {
+    '30s':    30,
+    '1 min':  60,
+    '2 min':  120,
+    '5 min':  300,
+    '10 min': 600,
+    '30 min': 1800,
+  };
+  const trimmed = val?.trim() ?? '';
+  if (presets[trimmed] !== undefined) return presets[trimmed];
+  if (trimmed.includes(':')) {
+    const [m, s] = trimmed.split(':').map(Number);
+    return ((isNaN(m) ? 0 : m) * 60) + (isNaN(s) ? 0 : s);
+  }
+  // Strip trailing 's' in case user typed "45s" as custom value
+  const num = Number(trimmed.replace(/s$/i, ''));
+  return isNaN(num) ? 0 : num;
+}
+
 interface UseWorkoutParams {
   api: any;
   userProfile: UserProfile;
@@ -109,7 +134,8 @@ export function useWorkout({
               weight: isDuration || inputMode === 'reps_only' ? 0 : lastWeight,
               completed: false,
               rest,
-              ...(isDuration ? { durationSeconds: 0 } : {}),
+              ...(isDuration ? { durationSeconds: parseConfigDuration(config.sets) } : {}),
+              ...(inputMode === 'duration_distance' ? { distanceMeters: 1000 } : {}),
             };
           }),
         };
