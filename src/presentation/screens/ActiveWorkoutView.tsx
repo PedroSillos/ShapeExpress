@@ -23,7 +23,7 @@ import {
   UserProfile,
   WorkoutSet
 } from '../../domain/entities';
-import { getInputMode, isSetReadyToComplete } from '../../domain/use-cases/exerciseInputMode';
+import { getInputMode, isSetReadyToComplete, getDefaultSpeed } from '../../domain/use-cases/exerciseInputMode';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { ProgressBar } from '../components/ProgressBar';
@@ -221,14 +221,7 @@ export function ActiveWorkoutView({
     const lastSet = activeExercise.sets[activeExercise.sets.length - 1];
     const inputMode = getInputMode(exerciseDetails ?? { inputMode: undefined } as any);
     const isDuration = inputMode === 'duration_distance' || inputMode === 'duration_only' || inputMode === 'duration_speed';
-    // Default speed per exercise when no previous set exists
-    const defaultSpeedByExercise: Record<string, number> = {
-      '36': 10,  // Corrida
-      '37': 20,  // Ciclismo
-      '154': 5,  // Caminhada
-      '155': 8,  // Trote
-    };
-    const defaultSpeed = defaultSpeedByExercise[exerciseDetails?.id ?? ''] ?? 10;
+    const defaultSpeed = getDefaultSpeed(exerciseDetails?.id ?? '');
     newExercises[activeExerciseIndex].sets.push({
       id: Date.now().toString(),
       reps: isDuration ? 0 : (lastSet?.reps || 10),

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../utils/cn';
 import { EXERCISES } from '@/src/domain/entities/exercises';
 import { WorkoutSheet, WorkoutTemplateExercise, Exercise, MuscleGroup, MuscleSubgroup, ExerciseCategory, Equipment } from '../../domain/entities';
-import { getInputMode } from '../../domain/use-cases/exerciseInputMode';
+import { getInputMode, getDefaultSpeed } from '../../domain/use-cases/exerciseInputMode';
 import { ALL_SPORTS } from '../../features/sports/constants';
 import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
 
@@ -271,12 +271,18 @@ export function ConfigureExercisesView({
           if (isDuration) {
             // For cardio/duration exercises: configure duration per set (in seconds)
             const durationOptions = ['30s', '1 min', '2 min', '5 min', '10 min', '30 min', 'Personalizado'];
+            // Custom duration is any value not in the preset list — after migration always "M:SS" format
             const looksLikeDuration = (v: string) =>
-              /^\d+$/.test(v) || /^\d+:\d+$/.test(v) || /^\d+s$/i.test(v) || /^\d+ min$/.test(v);
+              /^\d+:\d+$/.test(v) || /^\d+s$/i.test(v) || /^\d+ min$/.test(v) || /^\d+$/.test(v);
             const isValidDurationValue = durationOptions.slice(0, 6).includes(currentConfig.sets) || looksLikeDuration(currentConfig.sets);
             // If sets contains a reps value (legacy data), auto-correct to default
             if (!isValidDurationValue) {
               updateConfig({ sets: '5 min' });
+            }
+            // Migrate legacy numeric-only custom values (e.g. "60") to "M:SS"
+            if (/^\d+$/.test(currentConfig.sets) && !durationOptions.slice(0, 6).includes(currentConfig.sets)) {
+              const total = parseInt(currentConfig.sets);
+              updateConfig({ sets: `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}` });
             }
             const isCustomDuration = !durationOptions.slice(0, 6).includes(currentConfig.sets)
               && looksLikeDuration(currentConfig.sets);
@@ -299,7 +305,7 @@ export function ConfigureExercisesView({
                         key={option}
                         onClick={() => {
                           if (option === 'Personalizado') {
-                            if (!isCustomDuration) updateConfig({ sets: '60' });
+                            if (!isCustomDuration) updateConfig({ sets: '1:00' });
                           } else {
                             updateConfig({ sets: option });
                           }
@@ -319,20 +325,75 @@ export function ConfigureExercisesView({
                   })}
                 </div>
                 <AnimatePresence>
-                  {isCustomDuration && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                      <input
-                        type="text"
-                        value={currentConfig.sets}
-                        onChange={(e) => updateConfig({ sets: e.target.value })}
-                        placeholder="ex: 1:30 ou 90s"
-                        className="w-full bg-dark-card border border-white/5 rounded-xl p-3 focus:ring-0 focus:outline-none text-center font-bold text-sm"
-                        style={{ color: sportColor }}
-                      />
-                      <p className="text-[8px] text-white/20 text-center uppercase font-bold tracking-widest mt-2">Duração personalizada por série</p>
-                    </motion.div>
-                  )}
+                  {isCustomDuration && (() => {
+                    // Parse current "M:SS" value into minutes and seconds
+                    const parseMinSec = (v: string): [number, number] => {
+                      if (v.includes(':')) {
+                        const [m, s] = v.split(':').map(Number);
+                        return [isNaN(m) ? 0 : m, isNaN(s) ? 0 : s];
+                      }
+                      const total = parseInt(v.replace(/s$/i, '')) || 0;
+                      return [Math.floor(total / 60), total % 60];
+                    };
+                    const toMinSecString = (m: number, s: number) => `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                    const [curMin, curSec] = parseMinSec(currentConfig.sets);
+
+                    return (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                        <div className="flex items-center justify-center gap-4 bg-dark-card border border-white/5 rounded-2xl p-4">
+                          <button
+                            onClick={() => {
+                              const total = Math.max(0, curMin * 60 + curSec - 30);
+                              updateConfig({ sets: toMinSecString(Math.floor(total / 60), total % 60) });
+                            }}
+                            className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold hover:bg-white/10 transition-colors"
+                          >−</button>
+
+                          <div className="flex items-center gap-1">
+                            <span className="font-bold text-3xl w-10 text-center" style={{ color: sportColor }}>{String(curMin).padStart(2, '0')}</span>
+                            <span className="text-2xl font-bold text-white/30">:</span>
+                            <span className="font-bold text-3xl w-10 text-center" style={{ color: sportColor }}>{String(curSec).padStart(2, '0')}</span>
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              const total = curMin * 60 + curSec + 30;
+                              updateConfig({ sets: toMinSecString(Math.floor(total / 60), total % 60) });
+                            }}
+                            className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold hover:bg-white/10 transition-colors"
+                          >+</button>
+                        </div>
+                        <p className="text-[8px] text-white/20 text-center uppercase font-bold tracking-widest mt-2">Duração personalizada por série</p>
+                      </motion.div>
+                    );
+                  })()}
                 </AnimatePresence>
+
+                {/* Speed — only for duration_speed */}
+                {inputMode === 'duration_speed' && (() => {
+                  const curSpeed = currentConfig.speedKmh ?? getDefaultSpeed(currentExerciseId);
+                  return (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${sportColor}1a`, color: sportColor }}>
+                          <TrendingUp size={16} />
+                        </div>
+                        <h4 className="font-bold uppercase text-xs tracking-widest">Velocidade padrão (km/h)</h4>
+                      </div>
+                      <div className="flex items-center justify-center gap-4 bg-dark-card border border-dark-border rounded-2xl p-4">
+                        <button
+                          onClick={() => updateConfig({ speedKmh: Math.max(0, Math.round((curSpeed - 0.5) * 10) / 10) })}
+                          className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold hover:bg-white/10 transition-colors"
+                        >−</button>
+                        <span className="font-bold text-3xl w-16 text-center" style={{ color: sportColor }}>{curSpeed}</span>
+                        <button
+                          onClick={() => updateConfig({ speedKmh: Math.round((curSpeed + 0.5) * 10) / 10 })}
+                          className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold hover:bg-white/10 transition-colors"
+                        >+</button>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             );
           }

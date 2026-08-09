@@ -4,6 +4,19 @@ export function getInputMode(exercise: Exercise): ExerciseInputMode {
   return exercise.inputMode ?? "weight_reps";
 }
 
+/** Default speed (km/h) per exercise ID for duration_speed exercises */
+export const DEFAULT_SPEED_BY_EXERCISE: Record<string, number> = {
+  '36':  10, // Corrida
+  '37':  20, // Ciclismo
+  '154':  5, // Caminhada
+  '155':  8, // Trote
+};
+
+/** Returns the default speed for an exercise, or 10 km/h as fallback */
+export function getDefaultSpeed(exerciseId: string): number {
+  return DEFAULT_SPEED_BY_EXERCISE[exerciseId] ?? 10;
+}
+
 /** Returns true if the set has enough data to be marked as completed */
 export function isSetReadyToComplete(
   set: { reps: number; weight: number; durationSeconds?: number; distanceMeters?: number; speedKmh?: number },

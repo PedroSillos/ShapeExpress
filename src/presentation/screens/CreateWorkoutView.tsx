@@ -5,7 +5,7 @@ import { format, addMonths, parseISO } from 'date-fns';
 import { cn } from '../../utils/cn';
 import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 import { EXERCISES } from '@/src/domain/entities/exercises';
-import { getInputMode } from '../../domain/use-cases/exerciseInputMode';
+import { getInputMode, getDefaultSpeed } from '../../domain/use-cases/exerciseInputMode';
 import { Card } from '../components/Card';
 import { ConfigureExercisesView } from '../components/ConfigureExercisesView';
 import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
@@ -610,7 +610,8 @@ export function CreateWorkoutView({
           sets: defaultSets,
           numSets: 3,
           rest: '1 min',
-          notes: ''
+          notes: '',
+          ...(exInputMode === 'duration_speed' ? { speedKmh: getDefaultSpeed(id) } : {}),
         }];
       }
       newSheets[activeSheetIndex] = sheet;

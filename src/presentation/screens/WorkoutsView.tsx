@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
+import { getInputMode, getDefaultSpeed } from '@/src/domain/use-cases/exerciseInputMode';
 import {
   Plus,
   Dumbbell,
@@ -300,7 +301,16 @@ function TemplateCard({
   const addDraftEx = (exerciseId: string) => {
     const already = getDraftExercises().some(e => e.exerciseId === exerciseId);
     if (already) return;
-    const newEx: WorkoutTemplateExercise = { exerciseId, sets: '8-10', numSets: 3, rest: '60s' };
+    const exerciseData = EXERCISES.find(e => e.id === exerciseId);
+    const exInputMode = getInputMode(exerciseData ?? { inputMode: undefined } as any);
+    const isDuration = exInputMode === 'duration_only' || exInputMode === 'duration_distance' || exInputMode === 'duration_speed';
+    const newEx: WorkoutTemplateExercise = {
+      exerciseId,
+      sets: isDuration ? '5 min' : '8-10',
+      numSets: 3,
+      rest: '60s',
+      ...(exInputMode === 'duration_speed' ? { speedKmh: getDefaultSpeed(exerciseId) } : {}),
+    };
     setDraftExercises([...getDraftExercises(), newEx]);
     setShowExSearch(false);
     setExSearchQuery('');
@@ -596,7 +606,7 @@ function TemplateCard({
                                 </div>
                                 <span className="text-white/25 text-xs mb-0.5">×</span>
                                 <div className="flex flex-col items-center gap-0.5">
-                                  <span className="text-[9px] font-bold text-white/30 uppercase tracking-wide">reps.</span>
+                                  <span className="text-[9px] font-bold text-white/30 uppercase tracking-wide">{getInputMode(exercise) === 'duration_distance' || getInputMode(exercise) === 'duration_only' || getInputMode(exercise) === 'duration_speed' ? 'tempo' : 'reps.'}</span>
                                   <input
                                     type="text"
                                     value={ex.sets}
@@ -755,7 +765,7 @@ function TemplateCard({
                               </div>
                               <span className="text-white/25 text-xs mb-0.5">×</span>
                               <div className="flex flex-col items-center gap-0.5">
-                                <span className="text-[9px] font-bold text-white/30 uppercase tracking-wide">reps.</span>
+                                <span className="text-[9px] font-bold text-white/30 uppercase tracking-wide">{getInputMode(exercise) === 'duration_distance' || getInputMode(exercise) === 'duration_only' || getInputMode(exercise) === 'duration_speed' ? 'tempo' : 'reps.'}</span>
                                 <input
                                   type="text"
                                   value={ex.sets}

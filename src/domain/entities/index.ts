@@ -139,6 +139,7 @@ export interface WorkoutTemplateExercise {
   rest: string;
   notes?: string;
   substitutions?: string[];
+  speedKmh?: number;
 }
 
 export interface WorkoutSheet {

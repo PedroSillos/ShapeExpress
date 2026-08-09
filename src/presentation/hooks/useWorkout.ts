@@ -3,7 +3,7 @@ import React from 'react';
 import {
   WorkoutTemplate, WorkoutSession, WorkoutSheet, UserProfile, UserStats,
   UserTrainingProfile, ExerciseUserStats, UserCalorieProfile, BodyAssessment,
-  ProgressionAlert, StagnationReport,
+  ProgressionAlert, StagnationReport, WorkoutTemplateExercise,
 } from '../../domain/entities';
 import {
   estimateWorkoutDuration, estimateWorkoutCalories,
@@ -12,7 +12,7 @@ import {
 import { analyzeExerciseStagnation } from '../../domain/use-cases/analyzeStagnation';
 import { addSportXp, SPORT_XP_PER_WORKOUT } from '../../domain/use-cases/sportLevel';
 import { EXERCISES } from '@/src/domain/entities/exercises';
-import { getInputMode } from '../../domain/use-cases/exerciseInputMode';
+import { getInputMode, getDefaultSpeed } from '../../domain/use-cases/exerciseInputMode';
 
 /**
  * Converts a config.sets duration string into seconds.
@@ -95,7 +95,7 @@ export function useWorkout({
       ? sheet.exercises
       : (template.exercises && template.exercises.length > 0
         ? template.exercises
-        : (template.exerciseIds || []).map(id => ({ exerciseId: id, sets: '10', numSets: 3, rest: '1 min' })));
+        : (template.exerciseIds || []).map(id => ({ exerciseId: id, sets: '10', numSets: 3, rest: '1 min' } as WorkoutTemplateExercise)));
 
     if (exercisesToUse.length === 0) {
       alert('Este treino não possui exercícios configurados.');
@@ -128,12 +128,6 @@ export function useWorkout({
             const exerciseData = EXERCISES.find(e => e.id === config.exerciseId);
             const inputMode = getInputMode(exerciseData ?? { inputMode: undefined } as any);
             const isDuration = inputMode === 'duration_distance' || inputMode === 'duration_only' || inputMode === 'duration_speed';
-            const defaultSpeedByExercise: Record<string, number> = {
-              '36': 10,  // Corrida
-              '37': 20,  // Ciclismo
-              '154': 5,  // Caminhada
-              '155': 8,  // Trote
-            };
             return {
               id: `${Date.now()}-${i}`,
               reps: isDuration ? 0 : reps,
@@ -142,7 +136,7 @@ export function useWorkout({
               rest,
               ...(isDuration ? { durationSeconds: parseConfigDuration(config.sets) } : {}),
               ...(inputMode === 'duration_distance' ? { distanceMeters: 1000 } : {}),
-              ...(inputMode === 'duration_speed' ? { speedKmh: defaultSpeedByExercise[config.exerciseId] ?? 10 } : {}),
+              ...(inputMode === 'duration_speed' ? { speedKmh: config.speedKmh ?? getDefaultSpeed(config.exerciseId) } : {}),
             };
           }),
         };
