@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import {
   Dumbbell,
   ChevronRight,
@@ -220,7 +220,15 @@ export function ActiveWorkoutView({
     const newExercises = [...session.exercises];
     const lastSet = activeExercise.sets[activeExercise.sets.length - 1];
     const inputMode = getInputMode(exerciseDetails ?? { inputMode: undefined } as any);
-    const isDuration = inputMode === 'duration_distance' || inputMode === 'duration_only';
+    const isDuration = inputMode === 'duration_distance' || inputMode === 'duration_only' || inputMode === 'duration_speed';
+    // Default speed per exercise when no previous set exists
+    const defaultSpeedByExercise: Record<string, number> = {
+      '36': 10,  // Corrida
+      '37': 20,  // Ciclismo
+      '154': 5,  // Caminhada
+      '155': 8,  // Trote
+    };
+    const defaultSpeed = defaultSpeedByExercise[exerciseDetails?.id ?? ''] ?? 10;
     newExercises[activeExerciseIndex].sets.push({
       id: Date.now().toString(),
       reps: isDuration ? 0 : (lastSet?.reps || 10),
@@ -229,6 +237,7 @@ export function ActiveWorkoutView({
       rest: lastSet?.rest || '1 min',
       ...(isDuration ? { durationSeconds: lastSet?.durationSeconds || 0 } : {}),
       ...(inputMode === 'duration_distance' ? { distanceMeters: lastSet?.distanceMeters } : {}),
+      ...(inputMode === 'duration_speed' ? { speedKmh: lastSet?.speedKmh ?? defaultSpeed } : {}),
     });
     setSession({ ...session, exercises: newExercises });
   };
@@ -681,8 +690,8 @@ export function ActiveWorkoutView({
                               </div>
                             )}
 
-                            {/* duration fields  shared between duration_distance, duration_only */}
-                            {(inputMode === 'duration_distance' || inputMode === 'duration_only') && (
+                            {/* duration fields u{2014} shared between duration_distance, duration_only, duration_speed */}
+                            {(inputMode === 'duration_distance' || inputMode === 'duration_only' || inputMode === 'duration_speed') && (
                               <div className="space-y-2">
                                 <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">
                                   {timerRunning || (timerRemaining !== null && timerRemaining > 0) ? 'Tempo restante' : 'Duração (min:ss)'}
@@ -749,6 +758,26 @@ export function ActiveWorkoutView({
                                   <StepperButton label="-" onStep={() => { const d = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].distanceMeters ?? 0; updateSet(activeSetIndex, { distanceMeters: Math.max(0, d - 100) }); }} />
                                   <input type="number" value={set.distanceMeters ?? ''} onChange={(e) => updateSet(activeSetIndex, { distanceMeters: Number(e.target.value) })} className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none" placeholder="0" />
                                   <StepperButton label="+" onStep={() => { const d = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].distanceMeters ?? 0; updateSet(activeSetIndex, { distanceMeters: d + 100 }); }} />
+                                </div>
+                              </div>
+                            )}
+
+                            {/* speed  only for duration_speed */}
+                            {inputMode === 'duration_speed' && (
+                              <div className="space-y-2">
+                                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest text-center">Velocidade (km/h)</p>
+                                <div className="flex items-center gap-2 w-full">
+                                  <StepperButton label="-" onStep={() => { const v = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].speedKmh ?? 0; updateSet(activeSetIndex, { speedKmh: Math.max(0, Math.round((v - 0.5) * 10) / 10) }); }} />
+                                  <input
+                                    type="number"
+                                    inputMode="decimal"
+                                    step="0.5"
+                                    value={set.speedKmh ?? ''}
+                                    onChange={(e) => updateSet(activeSetIndex, { speedKmh: Number(e.target.value) })}
+                                    className="min-w-0 flex-1 bg-black/40 border border-white/10 rounded-xl py-4 px-3 text-center font-bold text-xl text-white focus:outline-none focus:border-gray-400 appearance-none"
+                                    placeholder="0"
+                                  />
+                                  <StepperButton label="+" onStep={() => { const v = sessionRef.current.exercises[activeExerciseIndex].sets[activeSetIndex].speedKmh ?? 0; updateSet(activeSetIndex, { speedKmh: Math.round((v + 0.5) * 10) / 10 }); }} />
                                 </div>
                               </div>
                             )}

@@ -127,7 +127,13 @@ export function useWorkout({
             const rest = restArray[i] !== undefined ? restArray[i] : (restArray[0] || '1 min');
             const exerciseData = EXERCISES.find(e => e.id === config.exerciseId);
             const inputMode = getInputMode(exerciseData ?? { inputMode: undefined } as any);
-            const isDuration = inputMode === 'duration_distance' || inputMode === 'duration_only';
+            const isDuration = inputMode === 'duration_distance' || inputMode === 'duration_only' || inputMode === 'duration_speed';
+            const defaultSpeedByExercise: Record<string, number> = {
+              '36': 10,  // Corrida
+              '37': 20,  // Ciclismo
+              '154': 5,  // Caminhada
+              '155': 8,  // Trote
+            };
             return {
               id: `${Date.now()}-${i}`,
               reps: isDuration ? 0 : reps,
@@ -136,6 +142,7 @@ export function useWorkout({
               rest,
               ...(isDuration ? { durationSeconds: parseConfigDuration(config.sets) } : {}),
               ...(inputMode === 'duration_distance' ? { distanceMeters: 1000 } : {}),
+              ...(inputMode === 'duration_speed' ? { speedKmh: defaultSpeedByExercise[config.exerciseId] ?? 10 } : {}),
             };
           }),
         };

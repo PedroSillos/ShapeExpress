@@ -17,5 +17,7 @@ export function isSetReadyToComplete(
     case "duration_distance":
     case "duration_only":
       return (set.durationSeconds ?? 0) > 0;
+    case "duration_speed":
+      return (set.durationSeconds ?? 0) > 0 && (set.speedKmh ?? 0) > 0;
   }
 }

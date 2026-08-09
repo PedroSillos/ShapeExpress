@@ -266,7 +266,7 @@ export function ConfigureExercisesView({
         {/* Reps / Duration — conditional by inputMode */}
         {(() => {
           const inputMode = getInputMode(exercise ?? { inputMode: undefined } as any);
-          const isDuration = inputMode === 'duration_distance' || inputMode === 'duration_only';
+          const isDuration = inputMode === 'duration_distance' || inputMode === 'duration_only' || inputMode === 'duration_speed';
 
           if (isDuration) {
             // For cardio/duration exercises: configure duration per set (in seconds)

@@ -602,7 +602,7 @@ export function CreateWorkoutView({
         const exerciseData = EXERCISES.find(e => e.id === id);
         const exInputMode = getInputMode(exerciseData ?? { inputMode: undefined } as any);
         const defaultSets =
-          exInputMode === 'duration_only' || exInputMode === 'duration_distance'
+          exInputMode === 'duration_only' || exInputMode === 'duration_distance' || exInputMode === 'duration_speed'
             ? '5 min'
             : '10';
         sheet.exercises = [...sheet.exercises, {

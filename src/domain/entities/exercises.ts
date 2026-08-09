@@ -182,11 +182,11 @@ export const EXERCISES: Exercise[] = [
   { id: "14", name: "Kettlebell swing", muscleGroup: "Full Body", defaultSets: 3, defaultReps: 20, category: "Funcional", equipment: "Kettlebell", type: "compound", youtubeUrl: "https://www.youtube.com/watch?v=pvIjsGZ0Zmc" },
 
   // ─── Cardio ───────────────────────────────────────────────────────────────
-  { id: "36",  name: "Corrida",     muscleGroup: "Pernas",    defaultSets: 1, defaultReps: 30,  category: "Funcional", equipment: "Peso corporal", type: "cardio", inputMode: "duration_distance", youtubeUrl: "https://www.youtube.com/watch?v=pvIjsGZ0Zmc" },
-  { id: "37",  name: "Ciclismo",    muscleGroup: "Pernas",    defaultSets: 1, defaultReps: 45,  category: "Funcional", equipment: "Máquina",       type: "cardio", inputMode: "duration_distance", youtubeUrl: "https://www.youtube.com/watch?v=pvIjsGZ0Zmc" },
+  { id: "36",  name: "Corrida",     muscleGroup: "Pernas",    defaultSets: 1, defaultReps: 30,  category: "Funcional", equipment: "Peso corporal", type: "cardio", inputMode: "duration_speed", youtubeUrl: "https://www.youtube.com/watch?v=pvIjsGZ0Zmc" },
+  { id: "37",  name: "Ciclismo",    muscleGroup: "Pernas",    defaultSets: 1, defaultReps: 45,  category: "Funcional", equipment: "Máquina",       type: "cardio", inputMode: "duration_speed", youtubeUrl: "https://www.youtube.com/watch?v=pvIjsGZ0Zmc" },
   { id: "38",  name: "Pular corda", muscleGroup: "Full Body", defaultSets: 3, defaultReps: 120, category: "Funcional", equipment: "Peso corporal", type: "cardio", inputMode: "duration_only",     youtubeUrl: "https://www.youtube.com/watch?v=pvIjsGZ0Zmc" },
-  { id: "154", name: "Caminhada",   muscleGroup: "Pernas",    defaultSets: 1, defaultReps: 1,   category: "Funcional", equipment: "Peso corporal", type: "cardio", inputMode: "duration_distance" },
-  { id: "155", name: "Trote",       muscleGroup: "Pernas",    defaultSets: 1, defaultReps: 1,   category: "Funcional", equipment: "Peso corporal", type: "cardio", inputMode: "duration_distance" },
+  { id: "154", name: "Caminhada",   muscleGroup: "Pernas",    defaultSets: 1, defaultReps: 1,   category: "Funcional", equipment: "Peso corporal", type: "cardio", inputMode: "duration_speed" },
+  { id: "155", name: "Trote",       muscleGroup: "Pernas",    defaultSets: 1, defaultReps: 1,   category: "Funcional", equipment: "Peso corporal", type: "cardio", inputMode: "duration_speed" },
 
   // ─── Natação ──────────────────────────────────────────────────────────────
   { id: "147", name: "Flutuação",       muscleGroup: "Full Body", defaultSets: 3, defaultReps: 1, category: "Funcional", equipment: "Peso corporal", type: "core",  inputMode: "duration_only" },

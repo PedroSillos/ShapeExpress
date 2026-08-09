@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import ReactDOM from 'react-dom';
 import { STORAGE_KEYS } from '../../shared/lib/storageKeys';
 import {
   Plus,
@@ -204,6 +205,8 @@ function TemplateCard({
   const [selectedCycleIdx, setSelectedCycleIdx] = useState(0);
   const [selectedSheetIdx, setSelectedSheetIdx] = useState(0);
   const renameInputRef = useRef<HTMLInputElement>(null);
+  const settingsBtnRef = useRef<HTMLButtonElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
   // Touch-based drag-to-reorder state
   const dragFromIdx = useRef<number>(-1);
 
@@ -402,45 +405,55 @@ function TemplateCard({
               />
             </div>
             <button
-              onClick={() => setOpenSettingsId(openSettingsId === template.id ? null : template.id)}
+              ref={settingsBtnRef}
+              onClick={() => {
+                if (openSettingsId === template.id) {
+                  setOpenSettingsId(null);
+                } else {
+                  if (settingsBtnRef.current) {
+                    const r = settingsBtnRef.current.getBoundingClientRect();
+                    setDropdownPos({ top: r.bottom + 4, right: window.innerWidth - r.right });
+                  }
+                  setOpenSettingsId(template.id);
+                }
+              }}
               className="p-2 text-white/20 hover:text-white transition-colors"
             >
               <Settings size={17} />
             </button>
-            <AnimatePresence>
-              {openSettingsId === template.id && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setOpenSettingsId(null)} />
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9, y: -8 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9, y: -8 }}
-                    className="absolute right-0 top-9 w-36 bg-dark-card border border-dark-border rounded-2xl shadow-2xl z-20 overflow-hidden"
-                  >
-                    <button
-                      onClick={startRename}
-                      className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold hover:bg-white/5 transition-colors"
-                    >
-                      <Pen size={13} /> Renomear
-                    </button>
-                    <button
-                      onClick={startEditing}
-                      className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold hover:bg-white/5 transition-colors border-t border-dark-border"
-                    >
-                      <Edit size={13} /> Editar
-                    </button>
-                    <button
-                      onClick={() => { onDeleteWorkout(template.id); setOpenSettingsId(null); }}
-                      className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold text-red-400 hover:bg-white/5 transition-colors border-t border-dark-border"
-                    >
-                      <Trash2 size={13} /> Excluir
-                    </button>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
           </div>
         </div>
+
+        {/* Settings dropdown — rendered via portal to escape overflow-hidden */}
+        {openSettingsId === template.id && ReactDOM.createPortal(
+          <>
+            <div className="fixed inset-0 z-[90]" onClick={() => setOpenSettingsId(null)} />
+            <div
+              style={{ position: 'fixed', top: dropdownPos.top, right: dropdownPos.right }}
+              className="w-36 bg-dark-card border border-dark-border rounded-2xl shadow-2xl z-[100] overflow-hidden"
+            >
+              <button
+                onClick={startRename}
+                className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold hover:bg-white/5 transition-colors"
+              >
+                <Pen size={13} /> Renomear
+              </button>
+              <button
+                onClick={startEditing}
+                className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold hover:bg-white/5 transition-colors border-t border-dark-border"
+              >
+                <Edit size={13} /> Editar
+              </button>
+              <button
+                onClick={() => { onDeleteWorkout(template.id); setOpenSettingsId(null); }}
+                className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold text-red-400 hover:bg-white/5 transition-colors border-t border-dark-border"
+              >
+                <Trash2 size={13} /> Excluir
+              </button>
+            </div>
+          </>,
+          document.body
+        )}
 
 
 

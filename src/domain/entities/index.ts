@@ -51,8 +51,9 @@ export type ExerciseType = "compound" | "isolation" | "core" | "cardio";
 export type ExerciseInputMode =
   | "weight_reps"       // musculação padrão
   | "reps_only"         // peso corporal sem carga
-  | "duration_distance" // corrida, natação, ciclismo
-  | "duration_only";    // alongamento, cardio sem métrica
+  | "duration_distance" // cardio com distância mensurável
+  | "duration_only"     // alongamento, cardio sem métrica
+  | "duration_speed";   // corrida, ciclismo, caminhada (duração + velocidade km/h)
 
 export interface Exercise {
   id: string;
