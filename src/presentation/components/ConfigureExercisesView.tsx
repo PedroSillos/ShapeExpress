@@ -97,10 +97,8 @@ export function ConfigureExercisesView({
   };
 
   const repOptions = ['6–8', '8–10', '10–12', '12–15', 'Personalizado'];
-  const restOptions = ['1 min', '2 min', '3 min', '5 min', 'Personalizado'];
 
   const isCustomReps = !repOptions.slice(0, 4).includes(currentConfig.sets);
-  const isCustomRest = !restOptions.slice(0, 4).includes(currentConfig.rest);
 
   return (
     <div className="fixed inset-0 bg-dark-surface z-[100] flex flex-col">
@@ -269,23 +267,32 @@ export function ConfigureExercisesView({
           const isDuration = inputMode === 'duration_distance' || inputMode === 'duration_only' || inputMode === 'duration_speed';
 
           if (isDuration) {
-            // For cardio/duration exercises: configure duration per set (in seconds)
-            const durationOptions = ['30s', '1 min', '2 min', '5 min', '10 min', '30 min', 'Personalizado'];
-            // Custom duration is any value not in the preset list — after migration always "M:SS" format
-            const looksLikeDuration = (v: string) =>
-              /^\d+:\d+$/.test(v) || /^\d+s$/i.test(v) || /^\d+ min$/.test(v) || /^\d+$/.test(v);
-            const isValidDurationValue = durationOptions.slice(0, 6).includes(currentConfig.sets) || looksLikeDuration(currentConfig.sets);
-            // If sets contains a reps value (legacy data), auto-correct to default
-            if (!isValidDurationValue) {
-              updateConfig({ sets: '5 min' });
+            // Normalize any legacy format to total seconds, then display as mm:ss
+            const parseLegacyToSeconds = (v: string): number => {
+              if (/^\d+:\d+$/.test(v)) {
+                const [m, s] = v.split(':').map(Number);
+                return (isNaN(m) ? 0 : m) * 60 + (isNaN(s) ? 0 : s);
+              }
+              if (/^\d+s$/i.test(v)) return parseInt(v) || 0;
+              if (/^\d+ min$/.test(v)) return (parseInt(v) || 0) * 60;
+              if (/^\d+$/.test(v)) return parseInt(v) || 0;
+              // Fallback for completely unrecognized values
+              return 300; // 5 min
+            };
+            const toMinSecString = (totalSecs: number) => {
+              const m = Math.floor(totalSecs / 60);
+              const s = totalSecs % 60;
+              return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            };
+
+            // Normalize legacy value on first render (side-effect inside render is fine here — same pattern as before)
+            const isAlreadyMinSec = /^\d+:\d+$/.test(currentConfig.sets);
+            if (!isAlreadyMinSec) {
+              updateConfig({ sets: toMinSecString(parseLegacyToSeconds(currentConfig.sets)) });
             }
-            // Migrate legacy numeric-only custom values (e.g. "60") to "M:SS"
-            if (/^\d+$/.test(currentConfig.sets) && !durationOptions.slice(0, 6).includes(currentConfig.sets)) {
-              const total = parseInt(currentConfig.sets);
-              updateConfig({ sets: `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}` });
-            }
-            const isCustomDuration = !durationOptions.slice(0, 6).includes(currentConfig.sets)
-              && looksLikeDuration(currentConfig.sets);
+
+            const totalSecs = parseLegacyToSeconds(currentConfig.sets);
+
             return (
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
@@ -297,77 +304,29 @@ export function ConfigureExercisesView({
                   </div>
                   <h4 className="font-bold uppercase text-xs tracking-widest">Duração por Série</h4>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {durationOptions.map(option => {
-                    const isSelected = option === 'Personalizado' ? isCustomDuration : currentConfig.sets === option;
-                    return (
-                      <button
-                        key={option}
-                        onClick={() => {
-                          if (option === 'Personalizado') {
-                            if (!isCustomDuration) updateConfig({ sets: '1:00' });
-                          } else {
-                            updateConfig({ sets: option });
-                          }
-                        }}
-                        className={cn(
-                          "py-4 rounded-2xl font-bold text-sm transition-all relative overflow-hidden",
-                          isSelected
-                            ? "text-white shadow-lg"
-                            : "bg-dark-card border border-dark-border text-white/40"
-                        )}
-                        style={isSelected ? { backgroundColor: sportColor, boxShadow: `0 0 15px ${sportColor}4d` } : undefined}
-                      >
-                        {option}
-                        {isSelected && <motion.div layoutId="rep-glow" className="absolute inset-0 bg-white/10" />}
-                      </button>
-                    );
-                  })}
+
+                <div className="flex items-center justify-center gap-4 bg-dark-card border border-white/5 rounded-2xl p-4">
+                  <button
+                    onClick={() => updateConfig({ sets: toMinSecString(Math.max(0, totalSecs - 30)) })}
+                    className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold hover:bg-white/10 transition-colors"
+                  >−</button>
+
+                  <div className="flex items-center gap-1">
+                    <span className="font-bold text-3xl w-10 text-center" style={{ color: sportColor }}>
+                      {String(Math.floor(totalSecs / 60)).padStart(2, '0')}
+                    </span>
+                    <span className="text-2xl font-bold text-white/30">:</span>
+                    <span className="font-bold text-3xl w-10 text-center" style={{ color: sportColor }}>
+                      {String(totalSecs % 60).padStart(2, '0')}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => updateConfig({ sets: toMinSecString(totalSecs + 30) })}
+                    className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold hover:bg-white/10 transition-colors"
+                  >+</button>
                 </div>
-                <AnimatePresence>
-                  {isCustomDuration && (() => {
-                    // Parse current "M:SS" value into minutes and seconds
-                    const parseMinSec = (v: string): [number, number] => {
-                      if (v.includes(':')) {
-                        const [m, s] = v.split(':').map(Number);
-                        return [isNaN(m) ? 0 : m, isNaN(s) ? 0 : s];
-                      }
-                      const total = parseInt(v.replace(/s$/i, '')) || 0;
-                      return [Math.floor(total / 60), total % 60];
-                    };
-                    const toMinSecString = (m: number, s: number) => `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-                    const [curMin, curSec] = parseMinSec(currentConfig.sets);
-
-                    return (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                        <div className="flex items-center justify-center gap-4 bg-dark-card border border-white/5 rounded-2xl p-4">
-                          <button
-                            onClick={() => {
-                              const total = Math.max(0, curMin * 60 + curSec - 30);
-                              updateConfig({ sets: toMinSecString(Math.floor(total / 60), total % 60) });
-                            }}
-                            className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold hover:bg-white/10 transition-colors"
-                          >−</button>
-
-                          <div className="flex items-center gap-1">
-                            <span className="font-bold text-3xl w-10 text-center" style={{ color: sportColor }}>{String(curMin).padStart(2, '0')}</span>
-                            <span className="text-2xl font-bold text-white/30">:</span>
-                            <span className="font-bold text-3xl w-10 text-center" style={{ color: sportColor }}>{String(curSec).padStart(2, '0')}</span>
-                          </div>
-
-                          <button
-                            onClick={() => {
-                              const total = curMin * 60 + curSec + 30;
-                              updateConfig({ sets: toMinSecString(Math.floor(total / 60), total % 60) });
-                            }}
-                            className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold hover:bg-white/10 transition-colors"
-                          >+</button>
-                        </div>
-                        <p className="text-[8px] text-white/20 text-center uppercase font-bold tracking-widest mt-2">Duração personalizada por série</p>
-                      </motion.div>
-                    );
-                  })()}
-                </AnimatePresence>
+                <p className="text-[8px] text-white/20 text-center uppercase font-bold tracking-widest">Duração por série</p>
 
                 {/* Speed — only for duration_speed */}
                 {inputMode === 'duration_speed' && (() => {
@@ -485,50 +444,68 @@ export function ConfigureExercisesView({
         })()}
 
         {/* Rest Selection */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: `${sportColor}1a`, color: sportColor }}
-            >
-              <History size={16} />
-            </div>
-            <h4 className="font-bold uppercase text-xs tracking-widest">Descanso</h4>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            {restOptions.map(option => {
-              const isSelected = option === 'Personalizado' ? isCustomRest : currentConfig.rest === option;
-              return (
-                <button
-                  key={option}
-                  onClick={() => {
-                    if (option === 'Personalizado') {
-                      if (!isCustomRest) {
-                        const baseVal = currentConfig.rest.includes('min') 
-                          ? (parseInt(currentConfig.rest) * 60).toString() + 's'
-                          : currentConfig.rest;
-                        updateConfig({ rest: Array(currentConfig.numSets).fill(baseVal || '60s').join(',') });
-                      }
-                    } else {
-                      updateConfig({ rest: option });
-                    }
-                  }}
-                  className={cn(
-                    "py-4 rounded-2xl font-bold text-sm transition-all relative overflow-hidden",
-                    isSelected 
-                      ? "text-white shadow-lg"
-                      : "bg-dark-card border border-dark-border text-white/40"
-                  )}
-                  style={isSelected ? { backgroundColor: sportColor, boxShadow: `0 0 15px ${sportColor}4d` } : undefined}
+        {(() => {
+          const parseRestToSeconds = (v: string): number => {
+            if (/^\d+:\d+$/.test(v)) {
+              const [m, s] = v.split(':').map(Number);
+              return (isNaN(m) ? 0 : m) * 60 + (isNaN(s) ? 0 : s);
+            }
+            if (/^\d+s$/i.test(v)) return parseInt(v) || 0;
+            if (/^\d+ min$/.test(v)) return (parseInt(v) || 0) * 60;
+            if (/^\d+$/.test(v)) return parseInt(v) || 0;
+            return 60; // fallback 1 min
+          };
+          const toRestMinSec = (totalSecs: number) => {
+            const m = Math.floor(totalSecs / 60);
+            const s = totalSecs % 60;
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+          };
+
+          // Normalize legacy value
+          const isAlreadyMinSec = /^\d+:\d+$/.test(currentConfig.rest);
+          if (!isAlreadyMinSec) {
+            updateConfig({ rest: toRestMinSec(parseRestToSeconds(currentConfig.rest)) });
+          }
+
+          const restTotalSecs = parseRestToSeconds(currentConfig.rest);
+
+          return (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: `${sportColor}1a`, color: sportColor }}
                 >
-                  {option}
-                  {isSelected && <motion.div layoutId="rest-glow" className="absolute inset-0 bg-white/10" />}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+                  <History size={16} />
+                </div>
+                <h4 className="font-bold uppercase text-xs tracking-widest">Descanso</h4>
+              </div>
+
+              <div className="flex items-center justify-center gap-4 bg-dark-card border border-white/5 rounded-2xl p-4">
+                <button
+                  onClick={() => updateConfig({ rest: toRestMinSec(Math.max(0, restTotalSecs - 30)) })}
+                  className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold hover:bg-white/10 transition-colors"
+                >−</button>
+
+                <div className="flex items-center gap-1">
+                  <span className="font-bold text-3xl w-10 text-center" style={{ color: sportColor }}>
+                    {String(Math.floor(restTotalSecs / 60)).padStart(2, '0')}
+                  </span>
+                  <span className="text-2xl font-bold text-white/30">:</span>
+                  <span className="font-bold text-3xl w-10 text-center" style={{ color: sportColor }}>
+                    {String(restTotalSecs % 60).padStart(2, '0')}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => updateConfig({ rest: toRestMinSec(restTotalSecs + 30) })}
+                  className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold hover:bg-white/10 transition-colors"
+                >+</button>
+              </div>
+              <p className="text-[8px] text-white/20 text-center uppercase font-bold tracking-widest">Descanso entre séries</p>
+            </div>
+          );
+        })()}
 
         {/* Observation */}
         <div className="space-y-4">
