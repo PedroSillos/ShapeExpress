@@ -268,6 +268,10 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             await api.createTemplate(template, true);
 
             try { localStorage.setItem(STORAGE_KEYS.WELCOME_ANSWERS, JSON.stringify(answers)); } catch {}
+            // Keep in-memory userProfile in sync so mainTabs reflects the chosen userType immediately
+            if (a.userType === 'atleta' || a.userType === 'treinador') {
+              setUserProfile((prev: UserProfile) => ({ ...prev, userType: a.userType }));
+            }
             if (a.weeklyGoal) {
               state.setUserStats({ ...state.userStats, weeklyGoal: a.weeklyGoal });
             }

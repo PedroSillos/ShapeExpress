@@ -199,11 +199,13 @@ export const useAuthState = () => {
         } else {
           // New account via Google: treat like a registration and upload any onboarding data.
           isNewAccount = true;
+          const wa = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; } })();
+          const resolvedUserType: "atleta" | "treinador" = wa?.userType === "treinador" ? "treinador" : "atleta";
           userDoc = {
             firstName: (userCredential.user.displayName || 'Usuário').split(' ')[0],
             lastName: (userCredential.user.displayName || '').split(' ').slice(1).join(' ') || undefined,
             email,
-            userType: "atleta",
+            userType: resolvedUserType,
             height: 180,
             initialWeight: 80,
             objective: "Manutenção",
@@ -349,10 +351,12 @@ export const useAuthState = () => {
         } else {
           // New account via phone: treat like a registration and upload any onboarding data.
           isNewAccount = true;
+          const wa = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; } })();
+          const resolvedUserType: "atleta" | "treinador" = wa?.userType === "treinador" ? "treinador" : "atleta";
           userDoc = {
             firstName: phone,
             email: docId,
-            userType: "atleta",
+            userType: resolvedUserType,
             phone,
             height: 180,
             initialWeight: 80,

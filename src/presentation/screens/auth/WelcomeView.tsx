@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Bell } from 'lucide-react';
+import { ArrowLeft, Bell, Dumbbell, ClipboardList } from 'lucide-react';
 import { cn } from '../../../utils/cn';
 import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
 import iconHalterofilismo from '@/src/assets/icons/icon-halterofilismo.svg';
@@ -181,6 +181,7 @@ const WEEKLY_GOALS = [
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Answers = {
+  userType?: 'atleta' | 'treinador';
   sports?: string[];
   objective?: string;
   source?: string;
@@ -194,14 +195,14 @@ type Answers = {
 
 // Questions are dynamic — experience has one entry per selected sport
 type QuestionId =
-  | 'sports' | 'objective' | 'source'
+  | 'userType' | 'sports' | 'objective' | 'source'
   | `experience:${string}`
   | 'weeklyGoal' | 'height' | 'weight' | 'birthDate' | 'notifications' | 'preview';
 
 interface DynQuestion {
   id: QuestionId;
   balloon: (answers: Answers) => React.ReactNode;
-  type: 'sports-multi' | 'cards-icon' | 'cards-list' | 'experience' | 'weekly-goal' | 'height' | 'weight' | 'birthDate' | 'notifications' | 'preview';
+  type: 'user-type' | 'sports-multi' | 'cards-icon' | 'cards-list' | 'experience' | 'weekly-goal' | 'height' | 'weight' | 'birthDate' | 'notifications' | 'preview';
   sportKey?: string;
 }
 
@@ -215,6 +216,7 @@ function buildQuestions(answers: Answers): DynQuestion[] {
   }));
 
   return [
+    { id: 'userType',      balloon: () => 'Você é atleta ou treinador(a)?',                       type: 'user-type' },
     { id: 'sports',        balloon: () => 'O que você gostaria de praticar?',                    type: 'sports-multi' },
     { id: 'source',        balloon: () => 'Como soube do Shape Express?',                         type: 'cards-list' },
     ...experienceQuestions,
@@ -586,6 +588,28 @@ const toggleSport = (id: string) => {
   const renderOptions = () => {
     if (!question) return null;
     const { type, sportKey } = question;
+
+    if (type === 'user-type') {
+      const USER_TYPES = [
+        { id: 'atleta' as const,    label: 'Atleta',       desc: 'Quero treinar e evoluir',      icon: <Dumbbell size={24} className="text-white" />,       bg: '#dc2626' },
+        { id: 'treinador' as const, label: 'Treinador(a)', desc: 'Quero gerenciar meus alunos',  icon: <ClipboardList size={24} className="text-white" />,   bg: '#1d4ed8' },
+      ];
+      return (
+        <div className="flex flex-col gap-3">
+          {USER_TYPES.map(o => (
+            <OptionCard
+              key={o.id}
+              selected={answers.userType === o.id}
+              onClick={() => set('userType', o.id)}
+              icon={o.icon}
+              iconBg={o.bg}
+              label={o.label}
+              desc={o.desc}
+            />
+          ))}
+        </div>
+      );
+    }
 
     if (type === 'sports-multi') {
       return (

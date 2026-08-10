@@ -71,7 +71,13 @@ function getGuestDefaultStats(): UserStats {
 function getGuestDefaultProfile(): UserProfile {
   try {
     const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null');
-    if (wa?.weeklyGoal) return { ...DEFAULT_PROFILE, weeklyGoal: wa.weeklyGoal };
+    if (wa) {
+      return {
+        ...DEFAULT_PROFILE,
+        ...(wa.userType === 'treinador' || wa.userType === 'atleta' ? { userType: wa.userType } : {}),
+        ...(wa.weeklyGoal ? { weeklyGoal: wa.weeklyGoal } : {}),
+      };
+    }
   } catch {}
   return DEFAULT_PROFILE;
 }

@@ -166,6 +166,7 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
 
     // Read onboarding answers collected during WelcomeView
     const wa: {
+      userType?: 'atleta' | 'treinador';
       sports?: string[];
       objective?: string;
       experiences?: Record<string, string>;
@@ -192,6 +193,7 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
         email,
         password,
         ...(phoneValue !== undefined && { phone: phoneValue }),
+        userType: wa?.userType ?? 'atleta',
         specialties: wa?.sports ?? [],
         ...(experienceLevel !== undefined && { experienceLevel }),
         objective: wa?.objective,
