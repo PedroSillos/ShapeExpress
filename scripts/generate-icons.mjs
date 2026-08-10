@@ -74,7 +74,6 @@ function buildIco(pngBuffers, sizes) {
 }
 
 // ── 1. public/favicon.ico (icon_round — fora do app) ─────────────────────────
-console.log('→ public/favicon.ico');
 const icoSizes = [16, 32, 48];
 const icoBufs  = await Promise.all(icoSizes.map((s) => toPng(SRC_ROUND, s)));
 writeFileSync(resolve(ROOT, 'public', 'favicon.ico'), buildIco(icoBufs, icoSizes));
@@ -84,7 +83,6 @@ const webpSizes = [48, 72, 96, 128, 192, 256, 512];
 const iconsDir  = resolve(ROOT, 'public', 'icons');
 ensure(iconsDir);
 for (const size of webpSizes) {
-  console.log(`→ public/icons/icon-${size}.webp`);
   writeFileSync(resolve(iconsDir, `icon-${size}.webp`), await toWebp(SRC_ROUND, size));
 }
 
@@ -110,11 +108,9 @@ for (const { name, ic, fg } of ANDROID_DENSITIES) {
   const dir = resolve(ANDROID_RES, name);
   ensure(dir);
   // ic_launcher + foreground: icon.png (forma dentro do app — sem recorte circular)
-  console.log(`→ ${name}/ic_launcher.png (${ic}px)`);
   writeFileSync(resolve(dir, 'ic_launcher.png'),            await toPng(SRC, ic));
   writeFileSync(resolve(dir, 'ic_launcher_foreground.png'), await toPng(SRC, fg));
   // ic_launcher_round: icon_round.png (tela home Android)
-  console.log(`→ ${name}/ic_launcher_round.png (${ic}px)`);
   writeFileSync(resolve(dir, 'ic_launcher_round.png'),      await toPng(SRC_ROUND, ic));
   // Background: expand transparent 1x1 to the foreground size
   writeFileSync(
@@ -122,5 +118,3 @@ for (const { name, ic, fg } of ANDROID_DENSITIES) {
     await sharp(transparentBg).resize(fg, fg, { fit: 'fill' }).png().toBuffer()
   );
 }
-
-console.log('\n✅ Todos os assets gerados com sucesso.');
