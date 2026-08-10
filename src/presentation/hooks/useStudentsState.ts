@@ -19,6 +19,8 @@ export const useStudentsState = (
   const [selectedStudentForWorkouts, setSelectedStudentForWorkouts] = useState<Student | null>(null);
   const [selectedStudentForEvolution, setSelectedStudentForEvolution] = useState<Student | null>(null);
 
+  console.log('🔄 [useStudentsState] Current trainers state:', trainers.length);
+
   const email = currentUser?.email || token || localStorage.getItem(STORAGE_KEYS.TOKEN);
 
   const buildStudentFromEmail = async (sEmail: string): Promise<Student> => {

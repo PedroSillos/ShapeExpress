@@ -152,8 +152,16 @@ export const useSyncState = (
             if (onlyLocal.length === 0) localStorage.removeItem(STORAGE_KEYS.LOCAL_SESSIONS);
           }).catch(() => {}),
           getDocs(query(collection(db, "users"), where("userType", "==", "treinador"))).then((snap) => {
-            if (!snap.empty) trainers = snap.docs.map((d) => d.data() as UserProfile);
-          }).catch(() => {}),
+            console.log('🔍 [useSyncState] Query trainers - docs found:', snap.docs.length);
+            if (!snap.empty) {
+              trainers = snap.docs.map((d) => d.data() as UserProfile);
+              console.log('✅ [useSyncState] Trainers loaded:', trainers.length, trainers);
+            } else {
+              console.warn('⚠️ [useSyncState] No trainers found in Firestore');
+            }
+          }).catch((e) => {
+            console.error('❌ [useSyncState] Error loading trainers:', e);
+          }),
         ]);
 
         // Connections (depends on profile type)
@@ -185,6 +193,7 @@ export const useSyncState = (
         setUserStats(stats ?? DEFAULT_STATS);
         setTemplates(templates);
         setSessions(sessions);
+        console.log('🎯 [useSyncState] Setting trainers state:', trainers.length, trainers);
         setTrainers(trainers);
         setTrainerConnections(trainerConnections);
         setStudentConnections(studentConnections);

@@ -37,15 +37,31 @@ export function TrainersScreen({
   const [selectedTrainer, setSelectedTrainer] = useState<UserProfile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
+  // ═══ DEBUG LOGS ═══════════════════════════════════════════════════════════
+  console.log('═══ TrainersScreen DEBUG ═══');
+  console.log('📊 Total trainers prop:', trainers.length);
+  console.log('📋 Trainers data:', JSON.stringify(trainers, null, 2));
+  console.log('🔗 Student connections:', JSON.stringify(studentConnections, null, 2));
+  console.log('🔍 Search term:', searchTerm);
+  // ══════════════════════════════════════════════════════════════════════════
+
   const connectedTrainers = trainers.filter((t) =>
     studentConnections.some((c) => c.trainerEmail === t.email && c.status === 'accepted'),
   );
 
   const filteredTrainers = trainers.filter(
-    (t) =>
-      t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (t.specialties?.join(' ') ?? '').toLowerCase().includes(searchTerm.toLowerCase()),
+    (t) => {
+      const name = fullName(t as UserProfile) || '';
+      return (
+        name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.specialties?.join(' ') ?? '').toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
   );
+
+  console.log('✅ Connected trainers:', connectedTrainers.length);
+  console.log('🎯 Filtered trainers:', filteredTrainers.length);
+  console.log('═══════════════════════════════');
 
   // ─── Tab switcher shared between both screens ──────────────────────────────
 

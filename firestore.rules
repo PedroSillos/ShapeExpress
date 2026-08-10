@@ -77,6 +77,7 @@ service cloud.firestore {
 
     match /users/{email} {
       allow get: if true;
+      // Allow authenticated users to list/query users (needed for trainers listing)
       allow list: if isAuthenticated();
       allow create, update: if isOwner(email) && isValidUserProfile(request.resource.data);
       allow delete: if isAdmin();
