@@ -1,7 +1,7 @@
 import React from 'react';
-import { Trophy, ShieldCheck, RefreshCw } from 'lucide-react';
-import { Card } from './Card';
-import { InitialsAvatar } from '@/src/shared/ui/InitialsAvatar';
+import { Trophy, ShieldCheck, RefreshCw, UserPlus } from 'lucide-react';
+import { motion } from 'motion/react';
+import { fullName } from '@/src/domain/entities';
 
 export interface TrainerCardProps {
   key?: any;
@@ -17,71 +17,105 @@ export function TrainerCard({ trainer, showDistance, onConnect, studentConnectio
   const isPending = connection?.status === 'pending';
   const isConnected = connection?.status === 'accepted';
 
+  // Azul do header da tela de treinadores
+  const trainerBlue = '#0284C7';
+  const trainerBlueDark = '#0369a1'; // tom mais escuro para gradiente
+
+  // Nome completo do treinador
+  const trainerName = fullName(trainer) || trainer.email?.split('@')[0] || 'Treinador';
+  const trainerInitial = trainerName.charAt(0).toUpperCase();
+
   return (
-    <Card 
-      className="p-4 hover:border-brand-red/30 transition-all group cursor-pointer"
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-3xl overflow-hidden cursor-pointer"
       onClick={() => onViewProfile?.(trainer)}
+      style={{
+        background: `linear-gradient(145deg, color-mix(in srgb, ${trainerBlue} 8%, #1a1a1a) 0%, #151515 60%)`,
+        border: `1px solid color-mix(in srgb, ${trainerBlue} 30%, transparent)`,
+      }}
     >
-      <div className="flex gap-4">
-        <div className="relative">
-          <InitialsAvatar
-            name={trainer.name ?? ''}
-            sizeClass="w-16 h-16"
-            roundedClass="rounded-2xl"
-            className="border border-white/10 group-hover:border-brand-red/50 transition-all"
-          />
-          {showDistance && (
-            <div className="absolute -bottom-1 -right-1 bg-brand-red text-black text-[8px] font-bold px-1.5 py-0.5 rounded-md shadow-lg">
-              {trainer.distance}
+      {/* Top accent stripe */}
+      <div className="h-1 w-full" style={{ background: trainerBlue }} />
+
+      <div className="p-4">
+        <div className="flex gap-4">
+          {/* Avatar */}
+          <div className="relative shrink-0">
+            <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center text-2xl font-bold">
+              {trainerInitial}
             </div>
-          )}
-        </div>
-        <div className="flex-1">
-          <div className="flex justify-between items-start">
-            <div>
-              <h4 className="font-bold text-sm">{trainer.name}</h4>
-              <p className="text-[10px] text-brand-red font-bold uppercase tracking-wider">{trainer.specialty || 'Treinador Elite'}</p>
-            </div>
-            <div className="flex items-center gap-1 bg-brand-red/10 px-2 py-1 rounded-lg">
-              <Trophy size={10} className="text-brand-red" />
-              <span className="text-[10px] font-bold text-brand-red">{trainer.rating || '5.0'}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 mt-3">
-            <div className="flex flex-col">
-              <span className="text-[8px] text-white/20 uppercase font-bold">Alunos</span>
-              <span className="text-[10px] font-bold">{trainer.students || (((trainer.email?.charCodeAt(0) || 1) + (trainer.name?.charCodeAt(0) || 1)) % 50 + 10)}</span>
-            </div>
-            <div className="w-px h-4 bg-white/5" />
-            <div className="flex flex-col">
-              <span className="text-[8px] text-white/20 uppercase font-bold">Exp.</span>
-              <span className="text-[10px] font-bold">{trainer.experience || '5+ anos'}</span>
-            </div>
-            
-            {isConnected ? (
-              <div className="ml-auto flex items-center gap-1 text-brand-red">
-                <ShieldCheck size={14} />
-                <span className="text-[9px] font-bold uppercase tracking-widest">Conectado</span>
-              </div>
-            ) : isPending ? (
-              <div className="ml-auto flex items-center gap-1 text-amber-500">
-                <RefreshCw size={14} className="animate-spin-slow" />
-                <span className="text-[9px] font-bold uppercase tracking-widest">Solicitado</span>
-              </div>
-            ) : (
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onConnect(trainer.personalCode);
-                }}
-                className="ml-auto px-4 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-brand-red hover:text-black hover:border-brand-red transition-all"
+            {showDistance && (
+              <div className="absolute -bottom-1 -right-1 text-black text-[8px] font-bold px-1.5 py-0.5 rounded-md shadow-lg"
+                style={{ backgroundColor: trainerBlue }}
               >
-                Conectar
-              </button>
+                {trainer.distance}
+              </div>
             )}
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <h4 className="font-black text-base text-white leading-snug truncate">
+                  {trainerName}
+                </h4>
+                {trainer.studentsCount && (
+                  <p className="text-[10px] text-white/40 mt-0.5">
+                    {trainer.studentsCount} alunos
+                  </p>
+                )}
+              </div>
+              
+              {/* Rating badge */}
+              <div className="flex items-center gap-1 px-2 py-1 rounded-lg shrink-0"
+                style={{ backgroundColor: `color-mix(in srgb, ${trainerBlue} 15%, transparent)` }}
+              >
+                <Trophy size={12} className="text-white/80" />
+                <span className="text-[10px] font-bold text-white">5.0</span>
+              </div>
+            </div>
+
+            {/* Status / Action button */}
+            <div className="mt-3">
+              {isConnected ? (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl w-fit"
+                  style={{ backgroundColor: `color-mix(in srgb, ${trainerBlue} 20%, transparent)` }}
+                >
+                  <ShieldCheck size={14} className="text-white/80" />
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-white/80">
+                    Conectado
+                  </span>
+                </div>
+              ) : isPending ? (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 w-fit">
+                  <RefreshCw size={14} className="text-amber-400 animate-spin-slow" />
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-amber-400">
+                    Solicitado
+                  </span>
+                </div>
+              ) : (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onConnect(trainer.personalCode);
+                  }}
+                  className="px-3 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-widest text-white transition-all flex items-center gap-1.5"
+                  style={{ 
+                    backgroundColor: `color-mix(in srgb, ${trainerBlue} 15%, transparent)`,
+                    border: `1px solid color-mix(in srgb, ${trainerBlue} 30%, transparent)`
+                  }}
+                >
+                  <UserPlus size={12} />
+                  Conectar
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </Card>
+    </motion.div>
   );
 }

@@ -65,15 +65,6 @@ export function TrainersScreen({
             <div className="space-y-1">
               <h1 className="text-3xl font-black text-white leading-tight">Treinadores</h1>
               <p className="text-white/70 text-sm font-semibold">Conecte-se com especialistas</p>
-              {connectedTrainers.length > 0 && (
-                <div className="flex items-center gap-1.5 mt-2">
-                  <ShieldCheck size={14} className="text-white/80" />
-                  <span className="text-white/80 text-xs font-bold">
-                    {connectedTrainers.length}{' '}
-                    {connectedTrainers.length === 1 ? 'treinador conectado' : 'treinadores conectados'}
-                  </span>
-                </div>
-              )}
             </div>
             <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
               <UserCheck size={36} className="text-white" />
@@ -86,7 +77,7 @@ export function TrainersScreen({
         {/* ── Connect CTA ───────────────────────────────────────── */}
         <button
           onClick={() => setShowConnectPopup(true)}
-          className="w-full py-3 bg-white/5 border border-white/10 text-white/60 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+          className="w-full py-3 bg-white/5 border border-sky-500/50 text-white/60 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
         >
           <UserPlus size={16} />
           Tem um código de treinador?
