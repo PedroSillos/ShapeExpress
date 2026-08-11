@@ -36,6 +36,7 @@ export function TrainersScreen({
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState<string | null>(null);
   const [selectedTrainer, setSelectedTrainer] = useState<UserProfile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAvailableTrainers, setShowAvailableTrainers] = useState(false);
 
   const connectedTrainers = trainers.filter((t) =>
     studentConnections.some((c) => c.trainerEmail === t.email && c.status === 'accepted'),
@@ -43,6 +44,13 @@ export function TrainersScreen({
 
   const filteredTrainers = trainers.filter(
     (t) => {
+      // Excluir treinadores já conectados
+      const isConnected = studentConnections.some(
+        (c) => c.trainerEmail === t.email && c.status === 'accepted'
+      );
+      
+      if (isConnected) return false;
+      
       const name = fullName(t as UserProfile) || '';
       return (
         name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -74,34 +82,14 @@ export function TrainersScreen({
           <div className="absolute top-4 right-12 w-12 h-12 rounded-full bg-white/5 pointer-events-none" />
         </div>
 
-        {/* ── Connect CTA ───────────────────────────────────────── */}
+        {/* ── Action Buttons ────────────────────────────────────── */}
         <button
-          onClick={() => setShowConnectPopup(true)}
+          onClick={() => setShowAvailableTrainers(true)}
           className="w-full py-3 bg-white/5 border border-sky-500/50 text-white/60 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
         >
-          <UserPlus size={16} />
-          Tem um código de treinador?
+          <Search size={16} />
+          Buscar treinadores
         </button>
-
-        {/* ── Search ────────────────────────────────────────────── */}
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar treinadores..."
-            className="w-full bg-dark-card border border-dark-border rounded-2xl pl-12 pr-4 py-4 text-sm focus:outline-none focus:border-gray-400 transition-all shadow-2xl"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30"
-            >
-              <X size={16} />
-            </button>
-          )}
-        </div>
 
         {/* ── Connected trainers ────────────────────────────────── */}
         {connectedTrainers.length > 0 && (
@@ -122,37 +110,6 @@ export function TrainersScreen({
             </div>
           </div>
         )}
-
-        {/* ── All trainers ──────────────────────────────────────── */}
-        <div className="space-y-3">
-          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-white/30">
-            Treinadores Disponíveis
-          </p>
-          {filteredTrainers.length > 0 ? (
-            <div className="space-y-3">
-              {filteredTrainers.map((trainer) => (
-                <TrainerCard
-                  key={trainer.email}
-                  trainer={trainer}
-                  studentConnections={studentConnections}
-                  onConnect={onConnect}
-                  onViewProfile={(t) => setSelectedTrainer(t as UserProfile)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="py-12 text-center space-y-3">
-              <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto">
-                <Search size={24} className="text-white/15" />
-              </div>
-              <p className="text-sm text-white/30">
-                {searchTerm
-                  ? `Nenhum treinador encontrado para "${searchTerm}"`
-                  : 'Nenhum treinador disponível'}
-              </p>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* ── Disconnect Confirm Modal ───────────────────────────── */}
@@ -353,6 +310,107 @@ export function TrainersScreen({
                     );
                   })()}
                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Available Trainers Modal ──────────────────────────── */}
+      <AnimatePresence>
+        {showAvailableTrainers && (
+          <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setShowAvailableTrainers(false);
+                setSearchTerm('');
+              }}
+              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative w-full max-w-lg h-[80vh] bg-dark-surface border-t sm:border border-white/10 rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl flex flex-col"
+            >
+              {/* Header */}
+              <div className="p-6 border-b border-white/10">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold">Treinadores Disponíveis</h3>
+                  <button
+                    onClick={() => {
+                      setShowAvailableTrainers(false);
+                      setSearchTerm('');
+                    }}
+                    className="p-2 bg-white/5 rounded-full text-white/60 hover:text-white transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                
+                {/* Connect by Code Button */}
+                <button
+                  onClick={() => {
+                    setShowAvailableTrainers(false);
+                    setShowConnectPopup(true);
+                  }}
+                  className="w-full py-3 bg-white/5 border border-sky-500/50 text-white/60 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform mb-4"
+                >
+                  <UserPlus size={16} />
+                  Tem um código de treinador?
+                </button>
+                
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Buscar treinadores..."
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-all"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+              </div>
+              
+              {/* Trainers List */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {filteredTrainers.length > 0 ? (
+                  <div className="space-y-3">
+                    {filteredTrainers.map((trainer) => (
+                      <TrainerCard
+                        key={trainer.email}
+                        trainer={trainer}
+                        studentConnections={studentConnections}
+                        onConnect={onConnect}
+                        onViewProfile={(t) => setSelectedTrainer(t as UserProfile)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-12 text-center space-y-3">
+                    <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+                      <Search size={24} className="text-white/15" />
+                    </div>
+                    <p className="text-sm text-white/30">
+                      {searchTerm
+                        ? `Nenhum treinador encontrado para "${searchTerm}"`
+                        : 'Nenhum treinador disponível'}
+                    </p>
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>
