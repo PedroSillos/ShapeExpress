@@ -2,16 +2,15 @@ import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
-  Search, SlidersHorizontal, UserPlus, X, RefreshCw, ChevronRight, 
-  Trash2, ShieldCheck, AlertTriangle, TrendingUp, 
-  TrendingDown, Minus, Trophy, Calendar, Target, Dumbbell, User, Sparkles,
+  Search, UserPlus, X, RefreshCw, ChevronRight, 
+  Trash2, ShieldCheck, AlertTriangle,
+  Trophy, Target, Dumbbell, User,
   DollarSign, PieChart, AlertCircle, CalendarPlus, UserMinus, Percent, Users
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../utils/cn';
 import { Student, UserProfile, TrainerConnection } from '../../domain/entities';
 import { Card } from '../components/Card';
-import { Badge } from '../components/Badge';
 import { InitialsAvatar } from '@/src/shared/ui/InitialsAvatar';
 
 export function StudentsView({ students, userProfile, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, selectedStudentForProfile, setSelectedStudentForProfile }: { 
@@ -26,53 +25,16 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
   setSelectedStudentForProfile: (s: Student | null) => void
 }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState<'Todos' | 'Evoluindo' | 'Estagnados' | 'Em Risco' | 'Novos'>('Todos');
-  const [showFilters, setShowFilters] = useState(false);
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState<Student | null>(null);
   const [isResponding, setIsResponding] = useState<string | null>(null);
   const [showFinancialDashboard, setShowFinancialDashboard] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
 
   const filteredStudents = students.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          student.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    let matchesFilter = true;
-    if (selectedFilter !== 'Todos') {
-      if (selectedFilter === 'Evoluindo') matchesFilter = student.status === 'evolving';
-      if (selectedFilter === 'Estagnados') matchesFilter = student.status === 'stagnated';
-      if (selectedFilter === 'Em Risco') matchesFilter = student.status === 'at-risk';
-      if (selectedFilter === 'Novos') matchesFilter = student.status === 'new';
-    }
-    
-    return matchesSearch && matchesFilter;
+    return matchesSearch;
   });
-
-  const getStatusIcon = (status: Student['status']) => {
-    switch (status) {
-      case 'evolving': return <TrendingUp size={14} className="text-emerald-500" />;
-      case 'stagnated': return <Minus size={14} className="text-amber-500" />;
-      case 'at-risk': return <TrendingDown size={14} className="text-brand-red" />;
-      case 'new': return <Sparkles size={14} className="text-blue-500" />;
-    }
-  };
-
-  const getStatusLabel = (status: Student['status']) => {
-    switch (status) {
-      case 'evolving': return 'Evoluindo';
-      case 'stagnated': return 'Estagnado';
-      case 'at-risk': return 'Em Risco';
-      case 'new': return 'Novo Aluno';
-    }
-  };
-
-  const getStatusColor = (status: Student['status']) => {
-    switch (status) {
-      case 'evolving': return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
-      case 'stagnated': return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
-      case 'at-risk': return 'text-brand-red bg-brand-red/10 border-brand-red/20';
-      case 'new': return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
-    }
-  };
 
   return (
     <div className="space-y-6 pb-24">
@@ -85,14 +47,6 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
           <div className="space-y-1">
             <h1 className="text-3xl font-black text-white leading-tight">Alunos</h1>
             <p className="text-white/70 text-sm font-semibold">Controle o desempenho dos seus alunos</p>
-            {students.length > 0 && (
-              <div className="flex items-center gap-1.5 mt-2">
-                <Users size={14} className="text-white/80" />
-                <span className="text-white/80 text-xs font-bold">
-                  {students.length} {students.length === 1 ? 'aluno' : 'alunos'}
-                </span>
-              </div>
-            )}
           </div>
           <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
             <Users size={36} className="text-white" />
@@ -102,38 +56,31 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
         <div className="absolute top-4 right-12 w-12 h-12 rounded-full bg-white/5 pointer-events-none" />
       </div>
 
-      {/* Header & Search */}
-      <div className="space-y-4 sticky top-0 bg-dark-surface/80 backdrop-blur-xl pt-4 pb-2 z-30">
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-display font-bold">Alunos</h2>
-            <div className="flex items-center gap-2 bg-white/5 px-3 py-1 rounded-full border border-white/10">
-              <User size={12} className="text-brand-red" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">{students.length}</span>
-            </div>
+      {/* ── Card de Gestão Financeira ────────────────────────── */}
+      <button
+        onClick={() => setShowFinancialDashboard(true)}
+        className="w-full p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-500 flex items-center justify-between hover:bg-emerald-500/20 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+            <DollarSign size={20} />
           </div>
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-brand-red/10 rounded-xl border border-brand-red/20 text-brand-red">
-              <p className="text-[10px] font-bold uppercase tracking-widest">Código: {userProfile.personalCode}</p>
-            </div>
+          <div className="text-left">
+            <h3 className="font-bold text-sm">Gestão Financeira</h3>
+            <p className="text-[10px] uppercase tracking-widest opacity-80">Ver painel de receitas e métricas</p>
           </div>
         </div>
+        <ChevronRight size={20} className="opacity-50" />
+      </button>
 
-        <button
-          onClick={() => setShowFinancialDashboard(true)}
-          className="w-full p-4 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-500 flex items-center justify-between hover:bg-emerald-500/20 transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-              <DollarSign size={20} />
-            </div>
-            <div className="text-left">
-              <h3 className="font-bold text-sm">Gestão Financeira</h3>
-              <p className="text-[10px] uppercase tracking-widest opacity-80">Ver painel de receitas e métricas</p>
-            </div>
-          </div>
-          <ChevronRight size={20} className="opacity-50" />
-        </button>
+      {/* ── Botão de Busca ────────────────────────────────────── */}
+      <button
+        onClick={() => setShowSearchModal(true)}
+        className="w-full py-3 bg-white/5 border border-sky-500/50 text-white/60 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+      >
+        <Search size={16} />
+        Buscar alunos
+      </button>
 
         {/* Pending Requests */}
         <AnimatePresence>
@@ -184,136 +131,160 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
           )}
         </AnimatePresence>
 
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
-            <input 
-              type="text" 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar alunos..."
-              className="w-full bg-dark-card border border-dark-border rounded-2xl pl-12 pr-4 py-4 text-sm focus:outline-none focus:border-gray-400 transition-all shadow-2xl"
-            />
-          </div>
-          
-          <button 
-            onClick={() => setShowFilters(!showFilters)}
-            className={cn(
-              "p-3 rounded-2xl border transition-all flex items-center justify-center gap-2",
-              showFilters || selectedFilter !== 'Todos'
-                ? "bg-brand-red/10 border-brand-red/30 text-brand-red" 
-                : "bg-dark-card border-dark-border text-white/40"
-            )}
-          >
-            <SlidersHorizontal size={20} />
-            {selectedFilter !== 'Todos' && !showFilters && (
-              <span className="w-2 h-2 bg-brand-red rounded-full"></span>
-            )}
-          </button>
-        </div>
-
-        {/* Filters Section */}
-        <AnimatePresence>
-          {showFilters && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden"
-            >
-              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4">
-                {['Todos', 'Evoluindo', 'Estagnados', 'Em Risco', 'Novos'].map(filter => (
-                  <button
-                    key={filter}
-                    onClick={() => setSelectedFilter(filter as any)}
-                    className={cn(
-                      "px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest whitespace-nowrap transition-all border",
-                      selectedFilter === filter 
-                        ? "bg-brand-red border-brand-red text-black shadow-lg shadow-brand-red/20" 
-                        : "bg-white/5 border-white/10 text-white/40 hover:border-white/20"
-                    )}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Results */}
-      <div className="grid gap-4">
-        {filteredStudents.map(student => (
-          <Card 
-            key={student.id} 
-            className="p-4 hover:border-brand-red/30 transition-all group cursor-pointer"
-            onClick={() => setSelectedStudentForProfile(student)}
-          >
-            <div className="flex gap-4">
-              <div className="relative">
-                <InitialsAvatar
-                  name={student.name}
-                  sizeClass="w-16 h-16"
-                  roundedClass="rounded-2xl"
-                  className="border border-white/10 group-hover:border-brand-red/50 transition-all"
-                />
-                <div className={cn(
-                  "absolute -bottom-1 -right-1 p-1 rounded-lg border shadow-lg",
-                  getStatusColor(student.status)
-                )}>
-                  {getStatusIcon(student.status)}
+      {/* ── Lista de Alunos ────────────────────────────────────── */}
+      {students.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-white/30">
+            Meus Alunos
+          </p>
+          <div className="space-y-3">
+            {students.map(student => (
+              <Card 
+                key={student.id} 
+                className="p-4 hover:border-brand-red/30 transition-all group cursor-pointer"
+                onClick={() => setSelectedStudentForProfile(student)}
+              >
+                <div className="flex gap-4 items-center">
+                  <InitialsAvatar
+                    name={student.name}
+                    sizeClass="w-14 h-14"
+                    roundedClass="rounded-2xl"
+                    className="border border-white/10 group-hover:border-brand-red/50 transition-all"
+                  />
+                  <div className="flex-1">
+                    <h4 className="font-bold text-base">{student.name}</h4>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
+                    <Trophy size={14} className="text-brand-red" />
+                    <span className="text-sm font-bold">{student.streak}d</span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-bold text-sm">{student.name}</h4>
-                    <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">{student.objective || 'Hipertrofia'}</p>
-                  </div>
-                  <div className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-lg border border-white/10">
-                    <Trophy size={10} className="text-brand-red" />
-                    <span className="text-[10px] font-bold">{student.score}</span>
-                  </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {students.length === 0 && (
+        <div className="py-20 text-center space-y-4">
+          <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto text-white/10">
+            <User size={32} />
+          </div>
+          <div className="space-y-1">
+            <p className="font-bold">Nenhum aluno encontrado</p>
+            <p className="text-xs text-white/40">Compartilhe seu código para conectar novos alunos.</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Search Modal ─────────────────────────────────────── */}
+      <AnimatePresence>
+        {showSearchModal && (
+          <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setShowSearchModal(false);
+                setSearchTerm('');
+              }}
+              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative w-full max-w-lg h-[80vh] bg-dark-surface border-t sm:border border-white/10 rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl flex flex-col"
+            >
+              {/* Header */}
+              <div className="p-6 border-b border-white/10">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold">Buscar Alunos</h3>
+                  <button
+                    onClick={() => {
+                      setShowSearchModal(false);
+                      setSearchTerm('');
+                    }}
+                    className="p-2 bg-white/5 rounded-full text-white/60 hover:text-white transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
                 </div>
                 
-                <div className="flex items-center gap-4 mt-3">
-                  <div className="flex flex-col">
-                    <span className="text-[8px] text-white/20 uppercase font-bold">Frequência</span>
-                    <div className="flex gap-0.5 mt-0.5">
-                      {student.weeklyWorkouts.map((w, i) => (
-                        <div key={i} className={cn("w-2 h-2 rounded-full", w ? "bg-brand-red" : "bg-white/5")} />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="w-px h-4 bg-white/5" />
-                  <div className="flex flex-col">
-                    <span className="text-[8px] text-white/20 uppercase font-bold">Último Treino</span>
-                    <span className="text-[10px] font-bold">
-                      {student.lastWorkout ? (() => { try { return format(parseISO(student.lastWorkout), "dd 'de' MMMM 'de' yyyy", { locale: ptBR }); } catch { return student.lastWorkout; } })() : 'Ainda não fez o primeiro treino'}
-                    </span>
-                  </div>
-                  <ChevronRight size={18} className="ml-auto text-white/20 group-hover:text-brand-red transition-colors" />
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Buscar alunos..."
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-all"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
                 </div>
               </div>
-            </div>
-          </Card>
-        ))}
-
-        {filteredStudents.length === 0 && (
-          <div className="py-20 text-center space-y-4">
-            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto text-white/10">
-              <User size={32} />
-            </div>
-            <div className="space-y-1">
-              <p className="font-bold">Nenhum aluno encontrado</p>
-              <p className="text-xs text-white/40">Compartilhe seu código para conectar novos alunos.</p>
-            </div>
+              
+              {/* Students List */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {filteredStudents.length > 0 ? (
+                  <div className="space-y-3">
+                    {filteredStudents.map(student => (
+                      <Card 
+                        key={student.id} 
+                        className="p-4 hover:border-brand-red/30 transition-all group cursor-pointer"
+                        onClick={() => {
+                          setSelectedStudentForProfile(student);
+                          setShowSearchModal(false);
+                          setSearchTerm('');
+                        }}
+                      >
+                        <div className="flex gap-4 items-center">
+                          <InitialsAvatar
+                            name={student.name}
+                            sizeClass="w-14 h-14"
+                            roundedClass="rounded-2xl"
+                            className="border border-white/10 group-hover:border-brand-red/50 transition-all"
+                          />
+                          <div className="flex-1">
+                            <h4 className="font-bold text-base">{student.name}</h4>
+                          </div>
+                          <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
+                            <Trophy size={14} className="text-brand-red" />
+                            <span className="text-sm font-bold">{student.streak}d</span>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-12 text-center space-y-3">
+                    <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+                      <Search size={24} className="text-white/15" />
+                    </div>
+                    <p className="text-sm text-white/30">
+                      {searchTerm
+                        ? `Nenhum aluno encontrado para "${searchTerm}"`
+                        : 'Digite para buscar seus alunos'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
           </div>
         )}
-      </div>
+      </AnimatePresence>
 
-      {/* Student Profile Modal */}
+      {/* ── Student Profile Modal ─────────────────────────────── */}
       <AnimatePresence>
         {selectedStudentForProfile && (
           <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -350,13 +321,7 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
                 <div className="flex justify-between items-end">
                   <div className="space-y-1">
                     <h3 className="text-3xl font-display font-bold">{selectedStudentForProfile.name}</h3>
-                    <div className="flex items-center gap-2">
-                      <div className={cn("px-2 py-0.5 rounded-lg border text-[10px] font-bold uppercase tracking-widest flex items-center gap-1", getStatusColor(selectedStudentForProfile.status))}>
-                        {getStatusIcon(selectedStudentForProfile.status)}
-                        {getStatusLabel(selectedStudentForProfile.status)}
-                      </div>
-                      <span className="text-xs text-white/40">{selectedStudentForProfile.email}</span>
-                    </div>
+                    <p className="text-xs text-white/40">{selectedStudentForProfile.email}</p>
                   </div>
                 </div>
 
