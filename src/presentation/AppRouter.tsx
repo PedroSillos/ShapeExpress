@@ -67,6 +67,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     onShowSuggestProfile, onShowStreak,
     storeItems, myPurchases, myListings, isLoadingItems,
     activeSport, setActiveSport,
+    publishingTemplate, setPublishingTemplate,
   } = state;
 
   const previousTabRef = useRef<string>('landing');
@@ -87,7 +88,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
   } = dataSync;
 
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
-  const [publishingTemplate, setPublishingTemplate] = useState<WorkoutTemplate | null>(null);
 
   /**
    * Called after the user picks a sport in the AI sport picker (inside WorkoutsView).
@@ -437,6 +437,8 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           isLoadingItems={!!isLoadingItems}
           onGoToWorkouts={() => switchTab('workouts')}
           createCheckoutSession={api.createCheckoutSession}
+          userEmail={userProfile?.email}
+          userType={userProfile?.userType === 'treinador' ? 'trainer' : 'athlete'}
         />
       );
     case 'trainers':

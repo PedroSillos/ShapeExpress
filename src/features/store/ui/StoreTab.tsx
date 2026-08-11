@@ -140,6 +140,8 @@ export interface StoreTabProps {
   onGoToWorkouts: () => void;
   createCheckoutSession: (itemId: string) => Promise<{ url: string }>;
   tabSwitcher?: React.ReactNode;
+  userEmail?: string;
+  userType?: 'athlete' | 'trainer';
 }
 
 export function StoreTab({
@@ -149,6 +151,8 @@ export function StoreTab({
   onGoToWorkouts,
   createCheckoutSession,
   tabSwitcher,
+  userEmail,
+  userType,
 }: StoreTabProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [buyingId, setBuyingId] = useState<string | null>(null);
@@ -156,6 +160,9 @@ export function StoreTab({
   const purchasedItemIds = new Set(myPurchases.map((p) => p.itemId));
   const storeWorkouts = storeItems.filter((i) => i.type === 'workout');
   const myPurchasedItems = storeWorkouts.filter((i) => purchasedItemIds.has(i.id));
+  const myAnnouncements = userEmail && userType === 'trainer'
+    ? storeWorkouts.filter((i) => i.creatorEmail.toLowerCase() === userEmail.toLowerCase())
+    : [];
   const totalCount = storeWorkouts.length;
 
   const filteredWorkouts = searchTerm.trim()
@@ -227,6 +234,80 @@ export function StoreTab({
         )}
       </div>
 
+      {/* My Storefront - Only for trainers */}
+      {userType === 'trainer' && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-white/30">
+              Minha Vitrine
+            </p>
+            {myAnnouncements.length > 0 && (
+              <span className="text-[10px] font-bold text-white/40">
+                {myAnnouncements.length} {myAnnouncements.length === 1 ? 'treino' : 'treinos'}
+              </span>
+            )}
+          </div>
+          
+          {myAnnouncements.length > 0 ? (
+            <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
+              {myAnnouncements.map((item) => (
+                <div
+                  key={item.id}
+                  className="min-w-[200px] bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3 flex-shrink-0"
+                >
+                  <div className="space-y-0.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-xs font-bold leading-tight line-clamp-2 flex-1">{item.title}</p>
+                      {item.status === 'draft' && (
+                        <span className="px-1.5 py-0.5 bg-yellow-500/20 border border-yellow-500/40 rounded text-[8px] font-black text-yellow-400 uppercase tracking-wider flex-shrink-0">
+                          Rascunho
+                        </span>
+                      )}
+                      {item.status === 'published' && (
+                        <span className="px-1.5 py-0.5 bg-emerald-500/20 border border-emerald-500/40 rounded text-[8px] font-black text-emerald-400 uppercase tracking-wider flex-shrink-0">
+                          Publicado
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-brand-red font-black text-sm">{formatPrice(item.price)}</p>
+                  </div>
+                  <div className="flex items-center gap-3 text-[10px] text-white/40">
+                    <div className="flex items-center gap-1">
+                      <Star size={10} className="fill-yellow-400 text-yellow-400" />
+                      <span className="font-bold">{item.rating > 0 ? item.rating.toFixed(1) : '—'}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <ShoppingBag size={10} />
+                      <span className="font-bold">{item.salesCount} vendas</span>
+                    </div>
+                  </div>
+                  <button
+                    className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
+                  >
+                    Gerenciar
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-dark-card border border-dark-border rounded-2xl p-6 text-center space-y-4">
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-white/60">Nenhum treino à venda</p>
+                <p className="text-xs text-white/30 leading-relaxed">
+                  Comece a vender seus treinos e alcance mais alunos
+                </p>
+              </div>
+              <button
+                onClick={onGoToWorkouts}
+                className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-black rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
+              >
+                Publicar Treino
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {isLoadingItems ? (
         <StoreSkeleton />
       ) : (
@@ -275,14 +356,17 @@ export function StoreTab({
                 ))}
               </div>
             ) : (
-              <div className="py-10 text-center space-y-3">
-                <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto">
-                  <Dumbbell size={24} className="text-white/15" />
+              // Only show empty state if not a trainer or if trainer is searching
+              userType !== 'trainer' || searchTerm ? (
+                <div className="py-10 text-center space-y-3">
+                  <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+                    <Dumbbell size={24} className="text-white/15" />
+                  </div>
+                  <p className="text-sm text-white/30">
+                    {searchTerm ? `Nenhum treino encontrado para "${searchTerm}"` : 'Nenhum treino disponível'}
+                  </p>
                 </div>
-                <p className="text-sm text-white/30">
-                  {searchTerm ? `Nenhum treino encontrado para "${searchTerm}"` : 'Nenhum treino disponível'}
-                </p>
-              </div>
+              ) : null
             )}
           </div>
         </>

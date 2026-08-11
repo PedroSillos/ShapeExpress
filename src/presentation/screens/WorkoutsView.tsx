@@ -831,9 +831,9 @@ function TemplateCard({
         {mainUserProfile.userType === 'treinador' && onCreateAd && (
           <button
             onClick={() => onCreateAd(template)}
-            className="w-full py-2.5 bg-brand-red/8 text-brand-red border border-brand-red/15 rounded-xl font-bold text-xs hover:bg-brand-red/15 transition-colors active:scale-95"
+            className="w-full py-2.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl font-bold text-xs hover:bg-emerald-500/20 transition-colors active:scale-95"
           >
-            Criar Anúncio na Loja
+            Publicar na Loja
           </button>
         )}
       </div>

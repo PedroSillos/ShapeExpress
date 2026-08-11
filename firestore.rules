@@ -219,6 +219,19 @@ service cloud.firestore {
       allow delete: if isOwner(email);
     }
 
+    // Store items - workout and program listings
+    match /store_items/{id} {
+      allow read: if true; // Anyone can browse the store
+      allow create: if isAuthenticated() && isOwner(request.resource.data.creatorEmail);
+      allow update, delete: if isAuthenticated() && (isOwner(resource.data.creatorEmail) || isAdmin());
+    }
+
+    // Store purchases - confirmed purchases after Stripe payment
+    match /store_purchases/{id} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.buyerEmail) || isAdmin());
+      allow write: if isAdmin(); // Only backend/admin can create purchases
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

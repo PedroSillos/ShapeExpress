@@ -9,6 +9,8 @@ export interface LojasScreenProps {
   isLoadingItems: boolean;
   onGoToWorkouts: () => void;
   createCheckoutSession: (itemId: string) => Promise<{ url: string }>;
+  userEmail?: string;
+  userType?: 'athlete' | 'trainer';
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -19,6 +21,8 @@ export function LojasScreen({
   isLoadingItems,
   onGoToWorkouts,
   createCheckoutSession,
+  userEmail,
+  userType,
 }: LojasScreenProps) {
   return (
     <StoreTab
@@ -27,6 +31,8 @@ export function LojasScreen({
       isLoadingItems={isLoadingItems}
       onGoToWorkouts={onGoToWorkouts}
       createCheckoutSession={createCheckoutSession}
+      userEmail={userEmail}
+      userType={userType}
     />
   );
 }
