@@ -1,8 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Search, X, Dumbbell, Star, ShoppingBag } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { StoreItem, StorePurchase } from '@/src/domain/entities';
-import iconTrophy from '@/src/assets/icons/icon-trophy.svg';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -33,104 +32,6 @@ function StoreSkeleton() {
   );
 }
 
-// ─── StoreItemCard ────────────────────────────────────────────────────────────
-
-interface StoreItemCardProps {
-  item: StoreItem;
-  isPurchased: boolean;
-  onBuyItem: (item: StoreItem) => void;
-  onGoToWorkouts: () => void;
-}
-
-function StoreItemCard({ item, isPurchased, onBuyItem, onGoToWorkouts }: StoreItemCardProps) {
-  return (
-    <div className="bg-dark-card border border-dark-border rounded-2xl overflow-hidden">
-      {/* Cover image or placeholder */}
-      {item.coverImageUrl ? (
-        <div className="aspect-video relative">
-          <img
-            src={item.coverImageUrl}
-            alt={item.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          {isPurchased && (
-            <span className="absolute top-3 left-3 px-2 py-1 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full">
-              Adquirido
-            </span>
-          )}
-        </div>
-      ) : (
-        <div
-          className="aspect-video flex items-center justify-center relative"
-          style={{ background: 'linear-gradient(135deg,#2d1b1b,#4a1414)' }}
-        >
-          <Dumbbell size={40} className="text-brand-red/60" />
-          {isPurchased && (
-            <span className="absolute top-3 left-3 px-2 py-1 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full">
-              Adquirido
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Content */}
-      <div className="p-4 space-y-3">
-        <div className="space-y-1">
-          <h3 className="font-bold text-sm leading-tight">{item.title}</h3>
-          {item.description && (
-            <p className="text-xs text-white/40 leading-relaxed line-clamp-2">{item.description}</p>
-          )}
-          <p className="text-[11px] text-white/30 font-medium">por {item.creatorName}</p>
-        </div>
-
-        {/* Tags */}
-        {item.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {item.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-bold text-white/40 uppercase tracking-wide"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Rating */}
-        {item.rating > 0 && (
-          <div className="flex items-center gap-1 text-yellow-400">
-            <Star size={11} className="fill-yellow-400" />
-            <span className="text-[11px] font-bold">{item.rating.toFixed(1)}</span>
-            <span className="text-[11px] text-white/25">· {item.salesCount} vendas</span>
-          </div>
-        )}
-
-        {/* Price + CTA */}
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-brand-red font-black text-base">{formatPrice(item.price)}</span>
-          {isPurchased ? (
-            <button
-              onClick={onGoToWorkouts}
-              className="px-4 py-2.5 bg-emerald-500 text-black rounded-xl text-[11px] font-black uppercase tracking-widest active:scale-95 transition-transform"
-            >
-              Acessar
-            </button>
-          ) : (
-            <button
-              onClick={() => onBuyItem(item)}
-              className="px-4 py-2.5 bg-brand-red text-black rounded-xl text-[11px] font-black uppercase tracking-widest active:scale-95 transition-transform shadow-lg shadow-brand-red/20"
-            >
-              Comprar
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── StoreTab ─────────────────────────────────────────────────────────────────
 
 export interface StoreTabProps {
@@ -156,6 +57,7 @@ export function StoreTab({
 }: StoreTabProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [buyingId, setBuyingId] = useState<string | null>(null);
+  const [showSearchModal, setShowSearchModal] = useState(false);
 
   const purchasedItemIds = new Set(myPurchases.map((p) => p.itemId));
   const storeWorkouts = storeItems.filter((i) => i.type === 'workout');
@@ -163,11 +65,14 @@ export function StoreTab({
   const myAnnouncements = userEmail && userType === 'trainer'
     ? storeWorkouts.filter((i) => i.creatorEmail.toLowerCase() === userEmail.toLowerCase())
     : [];
+  const myAnnouncementIds = new Set(myAnnouncements.map((a) => a.id));
   const totalCount = storeWorkouts.length;
 
   const filteredWorkouts = searchTerm.trim()
-    ? storeWorkouts.filter((i) => i.title.toLowerCase().includes(searchTerm.toLowerCase()))
-    : storeWorkouts;
+    ? storeWorkouts.filter((i) => 
+        i.title.toLowerCase().includes(searchTerm.toLowerCase()) && !myAnnouncementIds.has(i.id)
+      )
+    : storeWorkouts.filter((i) => !myAnnouncementIds.has(i.id));
 
   const handleBuyItem = useCallback(
     async (item: StoreItem) => {
@@ -196,14 +101,6 @@ export function StoreTab({
           <div className="space-y-1">
             <h1 className="text-3xl font-black text-white leading-tight">Loja</h1>
             <p className="text-white/70 text-sm font-semibold">Compre treinos de especialistas</p>
-            {totalCount > 0 && (
-              <div className="flex items-center gap-1.5 mt-2">
-                <img src={iconTrophy} alt="" className="w-4 h-4 brightness-0 invert opacity-80" />
-                <span className="text-white/80 text-xs font-bold">
-                  {totalCount} {totalCount === 1 ? 'treino disponível' : 'treinos disponíveis'}
-                </span>
-              </div>
-            )}
           </div>
           <div className="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center">
             <ShoppingBag size={36} className="text-white" />
@@ -214,46 +111,28 @@ export function StoreTab({
         <div className="absolute top-4 right-12 w-12 h-12 rounded-full bg-white/5 pointer-events-none" />
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Buscar treinos..."
-          className="w-full bg-dark-card border border-dark-border rounded-2xl pl-12 pr-4 py-4 text-sm focus:outline-none focus:border-gray-400 transition-all shadow-2xl"
-        />
-        {searchTerm && (
-          <button
-            onClick={() => setSearchTerm('')}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"
-          >
-            <X size={16} />
-          </button>
-        )}
-      </div>
+      {/* Search Button */}
+      <button
+        onClick={() => setShowSearchModal(true)}
+        className="w-full bg-dark-card border border-dark-border rounded-2xl px-4 py-4 text-sm text-left flex items-center gap-3 hover:border-gray-400 transition-all shadow-2xl active:scale-[0.99]"
+      >
+        <Search className="text-white/20" size={20} />
+        <span className="text-white/40">Buscar treinos...</span>
+      </button>
 
       {/* My Storefront - Only for trainers */}
       {userType === 'trainer' && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-white/30">
-              Minha Vitrine
-            </p>
-            {myAnnouncements.length > 0 && (
-              <span className="text-[10px] font-bold text-white/40">
-                {myAnnouncements.length} {myAnnouncements.length === 1 ? 'treino' : 'treinos'}
-              </span>
-            )}
-          </div>
+          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-white/30">
+            Minha Vitrine
+          </p>
           
           {myAnnouncements.length > 0 ? (
-            <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
+            <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
               {myAnnouncements.map((item) => (
                 <div
                   key={item.id}
-                  className="min-w-[200px] bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3 flex-shrink-0"
+                  className="min-w-[280px] bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3 flex-shrink-0"
                 >
                   <div className="space-y-0.5">
                     <div className="flex items-start justify-between gap-2">
@@ -318,11 +197,11 @@ export function StoreTab({
               <p className="text-[10px] font-black uppercase tracking-[0.15em] text-white/30">
                 Meus Treinos
               </p>
-              <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
+              <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
                 {myPurchasedItems.map((item) => (
                   <div
                     key={item.id}
-                    className="min-w-[200px] bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3 flex-shrink-0"
+                    className="min-w-[280px] bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3 flex-shrink-0"
                   >
                     <div className="space-y-0.5">
                       <p className="text-xs font-bold leading-tight line-clamp-2">{item.title}</p>
@@ -339,38 +218,181 @@ export function StoreTab({
               </div>
             </div>
           )}
-
-          {/* Workouts */}
-          <div className="space-y-3">
-            {filteredWorkouts.length > 0 ? (
-              <div className="space-y-4">
-                {filteredWorkouts.map((item) => (
-                  <motion.div key={item.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                    <StoreItemCard
-                      item={item}
-                      isPurchased={purchasedItemIds.has(item.id)}
-                      onBuyItem={handleBuyItem}
-                      onGoToWorkouts={onGoToWorkouts}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              // Only show empty state if not a trainer or if trainer is searching
-              userType !== 'trainer' || searchTerm ? (
-                <div className="py-10 text-center space-y-3">
-                  <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto">
-                    <Dumbbell size={24} className="text-white/15" />
-                  </div>
-                  <p className="text-sm text-white/30">
-                    {searchTerm ? `Nenhum treino encontrado para "${searchTerm}"` : 'Nenhum treino disponível'}
-                  </p>
-                </div>
-              ) : null
-            )}
-          </div>
         </>
       )}
+
+      {/* Search Modal */}
+      <AnimatePresence>
+        {showSearchModal && (
+          <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setShowSearchModal(false);
+                setSearchTerm('');
+              }}
+              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative w-full max-w-lg h-[80vh] bg-dark-surface border-t sm:border border-white/10 rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl flex flex-col"
+            >
+              {/* Header */}
+              <div className="p-6 border-b border-white/10">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold">Buscar Treinos</h3>
+                  <button
+                    onClick={() => {
+                      setShowSearchModal(false);
+                      setSearchTerm('');
+                    }}
+                    className="p-2 bg-white/5 rounded-full text-white/60 hover:text-white transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                
+                {/* Search Input */}
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Buscar treinos..."
+                    autoFocus
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-all"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+              </div>
+              
+              {/* Workouts List */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {filteredWorkouts.length > 0 ? (
+                  <div className="space-y-4">
+                    {filteredWorkouts.map((item) => (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
+                        <div className="bg-dark-card border border-dark-border rounded-2xl overflow-hidden hover:border-brand-red/30 transition-all">
+                          {/* Cover image or placeholder */}
+                          {item.coverImageUrl ? (
+                            <div className="aspect-video relative">
+                              <img
+                                src={item.coverImageUrl}
+                                alt={item.title}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                              {purchasedItemIds.has(item.id) && (
+                                <span className="absolute top-3 left-3 px-2 py-1 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full">
+                                  Adquirido
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <div
+                              className="aspect-video flex items-center justify-center relative"
+                              style={{ background: 'linear-gradient(135deg,#2d1b1b,#4a1414)' }}
+                            >
+                              <Dumbbell size={40} className="text-brand-red/60" />
+                              {purchasedItemIds.has(item.id) && (
+                                <span className="absolute top-3 left-3 px-2 py-1 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full">
+                                  Adquirido
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Content */}
+                          <div className="p-4 space-y-3">
+                            <div className="space-y-1">
+                              <h3 className="font-bold text-sm leading-tight">{item.title}</h3>
+                              {item.description && (
+                                <p className="text-xs text-white/40 leading-relaxed line-clamp-2">{item.description}</p>
+                              )}
+                              <p className="text-[11px] text-white/30 font-medium">por {item.creatorName}</p>
+                            </div>
+
+                            {/* Tags */}
+                            {item.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5">
+                                {item.tags.slice(0, 3).map((tag) => (
+                                  <span
+                                    key={tag}
+                                    className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-bold text-white/40 uppercase tracking-wide"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Rating */}
+                            {item.rating > 0 && (
+                              <div className="flex items-center gap-1 text-yellow-400">
+                                <Star size={11} className="fill-yellow-400" />
+                                <span className="text-[11px] font-bold">{item.rating.toFixed(1)}</span>
+                                <span className="text-[11px] text-white/25">· {item.salesCount} vendas</span>
+                              </div>
+                            )}
+
+                            {/* Price + CTA */}
+                            <div className="flex items-center justify-between pt-1">
+                              <span className="text-brand-red font-black text-base">{formatPrice(item.price)}</span>
+                              {purchasedItemIds.has(item.id) ? (
+                                <button
+                                  onClick={onGoToWorkouts}
+                                  className="px-4 py-2.5 bg-emerald-500 text-black rounded-xl text-[11px] font-black uppercase tracking-widest active:scale-95 transition-transform"
+                                >
+                                  Acessar
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleBuyItem(item)}
+                                  className="px-4 py-2.5 bg-brand-red text-black rounded-xl text-[11px] font-black uppercase tracking-widest active:scale-95 transition-transform shadow-lg shadow-brand-red/20"
+                                >
+                                  Comprar
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-12 text-center space-y-3">
+                    <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+                      <Search size={24} className="text-white/15" />
+                    </div>
+                    <p className="text-sm text-white/30">
+                      {searchTerm
+                        ? `Nenhum treino encontrado para "${searchTerm}"`
+                        : 'Digite para buscar treinos'}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
