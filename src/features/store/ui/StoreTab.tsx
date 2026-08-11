@@ -114,11 +114,110 @@ export function StoreTab({
       {/* Search Button */}
       <button
         onClick={() => setShowSearchModal(true)}
-        className="w-full bg-dark-card border border-dark-border rounded-2xl px-4 py-4 text-sm text-left flex items-center gap-3 hover:border-gray-400 transition-all shadow-2xl active:scale-[0.99]"
+        className="w-full py-3 bg-white/5 border border-emerald-500/50 text-white/60 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
       >
-        <Search className="text-white/20" size={20} />
-        <span className="text-white/40">Buscar treinos...</span>
+        <Search size={16} />
+        Buscar treinos
       </button>
+
+      {/* My Purchases - Only for athletes */}
+      {userType === 'athlete' && (
+        <div className="space-y-3">
+          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-white/30">
+            Minhas Compras
+          </p>
+          
+          {myPurchasedItems.length > 0 ? (
+            <div className="space-y-3">
+              {myPurchasedItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-dark-card border border-dark-border rounded-2xl overflow-hidden hover:border-emerald-500/30 transition-all"
+                >
+                  {/* Cover image or placeholder */}
+                  {item.coverImageUrl ? (
+                    <div className="aspect-video relative">
+                      <img
+                        src={item.coverImageUrl}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      <span className="absolute top-3 left-3 px-2 py-1 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">
+                        Adquirido
+                      </span>
+                    </div>
+                  ) : (
+                    <div
+                      className="aspect-video flex items-center justify-center relative"
+                      style={{ background: 'linear-gradient(135deg,#2d1b1b,#4a1414)' }}
+                    >
+                      <Dumbbell size={40} className="text-brand-red/60" />
+                      <span className="absolute top-3 left-3 px-2 py-1 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">
+                        Adquirido
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Content */}
+                  <div className="p-4 space-y-3">
+                    <div className="space-y-1">
+                      <h3 className="font-bold text-sm leading-tight">{item.title}</h3>
+                      {item.description && (
+                        <p className="text-xs text-white/40 leading-relaxed line-clamp-2">{item.description}</p>
+                      )}
+                      <p className="text-[11px] text-white/30 font-medium">por {item.creatorName}</p>
+                    </div>
+
+                    {/* Tags */}
+                    {item.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {item.tags.slice(0, 3).map((tag) => (
+                          <span
+                            key={tag}
+                            className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-bold text-white/40 uppercase tracking-wide"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Rating */}
+                    {item.rating > 0 && (
+                      <div className="flex items-center gap-1 text-yellow-400">
+                        <Star size={11} className="fill-yellow-400" />
+                        <span className="text-[11px] font-bold">{item.rating.toFixed(1)}</span>
+                        <span className="text-[11px] text-white/25">· {item.salesCount} vendas</span>
+                      </div>
+                    )}
+
+                    {/* CTA */}
+                    <button
+                      onClick={onGoToWorkouts}
+                      className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-black rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
+                    >
+                      Acessar Treino
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-dark-card border border-dark-border rounded-2xl p-6 text-center space-y-4">
+              <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+                <ShoppingBag size={24} className="text-white/15" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-white/60">Nenhuma compra realizada</p>
+                <p className="text-xs text-white/30 leading-relaxed">
+                  Explore treinos de especialistas e impulsione seus resultados
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* My Storefront - Only for trainers */}
       {userType === 'trainer' && (
@@ -128,40 +227,40 @@ export function StoreTab({
           </p>
           
           {myAnnouncements.length > 0 ? (
-            <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
+            <div className="space-y-3">
               {myAnnouncements.map((item) => (
                 <div
                   key={item.id}
-                  className="min-w-[280px] bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3 flex-shrink-0"
+                  className="bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3"
                 >
                   <div className="space-y-0.5">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-xs font-bold leading-tight line-clamp-2 flex-1">{item.title}</p>
+                      <p className="text-sm font-bold leading-tight flex-1">{item.title}</p>
                       {item.status === 'draft' && (
-                        <span className="px-1.5 py-0.5 bg-yellow-500/20 border border-yellow-500/40 rounded text-[8px] font-black text-yellow-400 uppercase tracking-wider flex-shrink-0">
+                        <span className="px-2 py-1 bg-yellow-500/20 border border-yellow-500/40 rounded text-[9px] font-black text-yellow-400 uppercase tracking-wider flex-shrink-0">
                           Rascunho
                         </span>
                       )}
                       {item.status === 'published' && (
-                        <span className="px-1.5 py-0.5 bg-emerald-500/20 border border-emerald-500/40 rounded text-[8px] font-black text-emerald-400 uppercase tracking-wider flex-shrink-0">
+                        <span className="px-2 py-1 bg-emerald-500/20 border border-emerald-500/40 rounded text-[9px] font-black text-emerald-400 uppercase tracking-wider flex-shrink-0">
                           Publicado
                         </span>
                       )}
                     </div>
-                    <p className="text-brand-red font-black text-sm">{formatPrice(item.price)}</p>
+                    <p className="text-brand-red font-black text-base">{formatPrice(item.price)}</p>
                   </div>
-                  <div className="flex items-center gap-3 text-[10px] text-white/40">
-                    <div className="flex items-center gap-1">
-                      <Star size={10} className="fill-yellow-400 text-yellow-400" />
+                  <div className="flex items-center gap-4 text-xs text-white/40">
+                    <div className="flex items-center gap-1.5">
+                      <Star size={12} className="fill-yellow-400 text-yellow-400" />
                       <span className="font-bold">{item.rating > 0 ? item.rating.toFixed(1) : '—'}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <ShoppingBag size={10} />
+                    <div className="flex items-center gap-1.5">
+                      <ShoppingBag size={12} />
                       <span className="font-bold">{item.salesCount} vendas</span>
                     </div>
                   </div>
                   <button
-                    className="w-full py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
+                    className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all"
                   >
                     Gerenciar
                   </button>
@@ -187,39 +286,7 @@ export function StoreTab({
         </div>
       )}
 
-      {isLoadingItems ? (
-        <StoreSkeleton />
-      ) : (
-        <>
-          {/* My Purchased Workouts */}
-          {myPurchasedItems.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-[10px] font-black uppercase tracking-[0.15em] text-white/30">
-                Meus Treinos
-              </p>
-              <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
-                {myPurchasedItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="min-w-[280px] bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3 flex-shrink-0"
-                  >
-                    <div className="space-y-0.5">
-                      <p className="text-xs font-bold leading-tight line-clamp-2">{item.title}</p>
-                      <p className="text-[10px] text-white/30 uppercase font-bold tracking-widest">Treino</p>
-                    </div>
-                    <button
-                      onClick={onGoToWorkouts}
-                      className="w-full py-2 bg-emerald-500 text-black rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform"
-                    >
-                      Acessar
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </>
-      )}
+      {isLoadingItems && <StoreSkeleton />}
 
       {/* Search Modal */}
       <AnimatePresence>
@@ -282,95 +349,74 @@ export function StoreTab({
               {/* Workouts List */}
               <div className="flex-1 overflow-y-auto p-6">
                 {filteredWorkouts.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {filteredWorkouts.map((item) => (
                       <motion.div
                         key={item.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                       >
-                        <div className="bg-dark-card border border-dark-border rounded-2xl overflow-hidden hover:border-brand-red/30 transition-all">
-                          {/* Cover image or placeholder */}
-                          {item.coverImageUrl ? (
-                            <div className="aspect-video relative">
-                              <img
-                                src={item.coverImageUrl}
-                                alt={item.title}
-                                className="w-full h-full object-cover"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        <div className="bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3 hover:border-brand-red/30 transition-all">
+                          {/* Header with title and purchased badge */}
+                          <div className="space-y-0.5">
+                            <div className="flex items-start justify-between gap-2">
+                              <h3 className="text-sm font-bold leading-tight flex-1">{item.title}</h3>
                               {purchasedItemIds.has(item.id) && (
-                                <span className="absolute top-3 left-3 px-2 py-1 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full">
+                                <span className="px-2 py-1 bg-emerald-500/20 border border-emerald-500/40 rounded text-[9px] font-black text-emerald-400 uppercase tracking-wider flex-shrink-0">
                                   Adquirido
                                 </span>
                               )}
                             </div>
-                          ) : (
-                            <div
-                              className="aspect-video flex items-center justify-center relative"
-                              style={{ background: 'linear-gradient(135deg,#2d1b1b,#4a1414)' }}
-                            >
-                              <Dumbbell size={40} className="text-brand-red/60" />
-                              {purchasedItemIds.has(item.id) && (
-                                <span className="absolute top-3 left-3 px-2 py-1 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full">
-                                  Adquirido
+                            {item.description && (
+                              <p className="text-xs text-white/40 leading-relaxed line-clamp-2">{item.description}</p>
+                            )}
+                            <p className="text-[11px] text-white/30 font-medium">por {item.creatorName}</p>
+                          </div>
+
+                          {/* Tags */}
+                          {item.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {item.tags.slice(0, 3).map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-bold text-white/40 uppercase tracking-wide"
+                                >
+                                  {tag}
                                 </span>
-                              )}
+                              ))}
                             </div>
                           )}
 
-                          {/* Content */}
-                          <div className="p-4 space-y-3">
-                            <div className="space-y-1">
-                              <h3 className="font-bold text-sm leading-tight">{item.title}</h3>
-                              {item.description && (
-                                <p className="text-xs text-white/40 leading-relaxed line-clamp-2">{item.description}</p>
-                              )}
-                              <p className="text-[11px] text-white/30 font-medium">por {item.creatorName}</p>
+                          {/* Stats */}
+                          <div className="flex items-center gap-4 text-xs text-white/40">
+                            <div className="flex items-center gap-1.5">
+                              <Star size={12} className="fill-yellow-400 text-yellow-400" />
+                              <span className="font-bold">{item.rating > 0 ? item.rating.toFixed(1) : '—'}</span>
                             </div>
-
-                            {/* Tags */}
-                            {item.tags.length > 0 && (
-                              <div className="flex flex-wrap gap-1.5">
-                                {item.tags.slice(0, 3).map((tag) => (
-                                  <span
-                                    key={tag}
-                                    className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-bold text-white/40 uppercase tracking-wide"
-                                  >
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Rating */}
-                            {item.rating > 0 && (
-                              <div className="flex items-center gap-1 text-yellow-400">
-                                <Star size={11} className="fill-yellow-400" />
-                                <span className="text-[11px] font-bold">{item.rating.toFixed(1)}</span>
-                                <span className="text-[11px] text-white/25">· {item.salesCount} vendas</span>
-                              </div>
-                            )}
-
-                            {/* Price + CTA */}
-                            <div className="flex items-center justify-between pt-1">
-                              <span className="text-brand-red font-black text-base">{formatPrice(item.price)}</span>
-                              {purchasedItemIds.has(item.id) ? (
-                                <button
-                                  onClick={onGoToWorkouts}
-                                  className="px-4 py-2.5 bg-emerald-500 text-black rounded-xl text-[11px] font-black uppercase tracking-widest active:scale-95 transition-transform"
-                                >
-                                  Acessar
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => handleBuyItem(item)}
-                                  className="px-4 py-2.5 bg-brand-red text-black rounded-xl text-[11px] font-black uppercase tracking-widest active:scale-95 transition-transform shadow-lg shadow-brand-red/20"
-                                >
-                                  Comprar
-                                </button>
-                              )}
+                            <div className="flex items-center gap-1.5">
+                              <ShoppingBag size={12} />
+                              <span className="font-bold">{item.salesCount} vendas</span>
                             </div>
+                          </div>
+
+                          {/* Price + CTA */}
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="text-brand-red font-black text-base">{formatPrice(item.price)}</span>
+                            {purchasedItemIds.has(item.id) ? (
+                              <button
+                                onClick={onGoToWorkouts}
+                                className="px-4 py-2.5 bg-emerald-500 text-black rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-transform"
+                              >
+                                Acessar
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleBuyItem(item)}
+                                className="px-4 py-2.5 bg-brand-red text-black rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-transform shadow-lg shadow-brand-red/20"
+                              >
+                                Comprar
+                              </button>
+                            )}
                           </div>
                         </div>
                       </motion.div>
