@@ -436,6 +436,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           myPurchases={(myPurchases as StorePurchase[]) ?? []}
           isLoadingItems={!!isLoadingItems}
           onGoToWorkouts={() => switchTab('workouts')}
+          claimFreeItem={api.claimFreeItem}
           createCheckoutSession={api.createCheckoutSession}
           userEmail={userProfile?.email}
           userType={userProfile?.userType === 'treinador' ? 'trainer' : 'athlete'}

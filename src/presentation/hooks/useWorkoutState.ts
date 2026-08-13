@@ -114,6 +114,8 @@ export const useWorkoutState = (
       await deleteDoc(doc(db, "templates", id));
       setTemplates((prev) => prev.filter((t) => t.id !== id));
     } catch (e: any) {
+      console.error('[deleteTemplate] Error deleting template:', e.message);
+      throw e;
     }
   };
 

@@ -34,6 +34,7 @@ export type PublishPayload = PublishWorkoutPayload;
 export const useStoreState = (
   currentUser: { email: string } | null,
   idToken: string | null,
+  onTemplatesChanged?: () => void,
 ) => {
   const [storeItems, setStoreItems] = useState<StoreItem[]>([]);
   const [myPurchases, setMyPurchases] = useState<StorePurchase[]>([]);
@@ -140,6 +141,30 @@ export const useStoreState = (
   }, []);
 
   // ── Stripe checkout ──────────────────────────────────────────────────────
+  const claimFreeItem = useCallback(async (itemId: string): Promise<{ success: boolean; purchaseId: string }> => {
+    const res = await fetch("/api/store/claim-free", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken || ""}`,
+      },
+      body: JSON.stringify({ itemId }),
+    });
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText);
+    }
+    const result = await res.json();
+    await loadMyPurchases();
+    
+    // Notify parent that templates need to be reloaded
+    if (onTemplatesChanged) {
+      onTemplatesChanged();
+    }
+    
+    return result;
+  }, [idToken, loadMyPurchases, onTemplatesChanged]);
+
   const createCheckoutSession = useCallback(async (itemId: string): Promise<{ url: string }> => {
     const res = await fetch("/api/checkout/session", {
       method: "POST",
@@ -197,6 +222,7 @@ export const useStoreState = (
     loadMyListings,
     publishItem,
     unpublishItem,
+    claimFreeItem,
     createCheckoutSession,
     verifyCheckoutSession,
     // Legacy

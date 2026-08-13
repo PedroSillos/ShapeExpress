@@ -84,7 +84,7 @@ export const useSyncState = (
   isLoggedIn: boolean,
   token: string | null,
   setters: SyncSetters,
-): { dataReady: boolean } => {
+): { dataReady: boolean; resyncTemplates: () => Promise<void> } => {
   const syncRan = useRef<string | null>(null);
   // dataReady starts false and is set to true once we know the user's data
   // is ready to display. We cannot initialise it from isLoggedIn here because
@@ -211,5 +211,18 @@ export const useSyncState = (
     };
   }, [isLoggedIn, token]);
 
-  return { dataReady };
+  // ── Manual resync for templates (can be called after purchase/creation) ──
+  const resyncTemplates = async () => {
+    if (!isLoggedIn || !token) return;
+    const emailLower = token.toLowerCase();
+    try {
+      const snap = await getDocs(query(collection(db, "templates"), where("userId", "==", emailLower)));
+      const templates = snap.docs.map((d) => ({ id: d.id, ...d.data() } as WorkoutTemplate));
+      setters.setTemplates(templates);
+    } catch (e) {
+      console.error('[useSyncState] Error resyncing templates:', e);
+    }
+  };
+
+  return { dataReady, resyncTemplates };
 };

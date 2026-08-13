@@ -20,10 +20,9 @@ export const useAppState = () => {
   const workout = useWorkoutState(auth.currentUser, auth.token, profile.userProfile);
   const progress = useProgressState(workout.userSessions, profile.userStats);
   const students = useStudentsState(auth.currentUser, auth.token);
-  const store = useStoreState(auth.currentUser, auth.idToken);
-
+  
   // Boot sync after login
-  const { dataReady } = useSyncState(auth.isLoggedIn, auth.token, {
+  const { dataReady, resyncTemplates } = useSyncState(auth.isLoggedIn, auth.token, {
     setUserProfile: profile.setUserProfile,
     setUserStats: profile.setUserStats,
     setTemplates: workout.setTemplates,
@@ -33,6 +32,8 @@ export const useAppState = () => {
     setStudentConnections: students.setStudentConnections,
     setStudents: students.setStudents,
   });
+  
+  const store = useStoreState(auth.currentUser, auth.idToken, resyncTemplates);
 
   // Apply the tab restored by Firebase Auth on page load/refresh
   useEffect(() => {
@@ -121,6 +122,7 @@ export const useAppState = () => {
     updateSession: workout.updateSession,
     deleteSession: workout.deleteSession,
     getStudentTemplates: workout.getStudentTemplates,
+    resyncTemplates,
 
     // Assessments (stub — not yet migrated to Firestore)
     getAssessments: async () => [],
@@ -144,6 +146,7 @@ export const useAppState = () => {
     getProtocols: store.getProtocols,
     createProtocol: store.createProtocol,
     getPurchasedProtocols: store.getPurchasedProtocols,
+    claimFreeItem: store.claimFreeItem,
     createCheckoutSession: store.createCheckoutSession,
     verifyCheckoutSession: store.verifyCheckoutSession,
     publishStoreItem: store.publishItem,

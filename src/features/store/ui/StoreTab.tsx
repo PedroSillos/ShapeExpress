@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Search, X, Dumbbell, Star, ShoppingBag } from 'lucide-react';
+import { Search, X, Star, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { StoreItem, StorePurchase } from '@/src/domain/entities';
 
@@ -39,6 +39,7 @@ export interface StoreTabProps {
   myPurchases: StorePurchase[];
   isLoadingItems: boolean;
   onGoToWorkouts: () => void;
+  claimFreeItem: (itemId: string) => Promise<{ success: boolean; purchaseId: string }>;
   createCheckoutSession: (itemId: string) => Promise<{ url: string }>;
   tabSwitcher?: React.ReactNode;
   userEmail?: string;
@@ -50,6 +51,7 @@ export function StoreTab({
   myPurchases,
   isLoadingItems,
   onGoToWorkouts,
+  claimFreeItem,
   createCheckoutSession,
   tabSwitcher,
   userEmail,
@@ -79,15 +81,22 @@ export function StoreTab({
       if (buyingId) return;
       setBuyingId(item.id);
       try {
-        const { url } = await createCheckoutSession(item.id);
-        window.location.href = url;
+        if (item.price === 0) {
+          // Free item: claim directly without Stripe
+          await claimFreeItem(item.id);
+          // Success feedback could be added here (toast/alert)
+        } else {
+          // Paid item: use Stripe checkout
+          const { url } = await createCheckoutSession(item.id);
+          window.location.href = url;
+        }
       } catch (err) {
         console.error('[StoreTab] checkout error:', err);
       } finally {
         setBuyingId(null);
       }
     },
-    [buyingId, createCheckoutSession],
+    [buyingId, claimFreeItem, createCheckoutSession],
   );
 
   return (
@@ -129,44 +138,32 @@ export function StoreTab({
           
           {myPurchasedItems.length > 0 ? (
             <div className="space-y-3">
-              {myPurchasedItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-dark-card border border-dark-border rounded-2xl overflow-hidden hover:border-emerald-500/30 transition-all"
-                >
-                  {/* Cover image or placeholder */}
-                  {item.coverImageUrl ? (
-                    <div className="aspect-video relative">
-                      <img
-                        src={item.coverImageUrl}
-                        alt={item.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      <span className="absolute top-3 left-3 px-2 py-1 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">
-                        Adquirido
-                      </span>
-                    </div>
-                  ) : (
-                    <div
-                      className="aspect-video flex items-center justify-center relative"
-                      style={{ background: 'linear-gradient(135deg,#2d1b1b,#4a1414)' }}
-                    >
-                      <Dumbbell size={40} className="text-brand-red/60" />
-                      <span className="absolute top-3 left-3 px-2 py-1 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg">
-                        Adquirido
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Content */}
-                  <div className="p-4 space-y-3">
-                    <div className="space-y-1">
-                      <h3 className="font-bold text-sm leading-tight">{item.title}</h3>
+              {myPurchasedItems.map((item) => {
+                const purchase = myPurchases.find((p) => p.itemId === item.id);
+                const purchaseDate = purchase?.purchasedAt 
+                  ? new Date(purchase.purchasedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+                  : null;
+                
+                return (
+                  <div
+                    key={item.id}
+                    className="bg-dark-card border border-dark-border rounded-2xl p-4 space-y-3 hover:border-emerald-500/30 transition-all"
+                  >
+                    {/* Header with title and badge */}
+                    <div className="space-y-0.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="text-sm font-bold leading-tight flex-1">{item.title}</h3>
+                        <span className="px-2 py-1 bg-emerald-500/20 border border-emerald-500/40 rounded text-[9px] font-black text-emerald-400 uppercase tracking-wider flex-shrink-0">
+                          Adquirido
+                        </span>
+                      </div>
                       {item.description && (
                         <p className="text-xs text-white/40 leading-relaxed line-clamp-2">{item.description}</p>
                       )}
                       <p className="text-[11px] text-white/30 font-medium">por {item.creatorName}</p>
+                      {purchaseDate && (
+                        <p className="text-[10px] text-white/25 font-bold uppercase tracking-wide">Comprado em {purchaseDate}</p>
+                      )}
                     </div>
 
                     {/* Tags */}
@@ -183,25 +180,28 @@ export function StoreTab({
                       </div>
                     )}
 
-                    {/* Rating */}
-                    {item.rating > 0 && (
-                      <div className="flex items-center gap-1 text-yellow-400">
-                        <Star size={11} className="fill-yellow-400" />
-                        <span className="text-[11px] font-bold">{item.rating.toFixed(1)}</span>
-                        <span className="text-[11px] text-white/25">· {item.salesCount} vendas</span>
+                    {/* Stats */}
+                    <div className="flex items-center gap-4 text-xs text-white/40">
+                      <div className="flex items-center gap-1.5">
+                        <Star size={12} className="fill-yellow-400 text-yellow-400" />
+                        <span className="font-bold">{item.rating > 0 ? item.rating.toFixed(1) : '—'}</span>
                       </div>
-                    )}
+                      <div className="flex items-center gap-1.5">
+                        <ShoppingBag size={12} />
+                        <span className="font-bold">{item.salesCount} vendas</span>
+                      </div>
+                    </div>
 
                     {/* CTA */}
                     <button
                       onClick={onGoToWorkouts}
                       className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-black rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
                     >
-                      Acessar Treino
+                      Acessar
                     </button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="bg-dark-card border border-dark-border rounded-2xl p-6 text-center space-y-4">
@@ -401,7 +401,9 @@ export function StoreTab({
 
                           {/* Price + CTA */}
                           <div className="flex items-center justify-between pt-1">
-                            <span className="text-brand-red font-black text-base">{formatPrice(item.price)}</span>
+                            <span className="text-brand-red font-black text-base">
+                              {item.price === 0 ? 'GRÁTIS' : formatPrice(item.price)}
+                            </span>
                             {purchasedItemIds.has(item.id) ? (
                               <button
                                 onClick={onGoToWorkouts}
@@ -412,9 +414,10 @@ export function StoreTab({
                             ) : (
                               <button
                                 onClick={() => handleBuyItem(item)}
-                                className="px-4 py-2.5 bg-brand-red text-black rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-transform shadow-lg shadow-brand-red/20"
+                                disabled={buyingId === item.id}
+                                className="px-4 py-2.5 bg-brand-red text-black rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-transform shadow-lg shadow-brand-red/20 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
-                                Comprar
+                                {buyingId === item.id ? '...' : 'Comprar'}
                               </button>
                             )}
                           </div>

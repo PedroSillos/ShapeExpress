@@ -57,10 +57,12 @@ async function startServer() {
           (req as any).userId = decodedToken.uid;
           (req as any).userEmail = decodedToken.email;
           return next();
+        } else {
+          console.warn('[authMiddleware] Firebase Admin not initialized');
         }
-      } catch (tokenError) {
+      } catch (tokenError: any) {
         // Token verification failed, try fallback
-        console.warn('Token verification failed, using fallback:', tokenError);
+        console.warn('[authMiddleware] Token verification failed:', tokenError.message);
       }
     }
     
@@ -282,6 +284,85 @@ Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"e
   });
 
   // ── Stripe Endpoints ───────────────────────────────────────────────────────
+
+  // POST /api/store/claim-free — claim a free item (price = 0)
+  app.post('/api/store/claim-free', authMiddleware, [
+    body('itemId').trim().isLength({ min: 1, max: 100 }).withMessage('itemId inválido'),
+  ], async (req: any, res: any) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    const email = (req as any).userEmail;
+    const { itemId } = req.body;
+
+    try {
+      const db = admin.firestore();
+      const itemSnap = await db.collection('store_items').doc(itemId).get();
+      if (!itemSnap.exists) return res.status(404).json({ error: 'Item não encontrado.' });
+      const item = itemSnap.data()!;
+      if (item.status !== 'published') return res.status(400).json({ error: 'Item não está disponível.' });
+
+      // Verify item is actually free
+      if (item.price !== 0) {
+        return res.status(400).json({ error: 'Este item não é gratuito.' });
+      }
+
+      // Prevent claiming own items
+      if (item.creatorEmail === email.toLowerCase()) {
+        return res.status(400).json({ error: 'Você não pode reivindicar seu próprio item.' });
+      }
+
+      // Prevent duplicate claim
+      const purchaseSnap = await db.collection('store_purchases')
+        .where('buyerEmail', '==', email.toLowerCase())
+        .where('itemId', '==', itemId)
+        .limit(1)
+        .get();
+      if (!purchaseSnap.empty) {
+        return res.status(400).json({ error: 'Você já possui este item.' });
+      }
+
+      // Record free "purchase"
+      const buyerEmail = email.toLowerCase();
+      const purchaseRef = await db.collection('store_purchases').add({
+        buyerEmail,
+        itemId,
+        itemType: item.type,
+        stripeSessionId: '', // No Stripe session for free items
+        purchasedAt: new Date().toISOString(),
+      });
+
+      // Copy template(s) to buyer's templates collection
+      const templateIds: string[] = item.type === 'workout'
+        ? [item.templateId]
+        : (item.templateIds || []);
+
+      await Promise.all(templateIds.map(async (tId: string) => {
+        const tSnap = await db.collection('templates').doc(tId).get();
+        if (!tSnap.exists) return;
+        const tData = tSnap.data()!;
+        const newId = `purchased_${tId}_${buyerEmail.replace(/[@.]/g, '_')}`;
+        await db.collection('templates').doc(newId).set({
+          ...tData,
+          id: newId,
+          userId: buyerEmail,
+          purchasedFrom: item.creatorEmail,
+          purchasedItemId: itemId,
+          purchasedAt: new Date().toISOString(),
+        });
+      }));
+
+      // Increment salesCount on item
+      await db.collection('store_items').doc(itemId).update({
+        salesCount: admin.firestore.FieldValue.increment(1),
+      });
+
+      res.json({ success: true, purchaseId: purchaseRef.id });
+    } catch (error: any) {
+      console.error('claim-free error:', error);
+      res.status(500).json({ error: 'Erro ao reivindicar item gratuito.' });
+    }
+  });
 
   app.post('/api/checkout/session', authMiddleware, [
     body('itemId').trim().isLength({ min: 1, max: 100 }).withMessage('itemId inválido'),

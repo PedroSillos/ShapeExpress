@@ -8,6 +8,7 @@ export interface LojasScreenProps {
   myPurchases: StorePurchase[];
   isLoadingItems: boolean;
   onGoToWorkouts: () => void;
+  claimFreeItem: (itemId: string) => Promise<{ success: boolean; purchaseId: string }>;
   createCheckoutSession: (itemId: string) => Promise<{ url: string }>;
   userEmail?: string;
   userType?: 'athlete' | 'trainer';
@@ -20,6 +21,7 @@ export function LojasScreen({
   myPurchases,
   isLoadingItems,
   onGoToWorkouts,
+  claimFreeItem,
   createCheckoutSession,
   userEmail,
   userType,
@@ -30,6 +32,7 @@ export function LojasScreen({
       myPurchases={myPurchases}
       isLoadingItems={isLoadingItems}
       onGoToWorkouts={onGoToWorkouts}
+      claimFreeItem={claimFreeItem}
       createCheckoutSession={createCheckoutSession}
       userEmail={userEmail}
       userType={userType}
