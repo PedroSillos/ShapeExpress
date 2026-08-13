@@ -39,8 +39,9 @@ export function generateFirstWorkout(sports: string[], userEmail: string, experi
 
   const template: WorkoutTemplate = {
     id: `first-workout-${Date.now()}`,
-    userId: userEmail,
-    creatorEmail: userEmail,
+    // Use 'guest' as userId when userEmail is 'guest', otherwise use the actual email
+    userId: userEmail === 'guest' ? 'guest' : userEmail,
+    creatorEmail: 'AICoach',
     name: `Treino de IA: ${sportLabel}`,
     sport: sports[0] ?? 'Musculação',
     category: 'basic',

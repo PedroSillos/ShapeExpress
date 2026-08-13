@@ -131,7 +131,8 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
         if (ai && ai.exercises?.length > 0) {
           template = {
             id: `ai-${Date.now()}`,
-            userId: userProfile?.email ?? 'user',
+            userId: userProfile?.email ?? 'guest',
+            creatorEmail: 'AICoach',
             sport,
             name: `Treino de IA: ${sport}`,
             category: 'basic' as const,
@@ -145,7 +146,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
 
       if (!template) {
         const { generateFirstWorkout } = await import('../domain/use-cases/generateFirstWorkout');
-        template = generateFirstWorkout(sports, userProfile?.email ?? 'user', experience);
+        template = generateFirstWorkout(sports, userProfile?.email ?? 'guest', experience);
       }
 
       await createTemplate(template);
@@ -247,6 +248,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
                   return {
                     id: `first-${Date.now()}`,
                     userId: 'guest',
+                    creatorEmail: 'AICoach',
                     sport: primarySport,
                     name: `Treino de IA: ${primarySport}`,
                     category: 'basic' as const,

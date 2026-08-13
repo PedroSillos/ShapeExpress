@@ -55,15 +55,27 @@ async function uploadLocalDataToFirestore(email: string) {
 
   // Use allSettled so a single failed write does not abort the others.
   const results = await Promise.allSettled([
-    ...templates.map((t) => setDoc(doc(db, "templates", t.id), sanitize({ ...t, userId: email }))),
+    ...templates.map((t) => {
+      // Ensure creatorEmail is always defined (required by Firestore rules)
+      // Preserve "AICoach" for AI-generated workouts, otherwise use user email
+      const creatorEmail = (t.creatorEmail && t.creatorEmail !== 'guest') ? t.creatorEmail : email;
+      
+      const templateData = {
+        ...t,
+        userId: email,
+        creatorEmail,
+      };
+      
+      return setDoc(doc(db, "templates", t.id), sanitize(templateData));
+    }),
     // Sessions also need the real userId — guests store them with '' or 'guest'.
-    ...sessions.map((s) => setDoc(doc(db, "sessions", s.id), sanitize({ ...s, userId: email }))),
+    ...sessions.map((s) => setDoc(doc(db, "sessions", s.id), sanitize({ ...s, userId: email, userEmail: email }))),
     ...(localStats ? [setDoc(doc(db, "stats", email), { ...localStats, userEmail: email }, { merge: true })] : []),
   ]);
 
   const failed = results.filter((r) => r.status === "rejected");
   if (failed.length > 0) {
-    console.warn(`[uploadLocalDataToFirestore] ${failed.length} write(s) failed:`, failed);
+    console.error(`[uploadLocalDataToFirestore] ${failed.length} write(s) failed:`, failed);
   }
 
   // Clear local copies regardless of individual failures — on next login
@@ -201,9 +213,13 @@ export const useAuthState = () => {
           isNewAccount = true;
           const wa = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; } })();
           const resolvedUserType: "atleta" | "treinador" = wa?.userType === "treinador" ? "treinador" : "atleta";
+          const firstName = (userCredential.user.displayName || 'Usuário').split(' ')[0];
+          const lastName = (userCredential.user.displayName || '').split(' ').slice(1).join(' ') || undefined;
           userDoc = {
-            firstName: (userCredential.user.displayName || 'Usuário').split(' ')[0],
-            lastName: (userCredential.user.displayName || '').split(' ').slice(1).join(' ') || undefined,
+            firstName,
+            lastName,
+            // Add 'name' field required by Firestore rules
+            name: lastName ? `${firstName} ${lastName}` : firstName,
             email,
             userType: resolvedUserType,
             height: 180,
@@ -220,11 +236,12 @@ export const useAuthState = () => {
           });
         }
       } catch (e) {}
+      // Upload local guest data BEFORE setting isLoggedIn=true (for new accounts only)
+      if (isNewAccount) await uploadLocalDataToFirestore(email);
       localStorage.setItem(STORAGE_KEYS.TOKEN, email);
       setToken(email);
       setCurrentUser({ email });
       setIsLoggedIn(true);
-      if (isNewAccount) await uploadLocalDataToFirestore(email);
       return { token: freshIdToken, user: userDoc };
     } catch (e: any) {
       throw new Error(getFirebaseErrorMessage(e));
@@ -241,6 +258,8 @@ export const useAuthState = () => {
       const isTrainer = resolvedUserType === "treinador";
       const userProfile = {
         ...data,
+        // Add 'name' field required by Firestore rules (combines firstName + lastName)
+        name: data.lastName ? `${data.firstName} ${data.lastName}` : data.firstName,
         userType: resolvedUserType,
         height: data.height || 180,
         initialWeight: data.initialWeight || 80,
@@ -258,11 +277,13 @@ export const useAuthState = () => {
           completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: data.email,
         });
       } catch (e) {}
+      // Upload local guest data BEFORE setting isLoggedIn=true
+      // so useSyncState fetches already-uploaded data
+      await uploadLocalDataToFirestore(data.email);
       localStorage.setItem(STORAGE_KEYS.TOKEN, data.email);
       setToken(data.email);
       setCurrentUser({ email: data.email });
       setIsLoggedIn(true);
-      await uploadLocalDataToFirestore(data.email);
       return { token: freshIdToken, user: userProfile };
     } catch (e: any) {
       if (e.code === "auth/operation-not-allowed") {
@@ -355,6 +376,8 @@ export const useAuthState = () => {
           const resolvedUserType: "atleta" | "treinador" = wa?.userType === "treinador" ? "treinador" : "atleta";
           userDoc = {
             firstName: phone,
+            // Add 'name' field required by Firestore rules
+            name: phone,
             email: docId,
             userType: resolvedUserType,
             phone,
@@ -372,11 +395,12 @@ export const useAuthState = () => {
           });
         }
       } catch (e) {}
+      // Upload local guest data BEFORE setting isLoggedIn=true (for new accounts only)
+      if (isNewAccount) await uploadLocalDataToFirestore(docId);
       localStorage.setItem(STORAGE_KEYS.TOKEN, docId);
       setToken(docId);
       setCurrentUser({ email: docId });
       setIsLoggedIn(true);
-      if (isNewAccount) await uploadLocalDataToFirestore(docId);
       return { token: freshIdToken, user: userDoc };
     } catch (e: any) {
       throw new Error(getFirebaseErrorMessage(e));

@@ -90,7 +90,11 @@ service cloud.firestore {
 
     match /templates/{id} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isOwner(request.resource.data.creatorEmail);
+      // Allow creation if user owns the creatorEmail OR if it's an AI-generated workout
+      allow create: if isAuthenticated() && (
+        isOwner(request.resource.data.creatorEmail) || 
+        request.resource.data.creatorEmail == 'AICoach'
+      );
       allow update, delete: if isAuthenticated() && (isOwner(resource.data.creatorEmail) || isAdmin());
     }
 

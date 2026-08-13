@@ -104,7 +104,7 @@ export function useWorkout({
 
     const newSession: WorkoutSession = {
       id: Date.now().toString(),
-      userId: userProfile?.email || '',
+      userId: userProfile?.email || 'guest',
       workoutId: template.id,
       sheetId: sheet?.id,
       date: new Date().toISOString(),

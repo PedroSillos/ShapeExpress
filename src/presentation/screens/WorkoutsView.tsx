@@ -338,7 +338,9 @@ function TemplateCard({
 
   const trainer =
     template.creatorEmail && template.creatorEmail !== mainUserProfile.email
-      ? trainers.find((t) => t.email === template.creatorEmail)
+      ? template.creatorEmail === 'AICoach'
+        ? { email: 'AICoach', name: 'AICoach' }
+        : trainers.find((t) => t.email === template.creatorEmail)
       : null;
 
   return (
@@ -378,7 +380,7 @@ function TemplateCard({
             </div>
             {trainer && (
               <p className="text-[10px] text-brand-red font-bold uppercase tracking-wider">
-                por {fullName(trainer)}
+                por {trainer.email === 'AICoach' ? 'AICoach' : fullName(trainer)}
               </p>
             )}
             {/* Show cycle dates when multicycle with 2+ cycles, otherwise show template dates */}
