@@ -39,7 +39,16 @@ export function useDataSync({
   // NOTE: api.createSession / updateSession / deleteSession (useWorkoutState) already
   // update React state internally — do NOT call setSessions here to avoid duplicates.
   const createSession = async (s: WorkoutSession) => {
-    await api.createSession(s);
+    console.log('🔗 [useDataSync.createSession] Chamando api.createSession');
+    console.log('🔗 [useDataSync.createSession] Sessão a ser criada:', s);
+    
+    try {
+      await api.createSession(s);
+      console.log('✅ [useDataSync.createSession] api.createSession concluído');
+    } catch (error) {
+      console.error('❌ [useDataSync.createSession] Erro ao chamar api.createSession:', error);
+      throw error;
+    }
   };
 
   const updateSession = async (s: WorkoutSession) => {

@@ -95,7 +95,12 @@ service cloud.firestore {
         isOwner(request.resource.data.creatorEmail) || 
         request.resource.data.creatorEmail == 'AICoach'
       );
-      allow update, delete: if isAuthenticated() && (isOwner(resource.data.creatorEmail) || isAdmin());
+      // Allow update/delete if user owns creatorEmail, is the workout owner (userId), or is admin
+      allow update, delete: if isAuthenticated() && (
+        isOwner(resource.data.creatorEmail) || 
+        (resource.data.keys().hasAll(['userId']) && isOwner(resource.data.userId)) || 
+        isAdmin()
+      );
     }
 
     match /sessions/{id} {
