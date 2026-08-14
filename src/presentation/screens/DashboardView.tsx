@@ -142,17 +142,29 @@ const CURRENT_WEEK_INDEX = WEEKS_PAST; // index 4
 
 /** Stacked bar showing 2 past weeks, current week, and 3 future weeks.
  *  On mount the current-week card is scrolled to the vertical center of the viewport. */
-/** Resolve the sport name for a given workoutId via the template list.
+/** Resolve the sport name for a given session via the template list.
  *  Uses template.sport when available; falls back to name-matching for
- *  legacy templates created before the sport field existed. */
-function getSportForWorkout(workoutId: string, templates: WorkoutTemplate[]): string {
-  const t = templates.find(t => t.id === workoutId);
-  if (!t) return 'Musculação';
+ *  legacy templates created before the sport field existed, or session.workoutName if template is deleted. */
+function getSportForWorkout(session: WorkoutSession, templates: WorkoutTemplate[]): string {
+  const t = templates.find(t => t.id === session.workoutId);
+  if (!t) {
+    // Template deleted - use workoutName fallback
+    const workoutName = session.workoutName?.toLowerCase() ?? '';
+    const known = Object.keys(SPORT_COLORS);
+    return known.find(s => workoutName.includes(s.toLowerCase())) ?? 'Musculação';
+  }
   // Prefer explicit sport field (set since the sport-field commit)
   if (t.sport) return t.sport;
   // Legacy fallback: derive from template name
   const known = Object.keys(SPORT_COLORS);
   return known.find(s => t.name.toLowerCase().includes(s.toLowerCase())) ?? 'Musculação';
+}
+
+/** Get sport from template directly */
+function getSportFromTemplate(template: WorkoutTemplate): string {
+  if (template.sport) return template.sport;
+  const known = Object.keys(SPORT_COLORS);
+  return known.find(s => template.name.toLowerCase().includes(s.toLowerCase())) ?? 'Musculação';
 }
 
 /** Renders the inner content of a trained day cell:
@@ -369,7 +381,7 @@ function WeekDayBar({
                 // Deduplicated sports trained on this day
                 const daySports = trained
                   ? [...new Set(
-                      (sessionsByDay.get(dayKey) ?? []).map(s => getSportForWorkout(s.workoutId, templates))
+                      (sessionsByDay.get(dayKey) ?? []).map(s => getSportForWorkout(s, templates))
                     )]
                   : [];
 
@@ -482,7 +494,7 @@ export function DashboardView({
   // Returns null (→ "Criar primeiro treino" banner) when no template belongs to the
   // current sport. Never falls back to a template from a different sport.
   const currentTemplate = useMemo(() => {
-    const sportTemplates = templates.filter(t => getSportForWorkout(t.id, templates) === currentSport);
+    const sportTemplates = templates.filter(t => getSportFromTemplate(t) === currentSport);
     if (sportTemplates.length === 0) return null;
     // Sort by most recent session; templates never used come last.
     const lastSessionDate = (t: typeof templates[0]) =>
@@ -676,7 +688,7 @@ export function DashboardView({
 
             <p className="text-xs font-black uppercase tracking-widest text-white/40">Escolha um treino</p>
 
-            {templates.filter(t => (t.sport ?? getSportForWorkout(t.id, templates)) === currentSport).length === 0 ? (
+            {templates.filter(t => getSportFromTemplate(t) === currentSport).length === 0 ? (
               <div className="py-8 text-center space-y-2 opacity-40">
                 <p className="text-sm">Nenhum treino de {currentSport} criado ainda.</p>
               </div>
@@ -684,7 +696,7 @@ export function DashboardView({
               <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
                 {[...templates]
                   // Only show templates matching the currently active sport
-                  .filter(t => (t.sport ?? getSportForWorkout(t.id, templates)) === currentSport)
+                  .filter(t => getSportFromTemplate(t) === currentSport)
                   .sort((a, b) => {
                     // Sort by last session date ascending (never used → first, most recent → last)
                     const lastA = sessions
@@ -708,7 +720,7 @@ export function DashboardView({
                     className="shrink-0 w-44 bg-white/5 border border-white/10 rounded-2xl p-4 text-left flex flex-col gap-3 active:scale-[0.97] transition-transform"
                   >
                     {(() => {
-                      const tSport = template.sport ?? getSportForWorkout(template.id, templates);
+                      const tSport = template.sport ?? getSportFromTemplate(template);
                       const sportColor = SPORT_COLORS[tSport] ?? '#dc2626';
                       const sportIcon  = SPORT_ICONS[tSport]  ?? iconMusculacao;
                       return (

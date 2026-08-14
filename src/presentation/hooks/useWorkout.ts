@@ -107,6 +107,7 @@ export function useWorkout({
       userId: userProfile?.email || 'guest',
       userEmail: userProfile?.email || 'guest',
       workoutId: template.id,
+      workoutName: template.name, // Preserve template name for history
       sheetId: sheet?.id,
       date: new Date().toISOString(),
       startTime: new Date().toISOString(),

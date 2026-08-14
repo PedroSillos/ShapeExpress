@@ -1055,7 +1055,7 @@ function SessionCard({
   onEditSession: (s: WorkoutSession) => void;
   onRequestDelete: (id: string) => void;
 }) {
-  const templateName = templates.find((t) => t.id === session.workoutId)?.name || 'Treino';
+  const templateName = session.workoutName || templates.find((t) => t.id === session.workoutId)?.name || 'Treino';
   const mins = session.duration ?? 0;
 
   return (
