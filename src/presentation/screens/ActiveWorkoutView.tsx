@@ -478,10 +478,6 @@ export function ActiveWorkoutView({
                   </button>
                   <button 
                     onClick={() => {
-                      console.log('🎯 [ActiveWorkoutView] Botão Finalizar clicado');
-                      console.log('📊 [ActiveWorkoutView] sessionMetrics:', sessionMetrics);
-                      console.log('⏱️ [ActiveWorkoutView] elapsedTime:', elapsedTime);
-                      
                       onFinish({
                         avgSetDuration: sessionMetrics.setCount > 0 ? sessionMetrics.totalSetDuration / sessionMetrics.setCount : userProfile?.avg_set_duration,
                         avgRestDuration: sessionMetrics.restCount > 0 ? sessionMetrics.totalRestDuration / sessionMetrics.restCount : userProfile?.avg_rest_duration,

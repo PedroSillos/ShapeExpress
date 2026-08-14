@@ -17,6 +17,7 @@ import { DeleteTemplateModal } from './presentation/components/AppModals';
 import { WorkoutSelectorModal } from './presentation/components/AppModals';
 import { SheetSelectorModal } from './presentation/components/AppModals';
 import { PublishToStoreModal } from './presentation/components/PublishToStoreModal';
+import { PublishGuestView } from './presentation/components/PublishGuestView';
 import { WorkoutDoneScreen } from './presentation/screens/auth/WelcomeView';
 import { OnboardingStreakScreen } from './presentation/screens/auth/OnboardingStreakScreen';
 import { OnboardingSuggestProfileScreen } from './presentation/screens/auth/OnboardingSuggestProfileScreen';
@@ -57,6 +58,7 @@ export default function App() {
 
   const [selectedStudentForProfile, setSelectedStudentForProfile] = useState<any>(null);
   const [publishingTemplate, setPublishingTemplate] = useState<WorkoutTemplate | null>(null);
+  const [showPublishGuest, setShowPublishGuest] = useState(false);
   const [studentTemplates, setStudentTemplates] = useState<WorkoutTemplate[]>([]);
   const [showOnboardingStreak, setShowOnboardingStreak] = useState(false);
   const [showSuggestProfile, setShowSuggestProfile] = useState(false);
@@ -253,7 +255,7 @@ export default function App() {
   }
 
   const currentAnimations = document.documentElement.getAttribute('data-animations') || 'enabled';
-  const routerState = { ...appState, switchTab, selectedStudentForProfile, setSelectedStudentForProfile, publishingTemplate, setPublishingTemplate: (t: WorkoutTemplate | null) => setPublishingTemplate(t), studentTemplates, setStudentTemplates, onShowSuggestProfile: () => setShowSuggestProfile(true), onShowStreak: () => { setShowSuggestProfile(false); setShowOnboardingStreak(true); }, showSettings, setShowSettings };
+  const routerState = { ...appState, switchTab, selectedStudentForProfile, setSelectedStudentForProfile, publishingTemplate, setPublishingTemplate: (t: WorkoutTemplate | null) => { if (t && !isLoggedIn) { setShowPublishGuest(true); } else { setPublishingTemplate(t); } }, studentTemplates, setStudentTemplates, onShowSuggestProfile: () => setShowSuggestProfile(true), onShowStreak: () => { setShowSuggestProfile(false); setShowOnboardingStreak(true); }, showSettings, setShowSettings };
 
   if (activeTab === 'landing' || activeTab === 'welcome' || activeTab === 'login' || activeTab === 'register' || activeTab === 'forgot-password') {
     return (
@@ -341,7 +343,7 @@ export default function App() {
         </AnimatePresence>
 
         <AnimatePresence>
-          {publishingTemplate && (
+          {publishingTemplate && isLoggedIn && (
             <PublishToStoreModal
               initialTemplate={publishingTemplate}
               templates={filteredTemplates}
@@ -355,6 +357,14 @@ export default function App() {
             />
           )}
         </AnimatePresence>
+
+        {showPublishGuest && (
+          <PublishGuestView
+            onCreateProfile={() => { setShowPublishGuest(false); switchTab('register'); }}
+            onLogin={() => { setShowPublishGuest(false); switchTab('login'); }}
+            onClose={() => setShowPublishGuest(false)}
+          />
+        )}
 
         <DeleteTemplateModal
           templateId={deletingTemplateId}

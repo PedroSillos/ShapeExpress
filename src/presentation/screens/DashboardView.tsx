@@ -609,10 +609,17 @@ export function DashboardView({
 
           {/* Weekly progress */}
           <div className="flex items-center gap-1.5">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0 bg-blue-600">
-              <img src={iconCalendar} className="w-full h-full object-contain brightness-0 invert" alt="meta semanal" />
+            <div className={cn(
+              'w-7 h-7 rounded-lg flex items-center justify-center p-1 shrink-0',
+              completedThisWeek > 0 ? 'bg-blue-600' : 'bg-white/10',
+            )}>
+              <img
+                src={iconCalendar}
+                className={cn('w-full h-full object-contain brightness-0 invert', completedThisWeek === 0 && 'opacity-40')}
+                alt="meta semanal"
+              />
             </div>
-            <span className="font-black text-sm text-blue-400">{completedThisWeek}/{mainUserProfile.weeklyGoal ?? 3}</span>
+            <span className={cn('font-black text-sm', completedThisWeek > 0 ? 'text-blue-400' : 'text-white/30')}>{completedThisWeek}/{mainUserProfile.weeklyGoal ?? 3}</span>
           </div>
         </div>
 

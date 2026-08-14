@@ -830,7 +830,7 @@ function TemplateCard({
           </div>
         )}
 
-        {mainUserProfile.userType === 'treinador' && onCreateAd && (
+        {mainUserProfile.userType === 'treinador' && onCreateAd && template.creatorEmail === mainUserProfile.email && (
           <button
             onClick={() => onCreateAd(template)}
             className="w-full py-2.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl font-bold text-xs hover:bg-emerald-500/20 transition-colors active:scale-95"

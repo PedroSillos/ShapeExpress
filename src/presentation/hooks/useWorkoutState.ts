@@ -46,7 +46,6 @@ export const useWorkoutState = (
       
       // Migration: ensure userEmail exists (for sessions created before this field was added)
       if (session && !session.userEmail && currentUser?.email) {
-        console.log('🔄 [useWorkoutState] Migrando activeWorkout: adicionando userEmail');
         session.userEmail = currentUser.email;
         localStorage.setItem(STORAGE_KEYS.ACTIVE_WORKOUT, JSON.stringify(session));
       }
@@ -70,7 +69,6 @@ export const useWorkoutState = (
   // Migration: ensure activeWorkout has userEmail
   useEffect(() => {
     if (activeWorkout && !activeWorkout.userEmail && currentUser?.email) {
-      console.log('🔄 [useWorkoutState] useEffect: adicionando userEmail ao activeWorkout');
       setActiveWorkout({ ...activeWorkout, userEmail: currentUser.email });
     }
   }, [activeWorkout, currentUser?.email]);
@@ -154,34 +152,15 @@ export const useWorkoutState = (
   };
 
   const createSession = async (s: WorkoutSession) => {
-    console.log('📝 [createSession] Iniciando criação de sessão');
-    console.log('👤 [createSession] currentUser:', currentUser);
-    console.log('📋 [createSession] Dados da sessão:', s);
-    
     if (!currentUser) {
-      console.log('💾 [createSession] Salvando em localStorage (usuário guest)');
       setSessions((prev) => { const next = [s, ...prev]; saveLocalSessions(next); return next; });
       return;
     }
     
-    console.log('🔥 [createSession] Salvando no Firestore (usuário logado)');
     try {
-      console.log('🔑 [createSession] ID da sessão:', s.id);
-      console.log('👤 [createSession] userId:', s.userId);
-      console.log('📧 [createSession] userEmail:', s.userEmail);
-      console.log('📄 [createSession] Dados sanitizados:', sanitize(s));
-      console.log('📋 [createSession] Todos os campos da sessão:', Object.keys(s));
-      
       await setDoc(doc(db, "sessions", s.id), sanitize(s));
-      console.log('✅ [createSession] Sessão salva no Firestore com sucesso');
-      
       setSessions((prev) => [s, ...prev]);
-      console.log('✅ [createSession] Estado local atualizado');
     } catch (e: any) {
-      console.error('❌ [createSession] Erro ao salvar no Firestore:', e);
-      console.error('❌ [createSession] Mensagem de erro:', e.message);
-      console.error('❌ [createSession] Stack trace:', e.stack);
-      console.error('❌ [createSession] Código de erro:', e.code);
     }
   };
 

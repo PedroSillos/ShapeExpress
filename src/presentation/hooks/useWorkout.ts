@@ -152,16 +152,9 @@ export function useWorkout({
   };
 
   const finishWorkout = (metrics: { avgSetDuration: number; avgRestDuration: number; totalDuration: number }) => {
-    console.log('🏋️ [finishWorkout] Iniciando finalização do treino');
-    console.log('📊 [finishWorkout] Métricas recebidas:', metrics);
-    
     const activeWorkout = activeWorkoutRef.current;
-    console.log('💪 [finishWorkout] activeWorkout:', activeWorkout);
-    console.log('📧 [finishWorkout] activeWorkout.userEmail:', activeWorkout.userEmail);
-    console.log('🔑 [finishWorkout] activeWorkout.userId:', activeWorkout.userId);
     
     if (!activeWorkout) {
-      console.error('❌ [finishWorkout] Nenhum treino ativo encontrado!');
       return;
     }
 
@@ -183,8 +176,6 @@ export function useWorkout({
       xpEarned: SPORT_XP_PER_WORKOUT,
       caloriesBurned: 0,
     };
-    
-    console.log('✅ [finishWorkout] Sessão completada criada:', completedSession);
 
     // Calories
     const weightKg = assessments.length > 0 ? assessments[0].weight : userProfile?.initialWeight;
@@ -199,14 +190,8 @@ export function useWorkout({
       setUserCalorieProfile(updateCalorieProfile(userCalorieProfile, actualCalories, metrics.totalDuration));
     }
 
-    console.log('💾 [finishWorkout] Chamando createSession...');
-    createSession(completedSession).then(() => {
-      console.log('✅ [finishWorkout] createSession concluído com sucesso');
-    }).catch((error) => {
-      console.error('❌ [finishWorkout] Erro ao criar sessão:', error);
-    });
+    createSession(completedSession);
     
-    console.log('🔄 [finishWorkout] Limpando activeWorkout e definindo lastCompletedSession');
     setActiveWorkout(null);
     setLastCompletedSession(completedSession);
 
