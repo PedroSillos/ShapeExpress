@@ -59,28 +59,6 @@ interface ProfileUserViewProps {
   onSettings?: () => void;
 }
 
-// ─── Stat chip ────────────────────────────────────────────────────────────────
-function StatChip({
-  icon,
-  value,
-  label,
-}: {
-  icon: React.ReactNode;
-  value: string | number;
-  label: string;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-0.5">
-      <span className="text-white text-lg font-bold">{value}</span>
-      <div className="flex items-center gap-1 text-white/40">
-        {icon}
-        <span className="text-[11px] uppercase tracking-wider font-semibold">{label}</span>
-      </div>
-    </div>
-  );
-}
-
-
 export function ProfileUserView({
   userProfile,
   userStats,
@@ -114,98 +92,96 @@ export function ProfileUserView({
   return (
     <div className="min-h-screen bg-dark-surface flex flex-col">
 
-      {/* ── Hero header ── */}
-      <div className="relative overflow-hidden px-5 pt-12 pb-20">
-
-        {/* Top row: name + settings */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-white text-3xl font-extrabold leading-tight">{displayName}</h1>
-            {emailHandle && (
-              <p className="text-white/60 text-sm font-medium mt-0.5">
-                @{emailHandle} · Desde {joinYear}
-              </p>
-            )}
-          </div>
+      {/* ── Header cinza claro: name + avatar + settings ── */}
+      <div className="bg-gray-200 -mx-6 px-6 pb-30 relative">
+        {/* Top bar: name + settings */}
+        <div className="flex items-center justify-between pt-8 pb-6">
+          <h1 className="text-[1.625rem] font-extrabold" style={{ color: '#4C4C4C' }}>{displayName}</h1>
           <button
             aria-label="Configurações"
-            className="text-white/70 hover:text-white transition-colors mt-1"
+            className="transition-opacity hover:opacity-70"
+            style={{ color: '#4C4C4C' }}
             onClick={onSettings}
           >
-            <Settings size={22} />
+            <Settings size={24} />
           </button>
         </div>
-      </div>
 
-      {/* ── Avatar — overlaps header bottom edge ── */}
-      <div className="flex justify-center -mt-14 z-10">
-        <div
-          className="w-28 h-28 rounded-full flex items-center justify-center text-4xl font-extrabold text-white"
-          style={{ backgroundColor: sportColor, boxShadow: `0 0 0 4px ${sportColor}99` }}
-        >
-          {displayName.charAt(0).toUpperCase()}
+        {/* Avatar grande - posicionado na base do container */}
+        <div className="flex justify-center absolute bottom-0 left-0 right-0">
+          <div 
+            className="w-40 h-30 rounded-t-3xl flex items-center justify-center text-6xl font-extrabold text-white"
+            style={{ backgroundColor: sportColor }}
+          >
+            {displayName.charAt(0).toUpperCase()}
+          </div>
         </div>
       </div>
 
-      {/* ── Stats row: modalidades · amigos ── */}
-      <div className="px-4 mt-5 flex items-center justify-around">
-        <StatChip
-          icon={<Dumbbell size={12} />}
-          value={sports.length}
-          label="Modalidades"
-        />
-        <div className="w-px h-8 bg-white/10" />
-        <StatChip
-          icon={<UserPlus size={12} />}
-          value={friendsCount}
-          label="Amigos"
-        />
+      {/* ── Info bar: @handle · joined ── */}
+      <div className="bg-dark-card py-4 px-6 -mx-6 flex items-center justify-center gap-3">
+        {emailHandle && (
+          <>
+            <span className="text-white/60 text-sm font-semibold">@{emailHandle}</span>
+            <span className="text-white/30">·</span>
+          </>
+        )}
+        <span className="text-white/60 text-sm font-semibold uppercase tracking-wide">Desde {joinYear}</span>
       </div>
 
-      {/* ── Add friends button ── */}
-      <div className="px-4 mt-4">
+      {/* ── Stats row: modalidades · seguindo · amigos ── */}
+      <div className="flex items-center justify-around py-6 px-4">
+        <div className="flex flex-col items-center">
+          <span className="text-white text-3xl font-extrabold">{sports.length}</span>
+          <span className="text-white/50 text-sm font-semibold mt-1">Modalidades</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-white text-3xl font-extrabold">{totalWorkouts}</span>
+          <span className="text-white/50 text-sm font-semibold mt-1">Treinos</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-white text-3xl font-extrabold">{friendsCount}</span>
+          <span className="text-white/50 text-sm font-semibold mt-1">Amigos</span>
+        </div>
+      </div>
+
+      {/* ── Adicionar amigos button ── */}
+      <div className="px-4">
         <button
           onClick={onAddFriends}
-          className="w-full flex items-center justify-center gap-2 border border-white/20 rounded-2xl py-3 text-white/80 font-semibold text-sm hover:bg-white/5 active:bg-white/10 transition-colors"
+          className="w-full flex items-center justify-center gap-2 bg-white/10 rounded-2xl py-4 text-white font-bold text-sm uppercase tracking-wider hover:bg-white/15 active:bg-white/20 transition-colors"
         >
-          <UserPlus size={16} />
-          Adicionar Amigos
+          <UserPlus size={18} />
+          Adicionar amigos
         </button>
       </div>
 
-      {/* ── Divider ── */}
-      <div className="mx-4 mt-5 border-t border-white/10" />
-
       {/* ── Overview ── */}
-      <div className="px-4 mt-5">
-        <p className="text-white/40 text-[11px] font-extrabold uppercase tracking-widest mb-3">Visão Geral</p>
-        <div className="grid grid-cols-2 gap-y-4">
-          {/* X dias */}
-          <div className="flex items-center gap-2">
-            <Flame size={18} className="text-orange-500" />
-            <span className="text-white font-bold text-sm">{streak} dias</span>
+      <div className="px-4 mt-8">
+        <p className="text-white/40 text-xs font-extrabold uppercase tracking-widest mb-4">Overview</p>
+        <div className="grid grid-cols-2 gap-y-5">
+          <div className="flex items-center gap-2.5">
+            <Flame size={20} className="text-orange-500" />
+            <span className="text-white font-bold">{streak} dias</span>
           </div>
-          {/* SVG ícone da modalidade + nível de experiência */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <img
               src={sportIconSrc}
               alt={primarySport}
               className="w-5 h-5 object-contain"
               style={{ filter: sportFilter }}
             />
-            <span className="text-white font-bold text-sm">
+            <span className="text-white font-bold">
               {userProfile.experienceLevel ?? 'Iniciante'}
             </span>
           </div>
-          {/* Nível X */}
-          <div className="flex items-center gap-2">
-            <Trophy size={18} className="text-purple-400" />
-            <span className="text-white font-bold text-sm">Nível {level}</span>
+          <div className="flex items-center gap-2.5">
+            <Trophy size={20} className="text-purple-400" />
+            <span className="text-white font-bold">Nível {level}</span>
           </div>
-          {/* X XP */}
-          <div className="flex items-center gap-2">
-            <Zap size={18} className="text-yellow-400" />
-            <span className="text-white font-bold text-sm">{xp.toLocaleString('pt-BR')} XP</span>
+          <div className="flex items-center gap-2.5">
+            <Zap size={20} className="text-yellow-400" />
+            <span className="text-white font-bold">{xp.toLocaleString('pt-BR')} XP</span>
           </div>
         </div>
       </div>
