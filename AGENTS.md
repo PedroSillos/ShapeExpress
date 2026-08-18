@@ -156,6 +156,20 @@ Dois modos: **guest** (localStorage) e **logado** (Firestore). Transição geren
 
 **Regra:** para usuários logados, sempre usar `userProfile.*`. `WELCOME_ANSWERS` só é válido para guests (`!isLoggedIn`).
 
+## Store / Loja
+
+**Separação entre Templates e Anúncios:**
+
+Quando um treinador publica um treino na loja, o sistema cria um **anúncio** (`StoreItem`) que é **independente** do template de treino original (`WorkoutTemplate`). São entidades separadas no Firestore:
+
+- **Template de treino** (`templates/` collection) — usado pelo próprio treinador e seus alunos
+- **Anúncio na loja** (`store_items/` collection) — contém `templateId` para referenciar o treino, mas tem seus próprios dados (preço, descrição, imagem, etc.)
+
+**Regras importantes:**
+- Alterações no template de treino **NÃO afetam** o anúncio na loja
+- Alterações no anúncio (título, preço, descrição) **NÃO afetam** o template original
+- Quando um atleta compra um treino, uma **cópia do template** é criada para ele via `StorePurchase` → cópia do template para `templates/{buyerEmail}/...`
+
 ## Troubleshooting
 
 | Problem | Fix |

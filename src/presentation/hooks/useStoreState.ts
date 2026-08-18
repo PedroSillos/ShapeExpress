@@ -140,6 +140,18 @@ export const useStoreState = (
     setStoreItems((prev) => prev.filter((i) => i.id !== itemId));
   }, []);
 
+  // ── Update a store item ───────────────────────────────────────────────────
+  const updateStoreItem = useCallback(async (item: StoreItem) => {
+    const { id, ...data } = item;
+    await updateDoc(doc(db, "store_items", id), data);
+    setMyListings((prev) =>
+      prev.map((i) => (i.id === id ? item : i)),
+    );
+    setStoreItems((prev) =>
+      prev.map((i) => (i.id === id ? item : i)),
+    );
+  }, []);
+
   // ── Stripe checkout ──────────────────────────────────────────────────────
   const claimFreeItem = useCallback(async (itemId: string): Promise<{ success: boolean; purchaseId: string }> => {
     const res = await fetch("/api/store/claim-free", {
@@ -222,6 +234,7 @@ export const useStoreState = (
     loadMyListings,
     publishItem,
     unpublishItem,
+    updateStoreItem,
     claimFreeItem,
     createCheckoutSession,
     verifyCheckoutSession,

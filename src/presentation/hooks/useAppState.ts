@@ -151,6 +151,7 @@ export const useAppState = () => {
     verifyCheckoutSession: store.verifyCheckoutSession,
     publishStoreItem: store.publishItem,
     unpublishStoreItem: store.unpublishItem,
+    onUpdateStoreItem: store.updateStoreItem,
 
     // Misc
     addXP: async (_xp: number) => {},

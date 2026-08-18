@@ -436,10 +436,24 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
         <LojasScreen
           storeItems={(storeItems as StoreItem[]) ?? []}
           myPurchases={(myPurchases as StorePurchase[]) ?? []}
+          templates={filteredTemplates ?? []}
           isLoadingItems={!!isLoadingItems}
           onGoToWorkouts={() => switchTab('workouts')}
           claimFreeItem={api.claimFreeItem}
           createCheckoutSession={api.createCheckoutSession}
+          onRenameStoreItem={async (itemId: string, newTitle: string) => {
+            // Update store item title
+            const item = storeItems?.find(i => i.id === itemId);
+            if (item) {
+              await api.onUpdateStoreItem?.({ ...item, title: newTitle });
+            }
+          }}
+          onUpdateStoreItem={async (item: StoreItem) => {
+            await api.onUpdateStoreItem?.(item);
+          }}
+          onUpdateTemplate={async (template: WorkoutTemplate) => {
+            await updateTemplate(template);
+          }}
           userEmail={userProfile?.email}
           userType={userProfile?.userType === 'treinador' ? 'trainer' : 'athlete'}
         />
