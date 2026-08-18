@@ -4,7 +4,6 @@ import { Search, X, Star, ShoppingBag, Settings, Edit, Trash2, Pen, Plus, GripVe
 import { motion, AnimatePresence } from 'motion/react';
 import { StoreItem, StorePurchase, WorkoutTemplate, WorkoutTemplateExercise } from '@/src/domain/entities';
 import { EXERCISES } from '@/src/domain/entities/exercises';
-import { format, parseISO } from 'date-fns';
 import { cn } from '@/src/utils/cn';
 
 // Icons
@@ -121,6 +120,8 @@ function StoreItemCard({
   
   const [isEditing, setIsEditing] = useState(false);
   const [editPrice, setEditPrice] = useState((item.price / 100).toFixed(2));
+  const [editDuration, setEditDuration] = useState(item.duration.toString());
+  const [editDurationUnit, setEditDurationUnit] = useState<'weeks' | 'months'>(item.durationUnit);
   
   // Draft state for exercise editing
   const [editDraft, setEditDraft] = useState<WorkoutTemplate | null>(null);
@@ -153,6 +154,8 @@ function StoreItemCard({
       return;
     }
     setEditPrice((item.price / 100).toFixed(2));
+    setEditDuration(item.duration.toString());
+    setEditDurationUnit(item.durationUnit);
     setEditDraft(JSON.parse(JSON.stringify(template))); // Deep copy
     setOpenSettingsId(null);
     setIsEditing(true);
@@ -161,6 +164,8 @@ function StoreItemCard({
   const cancelEditing = () => {
     setIsEditing(false);
     setEditPrice((item.price / 100).toFixed(2));
+    setEditDuration(item.duration.toString());
+    setEditDurationUnit(item.durationUnit);
     setEditDraft(null);
     setShowExSearch(false);
     setExSearchQuery('');
@@ -172,11 +177,17 @@ function StoreItemCard({
       alert('Preço inválido');
       return;
     }
+    const durationValue = parseInt(editDuration);
+    if (isNaN(durationValue) || durationValue < 1) {
+      alert('Duração inválida');
+      return;
+    }
     const priceCents = Math.round(priceValue * 100);
     
-    // Update price if changed
-    if (priceCents !== item.price) {
-      onUpdateStoreItem?.({ ...item, price: priceCents });
+    // Update price, duration, or durationUnit if changed
+    const itemChanged = priceCents !== item.price || durationValue !== item.duration || editDurationUnit !== item.durationUnit;
+    if (itemChanged) {
+      onUpdateStoreItem?.({ ...item, price: priceCents, duration: durationValue, durationUnit: editDurationUnit });
     }
     
     // Update template exercises if changed
@@ -319,12 +330,9 @@ function StoreItemCard({
             ) : (
               <h3 className="text-base font-black text-white leading-snug">{item.title}</h3>
             )}
-            {template && (
-              <p className="text-[10px] text-white/25 font-bold uppercase tracking-wide">
-                {format(parseISO(template.startDate), 'dd/MM/yy')} –{' '}
-                {format(parseISO(template.endDate), 'dd/MM/yy')}
-              </p>
-            )}
+            <p className="text-[10px] text-white/25 font-bold uppercase tracking-wide">
+              Duração: {item.duration} {item.durationUnit === 'weeks' ? item.duration === 1 ? 'semana' : 'semanas' : item.duration === 1 ? 'mês' : 'meses'}
+            </p>
           </div>
 
           {/* Sport icon with name + Settings menu */}
@@ -543,6 +551,28 @@ function StoreItemCard({
                   className="flex-1 px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-bold outline-none focus:border-brand-red/50"
                   placeholder="0,00"
                 />
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-white/40 uppercase tracking-wide block mb-2">
+                Duração do Anúncio
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="1"
+                  value={editDuration}
+                  onChange={(e) => setEditDuration(e.target.value)}
+                  className="w-20 px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-bold outline-none focus:border-brand-red/50 text-center"
+                />
+                <select
+                  value={editDurationUnit}
+                  onChange={(e) => setEditDurationUnit(e.target.value as 'weeks' | 'months')}
+                  className="flex-1 px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-bold outline-none focus:border-brand-red/50"
+                >
+                  <option value="weeks">Semanas</option>
+                  <option value="months">Meses</option>
+                </select>
               </div>
             </div>
             <div className="flex items-center gap-2">

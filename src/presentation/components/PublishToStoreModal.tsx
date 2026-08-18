@@ -20,6 +20,8 @@ export function PublishToStoreModal({ initialTemplate, templates, userProfile, o
   const [description, setDescription] = useState('');
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [price, setPrice] = useState('');
+  const [duration, setDuration] = useState('4');
+  const [durationUnit, setDurationUnit] = useState<'weeks' | 'months'>('weeks');
   const [tags, setTags] = useState<string[]>([]);
   const [customTag, setCustomTag] = useState('');
   const [isPublishing, setIsPublishing] = useState(false);
@@ -43,6 +45,8 @@ export function PublishToStoreModal({ initialTemplate, templates, userProfile, o
     if (!title.trim()) { setError('Informe um título para o treino.'); return; }
     const parsedPrice = parseFloat(price.replace(',', '.'));
     if (isNaN(parsedPrice) || parsedPrice < 0) { setError('Informe um preço válido (use 0 para gratuito).'); return; }
+    const parsedDuration = parseInt(duration);
+    if (isNaN(parsedDuration) || parsedDuration < 1) { setError('Informe uma duração válida.'); return; }
 
     setError('');
     setIsPublishing(true);
@@ -54,6 +58,8 @@ export function PublishToStoreModal({ initialTemplate, templates, userProfile, o
         description: description.trim() || undefined,
         coverImageUrl: coverImageUrl.trim() || undefined,
         price: parsedPrice,
+        duration: parsedDuration,
+        durationUnit,
         tags,
       };
       await onPublish(payload);
@@ -167,6 +173,33 @@ export function PublishToStoreModal({ initialTemplate, templates, userProfile, o
                   className="w-full bg-white/5 border border-dark-border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-white/20 placeholder:text-white/30"
                 />
               </div>
+            </div>
+
+            {/* Duration */}
+            <div>
+              <label className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-2 block">
+                Duração do Anúncio
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min="1"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  className="w-20 bg-white/5 border border-dark-border rounded-xl px-4 py-3 text-sm text-center focus:outline-none focus:border-white/20"
+                />
+                <select
+                  value={durationUnit}
+                  onChange={(e) => setDurationUnit(e.target.value as 'weeks' | 'months')}
+                  className="flex-1 bg-white/5 border border-dark-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-white/20"
+                >
+                  <option value="weeks">Semanas</option>
+                  <option value="months">Meses</option>
+                </select>
+              </div>
+              <p className="text-xs text-white/40 mt-1.5">
+                O treino ficará disponível para o comprador por esse período a partir da data de compra
+              </p>
             </div>
 
             {/* Tags */}

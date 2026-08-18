@@ -29,6 +29,38 @@ if (admin.apps.length === 0) {
 // Initialize Stripe
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' as any }) : null;
 
+/**
+ * Calculate startDate and endDate for a purchased template based on purchase date and duration
+ * @param purchaseDate - ISO string of purchase date
+ * @param duration - number (e.g., 1, 2, 4, 12)
+ * @param durationUnit - 'weeks' or 'months'
+ * @returns { startDate: string, endDate: string } in ISO format (yyyy-MM-dd)
+ */
+function calculateTemplateDates(purchaseDate: string, duration: number, durationUnit: 'weeks' | 'months'): { startDate: string; endDate: string } {
+  const start = new Date(purchaseDate);
+  const end = new Date(start);
+  
+  if (durationUnit === 'weeks') {
+    end.setDate(end.getDate() + (duration * 7) - 1); // -1 so it ends the day before next cycle starts
+  } else if (durationUnit === 'months') {
+    end.setMonth(end.getMonth() + duration);
+    end.setDate(end.getDate() - 1); // -1 so it ends the day before next cycle starts
+  }
+  
+  // Format as yyyy-MM-dd
+  const formatDate = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  return {
+    startDate: formatDate(start),
+    endDate: formatDate(end),
+  };
+}
+
 // Initialize Gemini AI (server-side only)
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
 
@@ -208,12 +240,13 @@ Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"e
     body('type').isIn(['workout', 'program']).withMessage('Tipo inválido'),
     body('title').trim().isLength({ min: 3, max: 120 }).escape(),
     body('description').optional().trim().isLength({ max: 500 }).escape(),
-    body('price').isInt({ min: 100, max: 99900 }).withMessage('Preço inválido (entre R$1 e R$999)'),
+    body('price').isInt({ min: 0, max: 999900 }).withMessage('Preço inválido (entre R$0 e R$9999)'),
+    body('duration').isInt({ min: 1, max: 52 }).withMessage('Duração inválida (entre 1 e 52)'),
+    body('durationUnit').isIn(['weeks', 'months']).withMessage('Unidade de duração inválida'),
     body('tags').isArray({ max: 8 }),
     body('coverImageUrl').optional().trim().isURL().withMessage('URL de capa inválida'),
     body('templateId').optional().trim().isLength({ min: 1, max: 100 }),
     body('templateIds').optional().isArray({ min: 1, max: 20 }),
-    body('durationWeeks').optional().isInt({ min: 1, max: 208 }),
   ], async (req: any, res: any) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -229,7 +262,7 @@ Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"e
         return res.status(403).json({ error: 'Apenas treinadores podem publicar na loja.' });
       }
 
-      const { type, title, description, price, tags, coverImageUrl, templateId, templateIds, durationWeeks } = req.body;
+      const { type, title, description, price, duration, durationUnit, tags, coverImageUrl, templateId, templateIds } = req.body;
 
       const base = {
         creatorEmail: email.toLowerCase(),
@@ -239,6 +272,8 @@ Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"e
         description: description || '',
         coverImageUrl: coverImageUrl || '',
         price,
+        duration,
+        durationUnit,
         tags: tags || [],
         rating: 0,
         salesCount: 0,
@@ -252,7 +287,7 @@ Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"e
         data = { ...base, type: 'workout', templateId };
       } else {
         if (!templateIds?.length) return res.status(400).json({ error: 'templateIds obrigatório para programa.' });
-        data = { ...base, type: 'program', templateIds, durationWeeks: durationWeeks || 1 };
+        data = { ...base, type: 'program', templateIds };
       }
 
       const ref = await db.collection('store_items').add(data);
@@ -324,18 +359,26 @@ Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"e
 
       // Record free "purchase"
       const buyerEmail = email.toLowerCase();
+      const purchaseDate = new Date().toISOString();
       const purchaseRef = await db.collection('store_purchases').add({
         buyerEmail,
         itemId,
         itemType: item.type,
         stripeSessionId: '', // No Stripe session for free items
-        purchasedAt: new Date().toISOString(),
+        purchasedAt: purchaseDate,
       });
 
       // Copy template(s) to buyer's templates collection
       const templateIds: string[] = item.type === 'workout'
         ? [item.templateId]
         : (item.templateIds || []);
+
+      // Calculate dates based on purchase date and item duration
+      const { startDate, endDate } = calculateTemplateDates(
+        purchaseDate,
+        item.duration,
+        item.durationUnit
+      );
 
       await Promise.all(templateIds.map(async (tId: string) => {
         const tSnap = await db.collection('templates').doc(tId).get();
@@ -346,9 +389,11 @@ Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"e
           ...tData,
           id: newId,
           userId: buyerEmail,
+          startDate,
+          endDate,
           purchasedFrom: item.creatorEmail,
           purchasedItemId: itemId,
-          purchasedAt: new Date().toISOString(),
+          purchasedAt: purchaseDate,
         });
       }));
 
@@ -468,18 +513,26 @@ Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"e
 
       // Record purchase
       const buyerEmail = email.toLowerCase();
+      const purchaseDate = new Date().toISOString();
       const purchaseRef = await db.collection('store_purchases').add({
         buyerEmail,
         itemId,
         itemType: item.type,
         stripeSessionId: sessionId,
-        purchasedAt: new Date().toISOString(),
+        purchasedAt: purchaseDate,
       });
 
       // Copy template(s) to buyer's templates collection
       const templateIds: string[] = item.type === 'workout'
         ? [item.templateId]
         : (item.templateIds || []);
+
+      // Calculate dates based on purchase date and item duration
+      const { startDate, endDate } = calculateTemplateDates(
+        purchaseDate,
+        item.duration,
+        item.durationUnit
+      );
 
       await Promise.all(templateIds.map(async (tId: string) => {
         const tSnap = await db.collection('templates').doc(tId).get();
@@ -490,9 +543,11 @@ Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"e
           ...tData,
           id: newId,
           userId: buyerEmail,
+          startDate,
+          endDate,
           purchasedFrom: item.creatorEmail,
           purchasedItemId: itemId,
-          purchasedAt: new Date().toISOString(),
+          purchasedAt: purchaseDate,
         });
       }));
 

@@ -344,6 +344,9 @@ export interface TrainerConnection {
 
 // ─── Store ────────────────────────────────────────────────────────────────────
 
+/** Duration unit for store items */
+export type DurationUnit = 'weeks' | 'months';
+
 /** A single workout template listed for sale in the store */
 export interface StoreWorkout {
   id: string;
@@ -363,6 +366,10 @@ export interface StoreWorkout {
   salesCount: number;
   createdAt: string;
   status: 'draft' | 'published';
+  /** Duration value (e.g., 1, 2, 4, 12) */
+  duration: number;
+  /** Duration unit (weeks or months) */
+  durationUnit: DurationUnit;
 }
 
 /** A bundle of workout templates listed for sale as a program */
@@ -377,8 +384,10 @@ export interface StoreProgram {
   title: string;
   description?: string;
   coverImageUrl?: string;
-  /** Total duration in weeks (e.g. 24 = 6 months) */
-  durationWeeks: number;
+  /** Duration value (e.g., 1, 2, 4, 12) */
+  duration: number;
+  /** Duration unit (weeks or months) */
+  durationUnit: DurationUnit;
   price: number;
   tags: string[];
   rating: number;

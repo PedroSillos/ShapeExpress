@@ -24,6 +24,8 @@ export interface PublishWorkoutPayload {
   description?: string;
   coverImageUrl?: string;
   price: number;
+  duration: number;
+  durationUnit: 'weeks' | 'months';
   tags: string[];
 }
 
@@ -115,6 +117,8 @@ export const useStoreState = (
       description: payload.description ?? "",
       coverImageUrl: payload.coverImageUrl ?? "",
       price: payload.price,
+      duration: payload.duration,
+      durationUnit: payload.durationUnit,
       tags: payload.tags,
       rating: 0,
       salesCount: 0,
