@@ -498,6 +498,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onViewEvolution={(student: Student) => { setSelectedStudentForEvolution(student); setActiveTab('student-evolution'); }}
           selectedStudentForProfile={selectedStudentForProfile}
           setSelectedStudentForProfile={(s: Student | null) => setSelectedStudentForProfile(s)}
+          onSearchUsers={api.searchNonConnectedUsers}
         />
       );
     case 'student-workouts':

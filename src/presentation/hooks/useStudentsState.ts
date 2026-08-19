@@ -256,6 +256,80 @@ export const useStudentsState = (
     }
   };
 
+  /**
+   * Searches the Firestore `users` collection for users whose full name contains
+   * `term` (case-insensitive). Excludes trainers and users already connected to
+   * the current trainer (accepted or pending).
+   */
+  const searchNonConnectedUsers = async (term: string): Promise<UserProfile[]> => {
+    if (!term.trim() || !email) return [];
+    try {
+      const termLower = term.trim().toLowerCase();
+      const emailLower = email.toLowerCase();
+
+      // Build two prefix-range queries: one lowercase, one capitalized.
+      // Firestore only supports prefix queries (>=, <=) — contains must be done client-side.
+      const termCapitalized =
+        term.trim().charAt(0).toUpperCase() + term.trim().slice(1).toLowerCase();
+
+      const [snapLower, snapCapitalized] = await Promise.all([
+        getDocs(
+          query(
+            collection(db, "users"),
+            where("firstName", ">=", termLower),
+            where("firstName", "<=", termLower + "\uf8ff"),
+          ),
+        ),
+        getDocs(
+          query(
+            collection(db, "users"),
+            where("firstName", ">=", termCapitalized),
+            where("firstName", "<=", termCapitalized + "\uf8ff"),
+          ),
+        ),
+      ]);
+
+      // Collect all connected / pending student emails to exclude
+      const connectedEmails = new Set(
+        students.map((s) => (s.email || "").toLowerCase()),
+      );
+
+      const seen = new Set<string>();
+      const results: UserProfile[] = [];
+
+      const processDocs = (docs: typeof snapLower.docs) => {
+        for (const d of docs) {
+          const profile = d.data() as UserProfile;
+          const profileEmail = (profile.email || "").toLowerCase();
+
+          // Skip self, trainers, already-connected and duplicates
+          if (
+            profileEmail === emailLower ||
+            profile.userType === "treinador" ||
+            connectedEmails.has(profileEmail) ||
+            seen.has(profileEmail)
+          ) continue;
+
+          // Case-insensitive full-name contains check
+          const full =
+            `${profile.firstName ?? ""} ${profile.lastName ?? ""}`.toLowerCase();
+          if (full.includes(termLower)) {
+            seen.add(profileEmail);
+            results.push(profile);
+          }
+        }
+      };
+
+      processDocs(snapLower.docs);
+      processDocs(snapCapitalized.docs);
+
+      return results;
+    } catch (e) {
+      console.error("[searchNonConnectedUsers] error:", e);
+      return [];
+    }
+  };
+
   const resetStudentsStates = () => {
     setStudents([]);
     setTrainers([]);
@@ -273,6 +347,7 @@ export const useStudentsState = (
     getTrainers, getStudents,
     requestConnection, getTrainerConnections, getStudentConnections,
     respondToConnection, disconnectTrainer, disconnectStudent,
+    searchNonConnectedUsers,
     resetStudentsStates,
   };
 };

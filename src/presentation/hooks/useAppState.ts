@@ -139,6 +139,7 @@ export const useAppState = () => {
     respondToConnection: students.respondToConnection,
     disconnectTrainer: students.disconnectTrainer,
     disconnectStudent: students.disconnectStudent,
+    searchNonConnectedUsers: students.searchNonConnectedUsers,
     getTrainerSettings: async () => ({}),
     updateTrainerSettings: async (_s: any) => {},
 

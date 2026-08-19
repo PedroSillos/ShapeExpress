@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
-  Search, UserPlus, X, RefreshCw, ChevronRight, 
+  Search, X, ChevronRight, 
   Trash2, ShieldCheck, AlertTriangle,
   Trophy, Target, Dumbbell, User,
   DollarSign, PieChart, AlertCircle, CalendarPlus, UserMinus, Percent, Users
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../utils/cn';
-import { Student, UserProfile, TrainerConnection } from '../../domain/entities';
+import { Student, UserProfile, TrainerConnection, fullName } from '../../domain/entities';
 import { Card } from '../components/Card';
 import { InitialsAvatar } from '@/src/shared/ui/InitialsAvatar';
 
-export function StudentsView({ students, userProfile, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, selectedStudentForProfile, setSelectedStudentForProfile }: { 
+export function StudentsView({ students, userProfile, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, selectedStudentForProfile, setSelectedStudentForProfile, onSearchUsers }: { 
   students: Student[], 
   userProfile: UserProfile, 
   pendingRequests: TrainerConnection[],
@@ -22,19 +22,42 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
   onViewWorkouts: (student: Student) => void,
   onViewEvolution?: (student: Student) => void,
   selectedStudentForProfile: Student | null,
-  setSelectedStudentForProfile: (s: Student | null) => void
+  setSelectedStudentForProfile: (s: Student | null) => void,
+  onSearchUsers?: (term: string) => Promise<UserProfile[]>,
 }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState<Student | null>(null);
   const [isResponding, setIsResponding] = useState<string | null>(null);
   const [showFinancialDashboard, setShowFinancialDashboard] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
 
-  const filteredStudents = students.filter(student => {
-    const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         student.email.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
-  });
+  // Debounced search — fires 400 ms after the user stops typing
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (!searchTerm.trim()) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const results = onSearchUsers ? await onSearchUsers(searchTerm.trim()) : [];
+        setSearchResults(results);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 400);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchTerm, onSearchUsers]);
 
   return (
     <div className="space-y-6 pb-24">
@@ -236,31 +259,30 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
               
               {/* Students List */}
               <div className="flex-1 overflow-y-auto p-6">
-                {filteredStudents.length > 0 ? (
+                {isSearching ? (
+                  <div className="py-12 text-center space-y-3">
+                    <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto animate-pulse">
+                      <Search size={24} className="text-white/30" />
+                    </div>
+                    <p className="text-sm text-white/30">Buscando...</p>
+                  </div>
+                ) : searchResults.length > 0 ? (
                   <div className="space-y-3">
-                    {filteredStudents.map(student => (
+                    {searchResults.map(user => (
                       <Card 
-                        key={student.id} 
-                        className="p-4 hover:border-brand-red/30 transition-all group cursor-pointer"
-                        onClick={() => {
-                          setSelectedStudentForProfile(student);
-                          setShowSearchModal(false);
-                          setSearchTerm('');
-                        }}
+                        key={user.email} 
+                        className="p-4 hover:border-sky-500/30 transition-all group"
                       >
                         <div className="flex gap-4 items-center">
                           <InitialsAvatar
-                            name={student.name}
-                            sizeClass="w-14 h-14"
+                            name={fullName(user)}
+                            sizeClass="w-12 h-12"
                             roundedClass="rounded-2xl"
-                            className="border border-white/10 group-hover:border-brand-red/50 transition-all"
+                            className="border border-white/10 group-hover:border-sky-500/40 transition-all"
                           />
-                          <div className="flex-1">
-                            <h4 className="font-bold text-base">{student.name}</h4>
-                          </div>
-                          <div className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10">
-                            <Trophy size={14} className="text-brand-red" />
-                            <span className="text-sm font-bold">{student.streak}d</span>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-bold text-sm truncate">{fullName(user)}</h4>
+                            <p className="text-[11px] text-white/40 truncate">{user.email}</p>
                           </div>
                         </div>
                       </Card>
@@ -272,9 +294,9 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
                       <Search size={24} className="text-white/15" />
                     </div>
                     <p className="text-sm text-white/30">
-                      {searchTerm
-                        ? `Nenhum aluno encontrado para "${searchTerm}"`
-                        : 'Digite para buscar seus alunos'}
+                      {searchTerm.trim()
+                        ? `Nenhum usuário encontrado para "${searchTerm}"`
+                        : 'Digite para buscar alunos'}
                     </p>
                   </div>
                 )}
