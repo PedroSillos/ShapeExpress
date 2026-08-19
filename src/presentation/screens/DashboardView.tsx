@@ -487,7 +487,12 @@ export function DashboardView({
 
   const completedThisWeek = useMemo(() => {
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 0 });
-    return sessions.filter(s => { try { return parseISO(s.date) >= weekStart; } catch { return false; } }).length;
+    const distinctDays = new Set(
+      sessions
+        .filter(s => { try { return parseISO(s.date) >= weekStart; } catch { return false; } })
+        .map(s => s.date.slice(0, 10)),
+    );
+    return distinctDays.size;
   }, [sessions]);
 
   // currentTemplate: most recently used template of the active sport.

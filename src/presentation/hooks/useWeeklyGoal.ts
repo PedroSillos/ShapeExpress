@@ -28,11 +28,13 @@ export function useWeeklyGoal({ isLoggedIn, userSessions, userStats, userProfile
         const previousWeekStart = subWeeks(currentWeekStart, 1);
         const previousWeekEnd = endOfWeek(previousWeekStart, { weekStartsOn: 0 });
 
-        const sessionsInPreviousWeek = userSessions.filter(s =>
-          isWithinInterval(parseISO(s.date), { start: previousWeekStart, end: previousWeekEnd }),
-        ).length;
+        const distinctDaysInPreviousWeek = new Set(
+          userSessions
+            .filter(s => isWithinInterval(parseISO(s.date), { start: previousWeekStart, end: previousWeekEnd }))
+            .map(s => s.date.slice(0, 10)),
+        ).size;
 
-        if (sessionsInPreviousWeek < weeklyGoal) {
+        if (distinctDaysInPreviousWeek < weeklyGoal) {
           alert(`Você não bateu sua meta de ${weeklyGoal} treinos na semana passada. Sua streak foi zerada!`);
           updateStats({ ...userStats, streakResetDate: format(previousWeekEnd, 'yyyy-MM-dd') });
         }
