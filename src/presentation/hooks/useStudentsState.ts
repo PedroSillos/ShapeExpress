@@ -147,6 +147,7 @@ export const useStudentsState = (
         studentEmail: currentUser.email.toLowerCase(),
         trainerEmail: trainer.email.toLowerCase(),
         status: "pending",
+        initiatedBy: "student",
         createdAt: new Date().toISOString(),
         trainerName: fullName(trainer),
       };
@@ -358,6 +359,7 @@ export const useStudentsState = (
         studentEmail: studentEmailLower,
         trainerEmail: trainerEmailLower,
         status: "pending",
+        initiatedBy: "trainer",
         createdAt: new Date().toISOString(),
       };
       await setDoc(doc(db, "connections", newConnection.id), newConnection);

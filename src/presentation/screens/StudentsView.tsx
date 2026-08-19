@@ -13,10 +13,11 @@ import { Student, UserProfile, TrainerConnection, fullName } from '../../domain/
 import { Card } from '../components/Card';
 import { InitialsAvatar } from '@/src/shared/ui/InitialsAvatar';
 
-export function StudentsView({ students, userProfile, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, selectedStudentForProfile, setSelectedStudentForProfile, onSearchUsers, onSendConnectionRequest }: { 
+export function StudentsView({ students, userProfile, pendingRequests, outgoingRequests = [], onRespond, onDisconnect, onViewWorkouts, onViewEvolution, selectedStudentForProfile, setSelectedStudentForProfile, onSearchUsers, onSendConnectionRequest }: { 
   students: Student[], 
   userProfile: UserProfile, 
   pendingRequests: TrainerConnection[],
+  outgoingRequests?: TrainerConnection[],
   onRespond: (id: string, status: 'accepted' | 'rejected') => Promise<void>,
   onDisconnect: (studentEmail: string) => Promise<void>,
   onViewWorkouts: (student: Student) => void,
@@ -108,7 +109,7 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
         Buscar alunos
       </button>
 
-        {/* Pending Requests */}
+        {/* Pending Requests — student initiated, trainer responds */}
         <AnimatePresence>
           {pendingRequests.length > 0 && (
             <motion.div 
@@ -150,6 +151,34 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
                     >
                       <ShieldCheck size={16} />
                     </button>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Outgoing Requests — trainer initiated, awaiting student response */}
+        <AnimatePresence>
+          {outgoingRequests.length > 0 && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="space-y-3 overflow-hidden"
+            >
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40 px-2">Convites Enviados</h3>
+              {outgoingRequests.map(request => (
+                <div key={request.id} className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex gap-4 items-center">
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/40 shrink-0">
+                    <User size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-sm truncate">Aguardando resposta</h4>
+                    <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest truncate">{request.studentEmail}</p>
+                  </div>
+                  <div className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">Pendente</span>
                   </div>
                 </div>
               ))}

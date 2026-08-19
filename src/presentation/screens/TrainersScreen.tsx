@@ -14,6 +14,7 @@ interface TrainerConnection {
   trainerEmail: string;
   trainerName?: string;
   status: 'pending' | 'accepted' | 'rejected' | 'disconnected';
+  initiatedBy?: 'trainer' | 'student';
 }
 
 export interface TrainersScreenProps {
@@ -43,8 +44,15 @@ export function TrainersScreen({
   const [showAvailableTrainers, setShowAvailableTrainers] = useState(false);
   const [isResponding, setIsResponding] = useState<string | null>(null);
 
-  // Connections where the trainer initiated the request (student needs to respond)
-  const incomingPendingRequests = studentConnections.filter((c) => c.status === 'pending');
+  // Requests initiated by the trainer — student needs to accept or reject these
+  const incomingPendingRequests = studentConnections.filter(
+    (c) => c.status === 'pending' && (c.initiatedBy === 'trainer' || !c.initiatedBy),
+  );
+
+  // Requests initiated by the student — awaiting trainer acceptance, no action needed
+  const outgoingPendingRequests = studentConnections.filter(
+    (c) => c.status === 'pending' && c.initiatedBy === 'student',
+  );
 
   const connectedTrainers = trainers.filter((t) =>
     studentConnections.some((c) => c.trainerEmail === t.email && c.status === 'accepted'),
@@ -150,6 +158,43 @@ export function TrainersScreen({
                     >
                       <ShieldCheck size={16} />
                     </button>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Outgoing Connection Requests — awaiting trainer acceptance ── */}
+        <AnimatePresence>
+          {outgoingPendingRequests.length > 0 && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="space-y-3 overflow-hidden"
+            >
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40 px-2">
+                Solicitações Enviadas
+              </h3>
+              {outgoingPendingRequests.map((request) => (
+                <div
+                  key={request.id}
+                  className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex gap-4 items-center"
+                >
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/40 shrink-0">
+                    <User size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-sm truncate">
+                      {request.trainerName ?? 'Treinador'}
+                    </h4>
+                    <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest truncate">
+                      {request.trainerEmail}
+                    </p>
+                  </div>
+                  <div className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 shrink-0">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">Aguardando</span>
                   </div>
                 </div>
               ))}

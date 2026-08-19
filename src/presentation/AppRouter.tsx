@@ -493,7 +493,8 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       return (
         <StudentsView
           students={students} userProfile={userProfile}
-          pendingRequests={trainerConnections.filter((c: any) => c.status === 'pending')}
+          pendingRequests={trainerConnections.filter((c: any) => c.status === 'pending' && (c.initiatedBy === 'student' || !c.initiatedBy))}
+          outgoingRequests={trainerConnections.filter((c: any) => c.status === 'pending' && c.initiatedBy === 'trainer')}
           onRespond={async (id: string, status: any) => {
             await api.respondToConnection(id, status);
             await Promise.all([api.getStudents(), api.getTrainerConnections()]);

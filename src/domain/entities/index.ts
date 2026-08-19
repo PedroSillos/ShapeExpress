@@ -339,6 +339,11 @@ export interface TrainerConnection {
   trainerName?: string;
   trainerAvatar?: string;
   status: "pending" | "accepted" | "rejected" | "disconnected";
+  /** Who initiated the connection request.
+   *  'student' = aluno enviou pedido ao treinador (via código).
+   *  'trainer' = treinador enviou convite ao aluno (via busca).
+   *  Ausente em documentos legados — tratado como 'student' para compatibilidade. */
+  initiatedBy?: "trainer" | "student";
   createdAt: string;
 }
 

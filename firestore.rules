@@ -132,7 +132,22 @@ service cloud.firestore {
         isOwner(request.resource.data.studentEmail) ||
         isOwner(request.resource.data.trainerEmail)
       );
-      allow update, delete: if isAuthenticated() && (isOwner(resource.data.studentEmail) || isOwner(resource.data.trainerEmail) || isAdmin());
+      // Only the party who did NOT initiate the request can accept/reject (status update).
+      // Cancellation (delete) is allowed by either party or admin.
+      // Accepted connections can be updated (e.g. disconnect) by either party.
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        // Non-initiating party responds to a pending request
+        (resource.data.status == 'pending' && (
+          (resource.data.initiatedBy == 'trainer' && isOwner(resource.data.studentEmail)) ||
+          (resource.data.initiatedBy == 'student' && isOwner(resource.data.trainerEmail)) ||
+          // Legacy docs without initiatedBy: preserve old behaviour (either party can update)
+          (!resource.data.keys().hasAll(['initiatedBy']) && (isOwner(resource.data.studentEmail) || isOwner(resource.data.trainerEmail)))
+        )) ||
+        // Either party can update an already-accepted connection (e.g. future metadata)
+        (resource.data.status == 'accepted' && (isOwner(resource.data.studentEmail) || isOwner(resource.data.trainerEmail)))
+      );
+      allow delete: if isAuthenticated() && (isOwner(resource.data.studentEmail) || isOwner(resource.data.trainerEmail) || isAdmin());
     }
 
     match /notifications/{id} {
