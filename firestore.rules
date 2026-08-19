@@ -127,7 +127,11 @@ service cloud.firestore {
 
     match /connections/{id} {
       allow read: if isAuthenticated() && (isOwner(resource.data.studentEmail) || isOwner(resource.data.trainerEmail) || isAdmin());
-      allow create: if isAuthenticated() && isOwner(request.resource.data.studentEmail);
+      // Either the student OR the trainer can initiate a connection request
+      allow create: if isAuthenticated() && (
+        isOwner(request.resource.data.studentEmail) ||
+        isOwner(request.resource.data.trainerEmail)
+      );
       allow update, delete: if isAuthenticated() && (isOwner(resource.data.studentEmail) || isOwner(resource.data.trainerEmail) || isAdmin());
     }
 

@@ -13,7 +13,7 @@ import { Student, UserProfile, TrainerConnection, fullName } from '../../domain/
 import { Card } from '../components/Card';
 import { InitialsAvatar } from '@/src/shared/ui/InitialsAvatar';
 
-export function StudentsView({ students, userProfile, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, selectedStudentForProfile, setSelectedStudentForProfile, onSearchUsers }: { 
+export function StudentsView({ students, userProfile, pendingRequests, onRespond, onDisconnect, onViewWorkouts, onViewEvolution, selectedStudentForProfile, setSelectedStudentForProfile, onSearchUsers, onSendConnectionRequest }: { 
   students: Student[], 
   userProfile: UserProfile, 
   pendingRequests: TrainerConnection[],
@@ -24,6 +24,7 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
   selectedStudentForProfile: Student | null,
   setSelectedStudentForProfile: (s: Student | null) => void,
   onSearchUsers?: (term: string) => Promise<UserProfile[]>,
+  onSendConnectionRequest?: (email: string) => Promise<void>,
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
@@ -33,6 +34,8 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
   const [isResponding, setIsResponding] = useState<string | null>(null);
   const [showFinancialDashboard, setShowFinancialDashboard] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [confirmConnectionUser, setConfirmConnectionUser] = useState<UserProfile | null>(null);
+  const [isSendingRequest, setIsSendingRequest] = useState(false);
 
   // Debounced search — fires 400 ms after the user stops typing
   useEffect(() => {
@@ -243,7 +246,7 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Buscar alunos..."
+                    placeholder="Buscar por nome..."
                     className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-all"
                   />
                   {searchTerm && (
@@ -271,7 +274,8 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
                     {searchResults.map(user => (
                       <Card 
                         key={user.email} 
-                        className="p-4 hover:border-sky-500/30 transition-all group"
+                        className="p-4 hover:border-sky-500/30 transition-all group cursor-pointer active:scale-[0.98]"
+                        onClick={() => setConfirmConnectionUser(user)}
                       >
                         <div className="flex gap-4 items-center">
                           <InitialsAvatar
@@ -289,17 +293,73 @@ export function StudentsView({ students, userProfile, pendingRequests, onRespond
                     ))}
                   </div>
                 ) : (
-                  <div className="py-12 text-center space-y-3">
-                    <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mx-auto">
-                      <Search size={24} className="text-white/15" />
+                  <div className="py-12 text-center space-y-4">
+                    <div className="w-16 h-16 bg-sky-500/10 rounded-2xl flex items-center justify-center mx-auto">
+                      <Search size={28} className="text-sky-400/60" />
                     </div>
-                    <p className="text-sm text-white/30">
-                      {searchTerm.trim()
-                        ? `Nenhum usuário encontrado para "${searchTerm}"`
-                        : 'Digite para buscar alunos'}
-                    </p>
+                    {searchTerm.trim() ? (
+                      <p className="text-sm text-white/40">
+                        Nenhum usuário encontrado para &ldquo;{searchTerm}&rdquo;
+                      </p>
+                    ) : (
+                      <p className="text-base font-bold text-white/70">Digite o nome do aluno<br />para encontrá-lo</p>
+                    )}
                   </div>
                 )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Connection Request Confirm Modal ─────────────────── */}
+      <AnimatePresence>
+        {confirmConnectionUser && (
+          <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="w-full max-w-xs bg-dark-card border border-dark-border rounded-3xl p-6 space-y-5 shadow-2xl text-center"
+            >
+              <InitialsAvatar
+                name={fullName(confirmConnectionUser)}
+                sizeClass="w-16 h-16"
+                roundedClass="rounded-2xl"
+                className="mx-auto border border-white/10"
+              />
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold">{fullName(confirmConnectionUser)}</h3>
+                <p className="text-xs text-white/40 truncate">{confirmConnectionUser.email}</p>
+              </div>
+              <p className="text-xs text-white/50 leading-relaxed">
+                Deseja enviar uma solicitação de conexão para este aluno?
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setConfirmConnectionUser(null)}
+                  className="py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-white/60 active:scale-95 transition-transform"
+                >
+                  Cancelar
+                </button>
+                <button
+                  disabled={isSendingRequest}
+                  onClick={async () => {
+                    if (!confirmConnectionUser.email) return;
+                    setIsSendingRequest(true);
+                    try {
+                      await onSendConnectionRequest?.(confirmConnectionUser.email);
+                    } finally {
+                      setIsSendingRequest(false);
+                    }
+                    setConfirmConnectionUser(null);
+                    setShowSearchModal(false);
+                    setSearchTerm('');
+                  }}
+                  className="py-3 bg-sky-500 rounded-xl text-xs font-bold text-white active:scale-95 transition-transform disabled:opacity-50"
+                >
+                  {isSendingRequest ? 'Enviando...' : 'Enviar'}
+                </button>
               </div>
             </motion.div>
           </div>

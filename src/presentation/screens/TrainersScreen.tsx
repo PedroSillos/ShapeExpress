@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Search, UserPlus, X, RefreshCw,
-  ChevronLeft, Trophy, ShieldCheck, AlertTriangle, UserCheck,
+  ChevronLeft, Trophy, ShieldCheck, AlertTriangle, UserCheck, User,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, fullName } from '@/src/domain/entities';
@@ -10,7 +10,9 @@ import { TrainerCard } from '../components/TrainerCard';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface TrainerConnection {
+  id: string;
   trainerEmail: string;
+  trainerName?: string;
   status: 'pending' | 'accepted' | 'rejected' | 'disconnected';
 }
 
@@ -20,6 +22,7 @@ export interface TrainersScreenProps {
   onConnect: (code: string) => Promise<void>;
   onDisconnect: (trainerEmail: string) => Promise<void>;
   studentConnections: TrainerConnection[];
+  onRespondToRequest?: (id: string, status: 'accepted' | 'rejected') => Promise<void>;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -29,6 +32,7 @@ export function TrainersScreen({
   onConnect,
   onDisconnect: _onDisconnect,
   studentConnections,
+  onRespondToRequest,
 }: TrainersScreenProps) {
   const [showConnectPopup, setShowConnectPopup] = useState(false);
   const [connectCode, setConnectCode] = useState('');
@@ -37,6 +41,10 @@ export function TrainersScreen({
   const [selectedTrainer, setSelectedTrainer] = useState<UserProfile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAvailableTrainers, setShowAvailableTrainers] = useState(false);
+  const [isResponding, setIsResponding] = useState<string | null>(null);
+
+  // Connections where the trainer initiated the request (student needs to respond)
+  const incomingPendingRequests = studentConnections.filter((c) => c.status === 'pending');
 
   const connectedTrainers = trainers.filter((t) =>
     studentConnections.some((c) => c.trainerEmail === t.email && c.status === 'accepted'),
@@ -90,6 +98,64 @@ export function TrainersScreen({
           <Search size={16} />
           Buscar treinadores
         </button>
+
+        {/* ── Incoming Connection Requests ──────────────────────── */}
+        <AnimatePresence>
+          {incomingPendingRequests.length > 0 && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="space-y-3 overflow-hidden"
+            >
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40 px-2">
+                Solicitações Pendentes
+              </h3>
+              {incomingPendingRequests.map((request) => (
+                <div
+                  key={request.id}
+                  className="p-4 rounded-2xl bg-sky-500/5 border border-sky-500/20 flex gap-4 items-center"
+                >
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/40 shrink-0">
+                    <User size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-sm truncate">
+                      {request.trainerName ?? 'Treinador'}
+                    </h4>
+                    <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest truncate">
+                      {request.trainerEmail}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      disabled={isResponding === request.id}
+                      onClick={async () => {
+                        setIsResponding(request.id);
+                        await onRespondToRequest?.(request.id, 'rejected');
+                        setIsResponding(null);
+                      }}
+                      className="p-2 bg-white/5 rounded-lg text-white/40 hover:text-red-400 transition-colors disabled:opacity-50"
+                    >
+                      <X size={16} />
+                    </button>
+                    <button
+                      disabled={isResponding === request.id}
+                      onClick={async () => {
+                        setIsResponding(request.id);
+                        await onRespondToRequest?.(request.id, 'accepted');
+                        setIsResponding(null);
+                      }}
+                      className="p-2 bg-sky-500 text-white rounded-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                    >
+                      <ShieldCheck size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ── Connected trainers ────────────────────────────────── */}
         {connectedTrainers.length > 0 && (

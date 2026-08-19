@@ -479,6 +479,11 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             setStudentConnections(connections);
             setUserProfile((profile as UserProfile) || DEFAULT_PROFILE);
           }}
+          onRespondToRequest={async (id: string, status: 'accepted' | 'rejected') => {
+            await api.respondToConnection(id, status);
+            const connections = await api.getStudentConnections();
+            setStudentConnections(connections);
+          }}
           studentConnections={studentConnections}
         />
       );
@@ -499,6 +504,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           selectedStudentForProfile={selectedStudentForProfile}
           setSelectedStudentForProfile={(s: Student | null) => setSelectedStudentForProfile(s)}
           onSearchUsers={api.searchNonConnectedUsers}
+          onSendConnectionRequest={api.sendConnectionRequestByEmail}
         />
       );
     case 'student-workouts':

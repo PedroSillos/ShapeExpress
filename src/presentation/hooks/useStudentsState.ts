@@ -200,13 +200,16 @@ export const useStudentsState = (
       const connRef = doc(db, "connections", id);
       if (status === "rejected") {
         await deleteDoc(connRef);
+        // Update both sides in memory (caller may be trainer OR student)
         setTrainerConnections((prev) => prev.filter((c) => c.id !== id));
+        setStudentConnections((prev) => prev.filter((c) => c.id !== id));
       } else {
         const connectionDoc = await getDoc(connRef);
         if (connectionDoc.exists()) {
           const studentEmail = connectionDoc.data().studentEmail;
           await updateDoc(connRef, { status });
           setTrainerConnections((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)));
+          setStudentConnections((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)));
           const newStudent = await buildStudentFromEmail(studentEmail);
           setStudents((prev) => {
             if (prev.some((s) => (s.email || "").toLowerCase() === (newStudent.email || "").toLowerCase())) return prev;
@@ -330,6 +333,40 @@ export const useStudentsState = (
     }
   };
 
+  /**
+   * Sends a connection request directly from the trainer to a student by email.
+   * The trainer initiates the connection; the student will see it as pending on
+   * their side until they accept.
+   */
+  const sendConnectionRequestByEmail = async (studentEmail: string): Promise<void> => {
+    if (!email) return;
+    try {
+      const trainerEmailLower = email.toLowerCase();
+      const studentEmailLower = studentEmail.toLowerCase();
+
+      // Avoid duplicates
+      const existingQ = query(
+        collection(db, "connections"),
+        where("trainerEmail", "==", trainerEmailLower),
+        where("studentEmail", "==", studentEmailLower),
+      );
+      const existingSnap = await getDocs(existingQ);
+      if (!existingSnap.empty) return;
+
+      const newConnection: TrainerConnection = {
+        id: Date.now().toString(),
+        studentEmail: studentEmailLower,
+        trainerEmail: trainerEmailLower,
+        status: "pending",
+        createdAt: new Date().toISOString(),
+      };
+      await setDoc(doc(db, "connections", newConnection.id), newConnection);
+      setTrainerConnections((prev) => [...prev, newConnection]);
+    } catch (e) {
+      console.error("[sendConnectionRequestByEmail] error:", e);
+    }
+  };
+
   const resetStudentsStates = () => {
     setStudents([]);
     setTrainers([]);
@@ -347,7 +384,7 @@ export const useStudentsState = (
     getTrainers, getStudents,
     requestConnection, getTrainerConnections, getStudentConnections,
     respondToConnection, disconnectTrainer, disconnectStudent,
-    searchNonConnectedUsers,
+    searchNonConnectedUsers, sendConnectionRequestByEmail,
     resetStudentsStates,
   };
 };
