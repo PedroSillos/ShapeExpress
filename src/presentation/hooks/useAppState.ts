@@ -33,7 +33,7 @@ export const useAppState = () => {
     setStudents: students.setStudents,
   });
   
-  const store = useStoreState(auth.currentUser, auth.idToken, resyncTemplates);
+  const store = useStoreState(auth.currentUser, resyncTemplates);
 
   // Apply the tab restored by Firebase Auth on page load/refresh
   useEffect(() => {
@@ -149,8 +149,6 @@ export const useAppState = () => {
     createProtocol: store.createProtocol,
     getPurchasedProtocols: store.getPurchasedProtocols,
     claimFreeItem: store.claimFreeItem,
-    createCheckoutSession: store.createCheckoutSession,
-    verifyCheckoutSession: store.verifyCheckoutSession,
     publishStoreItem: store.publishItem,
     unpublishStoreItem: store.unpublishItem,
     onUpdateStoreItem: store.updateStoreItem,

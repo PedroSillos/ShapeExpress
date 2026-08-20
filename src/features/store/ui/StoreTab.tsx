@@ -717,7 +717,6 @@ export interface StoreTabProps {
   isLoadingItems: boolean;
   onGoToWorkouts: () => void;
   claimFreeItem: (itemId: string) => Promise<{ success: boolean; purchaseId: string }>;
-  createCheckoutSession: (itemId: string) => Promise<{ url: string }>;
   onRenameStoreItem?: (itemId: string, newTitle: string) => void;
   onUpdateStoreItem?: (item: StoreItem) => void;
   onUpdateTemplate?: (template: WorkoutTemplate) => void;
@@ -733,7 +732,6 @@ export function StoreTab({
   isLoadingItems,
   onGoToWorkouts,
   claimFreeItem,
-  createCheckoutSession,
   onRenameStoreItem,
   onUpdateStoreItem,
   onUpdateTemplate,
@@ -746,6 +744,7 @@ export function StoreTab({
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [openSettingsId, setOpenSettingsId] = useState<string | null>(null);
   const [dropdownPos, setDropdownPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
+  const [paidBlockedMsg, setPaidBlockedMsg] = useState<string | null>(null);
 
   const purchasedItemIds = new Set(myPurchases.map((p) => p.itemId));
   const storeWorkouts = storeItems.filter((i) => i.type === 'workout');
@@ -765,32 +764,64 @@ export function StoreTab({
   const handleBuyItem = useCallback(
     async (item: StoreItem) => {
       if (buyingId) return;
+
+      // Paid items are disabled — payment system is offline
+      if (item.price !== 0) {
+        setPaidBlockedMsg('Sistema de pagamentos fora do ar. Tente novamente mais tarde.');
+        return;
+      }
+
       setBuyingId(item.id);
       try {
-        if (item.price === 0) {
-          // Free item: claim directly without Stripe
-          await claimFreeItem(item.id);
-          // Success feedback could be added here (toast/alert)
-        } else {
-          // Paid item: use Stripe checkout.
-          // window.open with '_system' is intercepted by Capacitor on Android and
-          // opens in the external browser instead of the WebView, which is required
-          // for Stripe to complete the payment flow correctly.
-          // On web, '_system' falls back to opening a new tab.
-          const { url } = await createCheckoutSession(item.id);
-          window.open(url, '_system');
-        }
+        await claimFreeItem(item.id);
       } catch (err) {
-        console.error('[StoreTab] checkout error:', err);
+        console.error('[StoreTab] claimFreeItem error:', err);
       } finally {
         setBuyingId(null);
       }
     },
-    [buyingId, claimFreeItem, createCheckoutSession],
+    [buyingId, claimFreeItem],
   );
 
   return (
     <div className="space-y-6">
+      {/* Payment unavailable modal */}
+      <AnimatePresence>
+        {paidBlockedMsg && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setPaidBlockedMsg(null)}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[150]"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ type: 'spring', damping: 22, stiffness: 300 }}
+              className="fixed inset-x-6 top-1/2 -translate-y-1/2 z-[160] bg-dark-card border border-dark-border rounded-3xl p-6 space-y-4 shadow-2xl"
+            >
+              <div className="flex flex-col items-center text-center gap-3">
+                <div className="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center">
+                  <ShoppingBag size={24} className="text-red-400" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-base font-black text-white">Pagamento indisponível</h3>
+                  <p className="text-sm text-white/50 leading-relaxed">{paidBlockedMsg}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setPaidBlockedMsg(null)}
+                className="w-full py-3 rounded-2xl bg-white/10 text-white text-sm font-bold active:scale-95 transition-transform"
+              >
+                Entendido
+              </button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
       {/* Hero Header */}
       <div
         className="relative overflow-hidden -mx-6 mb-6"

@@ -92,34 +92,7 @@ export default function App() {
     api.getStudentTemplates(selectedStudentForWorkouts.email).then(setStudentTemplates);
   }, [selectedStudentForWorkouts?.email]);
 
-  // Detect Stripe redirect query params on mount
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab');
-    const success = params.get('success');
-    const canceled = params.get('canceled');
-    const sessionId = params.get('session_id');
-    const itemId = params.get('item_id');
 
-    if (tab === 'store' && (success || canceled)) {
-      window.history.replaceState({}, '', window.location.pathname);
-
-      if (canceled === 'true') {
-        setActiveTab('store' as any);
-        return;
-      }
-
-      if (success === 'true' && sessionId && itemId) {
-        setActiveTab('store' as any);
-        api.verifyCheckoutSession(sessionId, itemId)
-          .then(() => {
-          })
-          .catch(() => {
-          });
-      }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // If app was closed during onboarding workout, clean up and restart from landing
   useEffect(() => {

@@ -440,7 +440,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           isLoadingItems={!!isLoadingItems}
           onGoToWorkouts={() => switchTab('workouts')}
           claimFreeItem={api.claimFreeItem}
-          createCheckoutSession={api.createCheckoutSession}
           onRenameStoreItem={async (itemId: string, newTitle: string) => {
             // Update store item title
             const item = storeItems?.find(i => i.id === itemId);

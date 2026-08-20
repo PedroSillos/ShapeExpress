@@ -403,13 +403,12 @@ export interface StoreProgram {
 
 export type StoreItem = StoreWorkout | StoreProgram;
 
-/** A confirmed purchase recorded after Stripe payment */
+/** A confirmed purchase recorded in Firestore */
 export interface StorePurchase {
   id: string;
   buyerEmail: string;
   itemId: string;
   itemType: 'workout' | 'program';
-  stripeSessionId: string;
   purchasedAt: string;
 }
 

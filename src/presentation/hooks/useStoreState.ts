@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import {
-  collection, query, where, getDocs, doc, setDoc, updateDoc, addDoc,
-  Timestamp,
+  collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc, addDoc,
+  Timestamp, increment,
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import { StoreItem, StoreWorkout, StorePurchase } from "../../domain/entities";
-import { getApiBaseUrl } from "../../utils/apiUrl";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -15,6 +14,35 @@ const toMs = (v: unknown): number =>
 
 /** Comparator for descending date sort (newest first). */
 const sortByDateDesc = (a: unknown, b: unknown) => toMs(b) - toMs(a);
+
+/**
+ * Calculates startDate and endDate for a purchased template.
+ * Mirrors the same logic that was in server.ts calculateTemplateDates.
+ */
+function calculateTemplateDates(
+  purchaseDate: string,
+  duration: number,
+  durationUnit: "weeks" | "months",
+): { startDate: string; endDate: string } {
+  const formatDate = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  const start = new Date(purchaseDate);
+  const end = new Date(start);
+
+  if (durationUnit === "weeks") {
+    end.setDate(end.getDate() + duration * 7 - 1);
+  } else {
+    end.setMonth(end.getMonth() + duration);
+    end.setDate(end.getDate() - 1);
+  }
+
+  return { startDate: formatDate(start), endDate: formatDate(end) };
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,7 +64,6 @@ export type PublishPayload = PublishWorkoutPayload;
 
 export const useStoreState = (
   currentUser: { email: string } | null,
-  idToken: string | null,
   onTemplatesChanged?: () => void,
 ) => {
   const [storeItems, setStoreItems] = useState<StoreItem[]>([]);
@@ -157,58 +184,83 @@ export const useStoreState = (
     );
   }, []);
 
-  // ── Stripe checkout ──────────────────────────────────────────────────────
+  // ── Free item claiming (client-side Firestore) ───────────────────────────
   const claimFreeItem = useCallback(async (itemId: string): Promise<{ success: boolean; purchaseId: string }> => {
-    const res = await fetch(`${getApiBaseUrl()}/api/store/claim-free`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken || ""}`,
-      },
-      body: JSON.stringify({ itemId }),
+    if (!currentUser?.email) throw new Error("Usuário não autenticado.");
+
+    const buyerEmail = currentUser.email.toLowerCase();
+
+    // Fetch the store item
+    const itemSnap = await getDoc(doc(db, "store_items", itemId));
+    if (!itemSnap.exists()) throw new Error("Item não encontrado.");
+    const item = itemSnap.data() as Record<string, any>;
+
+    if (item["status"] !== "published") throw new Error("Item não está disponível.");
+    if (item["price"] !== 0) throw new Error("Este item não é gratuito.");
+    if (item["creatorEmail"] === buyerEmail) throw new Error("Você não pode reivindicar seu próprio item.");
+
+    // Prevent duplicate claim
+    const dupSnap = await getDocs(
+      query(
+        collection(db, "store_purchases"),
+        where("buyerEmail", "==", buyerEmail),
+        where("itemId", "==", itemId),
+      ),
+    );
+    if (!dupSnap.empty) throw new Error("Você já possui este item.");
+
+    // Record purchase
+    const purchaseDate = new Date().toISOString();
+    const purchaseRef = await addDoc(collection(db, "store_purchases"), {
+      buyerEmail,
+      itemId,
+      itemType: item["type"],
+      purchasedAt: purchaseDate,
     });
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(errorText);
-    }
-    const result = await res.json();
+
+    // Copy template(s) to buyer's templates collection
+    const templateIds: string[] = item["type"] === "workout"
+      ? [item["templateId"]]
+      : (item["templateIds"] ?? []);
+
+    const { startDate, endDate } = calculateTemplateDates(
+      purchaseDate,
+      item["duration"] as number,
+      item["durationUnit"] as "weeks" | "months",
+    );
+
+    await Promise.all(
+      templateIds.map(async (tId: string) => {
+        const tSnap = await getDoc(doc(db, "templates", tId));
+        if (!tSnap.exists()) return;
+        const tData = tSnap.data();
+        const newId = `purchased_${tId}_${buyerEmail.replace(/[@.]/g, "_")}`;
+        await setDoc(doc(db, "templates", newId), {
+          ...tData,
+          id: newId,
+          userId: buyerEmail,
+          startDate,
+          endDate,
+          purchasedFrom: item["creatorEmail"],
+          purchasedItemId: itemId,
+          purchasedAt: purchaseDate,
+        });
+      }),
+    );
+
+    // Increment salesCount on item
+    await updateDoc(doc(db, "store_items", itemId), {
+      salesCount: increment(1),
+    });
+
+    // Refresh local purchases list
     await loadMyPurchases();
-    
+
     // Notify parent that templates need to be reloaded
-    if (onTemplatesChanged) {
-      onTemplatesChanged();
-    }
-    
-    return result;
-  }, [idToken, loadMyPurchases, onTemplatesChanged]);
+    onTemplatesChanged?.();
 
-  const createCheckoutSession = useCallback(async (itemId: string): Promise<{ url: string }> => {
-    const res = await fetch(`${getApiBaseUrl()}/api/checkout/session`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken || ""}`,
-      },
-      body: JSON.stringify({ itemId }),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
-  }, [idToken]);
-
-  const verifyCheckoutSession = useCallback(async (sessionId: string, itemId: string): Promise<{ success: boolean; verified: boolean }> => {
-    const res = await fetch(`${getApiBaseUrl()}/api/checkout/verify`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${idToken || ""}`,
-      },
-      body: JSON.stringify({ sessionId, itemId }),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const result = await res.json();
-    if (result.verified) await loadMyPurchases();
-    return result;
-  }, [idToken, loadMyPurchases]);
+    return { success: true, purchaseId: purchaseRef.id };
+  }, [currentUser?.email, loadMyPurchases, onTemplatesChanged]);
 
   // ── Load on mount ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -241,8 +293,6 @@ export const useStoreState = (
     unpublishItem,
     updateStoreItem,
     claimFreeItem,
-    createCheckoutSession,
-    verifyCheckoutSession,
     // Legacy
     getProtocols,
     createProtocol,
