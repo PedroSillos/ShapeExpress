@@ -90,9 +90,10 @@ service cloud.firestore {
 
     match /templates/{id} {
       allow read: if isAuthenticated();
-      // Allow creation if user owns the creatorEmail OR if it's an AI-generated workout
+      // Allow creation if user owns the creatorEmail, is the userId (purchased copy), or if it's an AI-generated workout
       allow create: if isAuthenticated() && (
         isOwner(request.resource.data.creatorEmail) || 
+        isOwner(request.resource.data.userId) ||
         request.resource.data.creatorEmail == 'AICoach'
       );
       // Allow update/delete if user owns creatorEmail, is the workout owner (userId), or is admin
@@ -251,13 +252,20 @@ service cloud.firestore {
     match /store_items/{id} {
       allow read: if true; // Anyone can browse the store
       allow create: if isAuthenticated() && isOwner(request.resource.data.creatorEmail);
-      allow update, delete: if isAuthenticated() && (isOwner(resource.data.creatorEmail) || isAdmin());
+      allow update: if isAuthenticated() && (
+        isOwner(resource.data.creatorEmail) || 
+        isAdmin() ||
+        // Any authenticated user can increment salesCount (e.g. after a purchase)
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['salesCount'])
+      );
+      allow delete: if isAuthenticated() && (isOwner(resource.data.creatorEmail) || isAdmin());
     }
 
-    // Store purchases - confirmed purchases after Stripe payment
+    // Store purchases - confirmed purchases after Stripe payment or free claim
     match /store_purchases/{id} {
       allow read: if isAuthenticated() && (isOwner(resource.data.buyerEmail) || isAdmin());
-      allow write: if isAdmin(); // Only backend/admin can create purchases
+      allow create: if isAuthenticated() && isOwner(request.resource.data.buyerEmail);
+      allow update, delete: if isAdmin();
     }
 
     match /{document=**} {
