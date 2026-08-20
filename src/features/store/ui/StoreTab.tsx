@@ -772,9 +772,13 @@ export function StoreTab({
           await claimFreeItem(item.id);
           // Success feedback could be added here (toast/alert)
         } else {
-          // Paid item: use Stripe checkout
+          // Paid item: use Stripe checkout.
+          // window.open with '_system' is intercepted by Capacitor on Android and
+          // opens in the external browser instead of the WebView, which is required
+          // for Stripe to complete the payment flow correctly.
+          // On web, '_system' falls back to opening a new tab.
           const { url } = await createCheckoutSession(item.id);
-          window.location.href = url;
+          window.open(url, '_system');
         }
       } catch (err) {
         console.error('[StoreTab] checkout error:', err);

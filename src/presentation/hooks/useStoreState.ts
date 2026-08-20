@@ -5,6 +5,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import { StoreItem, StoreWorkout, StorePurchase } from "../../domain/entities";
+import { getApiBaseUrl } from "../../utils/apiUrl";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -158,7 +159,7 @@ export const useStoreState = (
 
   // ── Stripe checkout ──────────────────────────────────────────────────────
   const claimFreeItem = useCallback(async (itemId: string): Promise<{ success: boolean; purchaseId: string }> => {
-    const res = await fetch("/api/store/claim-free", {
+    const res = await fetch(`${getApiBaseUrl()}/api/store/claim-free`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -182,7 +183,7 @@ export const useStoreState = (
   }, [idToken, loadMyPurchases, onTemplatesChanged]);
 
   const createCheckoutSession = useCallback(async (itemId: string): Promise<{ url: string }> => {
-    const res = await fetch("/api/checkout/session", {
+    const res = await fetch(`${getApiBaseUrl()}/api/checkout/session`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -195,7 +196,7 @@ export const useStoreState = (
   }, [idToken]);
 
   const verifyCheckoutSession = useCallback(async (sessionId: string, itemId: string): Promise<{ success: boolean; verified: boolean }> => {
-    const res = await fetch("/api/checkout/verify", {
+    const res = await fetch(`${getApiBaseUrl()}/api/checkout/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
