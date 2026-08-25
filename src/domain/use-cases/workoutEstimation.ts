@@ -8,24 +8,27 @@ import {
 } from '../entities';
 import { EXERCISES } from '@/src/domain/entities/exercises';
 
-// Base weight as % of body weight per muscle group and exercise type
+// Scale factors per experience level applied over the catalog's defaultWeight.
+const EXPERIENCE_SCALE: Record<string, number> = {
+  'Nunca pratiquei': 0.5,
+  'Iniciante':       0.75,
+  'Intermediário':   1.0,
+  'Avançado':        1.35,
+};
+
 export function estimateInitialWeight(
   exerciseId: string,
   userProfile: UserProfile,
 ): number {
   const exercise = EXERCISES.find(e => e.id === exerciseId);
   if (!exercise || exercise.type === 'cardio' || exercise.type === 'core') return 0;
-
-  // Fixed weight per experience level
-  const weights: Record<string, number> = {
-    'Nunca pratiquei': 20,
-    'Iniciante':       40,
-    'Intermediário':   60,
-    'Avançado':        80,
-  };
+  if (!exercise.defaultWeight) return 0;
 
   const level = userProfile?.experienceLevel ?? 'Nunca pratiquei';
-  return weights[level] ?? 20;
+  const scale = EXPERIENCE_SCALE[level] ?? 0.5;
+
+  // Round to nearest 2.5 kg for a realistic plate-loadable value
+  return Math.round((exercise.defaultWeight * scale) / 2.5) * 2.5;
 }
 
 

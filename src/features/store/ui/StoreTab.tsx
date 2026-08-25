@@ -4,6 +4,7 @@ import { Search, X, Star, ShoppingBag, Settings, Edit, Trash2, Pen, Plus, GripVe
 import { motion, AnimatePresence } from 'motion/react';
 import { StoreItem, StorePurchase, WorkoutTemplate, WorkoutTemplateExercise } from '@/src/domain/entities';
 import { EXERCISES } from '@/src/domain/entities/exercises';
+import { getInputMode, getDefaultSpeed } from '@/src/domain/use-cases/exerciseInputMode';
 import { cn } from '@/src/utils/cn';
 
 // Icons
@@ -42,20 +43,6 @@ const SPORT_COLORS: Record<string, string> = {
 
 export function formatPrice(cents: number): string {
   return `R$ ${(cents / 100).toFixed(2).replace('.', ',')}`;
-}
-
-/** Helper to get the input mode for an exercise (copied from WorkoutsView) */
-function getInputMode(exercise: { inputMode?: string }): string {
-  return exercise.inputMode ?? 'weight_reps';
-}
-
-/** Helper to get default speed for duration_speed exercises (copied from WorkoutsView) */
-function getDefaultSpeed(exerciseId: string): number {
-  // Simple defaults for common cardio exercises
-  if (exerciseId.toLowerCase().includes('corrida') || exerciseId.toLowerCase().includes('run')) return 10;
-  if (exerciseId.toLowerCase().includes('ciclismo') || exerciseId.toLowerCase().includes('bike')) return 25;
-  if (exerciseId.toLowerCase().includes('caminhada') || exerciseId.toLowerCase().includes('walk')) return 6;
-  return 10;
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────

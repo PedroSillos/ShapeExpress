@@ -61,12 +61,29 @@ export interface Exercise {
   muscleGroup: MuscleGroup;
   muscleSubgroup?: MuscleSubgroup;
   defaultSets: number;
-  defaultReps: number;
   category: ExerciseCategory;
   equipment: Equipment;
   type: ExerciseType;
 
-  inputMode?: ExerciseInputMode;
+  /** Always required — determines which input fields are shown during workout tracking. */
+  inputMode: ExerciseInputMode;
+
+  // ── Fields that depend on inputMode ──────────────────────────────────────
+
+  /** weight_reps | reps_only: target repetitions per set. */
+  defaultReps?: number;
+
+  /** weight_reps: suggested starting weight in kg. */
+  defaultWeight?: number;
+
+  /** duration_only | duration_speed | duration_distance: duration in seconds. */
+  defaultDurationSeconds?: number;
+
+  /** duration_speed: suggested speed in km/h (e.g. running, cycling). */
+  defaultSpeedKmh?: number;
+
+  /** duration_distance: suggested distance in meters (e.g. swimming). */
+  defaultDistanceMeters?: number;
 }
 
 export interface UserTrainingProfile {

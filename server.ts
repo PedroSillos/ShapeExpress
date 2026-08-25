@@ -7,6 +7,8 @@ import admin from 'firebase-admin';
 import { GoogleGenAI } from "@google/genai";
 import { body, validationResult } from 'express-validator';
 import { config } from 'dotenv';
+import { EXERCISES } from './src/domain/entities/exercises.js';
+import { SPORT_EXERCISE_IDS } from './src/domain/use-cases/sportExercises.js';
 
 // Load .env.local in development
 if (process.env.NODE_ENV !== 'production') {
@@ -147,19 +149,23 @@ async function startServer() {
           ? 'INTERMEDIARIO: exercicios compostos moderados. sets="12".'
           : 'INICIANTE: exercicios basicos. sets="10".';
 
-    // Sport-specific exercise pools — must match SPORT_EXERCISE_IDS in sportExercises.ts
-    const sportPools: Record<string, string> = {
-      'Musculação':     '1=Supino,16=SupinoInclinado,18=Crucifixo,6=Terra,3=Remada,8=Puxada,60=RemadaUnilateral,4=DevMilitar,28=ElevLateral,73=FacePull,2=Agachamento,7=LegPress,21=Stiff,25=Gemeos,5=Rosca,30=TricepsPulley,11=Prancha',
-      'Natação':        '147=Flutuacao,148=Deslizamento,149=Pernadas,150=Crawl,151=Costas,152=Peito,153=Borboleta',
-      'Corrida':        '36=Corrida,155=Trote,154=Caminhada,10=Afundo,140=ElevUnilateral,11=Prancha,110=PranchaLateral,9=Flexao',
-      'Ciclismo':       '37=Ciclismo,36=Corrida,10=Afundo,140=ElevUnilateral,12=AlongIsquio,163=AlongPanturrilha',
-      'Crossfit':       '2=Agachamento,6=Terra,4=DevMilitar,14=KBSwing,156=Arranco,157=PowerClean,9=Flexao,54=BarraFixa,3=Remada,11=Prancha,33=AbdSupra,38=PularCorda,36=Corrida,10=Afundo',
-      'Yoga':           '161=Tadasana,142=Balasana,143=AdhoMukha,144=GuerreiroI,145=Arvore,146=Pombo,158=Triangulo,159=Cadeira,160=Cobra,162=MeioSenhor',
-      'Triatlo':        '147=Flutuacao,150=Crawl,37=Ciclismo,10=Afundo,36=Corrida,11=Prancha,140=ElevUnilateral,155=Trote',
-      'Halterofilismo': '156=Arranco,164=Arremesso,157=PowerClean,113=FrontSquat,2=Agachamento,6=Terra,4=DevMilitar,53=RemadaPendlay,26=Encolhimento,25=Gemeos',
+    // Sport-specific exercise pools — derived from the canonical SPORT_EXERCISE_IDS catalog.
+    // Format: "id=ShortName,..." — compact representation for the AI prompt.
+    const buildSportPoolStr = (sport: string): string => {
+      const ids = SPORT_EXERCISE_IDS[sport] ?? SPORT_EXERCISE_IDS['Musculação'] ?? [];
+      return ids
+        .map(id => {
+          const ex = EXERCISES.find(e => e.id === id);
+          if (!ex) return null;
+          // Compact label: remove spaces and accents for a shorter prompt token
+          const label = ex.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '');
+          return `${id}=${label}`;
+        })
+        .filter(Boolean)
+        .join(',');
     };
     const primarySport = (sports[0] || '').trim();
-    const sportPoolStr = sportPools[primarySport] || sportPools['Musculação'];
+    const sportPoolStr = buildSportPoolStr(primarySport) || buildSportPoolStr('Musculação');
 
     // Build biometric hints so the AI can make a more appropriate selection
     const bmiHint = (weight && height)
@@ -175,8 +181,12 @@ async function startServer() {
       : '';
     const biometricContext = [bmiHint, ageHint].filter(Boolean).join(' ');
 
-    // Exercise IDs that use duration input (not reps)
-    const durationExerciseIds = new Set(['36', '37', '38', '147', '148', '149', '150', '151', '152', '153', '154', '155', '156', '157', '158', '159', '160', '161', '162', '163']);
+    // Exercise IDs that use duration input — derived from catalog (inputMode is not weight_reps or reps_only).
+    const durationExerciseIds = new Set(
+      EXERCISES
+        .filter(e => e.inputMode !== 'weight_reps' && e.inputMode !== 'reps_only')
+        .map(e => e.id)
+    );
 
     const prompt = `Voce e um personal trainer. Crie um treino VARIADO e PERSONALIZADO para: modalidade ${sports.join(', ')}, objetivo ${objective || 'condicionamento geral'}${height ? `, altura ${height}cm` : ''}${weight ? `, peso ${weight}kg` : ''}${age ? `, idade ${age} anos` : ''}.
 Nivel: ${difficulty}
