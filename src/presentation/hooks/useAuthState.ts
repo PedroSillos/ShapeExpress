@@ -11,11 +11,14 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   deleteUser,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
 } from "firebase/auth";
+import { Capacitor } from "@capacitor/core";
 import { getFirebaseErrorMessage } from "../../utils/firebaseErrors";
 import type { UserProfile, WorkoutTemplate, WorkoutSession } from "../../domain/entities";
 
@@ -129,12 +132,77 @@ export const useAuthState = () => {
   // Tab to restore after auth resolves — read by useAppState to redirect
   const [restoredTab, setRestoredTab] = useState<string | null>(null);
 
+  /**
+   * Shared post-authentication handler for Google sign-in.
+   * Called both from the popup path (web) and from getRedirectResult (native boot).
+   * Defined before useEffect so the closure is available when getRedirectResult resolves.
+   */
+  const handleGoogleCredential = async (userCredential: Awaited<ReturnType<typeof signInWithPopup>>) => {
+    const freshIdToken = await userCredential.user.getIdToken();
+    tokenStore.idToken = freshIdToken;
+    setIdToken(freshIdToken);
+    const email = userCredential.user.email!;
+    let userDoc: UserProfile | null = null;
+    let isNewAccount = false;
+    try {
+      const snap = await getDoc(doc(db, "users", email));
+      if (snap.exists()) {
+        // Existing account: Firestore is the source of truth — discard local guest data.
+        userDoc = snap.data() as UserProfile;
+        clearLocalGuestData();
+      } else {
+        // New account via Google: treat like a registration and upload any onboarding data.
+        isNewAccount = true;
+        const wa = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; } })();
+        const resolvedUserType: "atleta" | "treinador" = wa?.userType === "treinador" ? "treinador" : "atleta";
+        const firstName = (userCredential.user.displayName || 'Usuário').split(' ')[0];
+        const lastName = (userCredential.user.displayName || '').split(' ').slice(1).join(' ') || undefined;
+        userDoc = {
+          firstName,
+          lastName,
+          email,
+          userType: resolvedUserType,
+          height: 180,
+          initialWeight: 80,
+          objective: "Manutenção",
+          birthDate: "2000-01-01",
+          weeklyGoal: 3,
+        } as UserProfile;
+        // 'name' is required by Firestore Security Rules but not part of the TypeScript type
+        (userDoc as any).name = lastName ? `${firstName} ${lastName}` : firstName;
+        await setDoc(doc(db, "users", email), userDoc as any);
+        await setDoc(doc(db, "stats", email), {
+          level: 1, xp: 0, streak: 0, bestStreak: 0,
+          completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: email,
+        });
+      }
+    } catch (e) {}
+    // Upload local guest data BEFORE setting isLoggedIn=true (for new accounts only)
+    if (isNewAccount) await uploadLocalDataToFirestore(email);
+    localStorage.setItem(STORAGE_KEYS.TOKEN, email);
+    setToken(email);
+    setCurrentUser({ email });
+    setIsLoggedIn(true);
+    return { token: freshIdToken, user: userDoc };
+  };
+
   useEffect(() => {
     const fallbackTimer = setTimeout(() => {
       setRestoredTab(localStorage.getItem(STORAGE_KEYS.WELCOME_DONE) ? "dashboard" : "landing");
       // Ensure splash never stays forever if Firebase times out
       setAuthReady(true);
     }, 5000);
+
+    // On native Capacitor, signInWithRedirect returns the credential here when
+    // the app resumes from the Chrome Custom Tab. Must be called before
+    // onAuthStateChanged so the session is established before the listener fires.
+    if (Capacitor.isNativePlatform()) {
+      getRedirectResult(auth).then((result) => {
+        if (result) {
+          handleGoogleCredential(result).catch(() => {});
+        }
+      }).catch(() => {});
+    }
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       clearTimeout(fallbackTimer);
@@ -193,56 +261,21 @@ export const useAuthState = () => {
   };
 
   const loginWithGoogle = async () => {
-    try {
-      const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-      const freshIdToken = await userCredential.user.getIdToken();
-      tokenStore.idToken = freshIdToken;
-      setIdToken(freshIdToken);
-      const email = userCredential.user.email!;
-      let userDoc: UserProfile | null = null;
-      let isNewAccount = false;
-      try {
-        const snap = await getDoc(doc(db, "users", email));
-        if (snap.exists()) {
-          // Existing account: Firestore is the source of truth — discard local guest data.
-          userDoc = snap.data() as UserProfile;
-          clearLocalGuestData();
-        } else {
-          // New account via Google: treat like a registration and upload any onboarding data.
-          isNewAccount = true;
-          const wa = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; } })();
-          const resolvedUserType: "atleta" | "treinador" = wa?.userType === "treinador" ? "treinador" : "atleta";
-          const firstName = (userCredential.user.displayName || 'Usuário').split(' ')[0];
-          const lastName = (userCredential.user.displayName || '').split(' ').slice(1).join(' ') || undefined;
-          userDoc = {
-            firstName,
-            lastName,
-            // Add 'name' field required by Firestore rules
-            name: lastName ? `${firstName} ${lastName}` : firstName,
-            email,
-            userType: resolvedUserType,
-            height: 180,
-            initialWeight: 80,
-            objective: "Manutenção",
-            birthDate: "2000-01-01",
-            weeklyGoal: 3,
-          };
-          await setDoc(doc(db, "users", email), userDoc);
+    const provider = new GoogleAuthProvider();
 
-          await setDoc(doc(db, "stats", email), {
-            level: 1, xp: 0, streak: 0, bestStreak: 0,
-            completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: email,
-          });
-        }
-      } catch (e) {}
-      // Upload local guest data BEFORE setting isLoggedIn=true (for new accounts only)
-      if (isNewAccount) await uploadLocalDataToFirestore(email);
-      localStorage.setItem(STORAGE_KEYS.TOKEN, email);
-      setToken(email);
-      setCurrentUser({ email });
-      setIsLoggedIn(true);
-      return { token: freshIdToken, user: userDoc };
+    // On native Capacitor the WebView cannot receive the popup result back —
+    // use redirect instead. The result is picked up by getRedirectResult() in
+    // the boot useEffect when the app resumes from the Custom Tab.
+    if (Capacitor.isNativePlatform()) {
+      await signInWithRedirect(auth, provider);
+      // signInWithRedirect navigates away; execution does not continue here.
+      return;
+    }
+
+    // Web: use popup as before.
+    try {
+      const userCredential = await signInWithPopup(auth, provider);
+      await handleGoogleCredential(userCredential);
     } catch (e: any) {
       throw new Error(getFirebaseErrorMessage(e));
     }

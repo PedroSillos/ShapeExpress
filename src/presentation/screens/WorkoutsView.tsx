@@ -339,7 +339,7 @@ function TemplateCard({
   const trainer =
     template.creatorEmail && template.creatorEmail !== mainUserProfile.email
       ? template.creatorEmail === 'AICoach'
-        ? { email: 'AICoach', name: 'AICoach' }
+        ? { email: 'AICoach', firstName: 'AICoach' }
         : trainers.find((t) => t.email === template.creatorEmail)
       : null;
 

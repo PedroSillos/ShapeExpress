@@ -1,8 +1,14 @@
 import { initializeApp } from 'firebase/app';
-import { initializeAuth, browserLocalPersistence, browserPopupRedirectResolver } from 'firebase/auth';
+import {
+  initializeAuth,
+  browserLocalPersistence,
+  indexedDBLocalPersistence,
+  browserPopupRedirectResolver,
+} from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getFirebaseErrorMessage } from './utils/firebaseErrors';
+import { Capacitor } from '@capacitor/core';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -14,8 +20,14 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+// On native Capacitor (Android/iOS) use indexedDB as primary persistence so
+// the auth session survives the Custom Tab round-trip used by signInWithRedirect.
+// On web, keep browserLocalPersistence (localStorage) as usual.
 export const auth = initializeAuth(app, {
-  persistence: browserLocalPersistence,
+  persistence: Capacitor.isNativePlatform()
+    ? [indexedDBLocalPersistence, browserLocalPersistence]
+    : browserLocalPersistence,
   popupRedirectResolver: browserPopupRedirectResolver,
 });
 export const db = getFirestore(app);
