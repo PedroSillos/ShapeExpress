@@ -13,11 +13,11 @@ import type { Exercise } from "./index";
  */
 export const EXERCISES: Exercise[] = [
   // ─── Peito ───────────────────────────────────────────────────────────────
-  { id: "1",  name: "Supino reto",                  muscleGroup: "Peito", muscleSubgroup: "Peito médio",    defaultSets: 3, defaultReps: 10, category: "Musculação",       equipment: "Barra",        type: "compound",  youtubeUrl: "https://www.youtube.com/watch?v=sqOw2Y6uDWQ" },
-  { id: "16", name: "Supino inclinado",              muscleGroup: "Peito", muscleSubgroup: "Peito superior", defaultSets: 3, defaultReps: 10, category: "Musculação",       equipment: "Barra",        type: "compound",  youtubeUrl: "https://www.youtube.com/watch?v=Z1G_S9v0_o4" },
-  { id: "17", name: "Supino declinado",              muscleGroup: "Peito", muscleSubgroup: "Peito inferior", defaultSets: 3, defaultReps: 10, category: "Musculação",       equipment: "Barra",        type: "compound",  youtubeUrl: "https://www.youtube.com/watch?v=LfyQbuMZ9pI" },
-  { id: "18", name: "Crucifixo reto",                muscleGroup: "Peito", muscleSubgroup: "Peito médio",    defaultSets: 3, defaultReps: 12, category: "Musculação",       equipment: "Halter",       type: "isolation", youtubeUrl: "https://www.youtube.com/watch?v=eGjt4lk6g34" },
-  { id: "9",  name: "Flexão de braços",              muscleGroup: "Peito", muscleSubgroup: "Peito médio",    defaultSets: 3, defaultReps: 15, category: "Exercício em casa", equipment: "Peso corporal", type: "compound",  inputMode: "reps_only", youtubeUrl: "https://www.youtube.com/watch?v=IODxDxX7oi4" },
+  { id: "1",  name: "Supino reto",                  muscleGroup: "Peito", muscleSubgroup: "Peito médio",    defaultSets: 3, defaultReps: 10, category: "Musculação",       equipment: "Barra",        type: "compound" },
+  { id: "16", name: "Supino inclinado",              muscleGroup: "Peito", muscleSubgroup: "Peito superior", defaultSets: 3, defaultReps: 10, category: "Musculação",       equipment: "Barra",        type: "compound" },
+  { id: "17", name: "Supino declinado",              muscleGroup: "Peito", muscleSubgroup: "Peito inferior", defaultSets: 3, defaultReps: 10, category: "Musculação",       equipment: "Barra",        type: "compound" },
+  { id: "18", name: "Crucifixo reto",                muscleGroup: "Peito", muscleSubgroup: "Peito médio",    defaultSets: 3, defaultReps: 12, category: "Musculação",       equipment: "Halter",       type: "isolation" },
+  { id: "9",  name: "Flexão de braços",              muscleGroup: "Peito", muscleSubgroup: "Peito médio",    defaultSets: 3, defaultReps: 15, category: "Exercício em casa", equipment: "Peso corporal", type: "compound",  inputMode: "reps_only" },
   { id: "39", name: "Supino reto com halteres",      muscleGroup: "Peito", muscleSubgroup: "Peito médio",    defaultSets: 3, defaultReps: 10, category: "Musculação",       equipment: "Halter",       type: "compound" },
   { id: "40", name: "Supino inclinado com halteres", muscleGroup: "Peito", muscleSubgroup: "Peito superior", defaultSets: 3, defaultReps: 10, category: "Musculação",       equipment: "Halter",       type: "compound" },
   { id: "41", name: "Supino declinado com halteres", muscleGroup: "Peito", muscleSubgroup: "Peito inferior", defaultSets: 3, defaultReps: 10, category: "Musculação",       equipment: "Halter",       type: "compound" },
@@ -36,17 +36,17 @@ export const EXERCISES: Exercise[] = [
 
 
   // ─── Pernas ───────────────────────────────────────────────────────────────
-  { id: "2",   name: "Agachamento livre",         muscleGroup: "Pernas", muscleSubgroup: "Quadríceps",  defaultSets: 4, defaultReps: 8,  category: "Musculação",       equipment: "Barra",        type: "compound",  youtubeUrl: "https://www.youtube.com/watch?v=R2dMsNhN3DE" },
-  { id: "7",   name: "Leg press",                 muscleGroup: "Pernas", muscleSubgroup: "Quadríceps",  defaultSets: 3, defaultReps: 12, category: "Musculação",       equipment: "Máquina",      type: "compound",  youtubeUrl: "https://www.youtube.com/watch?v=IZxyjW7MPJQ" },
-  { id: "19",  name: "Cadeira extensora",         muscleGroup: "Pernas", muscleSubgroup: "Quadríceps",  defaultSets: 3, defaultReps: 12, category: "Musculação",       equipment: "Máquina",      type: "isolation", youtubeUrl: "https://www.youtube.com/watch?v=m0FOpMEgero" },
-  { id: "20",  name: "Mesa flexora",              muscleGroup: "Pernas", muscleSubgroup: "Posterior",   defaultSets: 3, defaultReps: 12, category: "Musculação",       equipment: "Máquina",      type: "isolation", youtubeUrl: "https://www.youtube.com/watch?v=1Tq3Qd1nwro" },
-  { id: "21",  name: "Stiff",                     muscleGroup: "Pernas", muscleSubgroup: "Posterior",   defaultSets: 3, defaultReps: 10, category: "Musculação",       equipment: "Barra",        type: "compound",  youtubeUrl: "https://www.youtube.com/watch?v=1uDiW17GV_Y" },
-  { id: "22",  name: "Elevação pélvica",          muscleGroup: "Pernas", muscleSubgroup: "Glúteos",     defaultSets: 3, defaultReps: 12, category: "Musculação",       equipment: "Barra",        type: "compound",  youtubeUrl: "https://www.youtube.com/watch?v=SEdqcd8j_S8" },
-  { id: "23",  name: "Cadeira adutora",           muscleGroup: "Pernas", muscleSubgroup: "Adutor",      defaultSets: 3, defaultReps: 15, category: "Musculação",       equipment: "Máquina",      type: "isolation", youtubeUrl: "https://www.youtube.com/watch?v=fXv0mY7_9p0" },
-  { id: "24",  name: "Cadeira abdutora",          muscleGroup: "Pernas", muscleSubgroup: "Abdutor",     defaultSets: 3, defaultReps: 15, category: "Musculação",       equipment: "Máquina",      type: "isolation", youtubeUrl: "https://www.youtube.com/watch?v=2vjS6Xv7_u0" },
-  { id: "25",  name: "Gêmeos em pé",              muscleGroup: "Pernas", muscleSubgroup: "Panturrilha", defaultSets: 4, defaultReps: 15, category: "Musculação",       equipment: "Máquina",      type: "isolation", youtubeUrl: "https://www.youtube.com/watch?v=N3_vS_8p6_w" },
-  { id: "10",  name: "Afundo",                    muscleGroup: "Pernas", muscleSubgroup: "Quadríceps",  defaultSets: 3, defaultReps: 12, category: "Exercício em casa", equipment: "Peso corporal", type: "compound",  inputMode: "reps_only", youtubeUrl: "https://www.youtube.com/watch?v=QOVaHwm-Q6U" },
-  { id: "12",  name: "Alongamento de isquiotibiais", muscleGroup: "Pernas", muscleSubgroup: "Posterior", defaultSets: 2, defaultReps: 30, category: "Alongamento",     equipment: "Peso corporal", type: "isolation", inputMode: "duration_only", youtubeUrl: "https://www.youtube.com/watch?v=mS9v0_o4" },
+  { id: "2",   name: "Agachamento livre",         muscleGroup: "Pernas", muscleSubgroup: "Quadríceps",  defaultSets: 4, defaultReps: 8,  category: "Musculação",       equipment: "Barra",        type: "compound" },
+  { id: "7",   name: "Leg press",                 muscleGroup: "Pernas", muscleSubgroup: "Quadríceps",  defaultSets: 3, defaultReps: 12, category: "Musculação",       equipment: "Máquina",      type: "compound" },
+  { id: "19",  name: "Cadeira extensora",         muscleGroup: "Pernas", muscleSubgroup: "Quadríceps",  defaultSets: 3, defaultReps: 12, category: "Musculação",       equipment: "Máquina",      type: "isolation" },
+  { id: "20",  name: "Mesa flexora",              muscleGroup: "Pernas", muscleSubgroup: "Posterior",   defaultSets: 3, defaultReps: 12, category: "Musculação",       equipment: "Máquina",      type: "isolation" },
+  { id: "21",  name: "Stiff",                     muscleGroup: "Pernas", muscleSubgroup: "Posterior",   defaultSets: 3, defaultReps: 10, category: "Musculação",       equipment: "Barra",        type: "compound" },
+  { id: "22",  name: "Elevação pélvica",          muscleGroup: "Pernas", muscleSubgroup: "Glúteos",     defaultSets: 3, defaultReps: 12, category: "Musculação",       equipment: "Barra",        type: "compound" },
+  { id: "23",  name: "Cadeira adutora",           muscleGroup: "Pernas", muscleSubgroup: "Adutor",      defaultSets: 3, defaultReps: 15, category: "Musculação",       equipment: "Máquina",      type: "isolation" },
+  { id: "24",  name: "Cadeira abdutora",          muscleGroup: "Pernas", muscleSubgroup: "Abdutor",     defaultSets: 3, defaultReps: 15, category: "Musculação",       equipment: "Máquina",      type: "isolation" },
+  { id: "25",  name: "Gêmeos em pé",              muscleGroup: "Pernas", muscleSubgroup: "Panturrilha", defaultSets: 4, defaultReps: 15, category: "Musculação",       equipment: "Máquina",      type: "isolation" },
+  { id: "10",  name: "Afundo",                    muscleGroup: "Pernas", muscleSubgroup: "Quadríceps",  defaultSets: 3, defaultReps: 12, category: "Exercício em casa", equipment: "Peso corporal", type: "compound",  inputMode: "reps_only" },
+  { id: "12",  name: "Alongamento de isquiotibiais", muscleGroup: "Pernas", muscleSubgroup: "Posterior", defaultSets: 2, defaultReps: 30, category: "Alongamento",     equipment: "Peso corporal", type: "isolation", inputMode: "duration_only" },
   { id: "113", name: "Front squat",               muscleGroup: "Pernas", muscleSubgroup: "Quadríceps",  defaultSets: 4, defaultReps: 8,  category: "Musculação",       equipment: "Barra",        type: "compound" },
   { id: "114", name: "Hack machine",              muscleGroup: "Pernas", muscleSubgroup: "Quadríceps",  defaultSets: 3, defaultReps: 12, category: "Musculação",       equipment: "Máquina",      type: "compound" },
   { id: "115", name: "Agachamento Goblet",        muscleGroup: "Pernas", muscleSubgroup: "Quadríceps",  defaultSets: 3, defaultReps: 12, category: "Musculação",       equipment: "Halter",       type: "compound" },
@@ -81,10 +81,10 @@ export const EXERCISES: Exercise[] = [
 
 
   // ─── Costas ───────────────────────────────────────────────────────────────
-  { id: "3",  name: "Remada curvada",          muscleGroup: "Costas", muscleSubgroup: "Dorsal",   defaultSets: 3, defaultReps: 12, category: "Musculação", equipment: "Barra",     type: "compound",  youtubeUrl: "https://www.youtube.com/watch?v=9efgcAjQ870" },
-  { id: "6",  name: "Levantamento terra",       muscleGroup: "Costas", muscleSubgroup: "Lombar",   defaultSets: 3, defaultReps: 5,  category: "Musculação", equipment: "Barra",     type: "compound",  youtubeUrl: "https://www.youtube.com/watch?v=op9kVnSso6Q" },
-  { id: "8",  name: "Puxada alta",             muscleGroup: "Costas", muscleSubgroup: "Dorsal",   defaultSets: 3, defaultReps: 10, category: "Musculação", equipment: "Máquina",   type: "compound",  youtubeUrl: "https://www.youtube.com/watch?v=CAwf7n6Luuc" },
-  { id: "26", name: "Encolhimento",            muscleGroup: "Costas", muscleSubgroup: "Trapézio", defaultSets: 3, defaultReps: 15, category: "Musculação", equipment: "Halter",    type: "isolation", youtubeUrl: "https://www.youtube.com/watch?v=cJRVVxmytaM" },
+  { id: "3",  name: "Remada curvada",          muscleGroup: "Costas", muscleSubgroup: "Dorsal",   defaultSets: 3, defaultReps: 12, category: "Musculação", equipment: "Barra",     type: "compound" },
+  { id: "6",  name: "Levantamento terra",       muscleGroup: "Costas", muscleSubgroup: "Lombar",   defaultSets: 3, defaultReps: 5,  category: "Musculação", equipment: "Barra",     type: "compound" },
+  { id: "8",  name: "Puxada alta",             muscleGroup: "Costas", muscleSubgroup: "Dorsal",   defaultSets: 3, defaultReps: 10, category: "Musculação", equipment: "Máquina",   type: "compound" },
+  { id: "26", name: "Encolhimento",            muscleGroup: "Costas", muscleSubgroup: "Trapézio", defaultSets: 3, defaultReps: 15, category: "Musculação", equipment: "Halter",    type: "isolation" },
   { id: "27", name: "Remada cavalinho",        muscleGroup: "Costas", muscleSubgroup: "Dorsal",   defaultSets: 3, defaultReps: 10, category: "Musculação", equipment: "Máquina",   type: "compound" },
   { id: "15", name: "Remada com elástico",     muscleGroup: "Costas", muscleSubgroup: "Dorsal",   defaultSets: 3, defaultReps: 15, category: "Exercício em casa", equipment: "Elástico", type: "compound" },
   { id: "53", name: "Remada Pendlay",          muscleGroup: "Costas", muscleSubgroup: "Dorsal",   defaultSets: 3, defaultReps: 8,  category: "Musculação", equipment: "Barra",     type: "compound" },
@@ -106,8 +106,8 @@ export const EXERCISES: Exercise[] = [
   { id: "78", name: "Encolhimento máquina",    muscleGroup: "Costas", muscleSubgroup: "Trapézio", defaultSets: 3, defaultReps: 15, category: "Musculação", equipment: "Máquina",   type: "isolation" },
 
   // ─── Ombros ───────────────────────────────────────────────────────────────
-  { id: "4",  name: "Desenvolvimento militar",          muscleGroup: "Ombros", muscleSubgroup: "Deltoide Anterior", defaultSets: 3, defaultReps: 10, category: "Musculação", equipment: "Barra",   type: "compound",  youtubeUrl: "https://www.youtube.com/watch?v=2yjwxtpY_pY" },
-  { id: "28", name: "Elevação lateral",                 muscleGroup: "Ombros", muscleSubgroup: "Deltoide Lateral",  defaultSets: 3, defaultReps: 12, category: "Musculação", equipment: "Halter",  type: "isolation", youtubeUrl: "https://www.youtube.com/watch?v=3VcKaXpzqRo" },
+  { id: "4",  name: "Desenvolvimento militar",          muscleGroup: "Ombros", muscleSubgroup: "Deltoide Anterior", defaultSets: 3, defaultReps: 10, category: "Musculação", equipment: "Barra",   type: "compound" },
+  { id: "28", name: "Elevação lateral",                 muscleGroup: "Ombros", muscleSubgroup: "Deltoide Lateral",  defaultSets: 3, defaultReps: 12, category: "Musculação", equipment: "Halter",  type: "isolation" },
   { id: "29", name: "Crucifixo inverso",                muscleGroup: "Ombros", muscleSubgroup: "Deltoide Posterior",defaultSets: 3, defaultReps: 12, category: "Musculação", equipment: "Halter",  type: "isolation" },
   { id: "65", name: "Desenvolvimento atrás da nuca",    muscleGroup: "Ombros", muscleSubgroup: "Deltoide Anterior", defaultSets: 3, defaultReps: 10, category: "Musculação", equipment: "Barra",   type: "compound" },
   { id: "66", name: "Desenvolvimento sentado",          muscleGroup: "Ombros", muscleSubgroup: "Deltoide Anterior", defaultSets: 3, defaultReps: 10, category: "Musculação", equipment: "Halter",  type: "compound" },
@@ -122,9 +122,9 @@ export const EXERCISES: Exercise[] = [
 
 
   // ─── Braços ───────────────────────────────────────────────────────────────
-  { id: "5",   name: "Rosca direta",             muscleGroup: "Braços", muscleSubgroup: "Bíceps",    defaultSets: 3, defaultReps: 12, category: "Musculação",  equipment: "Barra",     type: "isolation", youtubeUrl: "https://www.youtube.com/watch?v=ykJmrZ5v0_o" },
-  { id: "13",  name: "Rosca com halter",         muscleGroup: "Braços", muscleSubgroup: "Bíceps",    defaultSets: 3, defaultReps: 12, category: "Musculação",  equipment: "Halter",    type: "isolation", youtubeUrl: "https://www.youtube.com/watch?v=ykJmrZ5v0_o" },
-  { id: "30",  name: "Tríceps pulley",           muscleGroup: "Braços", muscleSubgroup: "Tríceps",   defaultSets: 3, defaultReps: 12, category: "Musculação",  equipment: "Máquina",   type: "isolation", youtubeUrl: "https://www.youtube.com/watch?v=2-LAMcpzHLw" },
+  { id: "5",   name: "Rosca direta",             muscleGroup: "Braços", muscleSubgroup: "Bíceps",    defaultSets: 3, defaultReps: 12, category: "Musculação",  equipment: "Barra",     type: "isolation" },
+  { id: "13",  name: "Rosca com halter",         muscleGroup: "Braços", muscleSubgroup: "Bíceps",    defaultSets: 3, defaultReps: 12, category: "Musculação",  equipment: "Halter",    type: "isolation" },
+  { id: "30",  name: "Tríceps pulley",           muscleGroup: "Braços", muscleSubgroup: "Tríceps",   defaultSets: 3, defaultReps: 12, category: "Musculação",  equipment: "Máquina",   type: "isolation" },
   { id: "31",  name: "Tríceps testa",            muscleGroup: "Braços", muscleSubgroup: "Tríceps",   defaultSets: 3, defaultReps: 10, category: "Musculação",  equipment: "Barra",     type: "isolation" },
   { id: "32",  name: "Rosca inversa",            muscleGroup: "Braços", muscleSubgroup: "Antebraço", defaultSets: 3, defaultReps: 12, category: "Musculação",  equipment: "Barra",     type: "isolation" },
   { id: "79",  name: "Rosca w",                  muscleGroup: "Braços", muscleSubgroup: "Bíceps",    defaultSets: 3, defaultReps: 10, category: "Musculação",  equipment: "Barra",     type: "isolation" },
@@ -157,10 +157,10 @@ export const EXERCISES: Exercise[] = [
   { id: "104", name: "Extensão de punho",        muscleGroup: "Braços", muscleSubgroup: "Antebraço", defaultSets: 3, defaultReps: 20, category: "Musculação",  equipment: "Barra",     type: "isolation" },
 
   // ─── Core ─────────────────────────────────────────────────────────────────
-  { id: "11",  name: "Prancha abdominal", muscleGroup: "Core", muscleSubgroup: "Abdominais", defaultSets: 3, defaultReps: 60, category: "Funcional",  equipment: "Peso corporal", type: "core", inputMode: "duration_only", youtubeUrl: "https://www.youtube.com/watch?v=pvIjsGZ0Zmc" },
-  { id: "33",  name: "Abdominal supra",   muscleGroup: "Core", muscleSubgroup: "Abdominais", defaultSets: 3, defaultReps: 20, category: "Musculação", equipment: "Peso corporal", type: "core", inputMode: "reps_only",     youtubeUrl: "https://www.youtube.com/watch?v=pvIjsGZ0Zmc" },
-  { id: "34",  name: "Abdominal infra",   muscleGroup: "Core", muscleSubgroup: "Abdominais", defaultSets: 3, defaultReps: 20, category: "Musculação", equipment: "Peso corporal", type: "core", inputMode: "reps_only",     youtubeUrl: "https://www.youtube.com/watch?v=pvIjsGZ0Zmc" },
-  { id: "35",  name: "Giro russo",        muscleGroup: "Core", muscleSubgroup: "Oblíquos",   defaultSets: 3, defaultReps: 30, category: "Funcional",  equipment: "Peso corporal", type: "core", inputMode: "reps_only",     youtubeUrl: "https://www.youtube.com/watch?v=pvIjsGZ0Zmc" },
+  { id: "11",  name: "Prancha abdominal", muscleGroup: "Core", muscleSubgroup: "Abdominais", defaultSets: 3, defaultReps: 60, category: "Funcional",  equipment: "Peso corporal", type: "core", inputMode: "duration_only" },
+  { id: "33",  name: "Abdominal supra",   muscleGroup: "Core", muscleSubgroup: "Abdominais", defaultSets: 3, defaultReps: 20, category: "Musculação", equipment: "Peso corporal", type: "core", inputMode: "reps_only" },
+  { id: "34",  name: "Abdominal infra",   muscleGroup: "Core", muscleSubgroup: "Abdominais", defaultSets: 3, defaultReps: 20, category: "Musculação", equipment: "Peso corporal", type: "core", inputMode: "reps_only" },
+  { id: "35",  name: "Giro russo",        muscleGroup: "Core", muscleSubgroup: "Oblíquos",   defaultSets: 3, defaultReps: 30, category: "Funcional",  equipment: "Peso corporal", type: "core", inputMode: "reps_only" },
   // bodyweight → reps_only
   { id: "105", name: "Crunch",              muscleGroup: "Core", muscleSubgroup: "Abdominais", defaultSets: 3, defaultReps: 20, category: "Musculação", equipment: "Peso corporal", type: "core", inputMode: "reps_only" },
   { id: "106", name: "Abdominal máquina",   muscleGroup: "Core", muscleSubgroup: "Abdominais", defaultSets: 3, defaultReps: 15, category: "Musculação", equipment: "Máquina",       type: "core", inputMode: "reps_only" },
@@ -174,17 +174,17 @@ export const EXERCISES: Exercise[] = [
 
 
   // ─── Halterofilismo olímpico ──────────────────────────────────────────────
-  { id: "156", name: "Arranco",    muscleGroup: "Full Body", defaultSets: 4, defaultReps: 3, category: "Funcional", equipment: "Barra", type: "compound", youtubeUrl: "https://www.youtube.com/watch?v=9xQp2sldyts" },
-  { id: "157", name: "Power Clean", muscleGroup: "Full Body", defaultSets: 4, defaultReps: 3, category: "Funcional", equipment: "Barra", type: "compound", youtubeUrl: "https://www.youtube.com/watch?v=lSK1f2sP9C4" },
-  { id: "164", name: "Arremesso",  muscleGroup: "Full Body", defaultSets: 4, defaultReps: 3, category: "Funcional", equipment: "Barra", type: "compound", youtubeUrl: "https://www.youtube.com/watch?v=kRR3CBPHBZA" },
+  { id: "156", name: "Arranco",    muscleGroup: "Full Body", defaultSets: 4, defaultReps: 3, category: "Funcional", equipment: "Barra", type: "compound" },
+  { id: "157", name: "Power Clean", muscleGroup: "Full Body", defaultSets: 4, defaultReps: 3, category: "Funcional", equipment: "Barra", type: "compound" },
+  { id: "164", name: "Arremesso",  muscleGroup: "Full Body", defaultSets: 4, defaultReps: 3, category: "Funcional", equipment: "Barra", type: "compound" },
 
   // ─── Full Body ────────────────────────────────────────────────────────────
-  { id: "14", name: "Kettlebell swing", muscleGroup: "Full Body", defaultSets: 3, defaultReps: 20, category: "Funcional", equipment: "Kettlebell", type: "compound", youtubeUrl: "https://www.youtube.com/watch?v=pvIjsGZ0Zmc" },
+  { id: "14", name: "Kettlebell swing", muscleGroup: "Full Body", defaultSets: 3, defaultReps: 20, category: "Funcional", equipment: "Kettlebell", type: "compound" },
 
   // ─── Cardio ───────────────────────────────────────────────────────────────
-  { id: "36",  name: "Corrida",     muscleGroup: "Pernas",    defaultSets: 1, defaultReps: 30,  category: "Funcional", equipment: "Peso corporal", type: "cardio", inputMode: "duration_speed", youtubeUrl: "https://www.youtube.com/watch?v=pvIjsGZ0Zmc" },
-  { id: "37",  name: "Ciclismo",    muscleGroup: "Pernas",    defaultSets: 1, defaultReps: 45,  category: "Funcional", equipment: "Máquina",       type: "cardio", inputMode: "duration_speed", youtubeUrl: "https://www.youtube.com/watch?v=pvIjsGZ0Zmc" },
-  { id: "38",  name: "Pular corda", muscleGroup: "Full Body", defaultSets: 3, defaultReps: 120, category: "Funcional", equipment: "Peso corporal", type: "cardio", inputMode: "duration_only",     youtubeUrl: "https://www.youtube.com/watch?v=pvIjsGZ0Zmc" },
+  { id: "36",  name: "Corrida",     muscleGroup: "Pernas",    defaultSets: 1, defaultReps: 30,  category: "Funcional", equipment: "Peso corporal", type: "cardio", inputMode: "duration_speed" },
+  { id: "37",  name: "Ciclismo",    muscleGroup: "Pernas",    defaultSets: 1, defaultReps: 45,  category: "Funcional", equipment: "Máquina",       type: "cardio", inputMode: "duration_speed" },
+  { id: "38",  name: "Pular corda", muscleGroup: "Full Body", defaultSets: 3, defaultReps: 120, category: "Funcional", equipment: "Peso corporal", type: "cardio", inputMode: "duration_only" },
   { id: "154", name: "Caminhada",   muscleGroup: "Pernas",    defaultSets: 1, defaultReps: 1,   category: "Funcional", equipment: "Peso corporal", type: "cardio", inputMode: "duration_speed" },
   { id: "155", name: "Trote",       muscleGroup: "Pernas",    defaultSets: 1, defaultReps: 1,   category: "Funcional", equipment: "Peso corporal", type: "cardio", inputMode: "duration_speed" },
 
@@ -210,5 +210,5 @@ export const EXERCISES: Exercise[] = [
   { id: "162", name: "Postura do meio senhor dos peixes (Ardha Matsyendrasana)",    muscleGroup: "Costas",    muscleSubgroup: "Lombar",      defaultSets: 3, defaultReps: 1, category: "Alongamento", equipment: "Peso corporal", type: "core", inputMode: "duration_only" },
 
   // ─── Ciclismo / alongamento complementar ─────────────────────────────────
-  { id: "163", name: "Alongamento de panturrilhas", muscleGroup: "Pernas", muscleSubgroup: "Panturrilha", defaultSets: 2, defaultReps: 30, category: "Alongamento", equipment: "Peso corporal", type: "isolation", inputMode: "duration_only", youtubeUrl: "https://www.youtube.com/watch?v=GNhNKFNkBpM" },
+  { id: "163", name: "Alongamento de panturrilhas", muscleGroup: "Pernas", muscleSubgroup: "Panturrilha", defaultSets: 2, defaultReps: 30, category: "Alongamento", equipment: "Peso corporal", type: "isolation", inputMode: "duration_only" },
 ];

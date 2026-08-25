@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, ChevronLeft, ChevronDown, Info, Search, SlidersHorizontal, Play, Check, Plus, Trash2, Edit } from 'lucide-react';
+import { X, ChevronLeft, ChevronDown, Info, Search, SlidersHorizontal, Check, Plus, Trash2, Edit } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, addMonths, parseISO } from 'date-fns';
 import { cn } from '../../utils/cn';
@@ -20,7 +20,6 @@ import {
   MuscleSubgroup, 
   ExerciseCategory, 
   Equipment, 
-  Exercise, 
   UserProfile 
 } from '../../domain/entities';
 
@@ -567,7 +566,6 @@ export function CreateWorkoutView({
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | 'Todos'>('Todos');
   const [showFilters, setShowFilters] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [selectedExerciseForVideo, setSelectedExerciseForVideo] = useState<Exercise | null>(null);
 
   const activeSheet = sheets[activeSheetIndex];
 
@@ -1337,15 +1335,6 @@ export function CreateWorkoutView({
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <h4 className="font-bold text-sm">{ex.name}</h4>
-                    {ex.youtubeUrl && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setSelectedExerciseForVideo(ex); }}
-                        className="p-1 rounded-full transition-colors"
-                        style={{ backgroundColor: `${sportColor}1a`, color: sportColor }}
-                      >
-                        <Play size={10} fill="currentColor" />
-                      </button>
-                    )}
                   </div>
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
                     <p className="text-[10px] text-white/40 font-bold uppercase">{ex.muscleGroup}</p>
@@ -1401,41 +1390,6 @@ export function CreateWorkoutView({
         </button>
       </div>
 
-      {/* Video Modal */}
-      <AnimatePresence>
-        {selectedExerciseForVideo && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 z-[200] flex items-center justify-center p-6"
-            onClick={() => setSelectedExerciseForVideo(null)}
-          >
-            <div className="w-full max-w-2xl bg-dark-card rounded-3xl overflow-hidden" onClick={e => e.stopPropagation()}>
-              <div className="aspect-video bg-black relative">
-                <iframe 
-                  width="100%" 
-                  height="100%" 
-                  src={`https://www.youtube.com/embed/${selectedExerciseForVideo.youtubeUrl}?autoplay=1`}
-                  title={selectedExerciseForVideo.name}
-                  frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen
-                ></iframe>
-              </div>
-              <div className="p-6 flex justify-between items-center">
-                <h3 className="font-bold text-lg">{selectedExerciseForVideo.name}</h3>
-                <button 
-                  onClick={() => setSelectedExerciseForVideo(null)}
-                  className="px-6 py-2 bg-white/10 rounded-xl font-bold text-sm"
-                >
-                  Fechar
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

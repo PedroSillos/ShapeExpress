@@ -28,7 +28,6 @@ import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { ProgressBar } from '../components/ProgressBar';
 import { cn } from '../../utils/cn';
-import { getYouTubeEmbedUrl } from '../../utils/youtube';
 import { EXERCISES } from '@/src/domain/entities/exercises';
 
 const SPORT_COLORS: Record<string, string> = {
@@ -126,7 +125,6 @@ export function ActiveWorkoutView({
   const [restCountdown, setRestCountdown] = useState<number | null>(null);
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
   const [showConfirmCancel, setShowConfirmCancel] = useState(false);
-  const [showVideoModal, setShowVideoModal] = useState(false);
   const [showConfirmDeleteSet, setShowConfirmDeleteSet] = useState(false);
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerRemaining, setTimerRemaining] = useState<number | null>(null);
@@ -496,48 +494,6 @@ export function ActiveWorkoutView({
           </div>
         )}
 
-        {showVideoModal && exerciseDetails && (
-          <div className="fixed inset-0 z-[300] flex items-center justify-center p-6">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowVideoModal(false)}
-              className="absolute inset-0 bg-black/90 backdrop-blur-md"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg bg-dark-surface border border-white/10 rounded-3xl p-6 shadow-2xl overflow-hidden"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold">Execução: {exerciseDetails.name}</h3>
-                <button onClick={() => setShowVideoModal(false)} className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors">
-                  <X size={20} />
-                </button>
-              </div>
-              
-              {getYouTubeEmbedUrl(exerciseDetails.youtubeUrl) ? (
-                <div className="w-full aspect-video bg-black rounded-2xl overflow-hidden border border-white/10 relative">
-                  <iframe 
-                    src={getYouTubeEmbedUrl(exerciseDetails.youtubeUrl)!}
-                    title={`Vídeo de execução: ${exerciseDetails.name}`}
-                    className="absolute inset-0 w-full h-full"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-              ) : (
-                <div className="p-8 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
-                  <p className="text-sm text-white/40">Vídeo não disponível para incorporação.</p>
-                  <a href={exerciseDetails.youtubeUrl} target="_blank" rel="noopener noreferrer" className="text-brand-red font-bold mt-2 block">Ver no YouTube</a>
-                </div>
-              )}
-            </motion.div>
-          </div>
-        )}
       </AnimatePresence>
 
       <AnimatePresence mode="wait" custom={swipeDirection}>
@@ -578,20 +534,7 @@ export function ActiveWorkoutView({
                     );
                   })}
                 </div>
-                <div className="mt-3 rounded-2xl bg-white/5 border border-white/5 px-4 pt-2 pb-3 space-y-2">
-                  <button
-                    onClick={() => {
-                      if (exerciseDetails?.youtubeUrl) {
-                        setShowVideoModal(true);
-                      } else {
-                        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent((exerciseDetails?.name ?? '') + ' como fazer exercício')}`, '_blank');
-                      }
-                    }}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-black/40 border border-white/10 rounded-xl text-sm font-bold text-white/60"
-                  >
-                    <Play size={14} fill="currentColor" />
-                    Ver vídeo
-                  </button>
+                <div className="mt-3 rounded-2xl bg-white/5 border border-white/5 px-4 pt-2 pb-3">
                   <div className="flex gap-2">
                     <Badge className="bg-black/40 text-white/60 text-xs px-3 py-1 rounded-full font-bold">{exerciseDetails?.muscleGroup}</Badge>
                     {exerciseDetails?.muscleSubgroup && (

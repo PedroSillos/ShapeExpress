@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { ChevronLeft, Play, Dumbbell, TrendingUp, History, Edit, RefreshCw, X, Plus, Search, SlidersHorizontal, Check } from 'lucide-react';
+import { ChevronLeft, Dumbbell, TrendingUp, History, Edit, RefreshCw, X, Plus, Search, SlidersHorizontal, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../utils/cn';
 import { EXERCISES } from '@/src/domain/entities/exercises';
-import { WorkoutSheet, WorkoutTemplateExercise, Exercise, MuscleGroup, MuscleSubgroup, ExerciseCategory, Equipment } from '../../domain/entities';
+import { WorkoutSheet, WorkoutTemplateExercise, MuscleGroup, MuscleSubgroup, ExerciseCategory, Equipment } from '../../domain/entities';
 import { getInputMode, getDefaultSpeed } from '../../domain/use-cases/exerciseInputMode';
 import { ALL_SPORTS } from '../../features/sports/constants';
 import iconMusculacao from '@/src/assets/icons/icon-musculacao.svg';
@@ -28,7 +28,6 @@ export function ConfigureExercisesView({
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [localSheets, setLocalSheets] = useState<WorkoutSheet[]>(sheets);
-  const [selectedExerciseForVideo, setSelectedExerciseForVideo] = useState<Exercise | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const [showSubstitutionList, setShowSubstitutionList] = useState(false);
@@ -219,15 +218,6 @@ export function ConfigureExercisesView({
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-2xl font-bold">{exercise?.name}</h3>
-              {exercise?.youtubeUrl && (
-                <button 
-                  onClick={() => setSelectedExerciseForVideo(exercise)}
-                  className="p-1.5 rounded-full hover:opacity-80 transition-opacity"
-                  style={{ backgroundColor: `${sportColor}1a`, color: sportColor }}
-                >
-                  <Play size={14} fill="currentColor" />
-                </button>
-              )}
             </div>
             <p className="text-sm text-white/40 font-medium">Grupo: {exercise?.muscleGroup}</p>
           </div>
@@ -787,18 +777,6 @@ export function ConfigureExercisesView({
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <h4 className="font-bold text-sm">{ex.name}</h4>
-                          {ex.youtubeUrl && (
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedExerciseForVideo(ex);
-                              }}
-                              className="p-1 rounded-full hover:opacity-80 transition-opacity"
-                              style={{ backgroundColor: `${sportColor}1a`, color: sportColor }}
-                            >
-                              <Play size={10} fill="currentColor" />
-                            </button>
-                          )}
                         </div>
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                           <p className="text-[10px] text-white/40 font-bold uppercase">{ex.muscleGroup}</p>
@@ -829,41 +807,6 @@ export function ConfigureExercisesView({
         )}
       </AnimatePresence>
 
-      {/* Video Modal */}
-      <AnimatePresence>
-        {selectedExerciseForVideo && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 z-[500] flex items-center justify-center p-6"
-            onClick={() => setSelectedExerciseForVideo(null)}
-          >
-            <div className="w-full max-w-2xl bg-dark-card rounded-3xl overflow-hidden" onClick={e => e.stopPropagation()}>
-              <div className="aspect-video bg-black relative">
-                <iframe 
-                  width="100%" 
-                  height="100%" 
-                  src={`https://www.youtube.com/embed/${selectedExerciseForVideo.youtubeUrl}?autoplay=1`}
-                  title={selectedExerciseForVideo.name}
-                  frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowFullScreen
-                ></iframe>
-              </div>
-              <div className="p-6 flex justify-between items-center">
-                <h3 className="font-bold text-lg">{selectedExerciseForVideo.name}</h3>
-                <button 
-                  onClick={() => setSelectedExerciseForVideo(null)}
-                  className="px-6 py-2 bg-white/10 rounded-xl font-bold text-sm"
-                >
-                  Fechar
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

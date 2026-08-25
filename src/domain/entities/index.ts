@@ -65,7 +65,7 @@ export interface Exercise {
   category: ExerciseCategory;
   equipment: Equipment;
   type: ExerciseType;
-  youtubeUrl?: string;
+
   inputMode?: ExerciseInputMode;
 }
 
