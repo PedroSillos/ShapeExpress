@@ -60,7 +60,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     setDeletingTemplateId,
     setScrollToHistory, scrollToHistory,
     highlightSessionId, setHighlightSessionId,
-    setShowLogoutConfirm,
     progressScore,
     goalStreak, personalRecords,
     api, switchTab,

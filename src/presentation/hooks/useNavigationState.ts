@@ -17,7 +17,6 @@ export const useNavigationState = () => {
     localStorage.getItem(STORAGE_KEYS.WELCOME_DONE) ? 'dashboard' : 'landing'
   );
   const [swipeDirection, setSwipeDirection] = useState(0);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<BodyAssessment | null>(null);
 
   // The active sport (modalidade ativa) persists across sessions via localStorage.
@@ -39,7 +38,6 @@ export const useNavigationState = () => {
   return {
     activeTab, setActiveTab,
     swipeDirection, setSwipeDirection,
-    showLogoutConfirm, setShowLogoutConfirm,
     editingAssessment, setEditingAssessment,
     activeSport, setActiveSport,
   };

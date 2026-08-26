@@ -175,8 +175,6 @@ export const useAppState = () => {
     setActiveTab: nav.setActiveTab,
     swipeDirection: nav.swipeDirection,
     setSwipeDirection: nav.setSwipeDirection,
-    showLogoutConfirm: nav.showLogoutConfirm,
-    setShowLogoutConfirm: nav.setShowLogoutConfirm,
     editingAssessment: nav.editingAssessment,
     setEditingAssessment: nav.setEditingAssessment,
     activeSport: nav.activeSport,

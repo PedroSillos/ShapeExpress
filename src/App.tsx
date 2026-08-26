@@ -12,7 +12,6 @@ import { AppRouter } from './presentation/AppRouter';
 
 import { SplashScreen } from './presentation/components/SplashScreen';
 
-import { LogoutAccountScreen } from './presentation/screens/auth/LogoutAccountScreen';
 import { DeleteTemplateModal } from './presentation/components/AppModals';
 import { WorkoutSelectorModal } from './presentation/components/AppModals';
 import { SheetSelectorModal } from './presentation/components/AppModals';
@@ -34,7 +33,6 @@ export default function App() {
     authReady,
     dataReady,
     swipeDirection, setSwipeDirection,
-    showLogoutConfirm, setShowLogoutConfirm,
     deletingTemplateId, setDeletingTemplateId,
     showWorkoutSelector, setShowWorkoutSelector,
     selectingSheetTemplate, setSelectingSheetTemplate,
@@ -290,23 +288,11 @@ export default function App() {
         />
 
         <AnimatePresence>
-          {showLogoutConfirm && (
-            <LogoutAccountScreen
-              userProfile={userProfile}
-              onLogoutConfirm={async () => { await api.logout(); setShowLogoutConfirm(false); }}
-              onResumeSession={() => { setShowLogoutConfirm(false); }}
-              onGoToRegister={() => { setShowLogoutConfirm(false); setActiveTab('register'); }}
-              onManageAccounts={() => { setShowLogoutConfirm(false); setActiveTab('login'); }}
-            />
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence>
           {showSettings && (
             <div className="fixed inset-0 z-[90] bg-dark-surface overflow-hidden">
               <SettingsView
                 onClose={() => setShowSettings(false)}
-                onLogout={() => { setShowSettings(false); setShowLogoutConfirm(true); }}
+                onLogout={async () => { setShowSettings(false); await api.logout(); setActiveTab('landing'); }}
                 userProfile={userProfile}
                 onUpdateProfile={api.updateProfile}
                 onDeleteAccount={() => api.deleteAccount()}

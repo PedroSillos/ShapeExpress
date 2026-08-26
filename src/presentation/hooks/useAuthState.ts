@@ -361,10 +361,7 @@ export const useAuthState = () => {
 
   const logout = async (onLogout?: () => void) => {
     await signOut(auth);
-    Object.keys(localStorage)
-      .filter((k) => k.startsWith("firebase:"))
-      .forEach((k) => localStorage.removeItem(k));
-    localStorage.removeItem(STORAGE_KEYS.TOKEN);
+    localStorage.clear();
     tokenStore.idToken = null;
     syncState.syncedToken = null;
     setIdToken(null);
