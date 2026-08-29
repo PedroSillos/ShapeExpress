@@ -44,24 +44,16 @@ export enum OperationType {
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null = null) {
   if (error instanceof Error && error.message.includes('Missing or insufficient permissions')) {
-    const errorInfo = {
-      error: 'Missing or insufficient permissions',
-      operationType,
-      path,
-      authInfo: {
-        userId: auth.currentUser?.uid || 'unauthenticated',
-        email: auth.currentUser?.email || '',
-        emailVerified: auth.currentUser?.emailVerified || false,
-        isAnonymous: auth.currentUser?.isAnonymous || true,
-        providerInfo: auth.currentUser?.providerData.map(p => ({
-          providerId: p.providerId,
-          displayName: p.displayName || '',
-          email: p.email || ''
-        })) || []
-      }
-    };
-    console.error('Firestore Security Rules Error:', JSON.stringify(errorInfo, null, 2));
-    throw new Error(JSON.stringify(errorInfo));
+    // SEC-012 fix: never expose userId, email or provider info in error messages.
+    // Log minimal debug info only in development, then throw a generic user-facing error.
+    if (import.meta.env.DEV) {
+      console.error('Firestore permission error:', {
+        operationType,
+        path,
+        uid: auth.currentUser?.uid ?? 'unauthenticated',
+      });
+    }
+    throw new Error('Permissão negada');
   }
   throw error;
 }
