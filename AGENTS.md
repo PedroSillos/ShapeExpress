@@ -72,23 +72,17 @@ Express on port **3000**. All routes except `/api/health` require `authMiddlewar
 
 Auth: `Authorization: Bearer <firebase-id-token>` (preferred) or `x-user-email` (legacy fallback).
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/health` | GET | Health check |
-| `/api/checkout/session` | POST | Create Stripe checkout session |
-| `/api/checkout/verify` | POST | Verify payment completion |
-| `/api/ai/coach-advice` | POST | AI coaching advice |
-| `/api/ai/recommend-communities` | POST | AI community recommendations |
+| Endpoint | Method | Auth | Rate limit | Description |
+|----------|--------|------|------------|-------------|
+| `/api/health` | GET | None | globalLimiter (skip) | Health check |
+| `/api/ai/generate-first-workout` | POST | None | aiGuestLimiter (5/min) | AI workout for guests |
+| `/api/store/items` | GET | None | globalLimiter (200/15min) | Published store items |
+| `/api/store/publish` | POST | authMiddleware | globalLimiter | Trainer publishes item |
+| `/api/store/unpublish/:id` | POST | authMiddleware | globalLimiter | Trainer unpublishes item |
+
+> **Stripe / checkout**: disabled. Free item claiming is handled client-side via Firestore SDK. Do not re-add Stripe to `server.ts` without also adding webhook signature verification (`stripe.webhooks.constructEvent`).
 
 Chat is Firestore-only — no WebSocket. Messages at `messages/{roomId}/msgs/{msgId}`.
-
-### Stripe Test Cards
-
-| Card | Result |
-|------|--------|
-| 4242 4242 4242 4242 | Success |
-| 4000 0000 0000 0002 | Declined |
-| 4000 0025 0000 3155 | 3D Secure |
 
 ## Conventions
 
@@ -126,13 +120,53 @@ Use this pattern for icon cards (onboarding, selections, lists):
 
 ## Security Guidelines
 
-- **Secrets**: all keys in `.env.local` (gitignored). `VITE_` prefix = client-side — never put `STRIPE_SECRET_KEY` or `GEMINI_API_KEY` there.
-- **Auth**: every `/api/*` route (except `/api/health`) must use `authMiddleware`. Prefer Bearer token over `x-user-email`.
-- **Input validation**: use `express-validator` on all request body fields (see `validateProtocolId` / `validateCoachAdvice` patterns in `server.ts`).
-- **AI prompts**: inject only known typed fields — never raw user strings.
-- **Stripe**: verify payment server-side via `stripe.checkout.sessions.retrieve`; use webhook signature verification in production.
-- **Firebase**: Admin SDK for privileged writes; enforce Firestore Security Rules (`request.auth.token.email == email`). On Railway: `FIREBASE_SERVICE_ACCOUNT` env var. On Cloud Run: Application Default Credentials.
-- **Logging**: never log tokens, emails, or payment data.
+### Secrets e credenciais
+
+- All keys in `.env.local` (gitignored). `VITE_` prefix = client-side — never put `STRIPE_SECRET_KEY` or `GEMINI_API_KEY` there.
+- Never commit `.env*`, `*.json` service account files, or keystores to Git.
+- On Railway: use `FIREBASE_SERVICE_ACCOUNT` env var (JSON string). On Cloud Run: Application Default Credentials.
+- Never store Firebase service account JSON files inside the project directory — use env vars only.
+
+### Autenticação e autorização
+
+- Every `/api/*` route (except `/api/health`) must use `authMiddleware`. Prefer Bearer token over `x-user-email`.
+- **Firestore Security Rules: ownership is mandatory.** Every collection that stores per-user data MUST verify `request.auth.token.email == resource.data.userEmail` (or equivalent uid check). Being authenticated is never sufficient — users must only read/write their own data.
+  - ✅ `allow read: if isOwner(resource.data.userEmail);`
+  - ❌ `allow read: if isAuthenticated();` — any logged-in user reads everyone's data
+- Sensitive fields (birthDate, height, weight, health metrics) belong in the private subcollection `users/{id}/private/data`, not in the public `users/{id}` document.
+- `isAdmin()` must rely exclusively on `role == 'admin'` in the user's Firestore document — never hardcode email addresses in Security Rules.
+- Phone-auth users: store `phoneNumber` (not `uid`) in the `email` field of their Firestore document so display and connection logic stays consistent.
+
+### Inputs e validação
+
+- Use `express-validator` on all request body fields — see `validateProtocolId` / `validateCoachAdvice` patterns in `server.ts`.
+- Sanitize or escape all string inputs that will be stored or displayed.
+- AI prompts: inject only known typed fields — never raw user strings.
+
+### Servidor Express
+
+- CORS is configured with an explicit origin whitelist (`server.ts`). When adding a new origin (e.g. a new domain or staging environment), add it to the `allowedOrigins` array or the `ALLOWED_ORIGINS` env var — never open it with `origin: '*'` or remove the check.
+- Global rate limiting (200 req/15 min per IP) is applied via `app.use(globalLimiter)` before all routes. Do not register new routes before this middleware.
+- Helmet is active (CSP, HSTS, X-Frame-Options, etc.). Extend CSP `connectSrc` when adding new external service calls.
+- Never expose internal identifiers (userId, email, provider info) in error messages returned to the client. Use generic user-facing messages; log details in DEV only.
+
+### Stripe
+
+- **Stripe is currently disabled.** Free item claiming is handled client-side via Firestore SDK.
+- Do not re-add Stripe without also adding webhook signature verification (`stripe.webhooks.constructEvent`). Never trust `STRIPE_SECRET_KEY` on the client side.
+
+### Firebase
+
+- Admin SDK for privileged writes only — never ship service account credentials in the app bundle.
+- Enforce Firestore Security Rules; use the Firebase Rules Simulator to verify that user A cannot read user B's data before deploying.
+- **Logging**: never log tokens, emails, phone numbers, or health data.
+
+### Android
+
+- `android:allowBackup="false"` must remain set in `AndroidManifest.xml`. Do not revert this — Android backup would expose localStorage and IndexedDB (Firebase sessions, workout data) via `adb backup`.
+- FileProvider paths in `file_paths.xml` must point to specific subdirectories, not `path="."`.
+- Release builds must use a signing config driven by environment variables (`KEYSTORE_PATH`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`) — never commit the keystore file.
+- WebView access origins in `res/xml/config.xml` must list explicit domains — never use `<access origin="*" />`.
 
 ## Data Layer
 
@@ -162,7 +196,7 @@ Dois modos: **guest** (localStorage) e **logado** (Firestore). Transição geren
 |---------|-----|
 | Module not found | Check import paths, run `npm install` |
 | Firebase auth failing | Verify `.env.local` keys, check Firebase Console auth methods |
-| Stripe error | Confirm `STRIPE_SECRET_KEY=sk_test_...`, server on `:3000` |
+| Stripe error | Confirm `STRIPE_SECRET_KEY=sk_test_...`, server on `:3000` — note: Stripe is currently disabled |
 | Android assets stale | Run `npm run android` (clears build before sync) |
 | White screen on Android | Check `webDir` in `capacitor.config.ts` points to `dist` |
 | Capacitor changes not reflected | Always `npm run build` before `npx capacitor sync` |
