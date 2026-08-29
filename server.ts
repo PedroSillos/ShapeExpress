@@ -1,8 +1,9 @@
 import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import Stripe from 'stripe';
 import admin from 'firebase-admin';
 import { GoogleGenAI } from "@google/genai";
 import { body, validationResult } from 'express-validator';
@@ -29,41 +30,6 @@ if (admin.apps.length === 0) {
   }
 }
 
-// Initialize Stripe
-const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-10-16' as any }) : null;
-
-/**
- * Calculate startDate and endDate for a purchased template based on purchase date and duration
- * @param purchaseDate - ISO string of purchase date
- * @param duration - number (e.g., 1, 2, 4, 12)
- * @param durationUnit - 'weeks' or 'months'
- * @returns { startDate: string, endDate: string } in ISO format (yyyy-MM-dd)
- */
-function calculateTemplateDates(purchaseDate: string, duration: number, durationUnit: 'weeks' | 'months'): { startDate: string; endDate: string } {
-  const start = new Date(purchaseDate);
-  const end = new Date(start);
-  
-  if (durationUnit === 'weeks') {
-    end.setDate(end.getDate() + (duration * 7) - 1); // -1 so it ends the day before next cycle starts
-  } else if (durationUnit === 'months') {
-    end.setMonth(end.getMonth() + duration);
-    end.setDate(end.getDate() - 1); // -1 so it ends the day before next cycle starts
-  }
-  
-  // Format as yyyy-MM-dd
-  const formatDate = (d: Date) => {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-  
-  return {
-    startDate: formatDate(start),
-    endDate: formatDate(end),
-  };
-}
-
 // Initialize Gemini AI (server-side only)
 const genAI = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
 
@@ -75,6 +41,66 @@ async function startServer() {
   const PORT = parseInt(process.env.PORT || '3000');
 
   app.use(express.json());
+
+  // ── Security Middleware ────────────────────────────────────────────────────
+
+  // SEC-005 — Helmet: security HTTP headers (CSP, HSTS, X-Frame-Options, etc.)
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://www.gstatic.com"],
+        connectSrc: [
+          "'self'",
+          "https://*.firebaseio.com",
+          "https://*.googleapis.com",
+          "https://firestore.googleapis.com",
+          "https://identitytoolkit.googleapis.com",
+        ],
+        frameSrc: ["'none'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+  }));
+
+  // SEC-004 — CORS: restrict cross-origin requests to known origins
+  const allowedOrigins: (string | RegExp)[] = [
+    'https://shapeexpress-production.up.railway.app',
+    'capacitor://localhost',
+    'http://localhost:5173',
+    'http://localhost:3000',
+  ];
+  const extraOrigins = (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  allowedOrigins.push(...extraOrigins);
+
+  app.use(cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, same-origin)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.some((o) => (o instanceof RegExp ? o.test(origin) : o === origin))) {
+        return callback(null, true);
+      }
+      return callback(new Error(`CORS: origem não permitida — ${origin}`));
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: false,
+  }));
+
+  // SEC-014 — Global rate limiting: 200 req / 15 min per IP for all routes
+  const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Muitas requisições. Tente novamente em 15 minutos.' },
+    skip: (req) => req.path === '/api/health', // health check always passes
+  });
+  app.use(globalLimiter);
 
   // Authentication middleware - verifies Firebase ID token
   const authMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -237,7 +263,12 @@ Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"e
         .where('status', '==', 'published')
         .orderBy('createdAt', 'desc')
         .get();
-      const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      // SEC-006: omit creatorEmail from public response to avoid exposing trainer PII.
+      // The creatorName (display name) is sufficient for presentation.
+      const items = snap.docs.map((d) => {
+        const { creatorEmail: _omit, ...pub } = d.data() as Record<string, any>;
+        return { id: d.id, ...pub };
+      });
       res.json({ items });
     } catch (error: any) {
       console.error('store/items error:', error);
