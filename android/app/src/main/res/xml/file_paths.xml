@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- SEC-015 fix: restrict FileProvider paths from '.' (entire directory) to
+     specific subdirectories used by the app, reducing the attack surface
+     for content URI exposure via intents. -->
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <external-path name="my_images" path="." />
-    <cache-path name="my_cache_images" path="." />
+    <cache-path name="my_cache_images" path="images/" />
+    <external-path name="my_images" path="Android/data/com.shapeexpress.app/files/images/" />
 </paths>

@@ -6,11 +6,21 @@ android {
 
     signingConfigs {
         release {
-            // Preencha apos gerar o keystore com scripts/generate-keystore.bat
-            // storeFile file(System.getenv("KEYSTORE_PATH") ?: "")
-            // storePassword System.getenv("KEYSTORE_PASSWORD") ?: ""
-            // keyAlias System.getenv("KEY_ALIAS") ?: "shapeexpress"
-            // keyPassword System.getenv("KEY_PASSWORD") ?: ""
+            // SEC-016 fix: signing credentials are read exclusively from environment variables.
+            // Set KEYSTORE_PATH, KEYSTORE_PASSWORD, KEY_ALIAS and KEY_PASSWORD in CI/CD
+            // (e.g., GitHub Actions secrets or local shell) before running a release build.
+            // Never commit the keystore file or credentials to version control.
+            def keystorePath = System.getenv("KEYSTORE_PATH") ?: ""
+            def keystorePassword = System.getenv("KEYSTORE_PASSWORD") ?: ""
+            def keyAlias = System.getenv("KEY_ALIAS") ?: "shapeexpress"
+            def keyPassword = System.getenv("KEY_PASSWORD") ?: ""
+
+            if (keystorePath && keystorePassword && keyPassword) {
+                storeFile file(keystorePath)
+                storePassword keystorePassword
+                keyAlias keyAlias
+                keyPassword keyPassword
+            }
         }
     }
 
@@ -31,6 +41,10 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Use the release signing config when env vars are set; fall back to debug otherwise.
+            if (signingConfigs.release.storeFile) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }
