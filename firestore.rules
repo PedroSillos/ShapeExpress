@@ -36,10 +36,11 @@ service cloud.firestore {
     }
 
     function isAdmin() {
+      // SEC-009 fix: rely solely on role field in Firestore — no hardcoded emails.
+      // Ensure the admin user has role == 'admin' in their users/{email} document.
       return isAuthenticated() && request.auth.token.email != null &&
-        ((exists(/databases/$(database)/documents/users/$(request.auth.token.email)) && 
-          get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.role == 'admin') || 
-         (request.auth.token.email.lower() == "bagaielpfspp@gmail.com" && request.auth.token.email_verified == true));
+        exists(/databases/$(database)/documents/users/$(request.auth.token.email)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.role == 'admin';
     }
 
     // Returns true if the current user has an accepted trainer connection with studentEmail.
