@@ -6,6 +6,7 @@ import Stripe from 'stripe';
 import admin from 'firebase-admin';
 import { GoogleGenAI } from "@google/genai";
 import { body, validationResult } from 'express-validator';
+import rateLimit from 'express-rate-limit';
 import { config } from 'dotenv';
 import { EXERCISES } from './src/domain/entities/exercises.js';
 import { SPORT_EXERCISE_IDS } from './src/domain/use-cases/sportExercises.js';
@@ -75,41 +76,40 @@ async function startServer() {
 
   app.use(express.json());
 
-  // Authentication middleware - verifies user identity
-  // Tries Firebase ID token first, falls back to email header for backward compatibility
+  // Authentication middleware - verifies Firebase ID token
   const authMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const authHeader = req.headers.authorization;
-    const xEmail = req.headers['x-user-email'] as string;
-    
-    // Try to verify Firebase ID token first (more secure)
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.split(' ')[1];
-      try {
-        // Check if admin is initialized and verify token
-        if (admin.apps.length > 0) {
-          const decodedToken = await admin.auth().verifyIdToken(token);
-          (req as any).userId = decodedToken.uid;
-          (req as any).userEmail = decodedToken.email;
-          return next();
-        } else {
-          console.warn('[authMiddleware] Firebase Admin not initialized');
-        }
-      } catch (tokenError: any) {
-        // Token verification failed, try fallback
-        console.warn('[authMiddleware] Token verification failed:', tokenError.message);
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Token de autenticação obrigatório' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    try {
+      if (admin.apps.length === 0) {
+        return res.status(500).json({ error: 'Servidor não inicializado corretamente' });
       }
+      const decodedToken = await admin.auth().verifyIdToken(token);
+      (req as any).userId = decodedToken.uid;
+      (req as any).userEmail = decodedToken.email;
+      return next();
+    } catch (tokenError: any) {
+      console.warn('[authMiddleware] Token inválido:', tokenError.message);
+      return res.status(401).json({ error: 'Token inválido ou expirado' });
     }
-    
-    // Fallback: use email header (less secure but maintains compatibility)
-    if (!xEmail) {
-      return res.status(401).json({ error: 'Não autorizado' });
-    }
-    (req as any).userEmail = xEmail;
-    next();
   };
 
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
+  });
+
+  // Rate limiter for unauthenticated AI endpoints (5 requests/min per IP)
+  const aiGuestLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 5,
+    message: { error: 'Muitas solicitações. Tente novamente em 1 minuto.' },
+    standardHeaders: true,
+    legacyHeaders: false,
   });
 
   // Input validation rules
@@ -126,7 +126,7 @@ async function startServer() {
     .withMessage('ID de sessão inválido');
 
   // AI Generate First Workout Endpoint
-  app.post('/api/ai/generate-first-workout', [
+  app.post('/api/ai/generate-first-workout', aiGuestLimiter, [
     body('sports').isArray({ min: 1, max: 10 }),
     body('objective').optional().trim().isLength({ max: 200 }).escape(),
     body('experience').optional().trim().isLength({ max: 50 }).escape(),
@@ -312,6 +312,9 @@ Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"e
   app.post('/api/store/unpublish/:id', authMiddleware, async (req: any, res: any) => {
     const email = (req as any).userEmail;
     const { id } = req.params;
+    if (!id || !/^[a-zA-Z0-9_-]{1,100}$/.test(id)) {
+      return res.status(400).json({ error: 'ID inválido' });
+    }
     try {
       const db = admin.firestore();
       const itemRef = db.collection('store_items').doc(id);

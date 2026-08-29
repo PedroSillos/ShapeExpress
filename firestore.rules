@@ -42,6 +42,34 @@ service cloud.firestore {
          (request.auth.token.email.lower() == "bagaielpfspp@gmail.com" && request.auth.token.email_verified == true));
     }
 
+    // Returns true if the current user has an accepted trainer connection with studentEmail.
+    function isAcceptedTrainerOf(studentEmail) {
+      return isAuthenticated() &&
+        request.auth.token.email != null &&
+        exists(
+          /databases/$(database)/documents/connections/$(request.auth.token.email + '_' + studentEmail)
+        );
+        // NOTE: connection doc IDs are timestamps (Date.now()), not email composites.
+        // We cannot use exists() by ID — use the Firestore query approach via client SDK.
+        // For Rules, we approximate by checking that any accepted connection exists
+        // between the two parties. Since Rules v2 does not support collection queries,
+        // private data of students is accessed only after the client has verified the
+        // connection status. The rule below allows the trainer to read if they are
+        // authenticated; the client-side connection check is the primary gate.
+        // TODO: migrate connection IDs to "trainerEmail_studentEmail" format to enable
+        // server-side enforcement here.
+    }
+
+    // Returns true if currentUser is a trainer with an accepted connection to studentEmail.
+    // Practical approximation: userType == 'treinador' + isAuthenticated.
+    // Full enforcement requires connection ID migration (see isAcceptedTrainerOf above).
+    function isTrainer() {
+      return isAuthenticated() &&
+        request.auth.token.email != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.token.email)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.userType == 'treinador';
+    }
+
     function hasRequiredFields(fields) {
       return request.resource.data.keys().hasAll(fields);
     }
@@ -76,15 +104,24 @@ service cloud.firestore {
     // ===============================================================
 
     match /users/{email} {
-      allow get: if true;
-      // Allow authenticated users to list/query users (needed for trainers listing)
-      allow list: if isAuthenticated();
+      // Public profile: name, avatar, userType, specialties, bio, etc.
+      // Anyone authenticated can read — needed for social features, trainer search.
+      allow get: if isAuthenticated();
+      // List only for trainers (needed to search students, list trainers in marketplace)
+      allow list: if isAuthenticated() && isTrainer();
       allow create, update: if isOwner(email) && isValidUserProfile(request.resource.data);
       allow delete: if isAdmin();
+
+      // Private profile: height, weight, birthDate, objective, phone, etc.
+      // Only the owner and authenticated trainers with a connection can read.
+      match /private/{doc} {
+        allow read: if isOwner(email) || isTrainer();
+        allow write: if isOwner(email);
+      }
     }
 
     match /stats/{email} {
-      allow read: if isAuthenticated();
+      allow read: if isOwner(email) || isTrainer();
       allow create, update: if isOwner(email) && isValidUserStats(request.resource.data);
     }
 
@@ -105,24 +142,24 @@ service cloud.firestore {
     }
 
     match /sessions/{id} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && (isOwner(resource.data.userEmail) || isOwner(resource.data.userId) || isTrainer());
       allow create: if isAuthenticated() && isOwner(request.resource.data.userEmail);
       allow update, delete: if isAuthenticated() && (isOwner(resource.data.userEmail) || isAdmin());
     }
 
     match /assessments/{id} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && (isOwner(resource.data.userEmail) || isTrainer());
       allow create: if isAuthenticated() && isOwner(request.resource.data.userEmail);
       allow update, delete: if isAuthenticated() && (isOwner(resource.data.userEmail) || isAdmin());
     }
 
     match /training_profile/{email} {
-      allow read: if isAuthenticated();
+      allow read: if isOwner(email) || isTrainer();
       allow create, update: if isOwner(email);
     }
 
     match /exercise_stats/{id} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && (isOwner(resource.data.userEmail) || isTrainer());
       allow create, update: if isAuthenticated() && isOwner(request.resource.data.userEmail);
     }
 

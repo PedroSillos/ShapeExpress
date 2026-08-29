@@ -124,14 +124,25 @@ export const useSyncState = (
         let studentConnections: TrainerConnection[] = [];
         let students: Student[] = [];
 
-        // Profile
+        // Profile — read public doc + private subcollection in parallel
         try {
-          const docSnap = await getDoc(doc(db, "users", emailLower));
+          const emailKey = emailLower;
+          const [docSnap, privSnap] = await Promise.all([
+            getDoc(doc(db, "users", emailKey)),
+            getDoc(doc(db, "users", emailKey, "private", "data")),
+          ]);
           if (docSnap.exists()) {
-            profile = docSnap.data() as UserProfile;
+            const pubData = docSnap.data();
+            const privData = privSnap.exists() ? privSnap.data() : {};
+            profile = { ...pubData, ...privData } as UserProfile;
           } else {
             const snap = await getDocs(query(collection(db, "users"), where("email", "==", emailLower)));
-            if (!snap.empty) profile = snap.docs[0].data() as UserProfile;
+            if (!snap.empty) {
+              const pubData = snap.docs[0].data();
+              const privSnap2 = await getDoc(doc(db, "users", snap.docs[0].id, "private", "data"));
+              const privData = privSnap2.exists() ? privSnap2.data() : {};
+              profile = { ...pubData, ...privData } as UserProfile;
+            }
           }
         } catch (e) {}
 

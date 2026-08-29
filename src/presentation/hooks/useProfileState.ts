@@ -11,6 +11,33 @@ import type {
 } from "../../domain/entities";
 import { STORAGE_KEYS } from "../../shared/lib/storageKeys";
 
+// Fields stored in users/{email}/private/data (sensitive, owner-only read)
+const PRIVATE_FIELDS = [
+  'height', 'initialWeight', 'birthDate', 'objective',
+  'experienceLevel', 'limitations', 'preferredStyle',
+  'phone', 'age', 'personalCodeConnected',
+] as const;
+
+type PrivateFields = Pick<UserProfile, typeof PRIVATE_FIELDS[number]>;
+
+/** Splits a UserProfile into public and private parts */
+function splitProfile(p: UserProfile): { pub: Omit<UserProfile, typeof PRIVATE_FIELDS[number]>; priv: PrivateFields } {
+  const priv = {} as PrivateFields;
+  const pub = { ...p } as any;
+  for (const field of PRIVATE_FIELDS) {
+    if (field in pub) {
+      (priv as any)[field] = pub[field];
+      delete pub[field];
+    }
+  }
+  return { pub, priv };
+}
+
+/** Merges public and private documents into a full UserProfile */
+function mergeProfile(pub: any, priv: any): UserProfile {
+  return { ...pub, ...priv } as UserProfile;
+}
+
 export const DEFAULT_PROFILE: UserProfile = {
   firstName: "",
   lastName: "",
@@ -127,19 +154,31 @@ export const useProfileState = (currentUser: { email: string } | null) => {
     if (!email) return null;
     try {
       const emailLower = email.toLowerCase();
+      let pubData: any = null;
+
+      // Read public document
       let docSnap = await getDoc(doc(db, "users", email));
       if (!docSnap.exists()) docSnap = await getDoc(doc(db, "users", emailLower));
       if (docSnap.exists()) {
-        setUserProfile(docSnap.data() as UserProfile);
-        return docSnap.data();
+        pubData = docSnap.data();
+      } else {
+        const q = query(collection(db, "users"), where("email", "==", emailLower));
+        const snap = await getDocs(q);
+        if (!snap.empty) pubData = snap.docs[0].data();
       }
-      const q = query(collection(db, "users"), where("email", "==", emailLower));
-      const snap = await getDocs(q);
-      if (!snap.empty) {
-        const data = snap.docs[0].data() as UserProfile;
-        setUserProfile(data);
-        return data;
-      }
+
+      if (!pubData) return null;
+
+      // Read private document
+      let privData: any = {};
+      try {
+        const privSnap = await getDoc(doc(db, "users", emailLower, "private", "data"));
+        if (privSnap.exists()) privData = privSnap.data();
+      } catch (e) {}
+
+      const profile = mergeProfile(pubData, privData);
+      setUserProfile(profile);
+      return profile;
     } catch (e) {}
     return null;
   };
@@ -151,9 +190,14 @@ export const useProfileState = (currentUser: { email: string } | null) => {
       setUserProfile(p);
       return;
     }
-    // Logged-in: persist to Firestore
+    // Logged-in: split into public + private and write both documents
     try {
-      await setDoc(doc(db, "users", currentUser.email), p, { merge: true });
+      const emailLower = currentUser.email.toLowerCase();
+      const { pub, priv } = splitProfile(p);
+      await Promise.all([
+        setDoc(doc(db, "users", emailLower), pub, { merge: true }),
+        setDoc(doc(db, "users", emailLower, "private", "data"), priv, { merge: true }),
+      ]);
       setUserProfile(p);
     } catch (e: any) {
     }

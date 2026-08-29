@@ -170,11 +170,17 @@ export const useAuthState = () => {
         } as UserProfile;
         // 'name' is required by Firestore Security Rules but not part of the TypeScript type
         (userDoc as any).name = lastName ? `${firstName} ${lastName}` : firstName;
-        await setDoc(doc(db, "users", email), userDoc as any);
-        await setDoc(doc(db, "stats", email), {
-          level: 1, xp: 0, streak: 0, bestStreak: 0,
-          completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: email,
-        });
+        const emailLower = email.toLowerCase();
+        // Write public fields to users/{email}, private to users/{email}/private/data
+        const { height: h, initialWeight: iw, birthDate: bd, objective: obj, ...pubDoc } = userDoc as any;
+        await Promise.all([
+          setDoc(doc(db, "users", emailLower), pubDoc as any),
+          setDoc(doc(db, "users", emailLower, "private", "data"), { height: h, initialWeight: iw, birthDate: bd, objective: obj }),
+          setDoc(doc(db, "stats", emailLower), {
+            level: 1, xp: 0, streak: 0, bestStreak: 0,
+            completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: emailLower,
+          }),
+        ]);
       }
     } catch (e) {}
     // Upload local guest data BEFORE setting isLoggedIn=true (for new accounts only)
@@ -304,11 +310,22 @@ export const useAuthState = () => {
       delete userProfile.password;
 
       try {
-        await setDoc(doc(db, "users", data.email), userProfile);
-        await setDoc(doc(db, "stats", data.email), {
-          level: 1, xp: 0, streak: 0, bestStreak: 0,
-          completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: data.email,
-        });
+        const emailLower = data.email.toLowerCase();
+        // Public fields only in users/{email}
+        const { password: _pw, height, initialWeight, birthDate, objective,
+                experienceLevel, limitations, preferredStyle, phone, age,
+                personalCodeConnected, ...pubFields } = userProfile;
+        const privFields = { height, initialWeight, birthDate, objective,
+                             experienceLevel, limitations, preferredStyle,
+                             phone, age, personalCodeConnected };
+        await Promise.all([
+          setDoc(doc(db, "users", emailLower), pubFields),
+          setDoc(doc(db, "users", emailLower, "private", "data"), privFields),
+          setDoc(doc(db, "stats", emailLower), {
+            level: 1, xp: 0, streak: 0, bestStreak: 0,
+            completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: emailLower,
+          }),
+        ]);
       } catch (e) {}
       // Upload local guest data BEFORE setting isLoggedIn=true
       // so useSyncState fetches already-uploaded data
@@ -417,12 +434,20 @@ export const useAuthState = () => {
             birthDate: "2000-01-01",
             weeklyGoal: 3,
           } as any;
-          await setDoc(doc(db, "users", docId), userDoc);
-
-          await setDoc(doc(db, "stats", docId), {
-            level: 1, xp: 0, streak: 0, bestStreak: 0,
-            completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: docId,
-          });
+          await Promise.all([
+            setDoc(doc(db, "users", docId), {
+              firstName: phone, name: phone, email: docId,
+              userType: resolvedUserType, weeklyGoal: 3,
+            }),
+            setDoc(doc(db, "users", docId, "private", "data"), {
+              height: 180, initialWeight: 80, objective: "Manutenção",
+              birthDate: "2000-01-01", phone,
+            }),
+            setDoc(doc(db, "stats", docId), {
+              level: 1, xp: 0, streak: 0, bestStreak: 0,
+              completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: docId,
+            }),
+          ]);
         }
       } catch (e) {}
       // Upload local guest data BEFORE setting isLoggedIn=true (for new accounts only)
