@@ -7,6 +7,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  sendEmailVerification,
   signOut,
   onAuthStateChanged,
   GoogleAuthProvider,
@@ -293,6 +294,18 @@ export const useAuthState = () => {
       const freshIdToken = await userCredential.user.getIdToken();
       tokenStore.idToken = freshIdToken;
       setIdToken(freshIdToken);
+
+      // SEC-018: send email verification so the user confirms ownership of the address.
+      // Non-blocking: failure is tolerated — the account is still created.
+      try {
+        await sendEmailVerification(userCredential.user);
+      } catch (_verifyErr) {
+        // Email verification sending failed (e.g. emulator, rate-limit).
+        // Log in development only — do not block registration.
+        if (import.meta.env.DEV) {
+          console.warn('[register] sendEmailVerification failed:', _verifyErr);
+        }
+      }
       const resolvedUserType: "atleta" | "treinador" = data.userType === "treinador" ? "treinador" : "atleta";
       const isTrainer = resolvedUserType === "treinador";
       const userProfile = {
@@ -305,7 +318,14 @@ export const useAuthState = () => {
         objective: data.objective || "Manutenção",
         birthDate: data.birthDate || "2000-01-01",
         weeklyGoal: data.weeklyGoal ?? 3,
-        ...(isTrainer ? { personalCode: Math.random().toString(36).substring(2, 8).toUpperCase() } : {}),
+        // SEC-007 fix: use cryptographically secure PRNG instead of Math.random()
+        ...(isTrainer ? {
+          personalCode: Array.from(crypto.getRandomValues(new Uint8Array(5)))
+            .map((b) => b.toString(36).padStart(2, '0'))
+            .join('')
+            .toUpperCase()
+            .substring(0, 6),
+        } : {}),
       };
       delete userProfile.password;
 
@@ -421,11 +441,14 @@ export const useAuthState = () => {
           isNewAccount = true;
           const wa = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; } })();
           const resolvedUserType: "atleta" | "treinador" = wa?.userType === "treinador" ? "treinador" : "atleta";
+          // SEC-019 fix: store the phone number in the email field so it acts as the user
+          // identifier in features that rely on userProfile.email (e.g. display, connections).
+          // The document key remains the uid — phone users do not have an email address.
           userDoc = {
             firstName: phone,
             // Add 'name' field required by Firestore rules
             name: phone,
-            email: docId,
+            email: phone,
             userType: resolvedUserType,
             phone,
             height: 180,
@@ -436,7 +459,7 @@ export const useAuthState = () => {
           } as any;
           await Promise.all([
             setDoc(doc(db, "users", docId), {
-              firstName: phone, name: phone, email: docId,
+              firstName: phone, name: phone, email: phone,
               userType: resolvedUserType, weeklyGoal: 3,
             }),
             setDoc(doc(db, "users", docId, "private", "data"), {
@@ -445,7 +468,7 @@ export const useAuthState = () => {
             }),
             setDoc(doc(db, "stats", docId), {
               level: 1, xp: 0, streak: 0, bestStreak: 0,
-              completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: docId,
+              completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: phone,
             }),
           ]);
         }
