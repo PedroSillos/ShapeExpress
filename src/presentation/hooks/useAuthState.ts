@@ -12,14 +12,14 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithCredential,
   deleteUser,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
 } from "firebase/auth";
 import { Capacitor } from "@capacitor/core";
+import { FirebaseAuthentication } from "@capacitor-firebase/authentication";
 import { getFirebaseErrorMessage } from "../../utils/firebaseErrors";
 import type { UserProfile, WorkoutTemplate, WorkoutSession } from "../../domain/entities";
 
@@ -200,17 +200,6 @@ export const useAuthState = () => {
       setAuthReady(true);
     }, 5000);
 
-    // On native Capacitor, signInWithRedirect returns the credential here when
-    // the app resumes from the Chrome Custom Tab. Must be called before
-    // onAuthStateChanged so the session is established before the listener fires.
-    if (Capacitor.isNativePlatform()) {
-      getRedirectResult(auth).then((result) => {
-        if (result) {
-          handleGoogleCredential(result).catch(() => {});
-        }
-      }).catch(() => {});
-    }
-
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       clearTimeout(fallbackTimer);
       if (firebaseUser?.email) {
@@ -268,18 +257,24 @@ export const useAuthState = () => {
   };
 
   const loginWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-
-    // On native Capacitor the WebView cannot receive the popup result back —
-    // use redirect instead. The result is picked up by getRedirectResult() in
-    // the boot useEffect when the app resumes from the Custom Tab.
     if (Capacitor.isNativePlatform()) {
-      await signInWithRedirect(auth, provider);
-      // signInWithRedirect navigates away; execution does not continue here.
+      // Native Android/iOS: use the Google Sign-In SDK via the Capacitor plugin.
+      // This shows the native account picker inside the app — no browser redirect.
+      try {
+        const result = await FirebaseAuthentication.signInWithGoogle();
+        const idToken = result.credential?.idToken;
+        if (!idToken) throw new Error("Google Sign-In não retornou um token.");
+        const credential = GoogleAuthProvider.credential(idToken);
+        const userCredential = await signInWithCredential(auth, credential);
+        await handleGoogleCredential(userCredential);
+      } catch (e: any) {
+        throw new Error(getFirebaseErrorMessage(e));
+      }
       return;
     }
 
     // Web: use popup as before.
+    const provider = new GoogleAuthProvider();
     try {
       const userCredential = await signInWithPopup(auth, provider);
       await handleGoogleCredential(userCredential);
