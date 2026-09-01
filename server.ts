@@ -366,6 +366,11 @@ Retorne JSON sem markdown: {"name":"Treino de IA: <modalidade>","exercises":[{"e
   // Free item claiming is handled client-side via Firestore SDK.
 
   // Vite middleware for development
+  // Public route — no auth required
+  app.get('/privacy-policy', (_req, res) => {
+    res.sendFile(path.join(process.cwd(), 'android', 'app', 'src', 'main', 'assets', 'public', 'privacy-policy.html'));
+  });
+
   // When running via `npm run dev` (Vite standalone + Express separately),
   // skip creating an internal Vite server — Vite is already running standalone.
   // In production, serve the built dist folder.

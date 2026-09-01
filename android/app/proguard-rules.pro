@@ -21,3 +21,7 @@
 # Keep line numbers for crash reports
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
+
+# Facebook SDK is referenced by capacitor-firebase-authentication but not used in this project.
+# Suppress R8 missing class errors for these optional provider classes.
+-dontwarn com.facebook.**
