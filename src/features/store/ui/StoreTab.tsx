@@ -710,6 +710,8 @@ export interface StoreTabProps {
   tabSwitcher?: React.ReactNode;
   userEmail?: string;
   userType?: 'athlete' | 'trainer';
+  /** Currently active sport — used to filter store items shown to athletes */
+  activeSport?: string;
 }
 
 export function StoreTab({
@@ -725,6 +727,7 @@ export function StoreTab({
   tabSwitcher,
   userEmail,
   userType,
+  activeSport,
 }: StoreTabProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [buyingId, setBuyingId] = useState<string | null>(null);
@@ -740,13 +743,20 @@ export function StoreTab({
     ? storeWorkouts.filter((i) => i.creatorEmail.toLowerCase() === userEmail.toLowerCase())
     : [];
   const myAnnouncementIds = new Set(myAnnouncements.map((a) => a.id));
-  const totalCount = storeWorkouts.length;
+
+  // For athletes: only show items matching the active sport (items without a sport are shown to all).
+  // Trainers see all items in the search catalogue.
+  const sportFilteredWorkouts = (userType === 'athlete' && activeSport)
+    ? storeWorkouts.filter((i) => !('sport' in i) || !(i as any).sport || (i as any).sport === activeSport)
+    : storeWorkouts;
+
+  const totalCount = sportFilteredWorkouts.length;
 
   const filteredWorkouts = searchTerm.trim()
-    ? storeWorkouts.filter((i) => 
+    ? sportFilteredWorkouts.filter((i) =>
         i.title.toLowerCase().includes(searchTerm.toLowerCase()) && !myAnnouncementIds.has(i.id)
       )
-    : storeWorkouts.filter((i) => !myAnnouncementIds.has(i.id));
+    : sportFilteredWorkouts.filter((i) => !myAnnouncementIds.has(i.id));
 
   const handleBuyItem = useCallback(
     async (item: StoreItem) => {

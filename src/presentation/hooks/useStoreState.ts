@@ -137,6 +137,20 @@ export const useStoreState = (
   // ── Publish a new item ───────────────────────────────────────────────────
   const publishItem = useCallback(async (payload: PublishPayload, creatorProfile: { email: string; firstName: string; lastName?: string }): Promise<StoreItem> => {
     const email = creatorProfile.email.toLowerCase();
+
+    // Inherit sport from the source template
+    let sport: string | undefined;
+    if (payload.type === 'workout') {
+      try {
+        const tSnap = await getDoc(doc(db, "templates", payload.templateId));
+        if (tSnap.exists()) {
+          sport = (tSnap.data() as { sport?: string }).sport;
+        }
+      } catch (e) {
+        console.error('[publishItem] Failed to fetch template sport:', e);
+      }
+    }
+
     const base = {
       creatorEmail: email,
       creatorName: [creatorProfile.firstName, creatorProfile.lastName].filter(Boolean).join(' '),
@@ -152,6 +166,7 @@ export const useStoreState = (
       salesCount: 0,
       createdAt: new Date().toISOString(),
       status: "published" as const,
+      ...(sport !== undefined ? { sport } : {}),
     };
 
     let data: Omit<StoreWorkout, 'id'>;

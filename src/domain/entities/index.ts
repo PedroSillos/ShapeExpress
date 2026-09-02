@@ -392,6 +392,8 @@ export interface StoreWorkout {
   duration: number;
   /** Duration unit (weeks or months) */
   durationUnit: DurationUnit;
+  /** Sport modality inherited from the source WorkoutTemplate */
+  sport?: string;
 }
 
 /** A bundle of workout templates listed for sale as a program */

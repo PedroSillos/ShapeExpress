@@ -475,6 +475,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           }}
           userEmail={userProfile?.email}
           userType={userProfile?.userType === 'treinador' ? 'trainer' : 'athlete'}
+          activeSport={activeSport}
         />
       );
     case 'trainers':

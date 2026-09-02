@@ -15,6 +15,7 @@ export interface LojasScreenProps {
   onUpdateTemplate?: (template: WorkoutTemplate) => void;
   userEmail?: string;
   userType?: 'athlete' | 'trainer';
+  activeSport?: string;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -31,6 +32,7 @@ export function LojasScreen({
   onUpdateTemplate,
   userEmail,
   userType,
+  activeSport,
 }: LojasScreenProps) {
   return (
     <StoreTab
@@ -45,6 +47,7 @@ export function LojasScreen({
       onUpdateTemplate={onUpdateTemplate}
       userEmail={userEmail}
       userType={userType}
+      activeSport={activeSport}
     />
   );
 }
