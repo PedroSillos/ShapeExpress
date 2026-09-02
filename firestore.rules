@@ -90,7 +90,8 @@ service cloud.firestore {
     // ===============================================================
     
     function isValidUserProfile(data) {
-      return hasRequiredFields(['name', 'email', 'height', 'initialWeight', 'birthDate']) &&
+      // height, initialWeight and birthDate live in users/{email}/private/data — not in the public doc.
+      return hasRequiredFields(['name', 'email']) &&
              data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
              data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
     }

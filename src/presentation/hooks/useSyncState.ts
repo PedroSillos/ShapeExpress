@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { db } from "../../firebase";
 import { doc, getDoc, getDocs, collection, query, where } from "firebase/firestore";
-import { syncState } from "./useAuthState";
+import { syncState, profileReadyState } from "./useAuthState";
 import { DEFAULT_PROFILE, DEFAULT_STATS } from "./useProfileState";
 import { STORAGE_KEYS } from "../../shared/lib/storageKeys";
 import type {
@@ -113,6 +113,17 @@ export const useSyncState = (
     } = setters;
 
     const syncAll = async () => {
+      // Wait for handleGoogleCredential / confirmPhoneLogin to finish writing
+      // Firestore docs before we try to read them. Without this guard the sync
+      // fires (via onAuthStateChanged) before the new user's docs exist.
+      if (!profileReadyState.ready) {
+        await new Promise<void>((resolve) => {
+          const interval = setInterval(() => {
+            if (profileReadyState.ready) { clearInterval(interval); resolve(); }
+          }, 100);
+        });
+      }
+
       try {
         // ── 1. Fetch everything from Firestore without touching React state ──
         let profile: UserProfile | null = null;
@@ -144,16 +155,18 @@ export const useSyncState = (
               profile = { ...pubData, ...privData } as UserProfile;
             }
           }
-        } catch (e) {}
+        } catch (e: any) {
+          console.error('[sync] ❌ erro ao buscar profile:', e?.code, e?.message);
+        }
 
         // Stats, templates, sessions, trainers — all in parallel
         await Promise.all([
           getDoc(doc(db, "stats", emailLower)).then((snap) => {
             if (snap.exists()) stats = snap.data() as UserStats;
-          }).catch(() => {}),
+          }).catch((e: any) => { console.error('[sync] ❌ erro ao buscar stats:', e?.code, e?.message); }),
           getDocs(query(collection(db, "templates"), where("userId", "==", emailLower))).then((snap) => {
             templates = snap.docs.map((d) => ({ id: d.id, ...d.data() } as WorkoutTemplate));
-          }).catch(() => {}),
+          }).catch((e: any) => { console.error('[sync] ❌ erro ao buscar templates:', e?.code, e?.message); }),
           getDocs(query(collection(db, "sessions"), where("userId", "==", emailLower))).then((snap) => {
             const remoteSessions = snap.docs.map((d) => ({ id: d.id, ...d.data() } as WorkoutSession));
             const localSessions: WorkoutSession[] = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.LOCAL_SESSIONS) ?? "[]"); } catch { return []; } })();
@@ -161,7 +174,7 @@ export const useSyncState = (
             const onlyLocal = localSessions.filter((s) => !remoteIds.has(s.id));
             sessions = [...remoteSessions, ...onlyLocal];
             if (onlyLocal.length === 0) localStorage.removeItem(STORAGE_KEYS.LOCAL_SESSIONS);
-          }).catch(() => {}),
+          }).catch((e: any) => { console.error('[sync] ❌ erro ao buscar sessions:', e?.code, e?.message); }),
           getDocs(query(collection(db, "users"), where("userType", "==", "treinador"))).then((snap) => {
             if (!snap.empty) {
               trainers = snap.docs.map((d) => d.data() as UserProfile);
@@ -207,6 +220,7 @@ export const useSyncState = (
         setDataReady(true);
       } catch (e) {
         // On unexpected error, unblock UI so user isn't stuck on splash.
+        console.error('[sync] ❌ erro inesperado:', e);
         setDataReady(true);
       }
     };

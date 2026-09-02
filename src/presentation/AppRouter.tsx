@@ -292,7 +292,16 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
     case 'login':
       return (
         <LoginView
-          api={api}
+          api={{
+            ...api,
+            // Google login completes inside LoginView without calling onLogin,
+            // so we intercept here to navigate away after success.
+            loginWithGoogle: async (mode?: string) => {
+              await api.loginWithGoogle(mode ?? 'login');
+              const defaultTab = localStorage.getItem(STORAGE_KEYS.DEFAULT_TAB) || 'dashboard';
+              setActiveTab(defaultTab as any);
+            },
+          }}
           onLogin={async (email: string, password: string) => {
             const data = await api.login(email, password);
             setUserProfile(data.user);
@@ -335,7 +344,19 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             }
           }}
           onGoToLogin={() => setActiveTab('login')}
-          api={api}
+          api={{
+            ...api,
+            // When Google/Phone login completes inside RegisterView, isLoggedIn flips to true
+            // but onRegister is never called — intercept here to navigate away.
+            loginWithGoogle: async (mode?: string) => {
+              await api.loginWithGoogle(mode ?? 'register');
+              if (api.isLoggedIn !== false) {
+                localStorage.removeItem(STORAGE_KEYS.WELCOME_ANSWERS);
+                const defaultTab = localStorage.getItem(STORAGE_KEYS.DEFAULT_TAB) || 'dashboard';
+                setActiveTab(defaultTab as any);
+              }
+            },
+          }}
         />
       );
     case 'forgot-password':

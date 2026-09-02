@@ -92,6 +92,109 @@ async function uploadLocalDataToFirestore(email: string) {
 export const syncState = { syncedToken: null as string | null };
 export const resetSyncedToken = () => { syncState.syncedToken = null; };
 
+// profileReady: set to true by handleGoogleCredential / confirmPhoneLogin after Firestore
+// docs are confirmed written. useSyncState checks this before starting a sync so it never
+// reads Firestore before the new user's docs exist.
+export const profileReadyState = { ready: true };
+
+// While a Google login is in progress, onAuthStateChanged must not set isLoggedIn=true
+// on its own — handleGoogleCredential will do it after writing Firestore docs (or reject).
+export const authFlowState = { googleInProgress: false };
+
+/**
+ * Single source of truth for new user profile creation.
+ * Reads all onboarding answers from WELCOME_ANSWERS, merges them with the
+ * provided identifiers, and writes three Firestore documents atomically:
+ *   - users/{docId}              → public fields
+ *   - users/{docId}/private/data → private fields
+ *   - stats/{docId}              → zeroed stats
+ *
+ * Called by all three registration flows (email, Google, phone) so the
+ * data written is always identical regardless of the auth method used.
+ *
+ * @param docId   Firestore document key (email lowercase for email/Google, uid for phone)
+ * @param params  Identifiers that cannot come from WELCOME_ANSWERS
+ */
+async function createFirestoreProfile(
+  docId: string,
+  params: {
+    firstName: string;
+    lastName?: string;
+    /** email address for email/Google users; phone number for phone users */
+    email: string;
+    phone?: string;
+  },
+): Promise<Record<string, unknown>> {
+  const { firstName, lastName, email, phone } = params;
+
+  const wa: {
+    userType?: 'atleta' | 'treinador';
+    sports?: string[];
+    objective?: string;
+    source?: string;
+    experiences?: Record<string, string>;
+    weeklyGoal?: number;
+    height?: number;
+    weight?: number;
+    birthDate?: string;
+    notifications?: boolean;
+  } | null = (() => {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; }
+  })();
+
+  const resolvedUserType: 'atleta' | 'treinador' = wa?.userType === 'treinador' ? 'treinador' : 'atleta';
+  const isTrainer = resolvedUserType === 'treinador';
+
+  // experienceLevel: derived from the first selected sport's experience entry
+  const firstSport = wa?.sports?.[0];
+  const experienceLevel = (firstSport && wa?.experiences?.[firstSport]) ? wa.experiences[firstSport] : undefined;
+
+  // Public fields — stored in users/{docId}
+  const pubFields = sanitize({
+    firstName,
+    ...(lastName ? { lastName } : {}),
+    name: lastName ? `${firstName} ${lastName}` : firstName,
+    email,
+    userType: resolvedUserType,
+    ...(wa?.weeklyGoal !== undefined ? { weeklyGoal: wa.weeklyGoal } : {}),
+    ...(wa?.sports?.length ? { specialties: wa.sports } : {}),
+    ...(wa?.source ? { source: wa.source } : {}),
+    // personalCode for trainers (SEC-007: cryptographically secure PRNG)
+    ...(isTrainer ? {
+      personalCode: Array.from(crypto.getRandomValues(new Uint8Array(5)))
+        .map((b) => b.toString(36).padStart(2, '0'))
+        .join('')
+        .toUpperCase()
+        .substring(0, 6),
+    } : {}),
+  } as Record<string, unknown>);
+
+  // Private fields — stored in users/{docId}/private/data
+  const privFields = sanitize({
+    ...(wa?.height !== undefined ? { height: Number(wa.height) } : {}),
+    ...(wa?.weight !== undefined ? { initialWeight: Number(wa.weight) } : {}),
+    ...(wa?.objective ? { objective: wa.objective } : {}),
+    ...(wa?.birthDate ? { birthDate: wa.birthDate } : {}),
+    ...(experienceLevel ? { experienceLevel } : {}),
+    ...(phone ? { phone } : {}),
+  } as Record<string, unknown>);
+
+  // statsEmail: for phone users the email field holds the phone number
+  const statsEmail = email;
+
+  await Promise.all([
+    setDoc(doc(db, "users", docId), pubFields),
+    setDoc(doc(db, "users", docId, "private", "data"), privFields),
+    setDoc(doc(db, "stats", docId), {
+      level: 1, xp: 0, streak: 0, bestStreak: 0,
+      completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0,
+      medalsCount: 0, userEmail: statsEmail,
+    }),
+  ]);
+
+  return { ...pubFields, ...privFields };
+}
+
 export const useAuthState = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   // authReady: false until onAuthStateChanged fires for the first time.
@@ -138,57 +241,57 @@ export const useAuthState = () => {
    * Called both from the popup path (web) and from getRedirectResult (native boot).
    * Defined before useEffect so the closure is available when getRedirectResult resolves.
    */
-  const handleGoogleCredential = async (userCredential: Awaited<ReturnType<typeof signInWithPopup>>) => {
+  const handleGoogleCredential = async (
+    userCredential: Awaited<ReturnType<typeof signInWithPopup>>,
+    mode: 'login' | 'register' = 'register',
+  ) => {
     const freshIdToken = await userCredential.user.getIdToken();
     tokenStore.idToken = freshIdToken;
     setIdToken(freshIdToken);
     const email = userCredential.user.email!;
+    const emailLower = email.toLowerCase();
     let userDoc: UserProfile | null = null;
     let isNewAccount = false;
     try {
-      const snap = await getDoc(doc(db, "users", email));
+      const snap = await getDoc(doc(db, "users", emailLower));
       if (snap.exists()) {
         // Existing account: Firestore is the source of truth — discard local guest data.
         userDoc = snap.data() as UserProfile;
         clearLocalGuestData();
       } else {
-        // New account via Google: treat like a registration and upload any onboarding data.
+        // If the user clicked "Login with Google" but has no account, reject instead of
+        // silently creating one. Only the register flow is allowed to create new accounts.
+        if (mode === 'login') {
+          // Delete the Firebase Auth user that was just created by signInWithPopup,
+          // then sign out — leaving no trace in Authentication.
+          try { await deleteUser(userCredential.user); } catch (_) {}
+          await signOut(auth);
+          throw new Error("Conta não encontrada. Crie uma conta primeiro.");
+        }
+        // New account via Google: use createFirestoreProfile() — same as all other flows.
         isNewAccount = true;
-        const wa = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; } })();
-        const resolvedUserType: "atleta" | "treinador" = wa?.userType === "treinador" ? "treinador" : "atleta";
+        profileReadyState.ready = false;
         const firstName = (userCredential.user.displayName || 'Usuário').split(' ')[0];
         const lastName = (userCredential.user.displayName || '').split(' ').slice(1).join(' ') || undefined;
-        userDoc = {
-          firstName,
-          lastName,
-          email,
-          userType: resolvedUserType,
-          height: 180,
-          initialWeight: 80,
-          objective: "Manutenção",
-          birthDate: "2000-01-01",
-          weeklyGoal: 3,
-        } as UserProfile;
-        // 'name' is required by Firestore Security Rules but not part of the TypeScript type
-        (userDoc as any).name = lastName ? `${firstName} ${lastName}` : firstName;
-        const emailLower = email.toLowerCase();
-        // Write public fields to users/{email}, private to users/{email}/private/data
-        const { height: h, initialWeight: iw, birthDate: bd, objective: obj, ...pubDoc } = userDoc as any;
-        await Promise.all([
-          setDoc(doc(db, "users", emailLower), pubDoc as any),
-          setDoc(doc(db, "users", emailLower, "private", "data"), { height: h, initialWeight: iw, birthDate: bd, objective: obj }),
-          setDoc(doc(db, "stats", emailLower), {
-            level: 1, xp: 0, streak: 0, bestStreak: 0,
-            completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: emailLower,
-          }),
-        ]);
+        try {
+          const builtDoc = await createFirestoreProfile(emailLower, { firstName, lastName, email: emailLower });
+          userDoc = builtDoc as unknown as UserProfile;
+        } catch (writeErr: any) {
+          console.error('[auth:google] ❌ erro ao criar docs:', writeErr?.code, writeErr?.message);
+        } finally {
+          profileReadyState.ready = true;
+        }
       }
-    } catch (e) {}
+    } catch (e: any) {
+      profileReadyState.ready = true;
+      console.error('[auth:google] ❌ erro no getDoc:', e?.code, e?.message);
+      throw e;
+    }
     // Upload local guest data BEFORE setting isLoggedIn=true (for new accounts only)
-    if (isNewAccount) await uploadLocalDataToFirestore(email);
-    localStorage.setItem(STORAGE_KEYS.TOKEN, email);
-    setToken(email);
-    setCurrentUser({ email });
+    if (isNewAccount) await uploadLocalDataToFirestore(emailLower);
+    localStorage.setItem(STORAGE_KEYS.TOKEN, emailLower);
+    setToken(emailLower);
+    setCurrentUser({ email: emailLower });
     setIsLoggedIn(true);
     return { token: freshIdToken, user: userDoc };
   };
@@ -203,6 +306,14 @@ export const useAuthState = () => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       clearTimeout(fallbackTimer);
       if (firebaseUser?.email) {
+        // If loginWithGoogle is in progress, let handleGoogleCredential take over
+        // after it finishes writing Firestore docs (or deletes the user on error).
+        // Without this guard, onAuthStateChanged races with handleGoogleCredential
+        // and triggers useSyncState before the new user's docs exist.
+        if (authFlowState.googleInProgress) {
+          setAuthReady(true);
+          return;
+        }
         const email = firebaseUser.email;
         const freshIdToken = await firebaseUser.getIdToken();
         tokenStore.idToken = freshIdToken;
@@ -238,8 +349,12 @@ export const useAuthState = () => {
       let userDoc = null;
       try {
         const snap = await getDoc(doc(db, "users", email));
-        if (snap.exists()) userDoc = snap.data();
-      } catch (e) {}
+        if (snap.exists()) {
+          userDoc = snap.data();
+        }
+      } catch (e: any) {
+        console.error('[auth:login] ❌ erro no getDoc:', e?.code, e?.message);
+      }
       localStorage.setItem(STORAGE_KEYS.TOKEN, email);
       setToken(email);
       setCurrentUser({ email });
@@ -256,20 +371,21 @@ export const useAuthState = () => {
     }
   };
 
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = async (mode: 'login' | 'register' = 'register') => {
+    authFlowState.googleInProgress = true;
     if (Capacitor.isNativePlatform()) {
-      // Native Android/iOS: use the Google Sign-In SDK via the Capacitor plugin.
-      // This shows the native account picker inside the app — no browser redirect.
       try {
         const result = await FirebaseAuthentication.signInWithGoogle();
         const idToken = result.credential?.idToken;
         if (!idToken) throw new Error("Google Sign-In não retornou um token.");
         const credential = GoogleAuthProvider.credential(idToken);
         const userCredential = await signInWithCredential(auth, credential);
-        await handleGoogleCredential(userCredential);
+        await handleGoogleCredential(userCredential, mode);
       } catch (e: any) {
+        authFlowState.googleInProgress = false;
         throw new Error(getFirebaseErrorMessage(e));
       }
+      authFlowState.googleInProgress = false;
       return;
     }
 
@@ -277,10 +393,13 @@ export const useAuthState = () => {
     const provider = new GoogleAuthProvider();
     try {
       const userCredential = await signInWithPopup(auth, provider);
-      await handleGoogleCredential(userCredential);
+      await handleGoogleCredential(userCredential, mode);
     } catch (e: any) {
+      authFlowState.googleInProgress = false;
+      if (e.message === "Conta não encontrada. Crie uma conta primeiro.") throw e;
       throw new Error(getFirebaseErrorMessage(e));
     }
+    authFlowState.googleInProgress = false;
   };
 
   const register = async (data: any) => {
@@ -295,59 +414,28 @@ export const useAuthState = () => {
       try {
         await sendEmailVerification(userCredential.user);
       } catch (_verifyErr) {
-        // Email verification sending failed (e.g. emulator, rate-limit).
-        // Log in development only — do not block registration.
         if (import.meta.env.DEV) {
           console.warn('[register] sendEmailVerification failed:', _verifyErr);
         }
       }
-      const resolvedUserType: "atleta" | "treinador" = data.userType === "treinador" ? "treinador" : "atleta";
-      const isTrainer = resolvedUserType === "treinador";
-      const userProfile = {
-        ...data,
-        // Add 'name' field required by Firestore rules (combines firstName + lastName)
-        name: data.lastName ? `${data.firstName} ${data.lastName}` : data.firstName,
-        userType: resolvedUserType,
-        height: data.height || 180,
-        initialWeight: data.initialWeight || 80,
-        objective: data.objective || "Manutenção",
-        birthDate: data.birthDate || "2000-01-01",
-        weeklyGoal: data.weeklyGoal ?? 3,
-        // SEC-007 fix: use cryptographically secure PRNG instead of Math.random()
-        ...(isTrainer ? {
-          personalCode: Array.from(crypto.getRandomValues(new Uint8Array(5)))
-            .map((b) => b.toString(36).padStart(2, '0'))
-            .join('')
-            .toUpperCase()
-            .substring(0, 6),
-        } : {}),
-      };
-      delete userProfile.password;
 
+      const emailLower = data.email.toLowerCase();
+      let userProfile: Record<string, unknown> = {};
       try {
-        const emailLower = data.email.toLowerCase();
-        // Public fields only in users/{email}
-        const { password: _pw, height, initialWeight, birthDate, objective,
-                experienceLevel, limitations, preferredStyle, phone, age,
-                personalCodeConnected, ...pubFields } = userProfile;
-        const privFields = { height, initialWeight, birthDate, objective,
-                             experienceLevel, limitations, preferredStyle,
-                             phone, age, personalCodeConnected };
-        await Promise.all([
-          setDoc(doc(db, "users", emailLower), pubFields),
-          setDoc(doc(db, "users", emailLower, "private", "data"), privFields),
-          setDoc(doc(db, "stats", emailLower), {
-            level: 1, xp: 0, streak: 0, bestStreak: 0,
-            completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: emailLower,
-          }),
-        ]);
-      } catch (e) {}
-      // Upload local guest data BEFORE setting isLoggedIn=true
-      // so useSyncState fetches already-uploaded data
-      await uploadLocalDataToFirestore(data.email);
-      localStorage.setItem(STORAGE_KEYS.TOKEN, data.email);
-      setToken(data.email);
-      setCurrentUser({ email: data.email });
+        userProfile = await createFirestoreProfile(emailLower, {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: emailLower,
+          phone: data.phone,
+        });
+      } catch (e: any) {
+        console.error('[auth:register] ❌ erro ao criar docs:', e?.code, e?.message);
+      }
+
+      await uploadLocalDataToFirestore(emailLower);
+      localStorage.setItem(STORAGE_KEYS.TOKEN, emailLower);
+      setToken(emailLower);
+      setCurrentUser({ email: emailLower });
       setIsLoggedIn(true);
       return { token: freshIdToken, user: userProfile };
     } catch (e: any) {
@@ -432,42 +520,24 @@ export const useAuthState = () => {
           userDoc = snap.data() as UserProfile;
           clearLocalGuestData();
         } else {
-          // New account via phone: treat like a registration and upload any onboarding data.
+          // New account via phone: use createFirestoreProfile() — same as all other flows.
+          // Phone number is stored in the email field (SEC-019) so it acts as identifier
+          // in features that rely on userProfile.email. Document key remains the uid.
           isNewAccount = true;
-          const wa = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); } catch { return null; } })();
-          const resolvedUserType: "atleta" | "treinador" = wa?.userType === "treinador" ? "treinador" : "atleta";
-          // SEC-019 fix: store the phone number in the email field so it acts as the user
-          // identifier in features that rely on userProfile.email (e.g. display, connections).
-          // The document key remains the uid — phone users do not have an email address.
-          userDoc = {
-            firstName: phone,
-            // Add 'name' field required by Firestore rules
-            name: phone,
-            email: phone,
-            userType: resolvedUserType,
-            phone,
-            height: 180,
-            initialWeight: 80,
-            objective: "Manutenção",
-            birthDate: "2000-01-01",
-            weeklyGoal: 3,
-          } as any;
-          await Promise.all([
-            setDoc(doc(db, "users", docId), {
-              firstName: phone, name: phone, email: phone,
-              userType: resolvedUserType, weeklyGoal: 3,
-            }),
-            setDoc(doc(db, "users", docId, "private", "data"), {
-              height: 180, initialWeight: 80, objective: "Manutenção",
-              birthDate: "2000-01-01", phone,
-            }),
-            setDoc(doc(db, "stats", docId), {
-              level: 1, xp: 0, streak: 0, bestStreak: 0,
-              completedThisWeek: 0, totalWorkouts: 0, totalVolume: 0, medalsCount: 0, userEmail: phone,
-            }),
-          ]);
+          try {
+            const builtDoc = await createFirestoreProfile(docId, {
+              firstName: phone,
+              email: phone,
+              phone,
+            });
+            userDoc = builtDoc as unknown as UserProfile;
+          } catch (writeErr: any) {
+            console.error('[auth:phone] ❌ erro ao criar docs:', writeErr?.code, writeErr?.message);
+          }
         }
-      } catch (e) {}
+      } catch (e: any) {
+        console.error('[auth:phone] ❌ erro no getDoc:', e?.code, e?.message);
+      }
       // Upload local guest data BEFORE setting isLoggedIn=true (for new accounts only)
       if (isNewAccount) await uploadLocalDataToFirestore(docId);
       localStorage.setItem(STORAGE_KEYS.TOKEN, docId);

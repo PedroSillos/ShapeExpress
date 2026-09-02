@@ -244,13 +244,12 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
                   Continuar com E-mail
                 </button>
                 <button
-                  onClick={() => { setError(''); setStep('phone'); }}
-                  className="w-full py-4 rounded-2xl border-2 border-dark-border bg-dark-card flex items-center justify-center gap-3 font-semibold text-sm uppercase tracking-widest text-white active:scale-95 transition-all"
+                  disabled
+                  className="w-full py-4 rounded-2xl border-2 border-dark-border bg-dark-card flex items-center justify-center gap-3 font-semibold text-sm uppercase tracking-widest text-white/30 pointer-events-none"
                 >
-                  <span className="text-green-400 text-lg">📱</span>
+                  <span className="text-green-400/30 text-lg">📱</span>
                   Continuar com Telefone
                 </button>
-                <div ref={recaptchaRef} />
                 {error && <p className="text-red-400 text-sm text-center">{error}</p>}
               </div>
             </div>
@@ -275,6 +274,7 @@ export function RegisterView({ onRegister, onBack, onGoToLogin, api }: RegisterV
               </div>
               <p className="text-sm text-white/40 -mt-3">Você receberá um SMS para verificar o seu número.</p>
               {error && <p className="text-red-400 text-sm -mt-3">{error}</p>}
+              <div ref={recaptchaRef} />
               <ContinueBtn label="Enviar SMS" onClick={handlePhoneSend} disabled={phone.trim().length === 0} isLoading={isLoading} />
             </div>
           </Shell>

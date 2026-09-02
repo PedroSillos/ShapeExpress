@@ -163,7 +163,13 @@ export function LoginView({ onLogin, onForgotPassword, onBack, api }: LoginViewP
       <div className="space-y-4">
         {mode === 'email' && (
           <button
-            onClick={async () => { try { await api.loginWithGoogle(); } catch {} }}
+            onClick={async () => {
+              setLoading(true); setError('');
+              try { await api.loginWithGoogle('login'); }
+              catch (e: any) { setError(e.message || 'Erro ao entrar com Google.'); }
+              finally { setLoading(false); }
+            }}
+            disabled={loading}
             className="w-full py-4 bg-dark-card border border-dark-border rounded-2xl font-bold text-sm flex items-center justify-center gap-3 active:scale-95 transition-transform"
           >
             <GoogleIcon />
