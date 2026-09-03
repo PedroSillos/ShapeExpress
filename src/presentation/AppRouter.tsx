@@ -439,6 +439,18 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onCreateAd={(t: WorkoutTemplate) => setPublishingTemplate(t)}
           isLoggedIn={isLoggedIn}
           activeSport={activeSport}
+          publishedTemplateIds={new Set(
+            ((myListings as StoreItem[]) ?? [])
+              .filter(i => i.status === 'published' && i.type === 'workout')
+              .map(i => (i as any).templateId as string)
+              .filter(Boolean)
+          )}
+          draftTemplateIds={new Set(
+            ((myListings as StoreItem[]) ?? [])
+              .filter(i => i.status === 'draft' && i.type === 'workout')
+              .map(i => (i as any).templateId as string)
+              .filter(Boolean)
+          )}
         />
       );
     case 'stats':

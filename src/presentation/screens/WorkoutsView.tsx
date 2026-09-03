@@ -100,6 +100,10 @@ interface WorkoutsViewProps {
   isLoggedIn?: boolean;
   initialOpenCreateMenu?: boolean;
   onCreateMenuMounted?: () => void;
+  /** Set of templateIds that are currently published in the store (status=published). */
+  publishedTemplateIds?: Set<string>;
+  /** Set of templateIds that exist in the store as drafts (status=draft). */
+  draftTemplateIds?: Set<string>;
   /** Currently active sport (from global nav state). Used to filter templates. */
   activeSport?: string;
 }
@@ -179,6 +183,8 @@ interface TemplateCardProps {
   onStartWorkout: (t: WorkoutTemplate, sheetIndex?: number) => void;
   onSelectSheet: (t: WorkoutTemplate) => void;
   onCreateAd?: (t: WorkoutTemplate) => void;
+  publishedTemplateIds?: Set<string>;
+  draftTemplateIds?: Set<string>;
 }
 
 function TemplateCard({
@@ -199,7 +205,11 @@ function TemplateCard({
   onStartWorkout,
   onSelectSheet,
   onCreateAd,
+  publishedTemplateIds,
+  draftTemplateIds,
 }: TemplateCardProps) {
+  const isPublished = publishedTemplateIds?.has(template.id) ?? false;
+  const isInDraft   = draftTemplateIds?.has(template.id) ?? false;
   const hasSheets = !!(template.sheets && template.sheets.length > 0);
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(template.name);
@@ -442,26 +452,37 @@ function TemplateCard({
             <div className="fixed inset-0 z-[90]" onClick={() => setOpenSettingsId(null)} />
             <div
               style={{ position: 'fixed', top: dropdownPos.top, right: dropdownPos.right }}
-              className="w-36 bg-dark-card border border-dark-border rounded-2xl shadow-2xl z-[100] overflow-hidden"
+              className="w-44 bg-dark-card border border-dark-border rounded-2xl shadow-2xl z-[100] overflow-hidden"
             >
-              <button
-                onClick={startRename}
-                className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold hover:bg-white/5 transition-colors"
-              >
-                <Pen size={13} /> Renomear
-              </button>
-              <button
-                onClick={startEditing}
-                className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold hover:bg-white/5 transition-colors border-t border-dark-border"
-              >
-                <Edit size={13} /> Editar
-              </button>
-              <button
-                onClick={() => { onDeleteWorkout(template.id); setOpenSettingsId(null); }}
-                className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold text-red-400 hover:bg-white/5 transition-colors border-t border-dark-border"
-              >
-                <Trash2 size={13} /> Excluir
-              </button>
+              {isPublished ? (
+                <div className="px-4 py-3 space-y-1">
+                  <p className="text-[10px] font-black text-emerald-400 uppercase tracking-wider">Na Loja</p>
+                  <p className="text-[10px] text-white/35 leading-snug">
+                    Despublique o treino da loja para poder editá-lo ou excluí-lo.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={startRename}
+                    className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold hover:bg-white/5 transition-colors"
+                  >
+                    <Pen size={13} /> Renomear
+                  </button>
+                  <button
+                    onClick={startEditing}
+                    className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold hover:bg-white/5 transition-colors border-t border-dark-border"
+                  >
+                    <Edit size={13} /> Editar
+                  </button>
+                  <button
+                    onClick={() => { onDeleteWorkout(template.id); setOpenSettingsId(null); }}
+                    className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold text-red-400 hover:bg-white/5 transition-colors border-t border-dark-border"
+                  >
+                    <Trash2 size={13} /> Excluir
+                  </button>
+                </>
+              )}
             </div>
           </>,
           document.body
@@ -830,13 +851,26 @@ function TemplateCard({
           </div>
         )}
 
-        {mainUserProfile.userType === 'treinador' && onCreateAd && template.creatorEmail === mainUserProfile.email && (
-          <button
-            onClick={() => onCreateAd(template)}
-            className="w-full py-2.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl font-bold text-xs hover:bg-emerald-500/20 transition-colors active:scale-95"
-          >
-            Publicar na Loja
-          </button>
+        {mainUserProfile.userType === 'treinador' && template.creatorEmail === mainUserProfile.email && (
+          isPublished ? (
+            <div className="w-full py-2.5 flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10">
+              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider">Na Loja</span>
+            </div>
+          ) : isInDraft ? (
+            <button
+              onClick={() => onCreateAd?.(template)}
+              className="w-full py-2.5 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded-xl font-bold text-xs hover:bg-yellow-500/20 transition-colors active:scale-95"
+            >
+              Republicar na Loja
+            </button>
+          ) : onCreateAd ? (
+            <button
+              onClick={() => onCreateAd(template)}
+              className="w-full py-2.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl font-bold text-xs hover:bg-emerald-500/20 transition-colors active:scale-95"
+            >
+              Publicar na Loja
+            </button>
+          ) : null
         )}
       </div>
 
@@ -1152,6 +1186,8 @@ export function WorkoutsView({
   isLoggedIn,
   initialOpenCreateMenu,
   onCreateMenuMounted,
+  publishedTemplateIds,
+  draftTemplateIds,
   activeSport: activeSportProp = '',
 }: WorkoutsViewProps) {
   const [openSettingsId, setOpenSettingsId] = useState<string | null>(null);
@@ -1291,6 +1327,8 @@ export function WorkoutsView({
                 onStartWorkout={onStartWorkout}
                 onSelectSheet={setSelectingSheetTemplate}
                 onCreateAd={onCreateAd}
+                publishedTemplateIds={publishedTemplateIds}
+                draftTemplateIds={draftTemplateIds}
               />
             ))
           )}
