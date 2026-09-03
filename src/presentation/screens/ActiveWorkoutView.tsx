@@ -310,18 +310,47 @@ export function ActiveWorkoutView({
   const isLastStep = currentStep === flatSteps.length - 1;
   const isFirstStep = currentStep === 0;
 
-  const currentExerciseAllSetsDone = activeExercise?.sets.every(s => s.completed || s.corrected) ?? false;
-
   const currentSetNavigable = !!(activeExercise?.sets[activeSetIndex]?.completed || activeExercise?.sets[activeSetIndex]?.corrected);
 
-  const goNext = () => {
-    if (!currentSetNavigable) return;
-    if (isLastStep) { setShowConfirmFinish(true); return; }
-    const next = flatSteps[currentStep + 1];
-    if (next.ei !== activeExerciseIndex && !currentExerciseAllSetsDone) return;
+  const allSetsDone = completedSets === totalSets;
+
+  // Returns the index in flatSteps of the next incomplete set after `fromStep`,
+  // searching across all exercises. Returns -1 if none found.
+  const findNextIncompleteStep = (fromStep: number, exercises: typeof session.exercises): number => {
+    return flatSteps.findIndex(
+      (s, i) => i > fromStep && !exercises[s.ei].sets[s.si].completed && !exercises[s.ei].sets[s.si].corrected
+    );
+  };
+
+  const navigateToStep = (stepIndex: number) => {
+    if (stepIndex === -1) return;
+    const target = flatSteps[stepIndex];
     setSwipeDirection(1);
-    setActiveExerciseIndex(next.ei);
-    setActiveSetIndex(next.si);
+    setActiveExerciseIndex(target.ei);
+    setActiveSetIndex(target.si);
+  };
+
+  const goNext = () => {
+    if (isLastStep) {
+      if (allSetsDone) setShowConfirmFinish(true);
+      return;
+    }
+    if (!currentSetNavigable) return;
+    // If staying within the same exercise, go to next set sequentially
+    const next = flatSteps[currentStep + 1];
+    if (next.ei === activeExerciseIndex) {
+      setSwipeDirection(1);
+      setActiveExerciseIndex(next.ei);
+      setActiveSetIndex(next.si);
+      return;
+    }
+    // Crossing into a new exercise: jump to its first incomplete set
+    const nextIncomplete = findNextIncompleteStep(currentStep, session.exercises);
+    if (nextIncomplete === -1) {
+      setShowConfirmFinish(true);
+    } else {
+      navigateToStep(nextIncomplete);
+    }
   };
 
   const goPrev = () => {
@@ -517,22 +546,23 @@ export function ActiveWorkoutView({
               {/* Tabs + info card  physically connected */}
               <div>
                 <div className="flex items-start gap-2 overflow-x-auto no-scrollbar" style={{overflowY: 'visible'}}>
-                  {(session.exercises || []).map((ex, i) => {
-                    const isUnlocked = i === 0 || session.exercises[i - 1].sets.every(s => s.completed || s.corrected);
-                    return (
-                      <button
-                        key={ex.id}
-                        onClick={() => { if (isUnlocked) { setActiveExerciseIndex(i); setActiveSetIndex(0); } }}
-                        className={cn(
-                          'px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-colors',
-                          i === activeExerciseIndex ? 'text-black' : isUnlocked ? 'bg-white/5 text-white/40' : 'bg-white/5 text-white/20 opacity-40'
-                        )}
-                        style={i === activeExerciseIndex ? { backgroundColor: sportColor } : undefined}
-                      >
-                        {EXERCISES.find(e => e.id === ex.exerciseId)?.name}
-                      </button>
-                    );
-                  })}
+                  {(session.exercises || []).map((ex, i) => (
+                    <button
+                      key={ex.id}
+                      onClick={() => {
+                        const firstIncomplete = ex.sets.findIndex(s => !s.completed && !s.corrected);
+                        setActiveExerciseIndex(i);
+                        setActiveSetIndex(firstIncomplete !== -1 ? firstIncomplete : 0);
+                      }}
+                      className={cn(
+                        'px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-colors',
+                        i === activeExerciseIndex ? 'text-black' : 'bg-white/5 text-white/40'
+                      )}
+                      style={i === activeExerciseIndex ? { backgroundColor: sportColor } : undefined}
+                    >
+                      {EXERCISES.find(e => e.id === ex.exerciseId)?.name}
+                    </button>
+                  ))}
                 </div>
                 <div className="mt-3 rounded-2xl bg-white/5 border border-white/5 px-4 pt-2 pb-3">
                   <div className="flex gap-2">
@@ -547,7 +577,7 @@ export function ActiveWorkoutView({
               {/* Series sub-tabs */}
               <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
                 {activeExercise.sets.map((set, si) => {
-                  const isUnlocked = si === 0 || activeExercise.sets[si - 1].completed || activeExercise.sets[si - 1].corrected;
+                  const isUnlocked = si === 0 || activeExercise.sets.slice(0, si).every(s => s.completed || s.corrected);
                   return (
                     <button
                       key={si}
@@ -724,13 +754,8 @@ export function ActiveWorkoutView({
                     <button disabled={set.completed || !isSetReadyToComplete(set, getInputMode(exerciseDetails ?? { inputMode: undefined } as any))} onClick={() => {
                       updateSet(activeSetIndex, { completed: true });
                       if (set.corrected) {
-                        // Find next incomplete set in the flat step list after current position
-                        const nextIncomplete = flatSteps.findIndex((s, i) => i > currentStep && !sessionRef.current.exercises[s.ei].sets[s.si].completed);
-                        if (nextIncomplete !== -1) {
-                          setSwipeDirection(1);
-                          setActiveExerciseIndex(flatSteps[nextIncomplete].ei);
-                          setActiveSetIndex(flatSteps[nextIncomplete].si);
-                        }
+                        const nextIncomplete = findNextIncompleteStep(currentStep, sessionRef.current.exercises);
+                        if (nextIncomplete !== -1) navigateToStep(nextIncomplete);
                       }
                     }} className={cn('mt-3 w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm transition-colors disabled:cursor-not-allowed', set.completed ? 'bg-white/5 text-white/40' : isSetReadyToComplete(set, getInputMode(exerciseDetails ?? { inputMode: undefined } as any)) ? 'text-black' : 'bg-white/10 text-white/60 opacity-50')}
                     style={(!set.completed && isSetReadyToComplete(set, getInputMode(exerciseDetails ?? { inputMode: undefined } as any))) ? { backgroundColor: sportColor } : undefined}>
@@ -762,15 +787,15 @@ export function ActiveWorkoutView({
           </button>
           <span className="text-sm text-white/50 font-bold w-14 text-center">{currentStep + 1}/{totalSets}</span>
           <button
-            disabled={!currentSetNavigable}
+            disabled={(!currentSetNavigable && !isLastStep) || (isLastStep && !allSetsDone)}
             onClick={goNext}
             className={cn(
               'p-3 rounded-xl font-bold disabled:opacity-20',
-              isLastStep ? 'text-black px-5 text-xs' : 'bg-white/5'
+              isLastStep && allSetsDone ? 'text-black px-5 text-xs' : 'bg-white/5'
             )}
-            style={isLastStep ? { backgroundColor: sportColor } : undefined}
+            style={(isLastStep && allSetsDone) ? { backgroundColor: sportColor } : undefined}
           >
-            {isLastStep ? 'Finalizar' : <ChevronRight size={20} />}
+            {isLastStep && allSetsDone ? 'Finalizar' : <ChevronRight size={20} />}
           </button>
         </div>
       </motion.div>
