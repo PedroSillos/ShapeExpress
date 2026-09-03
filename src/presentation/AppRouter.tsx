@@ -473,6 +473,9 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           onUpdateTemplate={async (template: WorkoutTemplate) => {
             await updateTemplate(template);
           }}
+          onDeleteStoreItem={async (itemId: string) => {
+            await api.unpublishStoreItem(itemId);
+          }}
           userEmail={userProfile?.email}
           userType={userProfile?.userType === 'treinador' ? 'trainer' : 'athlete'}
           activeSport={activeSport}

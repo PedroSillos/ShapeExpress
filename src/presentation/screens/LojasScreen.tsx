@@ -13,6 +13,7 @@ export interface LojasScreenProps {
   onRenameStoreItem?: (itemId: string, newTitle: string) => void;
   onUpdateStoreItem?: (item: StoreItem) => void;
   onUpdateTemplate?: (template: WorkoutTemplate) => void;
+  onDeleteStoreItem?: (itemId: string) => Promise<void>;
   userEmail?: string;
   userType?: 'athlete' | 'trainer';
   activeSport?: string;
@@ -30,6 +31,7 @@ export function LojasScreen({
   onRenameStoreItem,
   onUpdateStoreItem,
   onUpdateTemplate,
+  onDeleteStoreItem,
   userEmail,
   userType,
   activeSport,
@@ -45,6 +47,7 @@ export function LojasScreen({
       onRenameStoreItem={onRenameStoreItem}
       onUpdateStoreItem={onUpdateStoreItem}
       onUpdateTemplate={onUpdateTemplate}
+      onDeleteStoreItem={onDeleteStoreItem}
       userEmail={userEmail}
       userType={userType}
       activeSport={activeSport}

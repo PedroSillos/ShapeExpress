@@ -84,6 +84,7 @@ interface StoreItemCardProps {
   onRenameStoreItem?: (itemId: string, newTitle: string) => void;
   onUpdateStoreItem?: (item: StoreItem) => void;
   onUpdateTemplate?: (template: WorkoutTemplate) => void;
+  onDeleteStoreItem?: (itemId: string) => Promise<void>;
 }
 
 function StoreItemCard({
@@ -100,6 +101,7 @@ function StoreItemCard({
   onRenameStoreItem,
   onUpdateStoreItem,
   onUpdateTemplate,
+  onDeleteStoreItem,
 }: StoreItemCardProps) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(item.title);
@@ -376,12 +378,10 @@ function StoreItemCard({
                 <Edit size={13} /> Editar
               </button>
               <button
-                onClick={() => {
-                  if (confirm(`Excluir "${item.title}" da loja?`)) {
-                    setOpenSettingsId(null);
-                    alert('Funcionalidade de exclusão será implementada.');
-                  } else {
-                    setOpenSettingsId(null);
+                onClick={async () => {
+                  setOpenSettingsId(null);
+                  if (confirm(`Despublicar "${item.title}" da loja?\n\nO treino voltará para rascunho e não ficará mais visível para compradores.`)) {
+                    await onDeleteStoreItem?.(item.id);
                   }
                 }}
                 className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold text-red-400 hover:bg-white/5 transition-colors border-t border-dark-border"
@@ -707,6 +707,7 @@ export interface StoreTabProps {
   onRenameStoreItem?: (itemId: string, newTitle: string) => void;
   onUpdateStoreItem?: (item: StoreItem) => void;
   onUpdateTemplate?: (template: WorkoutTemplate) => void;
+  onDeleteStoreItem?: (itemId: string) => Promise<void>;
   tabSwitcher?: React.ReactNode;
   userEmail?: string;
   userType?: 'athlete' | 'trainer';
@@ -724,6 +725,7 @@ export function StoreTab({
   onRenameStoreItem,
   onUpdateStoreItem,
   onUpdateTemplate,
+  onDeleteStoreItem,
   tabSwitcher,
   userEmail,
   userType,
@@ -980,6 +982,7 @@ export function StoreTab({
                     onRenameStoreItem={onRenameStoreItem}
                     onUpdateStoreItem={onUpdateStoreItem}
                     onUpdateTemplate={onUpdateTemplate}
+                    onDeleteStoreItem={onDeleteStoreItem}
                   />
                 );
               })}
