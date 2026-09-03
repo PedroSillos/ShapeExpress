@@ -109,8 +109,9 @@ service cloud.firestore {
       // Public profile: name, avatar, userType, specialties, bio, etc.
       // Anyone authenticated can read — needed for social features, trainer search.
       allow get: if isAuthenticated();
-      // List only for trainers (needed to search students, list trainers in marketplace)
-      allow list: if isAuthenticated() && isTrainer();
+      // List: todos listam todos.
+      // Dados sensíveis (altura, peso, nascimento) ficam em /private/data
+      allow list: if isAuthenticated();
       allow create, update: if isOwner(email) && isValidUserProfile(request.resource.data);
       allow delete: if isAdmin();
 
