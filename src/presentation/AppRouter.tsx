@@ -455,6 +455,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       return (
         <LojasScreen
           storeItems={(storeItems as StoreItem[]) ?? []}
+          myListings={(myListings as StoreItem[]) ?? []}
           myPurchases={(myPurchases as StorePurchase[]) ?? []}
           templates={filteredTemplates ?? []}
           isLoadingItems={!!isLoadingItems}
@@ -475,6 +476,9 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           }}
           onDeleteStoreItem={async (itemId: string) => {
             await api.unpublishStoreItem(itemId);
+          }}
+          onRepublishStoreItem={async (itemId: string) => {
+            await api.republishStoreItem(itemId);
           }}
           userEmail={userProfile?.email}
           userType={userProfile?.userType === 'treinador' ? 'trainer' : 'athlete'}

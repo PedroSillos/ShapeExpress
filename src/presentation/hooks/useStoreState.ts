@@ -187,6 +187,26 @@ export const useStoreState = (
     setStoreItems((prev) => prev.filter((i) => i.id !== itemId));
   }, []);
 
+  // ── Republish a draft item ───────────────────────────────────────────────
+  const republishItem = useCallback(async (itemId: string) => {
+    await updateDoc(doc(db, "store_items", itemId), { status: "published" });
+    setMyListings((prev) => {
+      const updated = prev.map((i) =>
+        i.id === itemId ? { ...i, status: "published" as const } : i,
+      );
+      // Add back to public store list if not already there
+      const item = updated.find((i) => i.id === itemId);
+      if (item) {
+        setStoreItems((s) =>
+          s.some((i) => i.id === itemId)
+            ? s.map((i) => (i.id === itemId ? item : i))
+            : [item, ...s],
+        );
+      }
+      return updated;
+    });
+  }, []);
+
   // ── Update a store item ───────────────────────────────────────────────────
   const updateStoreItem = useCallback(async (item: StoreItem) => {
     const { id, ...data } = item;
@@ -306,6 +326,7 @@ export const useStoreState = (
     loadMyListings,
     publishItem,
     unpublishItem,
+    republishItem,
     updateStoreItem,
     claimFreeItem,
     // Legacy

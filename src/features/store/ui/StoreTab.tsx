@@ -85,6 +85,7 @@ interface StoreItemCardProps {
   onUpdateStoreItem?: (item: StoreItem) => void;
   onUpdateTemplate?: (template: WorkoutTemplate) => void;
   onDeleteStoreItem?: (itemId: string) => Promise<void>;
+  onRepublishStoreItem?: (itemId: string) => Promise<void>;
 }
 
 function StoreItemCard({
@@ -102,6 +103,7 @@ function StoreItemCard({
   onUpdateStoreItem,
   onUpdateTemplate,
   onDeleteStoreItem,
+  onRepublishStoreItem,
 }: StoreItemCardProps) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(item.title);
@@ -602,7 +604,7 @@ function StoreItemCard({
             </div>
 
             {/* Status badge */}
-            <div className="flex items-center">
+            <div className="flex items-center justify-between">
               {item.status === 'draft' && (
                 <span className="px-2 py-1 bg-yellow-500/20 border border-yellow-500/40 rounded text-[9px] font-black text-yellow-400 uppercase tracking-wider">
                   Rascunho
@@ -612,6 +614,17 @@ function StoreItemCard({
                 <span className="px-2 py-1 bg-emerald-500/20 border border-emerald-500/40 rounded text-[9px] font-black text-emerald-400 uppercase tracking-wider">
                   Publicado
                 </span>
+              )}
+              {item.status === 'draft' && onRepublishStoreItem && (
+                <button
+                  onClick={async () => {
+                    await onRepublishStoreItem(item.id);
+                  }}
+                  className="px-3 py-1.5 rounded-xl text-[10px] font-black text-white active:scale-95 transition-all"
+                  style={{ backgroundColor: sportColor }}
+                >
+                  Republicar
+                </button>
               )}
             </div>
           </div>
@@ -699,6 +712,7 @@ function StoreItemCard({
 
 export interface StoreTabProps {
   storeItems: StoreItem[];
+  myListings?: StoreItem[];
   myPurchases: StorePurchase[];
   templates: WorkoutTemplate[];
   isLoadingItems: boolean;
@@ -708,6 +722,7 @@ export interface StoreTabProps {
   onUpdateStoreItem?: (item: StoreItem) => void;
   onUpdateTemplate?: (template: WorkoutTemplate) => void;
   onDeleteStoreItem?: (itemId: string) => Promise<void>;
+  onRepublishStoreItem?: (itemId: string) => Promise<void>;
   tabSwitcher?: React.ReactNode;
   userEmail?: string;
   userType?: 'athlete' | 'trainer';
@@ -717,6 +732,7 @@ export interface StoreTabProps {
 
 export function StoreTab({
   storeItems,
+  myListings,
   myPurchases,
   templates,
   isLoadingItems,
@@ -726,6 +742,7 @@ export function StoreTab({
   onUpdateStoreItem,
   onUpdateTemplate,
   onDeleteStoreItem,
+  onRepublishStoreItem,
   tabSwitcher,
   userEmail,
   userType,
@@ -741,8 +758,12 @@ export function StoreTab({
   const purchasedItemIds = new Set(myPurchases.map((p) => p.itemId));
   const storeWorkouts = storeItems.filter((i) => i.type === 'workout');
   const myPurchasedItems = storeWorkouts.filter((i) => purchasedItemIds.has(i.id));
+  // Use myListings (all statuses) for the trainer's storefront so drafts are visible too.
+  // Fall back to filtering storeItems if myListings is not provided.
   const myAnnouncements = userEmail && userType === 'trainer'
-    ? storeWorkouts.filter((i) => i.creatorEmail.toLowerCase() === userEmail.toLowerCase())
+    ? (myListings
+        ? myListings.filter((i) => i.type === 'workout')
+        : storeWorkouts.filter((i) => i.creatorEmail.toLowerCase() === userEmail.toLowerCase()))
     : [];
   const myAnnouncementIds = new Set(myAnnouncements.map((a) => a.id));
 
@@ -983,6 +1004,7 @@ export function StoreTab({
                     onUpdateStoreItem={onUpdateStoreItem}
                     onUpdateTemplate={onUpdateTemplate}
                     onDeleteStoreItem={onDeleteStoreItem}
+                    onRepublishStoreItem={onRepublishStoreItem}
                   />
                 );
               })}

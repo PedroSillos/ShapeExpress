@@ -151,6 +151,7 @@ export const useAppState = () => {
     claimFreeItem: store.claimFreeItem,
     publishStoreItem: store.publishItem,
     unpublishStoreItem: store.unpublishItem,
+    republishStoreItem: store.republishItem,
     onUpdateStoreItem: store.updateStoreItem,
 
     // Misc

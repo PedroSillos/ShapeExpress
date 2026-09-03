@@ -5,6 +5,7 @@ import { StoreItem, StorePurchase, WorkoutTemplate } from '@/src/domain/entities
 
 export interface LojasScreenProps {
   storeItems: StoreItem[];
+  myListings?: StoreItem[];
   myPurchases: StorePurchase[];
   templates: WorkoutTemplate[];
   isLoadingItems: boolean;
@@ -14,6 +15,7 @@ export interface LojasScreenProps {
   onUpdateStoreItem?: (item: StoreItem) => void;
   onUpdateTemplate?: (template: WorkoutTemplate) => void;
   onDeleteStoreItem?: (itemId: string) => Promise<void>;
+  onRepublishStoreItem?: (itemId: string) => Promise<void>;
   userEmail?: string;
   userType?: 'athlete' | 'trainer';
   activeSport?: string;
@@ -23,6 +25,7 @@ export interface LojasScreenProps {
 
 export function LojasScreen({
   storeItems,
+  myListings,
   myPurchases,
   templates,
   isLoadingItems,
@@ -32,6 +35,7 @@ export function LojasScreen({
   onUpdateStoreItem,
   onUpdateTemplate,
   onDeleteStoreItem,
+  onRepublishStoreItem,
   userEmail,
   userType,
   activeSport,
@@ -39,6 +43,7 @@ export function LojasScreen({
   return (
     <StoreTab
       storeItems={storeItems}
+      myListings={myListings}
       myPurchases={myPurchases}
       templates={templates}
       isLoadingItems={isLoadingItems}
@@ -48,6 +53,7 @@ export function LojasScreen({
       onUpdateStoreItem={onUpdateStoreItem}
       onUpdateTemplate={onUpdateTemplate}
       onDeleteStoreItem={onDeleteStoreItem}
+      onRepublishStoreItem={onRepublishStoreItem}
       userEmail={userEmail}
       userType={userType}
       activeSport={activeSport}
