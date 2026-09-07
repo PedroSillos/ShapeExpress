@@ -619,7 +619,6 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           streak={state.goalStreak ?? userStats.streak ?? 0}
           sports={sports}
           friendsCount={friendsCount}
-          onAddFriends={() => switchTab(userProfile?.userType === 'treinador' ? 'students' : 'trainers')}
           onSettings={() => state.setShowSettings(true)}
         />
       ) : (

@@ -1,4 +1,5 @@
-import { Settings, Flame, Zap, Trophy, Dumbbell, UserPlus } from 'lucide-react';
+import { Settings, Flame, Zap, Trophy, Dumbbell, Copy, Check } from 'lucide-react';
+import { useState } from 'react';
 import type { UserProfile, UserStats } from '../../../domain/entities';
 import { fullName } from '../../../domain/entities';
 
@@ -55,7 +56,6 @@ interface ProfileUserViewProps {
   streak: number;
   sports: string[];
   friendsCount: number;
-  onAddFriends?: () => void;
   onSettings?: () => void;
 }
 
@@ -65,7 +65,6 @@ export function ProfileUserView({
   streak,
   sports,
   friendsCount,
-  onAddFriends,
   onSettings,
 }: ProfileUserViewProps) {
   const joinYear = new Date().getFullYear();
@@ -88,6 +87,9 @@ export function ProfileUserView({
   const sportIconSrc = SPORT_ICONS[primarySport] ?? iconMusculacao;
   const sportColor = SPORT_COLORS[primarySport] ?? '#dc2626';
   const sportFilter = SPORT_FILTERS[sportColor] ?? SPORT_FILTERS['#dc2626'];
+
+  const isTrainer = userProfile.userType === 'treinador';
+  const [codeCopied, setCodeCopied] = useState(false);
 
   return (
     <div className="min-h-screen bg-dark-surface flex flex-col">
@@ -145,16 +147,33 @@ export function ProfileUserView({
         </div>
       </div>
 
-      {/* ── Adicionar amigos button ── */}
-      <div className="px-4">
-        <button
-          onClick={onAddFriends}
-          className="w-full flex items-center justify-center gap-2 bg-white/10 rounded-2xl py-4 text-white font-bold text-sm uppercase tracking-wider hover:bg-white/15 active:bg-white/20 transition-colors"
-        >
-          <UserPlus size={18} />
-          Adicionar amigos
-        </button>
-      </div>
+      {/* ── Código do treinador (somente treinador) ── */}
+      {isTrainer && userProfile.personalCode && (
+        <div className="px-4">
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(userProfile.personalCode!);
+              setCodeCopied(true);
+              setTimeout(() => setCodeCopied(false), 2000);
+            }}
+            className="w-full flex items-center justify-between gap-3 bg-sky-500/10 border border-sky-500/20 rounded-2xl px-5 py-4 text-sky-400 hover:bg-sky-500/20 active:scale-[0.98] transition-all"
+          >
+            <div className="text-left">
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Código de treinador</p>
+              <p className="text-xl font-black tracking-widest text-white mt-0.5">{userProfile.personalCode}</p>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              {codeCopied
+                ? <Check size={20} className="text-emerald-400" />
+                : <Copy size={20} className="opacity-60" />
+              }
+              <span className="text-[9px] font-bold uppercase tracking-widest opacity-60">
+                {codeCopied ? 'Copiado!' : 'Copiar'}
+              </span>
+            </div>
+          </button>
+        </div>
+      )}
 
       {/* ── Overview ── */}
       <div className="px-4 mt-8">

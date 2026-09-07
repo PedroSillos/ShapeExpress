@@ -5,7 +5,8 @@ import {
   Search, X, ChevronRight, 
   Trash2, ShieldCheck, AlertTriangle,
   Trophy, Target, Dumbbell, User,
-  DollarSign, PieChart, AlertCircle, CalendarPlus, UserMinus, Percent, Users
+  DollarSign, PieChart, AlertCircle, CalendarPlus, UserMinus, Percent, Users,
+  Copy, Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../utils/cn';
@@ -37,6 +38,7 @@ export function StudentsView({ students, userProfile, pendingRequests, outgoingR
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [confirmConnectionUser, setConfirmConnectionUser] = useState<UserProfile | null>(null);
   const [isSendingRequest, setIsSendingRequest] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
 
   // Debounced search — fires 400 ms after the user stops typing
   useEffect(() => {
@@ -99,6 +101,32 @@ export function StudentsView({ students, userProfile, pendingRequests, outgoingR
         </div>
         <ChevronRight size={20} className="opacity-50" />
       </button>
+
+      {/* ── Card de Código do Treinador ──────────────────────── */}
+      {userProfile.userType === 'treinador' && userProfile.personalCode && (
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(userProfile.personalCode!);
+            setCodeCopied(true);
+            setTimeout(() => setCodeCopied(false), 2000);
+          }}
+          className="w-full flex items-center justify-between gap-3 bg-sky-500/10 border border-sky-500/20 rounded-2xl px-5 py-4 text-sky-400 hover:bg-sky-500/20 active:scale-[0.98] transition-all"
+        >
+          <div className="text-left">
+            <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">Código de treinador</p>
+            <p className="text-xl font-black tracking-widest text-white mt-0.5">{userProfile.personalCode}</p>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            {codeCopied
+              ? <Check size={20} className="text-emerald-400" />
+              : <Copy size={20} className="opacity-60" />
+            }
+            <span className="text-[9px] font-bold uppercase tracking-widest opacity-60">
+              {codeCopied ? 'Copiado!' : 'Copiar'}
+            </span>
+          </div>
+        </button>
+      )}
 
       {/* ── Botão de Busca ────────────────────────────────────── */}
       <button
