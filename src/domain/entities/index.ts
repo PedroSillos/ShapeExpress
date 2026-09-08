@@ -157,6 +157,8 @@ export interface WorkoutTemplateExercise {
   notes?: string;
   substitutions?: string[];
   speedKmh?: number;
+  /** Default weight (kg) for weight_reps exercises, defined during template creation */
+  defaultWeight?: number;
 }
 
 export interface WorkoutSheet {

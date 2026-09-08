@@ -505,58 +505,6 @@ export function CreateWorkoutView({
 
   const sport = selectedSport;
 
-  // Draft saving logic
-  useEffect(() => {
-    if (initialTemplate) return; // Don't save drafts when editing existing templates
-    
-    const draft = {
-      protocolName,
-      category,
-      selectedSport,
-      startDate,
-      endDate,
-      cycles,
-      numSheets,
-      sheets,
-      step
-    };
-    localStorage.setItem(STORAGE_KEYS.WORKOUT_DRAFT, JSON.stringify(draft));
-  }, [protocolName, category, selectedSport, startDate, endDate, cycles, numSheets, sheets, step, initialTemplate]);
-
-  // Load draft on mount
-  useEffect(() => {
-    if (initialTemplate) return;
-    
-    const savedDraft = localStorage.getItem(STORAGE_KEYS.WORKOUT_DRAFT);
-    if (savedDraft) {
-      try {
-        const draft = JSON.parse(savedDraft);
-        // Only ask if there's actual progress
-        if (draft.protocolName || draft.cycles.length > 0 || draft.sheets[0].exerciseIds.length > 0) {
-          if (confirm('Você tem um rascunho de treino não finalizado. Deseja continuar de onde parou?')) {
-            setProtocolName(draft.protocolName);
-            setCategory(draft.category);
-            if (draft.selectedSport) setSelectedSport(draft.selectedSport);
-            setStartDate(draft.startDate);
-            setEndDate(draft.endDate);
-            setCycles(draft.cycles);
-            setNumSheets(draft.numSheets);
-            setSheets(draft.sheets);
-            setStep(draft.step);
-          } else {
-            localStorage.removeItem(STORAGE_KEYS.WORKOUT_DRAFT);
-          }
-        }
-      } catch (e) {
-        console.error('Error loading draft', e);
-      }
-    }
-  }, [initialTemplate]);
-
-  const clearDraft = () => {
-    localStorage.removeItem(STORAGE_KEYS.WORKOUT_DRAFT);
-  };
-  
   const [activeSheetIndex, setActiveSheetIndex] = useState(0);
   const [showFichasInfo, setShowFichasInfo] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -610,6 +558,7 @@ export function CreateWorkoutView({
           rest: '1 min',
           notes: '',
           ...(exInputMode === 'duration_speed' ? { speedKmh: getDefaultSpeed(id) } : {}),
+          ...(exInputMode === 'weight_reps' ? { defaultWeight: exerciseData?.defaultWeight ?? 20 } : {}),
         }];
       }
       newSheets[activeSheetIndex] = sheet;
@@ -688,7 +637,6 @@ export function CreateWorkoutView({
         alert('Erro ao salvar ciclo.');
       }
     } else {
-      clearDraft();
       onSave({
         id: initialTemplate?.id || Date.now().toString(),
         userId: studentEmail ?? userProfile?.email,
@@ -716,7 +664,6 @@ export function CreateWorkoutView({
         return alert('Todos os ciclos devem ter vezes por semana configuradas antes de finalizar. Confira os ciclos destacados.');
       }
     }
-    clearDraft();
     onSave({
       id: initialTemplate?.id || Date.now().toString(),
       userId: studentEmail ?? userProfile?.email,

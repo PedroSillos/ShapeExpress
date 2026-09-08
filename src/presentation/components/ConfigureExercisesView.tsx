@@ -95,10 +95,6 @@ export function ConfigureExercisesView({
     }
   };
 
-  const repOptions = ['6–8', '8–10', '10–12', '12–15', 'Personalizado'];
-
-  const isCustomReps = !repOptions.slice(0, 4).includes(currentConfig.sets);
-
   return (
     <div className="fixed inset-0 bg-dark-surface z-[100] flex flex-col">
       {/* Header */}
@@ -357,78 +353,117 @@ export function ConfigureExercisesView({
                 >
                   <TrendingUp size={16} />
                 </div>
-                <h4 className="font-bold uppercase text-xs tracking-widest">
-                  {inputMode === 'reps_only' ? 'Repetições por Série' : 'Séries / Repetições'}
-                </h4>
+                <h4 className="font-bold uppercase text-xs tracking-widest">Repetições por Série</h4>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                {repOptions.map(option => {
-                  const isSelected = option === 'Personalizado' ? isCustomReps : currentConfig.sets === option;
-                  return (
+              {(() => {
+                // Normalize legacy formats ("8–10", "10,10,12", "10") to a plain integer
+                const parseReps = (v: string): number => {
+                  if (/^\d+$/.test(v.trim())) return Math.min(20, Math.max(1, parseInt(v)));
+                  // "8–10" or "8-10" → take the upper bound
+                  const rangeMatch = v.match(/(\d+)\s*[–-]\s*(\d+)/);
+                  if (rangeMatch) return Math.min(20, Math.max(1, parseInt(rangeMatch[2])));
+                  // "10,10,12" → take first value
+                  const first = v.split(',')[0].trim();
+                  const n = parseInt(first);
+                  return isNaN(n) ? 10 : Math.min(20, Math.max(1, n));
+                };
+                const reps = parseReps(currentConfig.sets);
+                return (
+                  <div className="flex items-center justify-between bg-dark-card border border-dark-border rounded-2xl p-4">
                     <button
-                      key={option}
-                      onClick={() => {
-                        if (option === 'Personalizado') {
-                          if (!isCustomReps) {
-                            const baseVal = currentConfig.sets.includes('–') ? currentConfig.sets.split('–')[1] : currentConfig.sets;
-                            updateConfig({ sets: Array(currentConfig.numSets).fill(baseVal || '10').join(',') });
-                          }
-                        } else {
-                          updateConfig({ sets: option });
-                        }
-                      }}
-                      className={cn(
-                        "py-4 rounded-2xl font-bold text-sm transition-all relative overflow-hidden",
-                        isSelected
-                          ? "text-white shadow-lg"
-                          : "bg-dark-card border border-dark-border text-white/40"
-                      )}
-                      style={isSelected ? { backgroundColor: sportColor, boxShadow: `0 0 15px ${sportColor}4d` } : undefined}
+                      onClick={() => updateConfig({ sets: String(Math.max(1, reps - 1)) })}
+                      className="w-10 h-10 rounded-full border border-dark-border flex items-center justify-center text-xl font-bold hover:bg-white/5 transition-colors"
                     >
-                      {option}
-                      {isSelected && <motion.div layoutId="rep-glow" className="absolute inset-0 bg-white/10" />}
+                      -
                     </button>
-                  );
-                })}
+                    <span className="text-3xl font-display font-bold" style={{ color: sportColor }}>{reps}</span>
+                    <button
+                      onClick={() => updateConfig({ sets: String(Math.min(20, reps + 1)) })}
+                      className="w-10 h-10 rounded-full border border-dark-border flex items-center justify-center text-xl font-bold hover:bg-white/5 transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
+                );
+              })()}
+            </div>
+          );
+        })()}
+
+        {/* Default Weight — only for weight_reps exercises */}
+        {(() => {
+          const inputMode = getInputMode(exercise ?? { inputMode: undefined } as any);
+          if (inputMode !== 'weight_reps') return null;
+
+          const weight = currentConfig.defaultWeight ?? 20;
+          const [isEditing, setIsEditing] = React.useState(false);
+          const [editValue, setEditValue] = React.useState('');
+
+          const handleStartEdit = () => {
+            setEditValue(String(weight));
+            setIsEditing(true);
+          };
+
+          const handleCommitEdit = () => {
+            const parsed = parseFloat(editValue.replace(',', '.'));
+            if (!isNaN(parsed) && parsed >= 0) {
+              // Round to nearest 0.5
+              updateConfig({ defaultWeight: Math.round(parsed * 2) / 2 });
+            }
+            setIsEditing(false);
+          };
+
+          return (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: `${sportColor}1a`, color: sportColor }}
+                >
+                  <Dumbbell size={16} />
+                </div>
+                <h4 className="font-bold uppercase text-xs tracking-widest">Peso Padrão</h4>
               </div>
-              <AnimatePresence>
-                {isCustomReps && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden space-y-3"
+              <div className="flex items-center justify-between bg-dark-card border border-dark-border rounded-2xl p-4">
+                <button
+                  onClick={() => updateConfig({ defaultWeight: Math.max(0, Math.round((weight - 2.5) * 10) / 10) })}
+                  className="w-10 h-10 rounded-full border border-dark-border flex items-center justify-center text-xl font-bold hover:bg-white/5 transition-colors"
+                >
+                  -
+                </button>
+                {isEditing ? (
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onBlur={handleCommitEdit}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleCommitEdit(); }}
+                    autoFocus
+                    className="w-24 bg-transparent border-b border-white/20 text-3xl font-display font-bold text-center focus:outline-none"
+                    style={{ color: sportColor }}
+                  />
+                ) : (
+                  <button
+                    onClick={handleStartEdit}
+                    className="flex flex-col items-center"
                   >
-                    <div className="grid grid-cols-3 gap-2">
-                      {Array.from({ length: currentConfig.numSets }).map((_, i) => {
-                        const repsArray = currentConfig.sets.split(',').map(s => s.trim());
-                        const currentVal = repsArray[i] !== undefined ? repsArray[i] : (repsArray[0] || '10');
-                        return (
-                          <div key={i} className="flex flex-col items-center gap-1 bg-dark-card border border-white/5 rounded-xl p-2">
-                            <span className="text-[8px] text-white/20 font-bold uppercase">Série {i + 1}</span>
-                            <input
-                              type="text"
-                              inputMode="numeric"
-                              value={currentVal}
-                              onChange={(e) => {
-                                const newReps = [...repsArray];
-                                while (newReps.length < currentConfig.numSets) {
-                                  newReps.push(newReps[newReps.length - 1] || '10');
-                                }
-                                newReps[i] = e.target.value;
-                                updateConfig({ sets: newReps.join(',') });
-                              }}
-                              className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-center font-bold text-sm"
-                              style={{ color: sportColor }}
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <p className="text-[8px] text-white/20 text-center uppercase font-bold tracking-widest">Repetições individuais por série</p>
-                  </motion.div>
+                    <span className="text-3xl font-display font-bold" style={{ color: sportColor }}>
+                      {weight % 1 === 0 ? weight : weight.toFixed(1)}
+                    </span>
+                    <span className="text-[8px] text-white/20 font-bold uppercase tracking-widest mt-0.5">kg</span>
+                  </button>
                 )}
-              </AnimatePresence>
+                <button
+                  onClick={() => updateConfig({ defaultWeight: Math.round((weight + 2.5) * 10) / 10 })}
+                  className="w-10 h-10 rounded-full border border-dark-border flex items-center justify-center text-xl font-bold hover:bg-white/5 transition-colors"
+                >
+                  +
+                </button>
+              </div>
+              <p className="text-[8px] text-white/20 text-center uppercase font-bold tracking-widest">
+                Toque no valor para editar manualmente
+              </p>
             </div>
           );
         })()}
