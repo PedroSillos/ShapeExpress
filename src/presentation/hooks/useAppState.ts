@@ -12,12 +12,15 @@ import { useProgressState } from "./useProgressState";
 import { useStudentsState } from "./useStudentsState";
 import { useStoreState } from "./useStoreState";
 import { useSyncState } from "./useSyncState";
+import { useRestTimer } from "./useRestTimer";
+import type { RestTimerState } from "./useRestTimer";
 
 export const useAppState = () => {
   const auth = useAuthState();
   const nav = useNavigationState();
   const profile = useProfileState(auth.currentUser);
   const workout = useWorkoutState(auth.currentUser, auth.token, profile.userProfile);
+  const restTimer = useRestTimer();
   const progress = useProgressState(workout.userSessions, profile.userStats);
   const students = useStudentsState(auth.currentUser, auth.token);
   
@@ -263,5 +266,8 @@ export const useAppState = () => {
     // Composed
     api,
     resetUserStates,
+
+    // Rest timer — global so countdown survives navigation between tabs
+    restTimer: restTimer as RestTimerState,
   };
 };

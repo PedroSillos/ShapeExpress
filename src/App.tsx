@@ -265,6 +265,7 @@ export default function App() {
           userProfile={userProfile}
           switchTab={switchTab}
           onStudentsClick={() => { setSelectedStudentForProfile(null); switchTab('students'); }}
+          restTimer={appState.restTimer}
         />
 
         <WorkoutSelectorModal

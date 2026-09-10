@@ -29,6 +29,7 @@ import { Badge } from '../components/Badge';
 import { ProgressBar } from '../components/ProgressBar';
 import { cn } from '../../utils/cn';
 import { EXERCISES } from '@/src/domain/entities/exercises';
+import type { RestTimerState } from '../hooks/useRestTimer';
 
 const SPORT_COLORS: Record<string, string> = {
   'Musculação':     '#dc2626',
@@ -52,6 +53,7 @@ interface ActiveWorkoutViewProps {
   userProfile: UserTrainingProfile;
   exerciseStats: ExerciseUserStats[];
   mainUserProfile: UserProfile;
+  restTimer?: RestTimerState;
 }
 
 function StepperButton({ label, onStep }: { label: string; onStep: () => void }) {
@@ -100,7 +102,8 @@ export function ActiveWorkoutView({
   isEditing,
   userProfile,
   exerciseStats,
-  mainUserProfile
+  mainUserProfile,
+  restTimer,
 }: ActiveWorkoutViewProps) {
   const sportColor = (() => {
     // Prefer the sport from the active workout's template
@@ -122,7 +125,6 @@ export function ActiveWorkoutView({
   const [activeExerciseIndex, setActiveExerciseIndex] = useState(0);
   const [activeSetIndex, setActiveSetIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState(0);
-  const [restCountdown, setRestCountdown] = useState<number | null>(null);
   const [showConfirmFinish, setShowConfirmFinish] = useState(false);
   const [showConfirmCancel, setShowConfirmCancel] = useState(false);
   const [showConfirmDeleteSet, setShowConfirmDeleteSet] = useState(false);
@@ -179,15 +181,6 @@ export function ActiveWorkoutView({
     }, 1000);
     return () => clearInterval(interval);
   }, [session.startTime, isEditing]);
-
-
-
-  useEffect(() => {
-    if (restCountdown === null) return;
-    if (restCountdown <= 0) { setRestCountdown(null); goNext(); return; }
-    const t = setTimeout(() => setRestCountdown(c => (c ?? 1) - 1), 1000);
-    return () => clearTimeout(t);
-  }, [restCountdown]);
 
 
   const parseRestTime = (restStr: string, setIndex?: number): number => {
@@ -276,7 +269,10 @@ export function ActiveWorkoutView({
         if (isLastStep) {
           setShowConfirmFinish(true);
         } else {
-          setRestCountdown(parseRestTime(set.rest || '60s'));
+          // Start the global rest timer — survives navigation between tabs.
+          // Use goNextRef so the callback always reads the latest state when
+          // it fires (avoids stale closure over currentStep / flatSteps).
+          restTimer?.start(parseRestTime(set.rest || '60s'), () => goNextRef.current());
         }
       }
     } else if (wasCompleted && updates.completed) {
@@ -353,6 +349,12 @@ export function ActiveWorkoutView({
     }
   };
 
+  // Always keep goNextRef pointing to the latest goNext so callbacks
+  // scheduled by the rest timer (which fires after a delay) never read
+  // stale closures.
+  const goNextRef = React.useRef(goNext);
+  React.useEffect(() => { goNextRef.current = goNext; });
+
   const goPrev = () => {
     if (isFirstStep) return;
     const prev = flatSteps[currentStep - 1];
@@ -372,15 +374,15 @@ export function ActiveWorkoutView({
     );
   }
 
-  if (restCountdown !== null && restCountdown > 0) {
+  if (restTimer?.isResting) {
     return (
       <div className="fixed inset-0 bg-dark-surface z-[100] flex flex-col items-center justify-center gap-8 p-6">
         <p className="text-white/40 font-bold uppercase tracking-widest text-sm">Descansando...</p>
         <div className="w-40 h-40 rounded-full border-4 flex items-center justify-center" style={{ borderColor: sportColorAlpha(0.3) }}>
-          <span className="text-6xl font-black font-mono" style={{ color: sportColor }}>{restCountdown}</span>
+          <span className="text-6xl font-black font-mono" style={{ color: sportColor }}>{restTimer.remaining}</span>
         </div>
         <button
-          onClick={() => { setRestCountdown(null); goNext(); }}
+          onClick={() => restTimer.skip()}
           className="px-8 py-4 bg-white/5 rounded-2xl font-bold text-white/60 active:scale-95 transition-transform"
         >
           Pular descanso
@@ -751,17 +753,57 @@ export function ActiveWorkoutView({
                         </div>
                       );
                     })()}
-                    <button disabled={set.completed || !isSetReadyToComplete(set, getInputMode(exerciseDetails ?? { inputMode: undefined } as any))} onClick={() => {
-                      updateSet(activeSetIndex, { completed: true });
-                      if (set.corrected) {
-                        const nextIncomplete = findNextIncompleteStep(currentStep, sessionRef.current.exercises);
-                        if (nextIncomplete !== -1) navigateToStep(nextIncomplete);
-                      }
-                    }} className={cn('mt-3 w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm transition-colors disabled:cursor-not-allowed', set.completed ? 'bg-white/5 text-white/40' : isSetReadyToComplete(set, getInputMode(exerciseDetails ?? { inputMode: undefined } as any)) ? 'text-black' : 'bg-white/10 text-white/60 opacity-50')}
-                    style={(!set.completed && isSetReadyToComplete(set, getInputMode(exerciseDetails ?? { inputMode: undefined } as any))) ? { backgroundColor: sportColor } : undefined}>
-                      <CheckCircle2 size={18} fill={set.completed ? 'currentColor' : 'none'} stroke="currentColor" />
-                      {set.completed ? 'Série concluída' : set.corrected ? 'Corrigir série' : 'Concluir série'}
-                    </button>
+                    {/* CONCLUIR SÉRIE button — shows progress bar overlay while rest timer runs */}
+                    {(() => {
+                      const inputMode = getInputMode(exerciseDetails ?? { inputMode: undefined } as any);
+                      const isReady = isSetReadyToComplete(set, inputMode);
+                      const isResting = !!restTimer?.isResting && set.completed;
+                      const restProgress = restTimer?.progress ?? 0;
+
+                      return (
+                        <div className="mt-3 relative overflow-hidden rounded-xl">
+                          <button
+                            disabled={set.completed || !isReady}
+                            onClick={() => {
+                              updateSet(activeSetIndex, { completed: true });
+                              if (set.corrected) {
+                                const nextIncomplete = findNextIncompleteStep(currentStep, sessionRef.current.exercises);
+                                if (nextIncomplete !== -1) navigateToStep(nextIncomplete);
+                              }
+                            }}
+                            className={cn(
+                              'w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-sm transition-colors disabled:cursor-not-allowed',
+                              set.completed
+                                ? 'bg-white/5 text-white/40'
+                                : isReady
+                                  ? 'text-black'
+                                  : 'bg-white/10 text-white/60 opacity-50'
+                            )}
+                            style={(!set.completed && isReady) ? { backgroundColor: sportColor } : undefined}
+                          >
+                            <CheckCircle2 size={18} fill={set.completed ? 'currentColor' : 'none'} stroke="currentColor" />
+                            {set.completed
+                              ? isResting
+                                ? `Descansando… ${restTimer!.remaining}s`
+                                : 'Série concluída'
+                              : set.corrected
+                                ? 'Corrigir série'
+                                : 'Concluir série'}
+                          </button>
+
+                          {/* Animated progress bar that fills from left to right during rest period */}
+                          {isResting && (
+                            <motion.div
+                              className="absolute bottom-0 left-0 h-1 rounded-b-xl"
+                              style={{ backgroundColor: sportColor }}
+                              initial={{ width: '0%' }}
+                              animate={{ width: `${restProgress * 100}%` }}
+                              transition={{ duration: 0.5, ease: 'linear' }}
+                            />
+                          )}
+                        </div>
+                      );
+                    })()}
                   </>
                 );
               })()}

@@ -180,6 +180,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       userProfile={userTrainingProfile}
       exerciseStats={exerciseUserStats}
       mainUserProfile={userProfile}
+      restTimer={state.restTimer}
     />
   );
 
@@ -203,6 +204,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       userProfile={userTrainingProfile}
       exerciseStats={exerciseUserStats}
       mainUserProfile={userProfile}
+      restTimer={state.restTimer}
     />
   );
 
