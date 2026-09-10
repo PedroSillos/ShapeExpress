@@ -9,8 +9,13 @@ import { GoogleGenAI } from "@google/genai";
 import { body, validationResult } from 'express-validator';
 import rateLimit from 'express-rate-limit';
 import { config } from 'dotenv';
-import { EXERCISES } from './src/domain/entities/exercises.js';
-import { SPORT_EXERCISE_IDS } from './src/domain/use-cases/sportExercises.js';
+import { parseCsv } from './src/domain/entities/exerciseParser.js';
+
+// Load exercise catalog via fs — avoids the Vite-only `?raw` import in exercises.ts
+const _csvPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'src/domain/entities/exercises.csv');
+const { exercises: EXERCISES, sportExerciseIds: SPORT_EXERCISE_IDS } = parseCsv(
+  fs.readFileSync(_csvPath, 'utf-8')
+);
 
 // Load .env.local in development
 if (process.env.NODE_ENV !== 'production') {

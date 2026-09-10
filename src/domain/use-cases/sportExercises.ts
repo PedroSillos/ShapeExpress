@@ -10,9 +10,9 @@
 export {
   SPORT_EXERCISE_IDS,
   DEFAULT_EXERCISE_IDS,
-} from "@/src/domain/entities/exercises";
+} from "../entities/exercises";
 
-import { SPORT_EXERCISE_IDS, DEFAULT_EXERCISE_IDS } from "@/src/domain/entities/exercises";
+import { SPORT_EXERCISE_IDS, DEFAULT_EXERCISE_IDS } from "../entities/exercises";
 
 /**
  * Returns the ordered list of exercise IDs for a given sport.
