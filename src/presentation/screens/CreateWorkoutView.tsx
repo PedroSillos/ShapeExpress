@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, ChevronLeft, ChevronDown, Info, Search, SlidersHorizontal, Check, Plus, Trash2, Edit } from 'lucide-react';
+import { X, ChevronLeft, ChevronDown, Info, Search, SlidersHorizontal, Plus, Trash2, Edit } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, addMonths, parseISO } from 'date-fns';
 import { cn } from '../../utils/cn';
@@ -1259,16 +1259,22 @@ export function CreateWorkoutView({
           </AnimatePresence>
         </div>
 
-        {/* Exercise list — selected first */}
+        {/* Exercise list — selected first (in selection order), unselected after */}
         <div className="space-y-2 pr-1 custom-scrollbar">
           {[...filteredExercises]
             .sort((a, b) => {
-              const aSelected = activeSheet.exerciseIds.includes(a.id) ? 0 : 1;
-              const bSelected = activeSheet.exerciseIds.includes(b.id) ? 0 : 1;
-              return aSelected - bSelected;
+              const aIdx = activeSheet.exerciseIds.indexOf(a.id);
+              const bIdx = activeSheet.exerciseIds.indexOf(b.id);
+              const aSelected = aIdx !== -1;
+              const bSelected = bIdx !== -1;
+              if (aSelected && bSelected) return aIdx - bIdx; // preserve insertion order
+              if (aSelected) return -1;
+              if (bSelected) return 1;
+              return 0; // stable: unselected keep their original relative order
             })
             .map(ex => {
             const isSelected = activeSheet.exerciseIds.includes(ex.id);
+            const selectionOrder = isSelected ? activeSheet.exerciseIds.indexOf(ex.id) + 1 : null;
             return (
               <div
                 key={ex.id}
@@ -1301,7 +1307,9 @@ export function CreateWorkoutView({
                   className="w-6 h-6 rounded-full border flex items-center justify-center transition-colors flex-shrink-0 ml-3"
                   style={isSelected ? { backgroundColor: sportColor, borderColor: sportColor } : undefined}
                 >
-                  {isSelected && <Check size={14} strokeWidth={4} className="text-white" />}
+                  {isSelected ? (
+                    <span className="text-white text-[10px] font-black leading-none">{selectionOrder}</span>
+                  ) : null}
                 </div>
               </div>
             );
