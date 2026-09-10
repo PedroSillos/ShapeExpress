@@ -609,9 +609,11 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
       const sports: string[] = isLoggedIn
         ? (userProfile?.specialties ?? [])
         : (() => { try { const wa = JSON.parse(localStorage.getItem(STORAGE_KEYS.WELCOME_ANSWERS) ?? 'null'); return wa?.sports ?? []; } catch { return []; } })();
-      // Friends = trainer connections (athletes) + students (trainers)
-      const friendsCount =
-        (studentConnections?.length ?? 0) + (students?.length ?? 0) + (trainers?.length ?? 0);
+      // Friends: athletes count their accepted trainer connections; trainers count their accepted students.
+      const isTrainer = userProfile?.userType === 'treinador';
+      const friendsCount = isTrainer
+        ? (students?.length ?? 0)
+        : (studentConnections?.filter(c => c.status === 'accepted')?.length ?? 0);
       return isLoggedIn ? (
         <ProfileUserView
           userProfile={{ ...userProfile, email: userProfile.email || currentUserEmail || '' }}
