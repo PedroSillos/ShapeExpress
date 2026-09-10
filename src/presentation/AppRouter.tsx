@@ -87,6 +87,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
   } = dataSync;
 
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [editingStudentTemplate, setEditingStudentTemplate] = useState<WorkoutTemplate | null>(null);
 
   /**
    * Called after the user picks a sport in the AI sport picker (inside WorkoutsView).
@@ -553,10 +554,14 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           studentName={selectedStudentForWorkouts.name}
           templates={studentTemplates}
           onSelect={() => {}}
-          onAdd={() => setActiveTab('create-workout')}
+          onAdd={() => { setEditingStudentTemplate(null); setActiveTab('create-workout'); }}
           onDelete={async (id: string) => {
             await deleteTemplate(id);
             setStudentTemplates((prev: WorkoutTemplate[]) => prev.filter(t => t.id !== id));
+          }}
+          onUpdateTemplate={async (t: WorkoutTemplate) => {
+            await updateTemplate(t);
+            setStudentTemplates((prev: WorkoutTemplate[]) => prev.map(p => p.id === t.id ? t : p));
           }}
           onBack={() => { setSelectedStudentForWorkouts(null); setActiveTab('students'); }}
         />
@@ -577,13 +582,15 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           studentEmail={selectedStudentForWorkouts?.email}
           creatorEmail={userProfile?.email}
           initialSport={activeSport}
+          initialTemplate={editingStudentTemplate ?? undefined}
           existingTemplates={selectedStudentForWorkouts ? studentTemplates : filteredTemplates}
           onSave={async (t: WorkoutTemplate) => {
             await createTemplate(t);
             if (selectedStudentForWorkouts) api.getStudentTemplates(selectedStudentForWorkouts.email).then(setStudentTemplates);
+            setEditingStudentTemplate(null);
             setActiveTab(selectedStudentForWorkouts ? 'student-workouts' : 'workouts');
           }}
-          onCancel={() => setActiveTab(selectedStudentForWorkouts ? 'student-workouts' : 'workouts')}
+          onCancel={() => { setEditingStudentTemplate(null); setActiveTab(selectedStudentForWorkouts ? 'student-workouts' : 'workouts'); }}
         />
       );
     case 'new-assessment':

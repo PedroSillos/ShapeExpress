@@ -143,7 +143,7 @@ export function ProfileUserView({
         </div>
         <div className="flex flex-col items-center">
           <span className="text-white text-3xl font-extrabold">{friendsCount}</span>
-          <span className="text-white/50 text-sm font-semibold mt-1">Amigos</span>
+          <span className="text-white/50 text-sm font-semibold mt-1">Conexões</span>
         </div>
       </div>
 
