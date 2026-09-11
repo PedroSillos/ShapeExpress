@@ -192,6 +192,12 @@ export interface WorkoutTemplate {
   cycles?: WorkoutCycle[];
   exerciseIds?: string[];
   exercises?: WorkoutTemplateExercise[];
+  /** Soft-delete flag. When true the template is hidden from the main workouts list
+   *  and shown instead in the "Treinos Arquivados" screen. */
+  archived?: boolean;
+  /** ID of the StorePurchase that originated this template (set by claimFreeItem).
+   *  When present, the template cannot be permanently deleted — only archived/restored. */
+  purchasedItemId?: string;
 }
 
 

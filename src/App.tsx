@@ -12,7 +12,7 @@ import { AppRouter } from './presentation/AppRouter';
 
 import { SplashScreen } from './presentation/components/SplashScreen';
 
-import { DeleteTemplateModal } from './presentation/components/AppModals';
+import { ArchiveTemplateModal } from './presentation/components/AppModals';
 import { WorkoutSelectorModal } from './presentation/components/AppModals';
 import { SheetSelectorModal } from './presentation/components/AppModals';
 import { PublishToStoreModal } from './presentation/components/PublishToStoreModal';
@@ -326,10 +326,10 @@ export default function App() {
           />
         )}
 
-        <DeleteTemplateModal
+        <ArchiveTemplateModal
           templateId={deletingTemplateId}
           onCancel={() => setDeletingTemplateId(null)}
-          onConfirm={(id) => { dataSync.deleteTemplate(id); setDeletingTemplateId(null); }}
+          onConfirm={(id) => { dataSync.archiveTemplate(id); setDeletingTemplateId(null); }}
         />
 
       </div>

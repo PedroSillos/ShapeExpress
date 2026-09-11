@@ -138,6 +138,58 @@ export const useWorkoutState = (
     }
   };
 
+  /** Soft-delete: sets archived=true on the template (Firestore + local state).
+   *  The document is preserved so purchased workouts can always be restored. */
+  const archiveTemplate = async (id: string) => {
+    if (!currentUser) {
+      setTemplates((prev) => {
+        const next = prev.map((t) => t.id === id ? { ...t, archived: true } : t);
+        saveLocalTemplates(next);
+        return next;
+      });
+      return;
+    }
+    try {
+      const ref = doc(db, "templates", id);
+      await setDoc(ref, { archived: true }, { merge: true });
+      setTemplates((prev) => prev.map((t) => t.id === id ? { ...t, archived: true } : t));
+    } catch (e: any) {
+      console.error('[archiveTemplate] Error archiving template:', e.message);
+      throw e;
+    }
+  };
+
+  /** Restore an archived template: sets archived=false. */
+  const restoreTemplate = async (id: string) => {
+    if (!currentUser) {
+      setTemplates((prev) => {
+        const next = prev.map((t) => t.id === id ? { ...t, archived: false } : t);
+        saveLocalTemplates(next);
+        return next;
+      });
+      return;
+    }
+    try {
+      const ref = doc(db, "templates", id);
+      await setDoc(ref, { archived: false }, { merge: true });
+      setTemplates((prev) => prev.map((t) => t.id === id ? { ...t, archived: false } : t));
+    } catch (e: any) {
+      console.error('[restoreTemplate] Error restoring template:', e.message);
+      throw e;
+    }
+  };
+
+  /** Permanent hard-delete. Only call this for non-purchased templates.
+   *  Purchased templates (purchasedItemId is set) must never be permanently deleted. */
+  const permanentDeleteTemplate = async (id: string) => {
+    const template = templates.find((t) => t.id === id);
+    if (template?.purchasedItemId) {
+      console.warn('[permanentDeleteTemplate] Attempted to permanently delete a purchased template — blocked.');
+      return;
+    }
+    await deleteTemplate(id);
+  };
+
   const getSessions = async () => {
     if (!email) return [];
     try {
@@ -259,6 +311,7 @@ export const useWorkoutState = (
     highlightSessionId, setHighlightSessionId,
     filteredTemplates, userSessions, filteredSessions,
     getTemplates, createTemplate, updateTemplate, deleteTemplate,
+    archiveTemplate, restoreTemplate, permanentDeleteTemplate,
     getSessions, createSession, updateSession, deleteSession,
     getStudentTemplates,
     resetWorkoutStates,

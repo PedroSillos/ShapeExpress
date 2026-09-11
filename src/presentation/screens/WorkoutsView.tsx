@@ -18,6 +18,7 @@ import {
   Check,
   Search,
   GripVertical,
+  Archive,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, parseISO, startOfMonth, endOfMonth, startOfWeek, addDays, isSameMonth, addMonths, subMonths } from 'date-fns';
@@ -106,6 +107,10 @@ interface WorkoutsViewProps {
   draftTemplateIds?: Set<string>;
   /** Currently active sport (from global nav state). Used to filter templates. */
   activeSport?: string;
+  /** Navigate to the archived workouts screen */
+  onArchivedWorkouts?: () => void;
+  /** Number of archived templates — shown in the footer link */
+  archivedCount?: number;
 }
 
 
@@ -477,9 +482,9 @@ function TemplateCard({
                   </button>
                   <button
                     onClick={() => { onDeleteWorkout(template.id); setOpenSettingsId(null); }}
-                    className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold text-red-400 hover:bg-white/5 transition-colors border-t border-dark-border"
+                    className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold text-orange-400 hover:bg-white/5 transition-colors border-t border-dark-border"
                   >
-                    <Trash2 size={13} /> Excluir
+                    <Trash2 size={13} /> Arquivar
                   </button>
                 </>
               )}
@@ -1189,6 +1194,8 @@ export function WorkoutsView({
   publishedTemplateIds,
   draftTemplateIds,
   activeSport: activeSportProp = '',
+  onArchivedWorkouts,
+  archivedCount = 0,
 }: WorkoutsViewProps) {
   const [openSettingsId, setOpenSettingsId] = useState<string | null>(null);
   const [selectingSheetTemplate, setSelectingSheetTemplate] = useState<WorkoutTemplate | null>(null);
@@ -1221,9 +1228,10 @@ export function WorkoutsView({
     return 'Musculação';
   }, [activeSportProp, mainUserProfile, isLoggedIn]);
 
-  // Filter templates to only show those matching the active sport.
+  // Filter templates to only show those matching the active sport and not archived.
   const visibleTemplates = useMemo(() => {
     return templates.filter(t => {
+      if (t.archived) return false;
       const tSport = t.sport ?? (() => {
         const known = ['Musculação', 'Crossfit', 'Corrida', 'Yoga', 'Natação', 'Ciclismo', 'Halterofilismo', 'Triatlo'];
         return known.find(s => t.name.toLowerCase().includes(s.toLowerCase())) ?? 'Musculação';
@@ -1333,6 +1341,22 @@ export function WorkoutsView({
             ))
           )}
         </div>
+
+        {/* Archived workouts link */}
+        {onArchivedWorkouts && (
+          <div className="flex justify-center">
+            <button
+              onClick={onArchivedWorkouts}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-white/25 hover:text-white/50 active:scale-95 transition-all"
+            >
+              <Archive size={13} />
+              <span className="text-xs font-semibold">Treinos arquivados</span>
+              {archivedCount > 0 && (
+                <span className="text-xs font-black tabular-nums">({archivedCount})</span>
+              )}
+            </button>
+          </div>
+        )}
 
         {/* History section */}
         <div ref={historyRef} className="space-y-4">

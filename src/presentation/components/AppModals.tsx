@@ -47,14 +47,14 @@ export function LogoutModal({ open, onCancel, onConfirm }: LogoutModalProps) {
   );
 }
 
-// --- DeleteTemplateModal ---
-interface DeleteTemplateModalProps {
+// --- ArchiveTemplateModal ---
+interface ArchiveTemplateModalProps {
   templateId: string | null;
   onCancel: () => void;
   onConfirm: (id: string) => void;
 }
 
-export function DeleteTemplateModal({ templateId, onCancel, onConfirm }: DeleteTemplateModalProps) {
+export function ArchiveTemplateModal({ templateId, onCancel, onConfirm }: ArchiveTemplateModalProps) {
   return (
     <AnimatePresence>
       {templateId && (
@@ -69,11 +69,11 @@ export function DeleteTemplateModal({ templateId, onCancel, onConfirm }: DeleteT
             className="relative w-full bg-dark-card border border-dark-border rounded-3xl p-6 shadow-2xl space-y-6"
           >
             <div className="text-center space-y-2">
-              <div className="w-16 h-16 bg-red-400/10 text-red-400 rounded-full flex items-center justify-center mx-auto">
+              <div className="w-16 h-16 bg-orange-400/10 text-orange-400 rounded-full flex items-center justify-center mx-auto">
                 <Trash2 size={32} />
               </div>
-              <h2 className="text-xl font-bold">Excluir Treino?</h2>
-              <p className="text-sm text-white/40">Esta ação não pode ser desfeita. O template do treino será removido permanentemente.</p>
+              <h2 className="text-xl font-bold">Arquivar Treino?</h2>
+              <p className="text-sm text-white/40">O treino será arquivado e ficará disponível em <span className="text-white/60 font-semibold">Perfil → Treinos Arquivados</span> para restaurar quando quiser.</p>
             </div>
             <div className="flex gap-3">
               <button onClick={onCancel} className="flex-1 py-4 bg-white/5 rounded-2xl font-bold hover:bg-white/10 transition-colors">
@@ -81,9 +81,9 @@ export function DeleteTemplateModal({ templateId, onCancel, onConfirm }: DeleteT
               </button>
               <button
                 onClick={() => onConfirm(templateId)}
-                className="flex-1 py-4 bg-red-500 rounded-2xl text-white font-bold shadow-lg shadow-red-500/20 active:scale-95 transition-transform"
+                className="flex-1 py-4 bg-orange-500 rounded-2xl text-white font-bold shadow-lg shadow-orange-500/20 active:scale-95 transition-transform"
               >
-                Excluir
+                Arquivar
               </button>
             </div>
           </motion.div>
@@ -92,6 +92,9 @@ export function DeleteTemplateModal({ templateId, onCancel, onConfirm }: DeleteT
     </AnimatePresence>
   );
 }
+
+/** @deprecated Use ArchiveTemplateModal instead */
+export const DeleteTemplateModal = ArchiveTemplateModal;
 
 // --- DeleteSessionModal ---
 interface DeleteSessionModalProps {

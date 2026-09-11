@@ -25,6 +25,7 @@ import { ActiveWorkoutView } from './screens/ActiveWorkoutView';
 import { BodyAssessmentView as NewAssessmentView } from './screens/BodyAssessmentView';
 import { generateWorkoutAI } from '../data/services/aiService';
 import { ProfileGuestView, ProfileUserView } from '../features/profile';
+import { ArchivedWorkoutsView } from './screens/ArchivedWorkoutsView';
 import { ALL_SPORTS } from '../features/sports/constants';
 import { cn } from '../utils/cn';
 
@@ -454,6 +455,8 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
               .map(i => (i as any).templateId as string)
               .filter(Boolean)
           )}
+          onArchivedWorkouts={() => setActiveTab('archived-workouts' as any)}
+          archivedCount={filteredTemplates.filter((t: WorkoutTemplate) => t.archived).length}
         />
       );
     case 'stats':
@@ -639,6 +642,15 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
         />
       );
     }
+    case 'archived-workouts':
+      return (
+        <ArchivedWorkoutsView
+          templates={filteredTemplates}
+          onRestore={async (id: string) => { await dataSync.restoreTemplate(id); }}
+          onPermanentDelete={async (id: string) => { await dataSync.permanentDeleteTemplate(id); }}
+          onBack={() => setActiveTab('workouts' as any)}
+        />
+      );
     default:
       return null;
   }

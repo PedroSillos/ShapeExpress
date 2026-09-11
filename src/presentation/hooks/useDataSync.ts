@@ -36,6 +36,18 @@ export function useDataSync({
     await api.deleteTemplate(id);
   };
 
+  const archiveTemplate = async (id: string) => {
+    await api.archiveTemplate(id);
+  };
+
+  const restoreTemplate = async (id: string) => {
+    await api.restoreTemplate(id);
+  };
+
+  const permanentDeleteTemplate = async (id: string) => {
+    await api.permanentDeleteTemplate(id);
+  };
+
   // NOTE: api.createSession / updateSession / deleteSession (useWorkoutState) already
   // update React state internally — do NOT call setSessions here to avoid duplicates.
   const createSession = async (s: WorkoutSession) => {
@@ -65,6 +77,7 @@ export function useDataSync({
   return {
     updateProfile, updateStats,
     createTemplate, updateTemplate, deleteTemplate,
+    archiveTemplate, restoreTemplate, permanentDeleteTemplate,
     createSession, updateSession, deleteSession,
     createAssessment, updateAssessment, deleteAssessment,
   };
