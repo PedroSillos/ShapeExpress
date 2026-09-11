@@ -89,6 +89,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
 
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [editingStudentTemplate, setEditingStudentTemplate] = useState<WorkoutTemplate | null>(null);
+  const [focusArchivedTemplateId, setFocusArchivedTemplateId] = useState<string | null>(null);
 
   /**
    * Called after the user picks a sport in the AI sport picker (inside WorkoutsView).
@@ -478,6 +479,10 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           templates={filteredTemplates ?? []}
           isLoadingItems={!!isLoadingItems}
           onGoToWorkouts={() => switchTab('workouts')}
+          onGoToArchivedWorkouts={(templateId: string) => {
+            setFocusArchivedTemplateId(templateId);
+            setActiveTab('archived-workouts' as any);
+          }}
           claimFreeItem={api.claimFreeItem}
           onRenameStoreItem={async (itemId: string, newTitle: string) => {
             // Update store item title
@@ -648,7 +653,8 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           templates={filteredTemplates}
           onRestore={async (id: string) => { await dataSync.restoreTemplate(id); }}
           onPermanentDelete={async (id: string) => { await dataSync.permanentDeleteTemplate(id); }}
-          onBack={() => setActiveTab('workouts' as any)}
+          onBack={() => { setFocusArchivedTemplateId(null); setActiveTab('workouts' as any); }}
+          focusTemplateId={focusArchivedTemplateId}
         />
       );
     default:

@@ -1,4 +1,4 @@
-import { LogOut, Trash2, X, Plus, Dumbbell, ChevronRight, Clock } from 'lucide-react';
+import { LogOut, Trash2, Archive, X, Plus, Dumbbell, ChevronRight, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WorkoutTemplate, UserTrainingProfile, ExerciseUserStats } from '../../domain/entities';
 import { estimateWorkoutDuration } from '../../domain/use-cases/workoutEstimation';
@@ -70,10 +70,10 @@ export function ArchiveTemplateModal({ templateId, onCancel, onConfirm }: Archiv
           >
             <div className="text-center space-y-2">
               <div className="w-16 h-16 bg-orange-400/10 text-orange-400 rounded-full flex items-center justify-center mx-auto">
-                <Trash2 size={32} />
+                <Archive size={32} />
               </div>
               <h2 className="text-xl font-bold">Arquivar Treino?</h2>
-              <p className="text-sm text-white/40">O treino será arquivado e ficará disponível em <span className="text-white/60 font-semibold">Perfil → Treinos Arquivados</span> para restaurar quando quiser.</p>
+              <p className="text-sm text-white/40">O treino será arquivado e ficará disponível em <span className="text-white/60 font-semibold">Treinos Arquivados</span> para restaurar quando quiser.</p>
             </div>
             <div className="flex gap-3">
               <button onClick={onCancel} className="flex-1 py-4 bg-white/5 rounded-2xl font-bold hover:bg-white/10 transition-colors">

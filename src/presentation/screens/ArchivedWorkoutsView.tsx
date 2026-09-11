@@ -1,6 +1,6 @@
 import { Archive, ChevronLeft, RotateCcw, Trash2, Dumbbell } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { WorkoutTemplate } from '../../domain/entities';
@@ -121,10 +121,12 @@ function ArchivedTemplateCard({
   template,
   onRestore,
   onPermanentDelete,
+  highlighted,
 }: {
   template: WorkoutTemplate;
   onRestore: (id: string) => void;
   onPermanentDelete: (id: string, isPurchased: boolean) => void;
+  highlighted?: boolean;
 }) {
   const sport = template.sport ?? 'Musculação';
   const color = SPORT_COLORS[sport] ?? '#dc2626';
@@ -147,10 +149,10 @@ function ArchivedTemplateCard({
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl overflow-hidden"
+      className={cn('rounded-2xl overflow-hidden transition-shadow duration-700', highlighted && 'ring-2 ring-emerald-400/70 shadow-lg shadow-emerald-500/20')}
       style={{
         background: `linear-gradient(145deg, color-mix(in srgb, ${color} 8%, #1a1a1a) 0%, #151515 60%)`,
-        border: `1px solid color-mix(in srgb, ${color} 25%, transparent)`,
+        border: `1px solid color-mix(in srgb, ${color} ${highlighted ? '60%' : '25%'}, transparent)`,
       }}
     >
       {/* Top accent stripe */}
@@ -216,6 +218,8 @@ interface ArchivedWorkoutsViewProps {
   onRestore: (id: string) => Promise<void>;
   onPermanentDelete: (id: string) => Promise<void>;
   onBack: () => void;
+  /** templateId de um treino arquivado que deve receber foco ao abrir a tela */
+  focusTemplateId?: string | null;
 }
 
 export function ArchivedWorkoutsView({
@@ -223,10 +227,26 @@ export function ArchivedWorkoutsView({
   onRestore,
   onPermanentDelete,
   onBack,
+  focusTemplateId,
 }: ArchivedWorkoutsViewProps) {
   const archived = templates.filter(t => t.archived);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [showPurchasedBlock, setShowPurchasedBlock] = useState(false);
+  const [highlightedId, setHighlightedId] = useState<string | null>(focusTemplateId ?? null);
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Scroll ao card focado e remover highlight após 2s
+  useEffect(() => {
+    if (!focusTemplateId) return;
+    setHighlightedId(focusTemplateId);
+    // Pequeno delay para garantir que os cards foram montados
+    const scrollTimer = setTimeout(() => {
+      const el = cardRefs.current[focusTemplateId];
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
+    const clearTimer = setTimeout(() => setHighlightedId(null), 2500);
+    return () => { clearTimeout(scrollTimer); clearTimeout(clearTimer); };
+  }, [focusTemplateId]);
 
   const handleDeleteRequest = (id: string, isPurchased: boolean) => {
     if (isPurchased) {
@@ -288,12 +308,14 @@ export function ArchivedWorkoutsView({
       ) : (
         <div className="space-y-3">
           {archived.map(template => (
-            <ArchivedTemplateCard
-              key={template.id}
-              template={template}
-              onRestore={onRestore}
-              onPermanentDelete={handleDeleteRequest}
-            />
+            <div key={template.id} ref={el => { cardRefs.current[template.id] = el; }}>
+              <ArchivedTemplateCard
+                template={template}
+                onRestore={onRestore}
+                onPermanentDelete={handleDeleteRequest}
+                highlighted={highlightedId === template.id}
+              />
+            </div>
           ))}
         </div>
       )}

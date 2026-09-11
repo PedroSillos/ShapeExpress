@@ -717,6 +717,8 @@ export interface StoreTabProps {
   templates: WorkoutTemplate[];
   isLoadingItems: boolean;
   onGoToWorkouts: () => void;
+  /** Navega para a tela de arquivados com foco no templateId informado */
+  onGoToArchivedWorkouts?: (templateId: string) => void;
   claimFreeItem: (itemId: string) => Promise<{ success: boolean; purchaseId: string }>;
   onRenameStoreItem?: (itemId: string, newTitle: string) => void;
   onUpdateStoreItem?: (item: StoreItem) => void;
@@ -737,6 +739,7 @@ export function StoreTab({
   templates,
   isLoadingItems,
   onGoToWorkouts,
+  onGoToArchivedWorkouts,
   claimFreeItem,
   onRenameStoreItem,
   onUpdateStoreItem,
@@ -884,6 +887,10 @@ export function StoreTab({
                 const purchaseDate = purchase?.purchasedAt 
                   ? new Date(purchase.purchasedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
                   : null;
+                // Localiza o template do atleta gerado pela compra via purchasedItemId === StoreItem.id
+                const purchasedTemplate = templates.find(t => t.purchasedItemId === item.id);
+                const isArchived = !!purchasedTemplate?.archived;
+                const purchasedTemplateId = purchasedTemplate?.id;
                 
                 return (
                   <div
@@ -934,12 +941,21 @@ export function StoreTab({
                     </div>
 
                     {/* CTA */}
-                    <button
-                      onClick={onGoToWorkouts}
-                      className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-black rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
-                    >
-                      Acessar
-                    </button>
+                    {isArchived && purchasedTemplateId ? (
+                      <button
+                        onClick={() => onGoToArchivedWorkouts?.(purchasedTemplateId)}
+                        className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-black rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-amber-500/20"
+                      >
+                        Ver Arquivados
+                      </button>
+                    ) : (
+                      <button
+                        onClick={onGoToWorkouts}
+                        className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-black rounded-xl text-xs font-black uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
+                      >
+                        Acessar
+                      </button>
+                    )}
                   </div>
                 );
               })}

@@ -484,7 +484,7 @@ function TemplateCard({
                     onClick={() => { onDeleteWorkout(template.id); setOpenSettingsId(null); }}
                     className="w-full flex items-center gap-2 px-4 py-3 text-xs font-bold text-orange-400 hover:bg-white/5 transition-colors border-t border-dark-border"
                   >
-                    <Trash2 size={13} /> Arquivar
+                    <Archive size={13} /> Arquivar
                   </button>
                 </>
               )}

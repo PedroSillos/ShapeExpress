@@ -10,6 +10,7 @@ export interface LojasScreenProps {
   templates: WorkoutTemplate[];
   isLoadingItems: boolean;
   onGoToWorkouts: () => void;
+  onGoToArchivedWorkouts?: (templateId: string) => void;
   claimFreeItem: (itemId: string) => Promise<{ success: boolean; purchaseId: string }>;
   onRenameStoreItem?: (itemId: string, newTitle: string) => void;
   onUpdateStoreItem?: (item: StoreItem) => void;
@@ -30,6 +31,7 @@ export function LojasScreen({
   templates,
   isLoadingItems,
   onGoToWorkouts,
+  onGoToArchivedWorkouts,
   claimFreeItem,
   onRenameStoreItem,
   onUpdateStoreItem,
@@ -48,6 +50,7 @@ export function LojasScreen({
       templates={templates}
       isLoadingItems={isLoadingItems}
       onGoToWorkouts={onGoToWorkouts}
+      onGoToArchivedWorkouts={onGoToArchivedWorkouts}
       claimFreeItem={claimFreeItem}
       onRenameStoreItem={onRenameStoreItem}
       onUpdateStoreItem={onUpdateStoreItem}
