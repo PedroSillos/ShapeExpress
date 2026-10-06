@@ -62,11 +62,15 @@ export function TrainerCard({ trainer, showDistance, onConnect, studentConnectio
                 <h4 className="font-black text-base text-white leading-snug truncate">
                   {trainerName}
                 </h4>
-                {trainer.studentsCount && (
+                {trainer.specialties && trainer.specialties.length > 0 ? (
+                  <p className="text-[10px] text-white/55 mt-0.5 truncate font-semibold uppercase tracking-wider">
+                    {(trainer.specialties as string[]).slice(0, 2).join(' · ')}
+                  </p>
+                ) : trainer.studentsCount ? (
                   <p className="text-[10px] text-white/40 mt-0.5">
                     {trainer.studentsCount} alunos
                   </p>
-                )}
+                ) : null}
               </div>
               
               {/* Rating badge */}

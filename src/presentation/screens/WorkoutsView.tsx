@@ -111,6 +111,8 @@ interface WorkoutsViewProps {
   onArchivedWorkouts?: () => void;
   /** Number of archived templates — shown in the footer link */
   archivedCount?: number;
+  /** When set, only templates created by this trainer email are shown. */
+  filterByTrainerEmail?: string | null;
 }
 
 
@@ -1196,6 +1198,7 @@ export function WorkoutsView({
   activeSport: activeSportProp = '',
   onArchivedWorkouts,
   archivedCount = 0,
+  filterByTrainerEmail = null,
 }: WorkoutsViewProps) {
   const [openSettingsId, setOpenSettingsId] = useState<string | null>(null);
   const [selectingSheetTemplate, setSelectingSheetTemplate] = useState<WorkoutTemplate | null>(null);
@@ -1232,13 +1235,17 @@ export function WorkoutsView({
   const visibleTemplates = useMemo(() => {
     return templates.filter(t => {
       if (t.archived) return false;
+      // When coming from a trainer's profile, show only their templates regardless of sport
+      if (filterByTrainerEmail) {
+        return (t.creatorEmail ?? '').toLowerCase() === filterByTrainerEmail.toLowerCase();
+      }
       const tSport = t.sport ?? (() => {
         const known = ['Musculação', 'Crossfit', 'Corrida', 'Yoga', 'Natação', 'Ciclismo', 'Halterofilismo', 'Triatlo'];
         return known.find(s => t.name.toLowerCase().includes(s.toLowerCase())) ?? 'Musculação';
       })();
       return tSport === sport;
     });
-  }, [templates, sport]);
+  }, [templates, sport, filterByTrainerEmail]);
 
   const historyRef = useRef<HTMLDivElement>(null);
 

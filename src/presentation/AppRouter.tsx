@@ -458,6 +458,7 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
           )}
           onArchivedWorkouts={() => setActiveTab('archived-workouts' as any)}
           archivedCount={filteredTemplates.filter((t: WorkoutTemplate) => t.archived).length}
+          filterByTrainerEmail={state.filterByTrainerEmail ?? null}
         />
       );
     case 'stats':
@@ -533,6 +534,10 @@ export function AppRouter({ state, workout, dataSync }: AppRouterProps) {
             await api.respondToConnection(id, status);
             const connections = await api.getStudentConnections();
             setStudentConnections(connections);
+          }}
+          onViewWorkouts={(trainer: UserProfile) => {
+            state.setFilterByTrainerEmail(trainer.email.toLowerCase());
+            switchTab('workouts');
           }}
           studentConnections={studentConnections}
         />

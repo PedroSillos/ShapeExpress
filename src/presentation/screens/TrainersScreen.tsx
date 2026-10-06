@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Search, UserPlus, X, RefreshCw,
-  ChevronLeft, Trophy, ShieldCheck, AlertTriangle, UserCheck, User,
+  ChevronLeft, Trophy, ShieldCheck, AlertTriangle, UserCheck, User, Dumbbell, LogOut,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, fullName } from '@/src/domain/entities';
@@ -24,6 +24,7 @@ export interface TrainersScreenProps {
   onDisconnect: (trainerEmail: string) => Promise<void>;
   studentConnections: TrainerConnection[];
   onRespondToRequest?: (id: string, status: 'accepted' | 'rejected') => Promise<void>;
+  onViewWorkouts?: (trainer: UserProfile) => void;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -34,6 +35,7 @@ export function TrainersScreen({
   onDisconnect: _onDisconnect,
   studentConnections,
   onRespondToRequest,
+  onViewWorkouts,
 }: TrainersScreenProps) {
   const [showConnectPopup, setShowConnectPopup] = useState(false);
   const [connectCode, setConnectCode] = useState('');
@@ -388,9 +390,31 @@ export function TrainersScreen({
                     );
                     if (conn?.status === 'accepted') {
                       return (
-                        <div className="w-full py-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-2xl font-bold uppercase tracking-widest flex items-center justify-center gap-2">
-                          <ShieldCheck size={18} />
-                          Conectado
+                        <div className="space-y-3">
+                          <div className="w-full py-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-2xl font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+                            <ShieldCheck size={18} />
+                            Conectado
+                          </div>
+                          <button
+                            onClick={() => {
+                              onViewWorkouts?.(selectedTrainer);
+                              setSelectedTrainer(null);
+                            }}
+                            className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl font-bold uppercase tracking-widest text-sm text-white/80 flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+                          >
+                            <Dumbbell size={18} />
+                            Ver Treinos
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedTrainer(null);
+                              setShowDisconnectConfirm(selectedTrainer.email);
+                            }}
+                            className="w-full py-3 text-red-400/70 font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+                          >
+                            <LogOut size={14} />
+                            Encerrar Conexão
+                          </button>
                         </div>
                       );
                     }

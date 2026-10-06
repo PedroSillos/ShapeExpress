@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { db } from "../../firebase";
 import { doc, setDoc, deleteDoc, collection, query, where, getDocs } from "firebase/firestore";
-import type { WorkoutTemplate, WorkoutSession, UserProfile } from "../../domain/entities";
+import type { WorkoutTemplate, WorkoutSession, UserProfile, TrainerConnection } from "../../domain/entities";
 import { STORAGE_KEYS } from "../../shared/lib/storageKeys";
 
 const LOCAL_SESSIONS_KEY = STORAGE_KEYS.LOCAL_SESSIONS;
@@ -31,6 +31,7 @@ export const useWorkoutState = (
   currentUser: { email: string } | null,
   token: string | null,
   userProfile: UserProfile | null,
+  studentConnections: TrainerConnection[] = [],
 ) => {
   const [sessions, setSessions] = useState<WorkoutSession[]>(() =>
     currentUser ? [] : loadLocalSessions()
@@ -269,8 +270,23 @@ export const useWorkoutState = (
   const filteredTemplates = useMemo(() => {
     if (userProfile?.userType === "treinador") return templates;
     if (!userProfile) return templates.filter((t) => !t.userId || t.userId === 'guest');
-    return templates.filter((t) => !t.userId || t.userId === 'guest' || t.userId === userProfile.email);
-  }, [templates, userProfile]);
+
+    // Build the set of trainer emails with an active (accepted) connection
+    const connectedTrainerEmails = new Set(
+      studentConnections
+        .filter((c) => c.status === 'accepted')
+        .map((c) => c.trainerEmail.toLowerCase()),
+    );
+
+    return templates.filter((t) => {
+      if (t.userId && t.userId !== 'guest' && t.userId !== userProfile.email) return false;
+      // Hide templates created by a trainer the student is no longer connected to
+      if (t.creatorEmail && t.creatorEmail !== userProfile.email && t.creatorEmail !== 'AICoach') {
+        return connectedTrainerEmails.has(t.creatorEmail.toLowerCase());
+      }
+      return true;
+    });
+  }, [templates, userProfile, studentConnections]);
 
   const userSessions = useMemo(
     () => !userProfile ? sessions : sessions.filter((s) => s.userId === userProfile.email || s.userId === '' || s.userId === 'guest'),

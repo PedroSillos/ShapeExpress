@@ -62,6 +62,7 @@ export default function App() {
   const [showSuggestProfile, setShowSuggestProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [onboardingSession, setOnboardingSession] = useState<typeof lastCompletedSession>(null);
+  const [filterByTrainerEmail, setFilterByTrainerEmail] = useState<string | null>(null);
 
   const dataSync = useDataSync({
     api,
@@ -121,6 +122,9 @@ export default function App() {
     const isTrainer = userProfile?.userType === 'treinador';
     if (tab === 'trainers' && isTrainer) tab = 'students';
     if (tab === 'students' && !isTrainer) tab = 'trainers';
+    // Clear trainer filter when navigating away from workouts via any path
+    // other than onViewWorkouts (which sets it right before calling switchTab)
+    if (tab !== 'workouts') setFilterByTrainerEmail(null);
     setSwipeDirection(0);
     setActiveTab(tab as any); // eslint-disable-line
   };
@@ -226,7 +230,7 @@ export default function App() {
   }
 
   const currentAnimations = document.documentElement.getAttribute('data-animations') || 'enabled';
-  const routerState = { ...appState, switchTab, selectedStudentForProfile, setSelectedStudentForProfile, publishingTemplate, setPublishingTemplate: (t: WorkoutTemplate | null) => { if (t && !isLoggedIn) { setShowPublishGuest(true); } else { setPublishingTemplate(t); } }, studentTemplates, setStudentTemplates, onShowSuggestProfile: () => setShowSuggestProfile(true), onShowStreak: () => { setShowSuggestProfile(false); setShowOnboardingStreak(true); }, showSettings, setShowSettings };
+  const routerState = { ...appState, switchTab, selectedStudentForProfile, setSelectedStudentForProfile, publishingTemplate, setPublishingTemplate: (t: WorkoutTemplate | null) => { if (t && !isLoggedIn) { setShowPublishGuest(true); } else { setPublishingTemplate(t); } }, studentTemplates, setStudentTemplates, onShowSuggestProfile: () => setShowSuggestProfile(true), onShowStreak: () => { setShowSuggestProfile(false); setShowOnboardingStreak(true); }, showSettings, setShowSettings, filterByTrainerEmail, setFilterByTrainerEmail };
 
   if (activeTab === 'landing' || activeTab === 'welcome' || activeTab === 'login' || activeTab === 'register' || activeTab === 'forgot-password') {
     return (

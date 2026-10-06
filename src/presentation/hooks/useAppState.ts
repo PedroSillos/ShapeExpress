@@ -19,10 +19,10 @@ export const useAppState = () => {
   const auth = useAuthState();
   const nav = useNavigationState();
   const profile = useProfileState(auth.currentUser);
-  const workout = useWorkoutState(auth.currentUser, auth.token, profile.userProfile);
+  const students = useStudentsState(auth.currentUser, auth.token);
+  const workout = useWorkoutState(auth.currentUser, auth.token, profile.userProfile, students.studentConnections);
   const restTimer = useRestTimer();
   const progress = useProgressState(workout.userSessions, profile.userStats);
-  const students = useStudentsState(auth.currentUser, auth.token);
   
   // Boot sync after login
   const { dataReady, resyncTemplates } = useSyncState(auth.isLoggedIn, auth.token, {
