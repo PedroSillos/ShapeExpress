@@ -1,66 +1,19 @@
 ﻿id,name,muscleGroup,muscleSubgroup,category,equipment,type,inputMode,defaultSets,defaultReps,defaultWeight,defaultDurationSeconds,defaultSpeedKmh,defaultDistanceMeters,sports
-12,Alongamento de isquiotibiais,Pernas,Posterior,Alongamento,Peso corporal,isolation,duration_only,2,,,30,,,Ciclismo
-37,Ciclismo,Pernas,,Funcional,Máquina,cardio,duration_speed,1,,,2700,20,,Ciclismo
-163,Alongamento de panturrilhas,Pernas,Panturrilha,Alongamento,Peso corporal,isolation,duration_only,2,,,30,,,Ciclismo
-15,Remada com elástico,Costas,Dorsal,Exercício em casa,Elástico,compound,reps_only,3,15,,,,,Ciclismo|Corrida
-140,Elevação unilateral,Pernas,Panturrilha,Exercício em casa,Peso corporal,isolation,reps_only,3,15,,,,,Ciclismo|Corrida
-10,Afundo,Pernas,Quadríceps,Exercício em casa,Peso corporal,compound,reps_only,3,12,,,,,Ciclismo|Corrida|Crossfit
-131,Step-up,Pernas,Glúteos,Musculação,Halter,compound,weight_reps,3,12,10,,,,Ciclismo|Corrida|Musculação
-110,Prancha lateral,Core,Oblíquos,Funcional,Peso corporal,core,duration_only,3,,,30,,,Corrida
-134,Caminhada lateral,Pernas,Abdutor,Funcional,Elástico,isolation,reps_only,3,20,,,,,Corrida
-135,Monster walk,Pernas,Abdutor,Funcional,Elástico,isolation,reps_only,3,20,,,,,Corrida
-154,Caminhada,Pernas,,Funcional,Peso corporal,cardio,duration_speed,1,,,2700,5,,Corrida
-155,Trote,Pernas,,Funcional,Peso corporal,cardio,duration_speed,1,,,1800,8,,Corrida
-36,Corrida,Pernas,,Funcional,Peso corporal,cardio,duration_speed,1,,,1800,10,,Corrida|Ciclismo|Crossfit
-141,Saltos pliométricos,Pernas,Panturrilha,Funcional,Peso corporal,compound,reps_only,3,10,,,,,Corrida|Crossfit
-11,Prancha abdominal,Core,Abdominais,Funcional,Peso corporal,core,duration_only,3,,,60,,,Corrida|Crossfit|Musculação
-35,Giro russo,Core,Oblíquos,Funcional,Peso corporal,core,reps_only,3,30,,,,,Corrida|Crossfit|Musculação
-109,Woodchopper,Core,Oblíquos,Funcional,Polia,core,weight_reps,3,12,10,,,,Corrida|Crossfit|Musculação
-14,Kettlebell swing,Full Body,,Funcional,Kettlebell,compound,weight_reps,3,20,16,,,,Crossfit
-33,Abdominal supra,Core,Abdominais,Musculação,Peso corporal,core,reps_only,3,20,,,,,Crossfit
-38,Pular corda,Full Body,,Funcional,Peso corporal,cardio,duration_only,3,,,120,,,Crossfit
-54,Barra fixa pronada,Costas,Dorsal,Musculação,Barra fixa,compound,reps_only,3,8,,,,,Crossfit
-9,Flexão de braços,Peito,Peito médio,Exercício em casa,Peso corporal,compound,reps_only,3,15,,,,,Crossfit|Corrida
-2,Agachamento livre,Pernas,Quadríceps,Musculação,Barra,compound,weight_reps,4,8,60,,,,Crossfit|Halterofilismo|Musculação
-4,Desenvolvimento militar,Ombros,Deltoide Anterior,Musculação,Barra,compound,weight_reps,3,10,40,,,,Crossfit|Halterofilismo|Musculação
-6,Levantamento terra,Costas,Lombar,Musculação,Barra,compound,weight_reps,3,5,80,,,,Crossfit|Halterofilismo|Musculação
-3,Remada curvada,Costas,Dorsal,Musculação,Barra,compound,weight_reps,3,12,50,,,,Crossfit|Musculação
-34,Abdominal infra,Core,Abdominais,Musculação,Peso corporal,core,reps_only,3,20,,,,,Crossfit|Musculação
-50,Flexão inclinada,Peito,Peito inferior,Exercício em casa,Peso corporal,compound,reps_only,3,15,,,,,Crossfit|Musculação
-51,Flexão declinada,Peito,Peito superior,Exercício em casa,Peso corporal,compound,reps_only,3,15,,,,,Crossfit|Musculação
-52,Flexão arqueiro,Peito,Peito médio,Exercício em casa,Peso corporal,compound,reps_only,3,10,,,,,Crossfit|Musculação
-55,Barra fixa supinada,Costas,Dorsal,Musculação,Barra fixa,compound,reps_only,3,8,,,,,Crossfit|Musculação
-56,Barra neutra,Costas,Dorsal,Musculação,Barra fixa,compound,reps_only,3,8,,,,,Crossfit|Musculação
-98,Paralelas,Braços,Tríceps,Exercício em casa,Peso corporal,compound,reps_only,3,10,,,,,Crossfit|Musculação
-99,Mergulho no banco,Braços,Tríceps,Exercício em casa,Peso corporal,compound,reps_only,3,15,,,,,Crossfit|Musculação
-103,Dead hang,Braços,Antebraço,Funcional,Barra fixa,isolation,duration_only,3,,,30,,,Crossfit|Musculação
-105,Crunch,Core,Abdominais,Musculação,Peso corporal,core,reps_only,3,20,,,,,Crossfit|Musculação
-107,Elevação de pernas,Core,Abdominais,Musculação,Peso corporal,core,reps_only,3,15,,,,,Crossfit|Musculação
-108,Elevação de joelhos,Core,Abdominais,Musculação,Peso corporal,core,reps_only,3,15,,,,,Crossfit|Musculação
-112,Hollow hold,Core,Abdominais,Funcional,Peso corporal,core,duration_only,3,,,30,,,Crossfit|Musculação
-115,Agachamento Goblet,Pernas,Quadríceps,Musculação,Halter,compound,weight_reps,3,12,16,,,,Crossfit|Musculação
-116,Passada,Pernas,Quadríceps,Musculação,Halter,compound,weight_reps,3,12,12,,,,Crossfit|Musculação
-117,Avanço,Pernas,Quadríceps,Musculação,Halter,compound,weight_reps,3,12,12,,,,Crossfit|Musculação
-130,Afundo Búlgaro,Pernas,Glúteos,Musculação,Halter,compound,weight_reps,3,10,14,,,,Crossfit|Musculação
-111,Dead bug,Core,Abdominais,Funcional,Peso corporal,core,reps_only,3,10,,,,,Crossfit|Musculação
-26,Encolhimento,Costas,Trapézio,Musculação,Halter,isolation,weight_reps,3,15,20,,,,Halterofilismo
-113,Front squat,Pernas,Quadríceps,Musculação,Barra,compound,weight_reps,4,8,50,,,,Halterofilismo
-164,Arremesso,Full Body,,Funcional,Barra,compound,weight_reps,4,3,50,,,,Halterofilismo
-156,Arranco,Full Body,,Funcional,Barra,compound,weight_reps,4,3,50,,,,Halterofilismo|Crossfit
-157,Power Clean,Full Body,,Funcional,Barra,compound,weight_reps,4,3,50,,,,Halterofilismo|Crossfit
-76,High pull,Costas,Trapézio,Musculação,Barra,compound,weight_reps,3,8,50,,,,Halterofilismo|Crossfit|Musculação
-102,Farmer walk,Braços,Antebraço,Funcional,Halter,compound,weight_reps,3,1,20,,,,Halterofilismo|Crossfit|Musculação
-25,Gêmeos em pé,Pernas,Panturrilha,Musculação,Máquina,isolation,weight_reps,4,15,50,,,,Halterofilismo|Musculação
-53,Remada Pendlay,Costas,Dorsal,Musculação,Barra,compound,weight_reps,3,8,60,,,,Halterofilismo|Musculação
-75,Encolhimento com barra,Costas,Trapézio,Musculação,Barra,isolation,weight_reps,3,15,60,,,,Halterofilismo|Musculação
-120,Levantamento terra Romeno,Pernas,Posterior,Musculação,Barra,compound,weight_reps,3,10,60,,,,Halterofilismo|Musculação
-121,Good morning,Pernas,Posterior,Musculação,Barra,compound,weight_reps,3,10,30,,,,Halterofilismo|Musculação
-125,Agachamento sumô,Pernas,Glúteos,Musculação,Barra,compound,weight_reps,3,12,50,,,,Halterofilismo|Musculação
 1,Supino reto,Peito,Peito médio,Musculação,Barra,compound,weight_reps,3,10,60,,,,Musculação
+2,Agachamento livre,Pernas,Quadríceps,Musculação,Barra,compound,weight_reps,4,8,60,,,,"Crossfit|Halterofilismo|Musculação"
+3,Remada curvada,Costas,Dorsal,Musculação,Barra,compound,weight_reps,3,12,50,,,,"Crossfit|Musculação"
+4,Desenvolvimento militar,Ombros,Deltoide anterior,Musculação,Barra,compound,weight_reps,3,10,40,,,,"Crossfit|Halterofilismo|Musculação"
 5,Rosca direta,Braços,Bíceps,Musculação,Barra,isolation,weight_reps,3,12,20,,,,Musculação
+6,Levantamento terra,Costas,Lombar,Musculação,Barra,compound,weight_reps,3,5,80,,,,"Crossfit|Halterofilismo|Musculação"
 7,Leg press,Pernas,Quadríceps,Musculação,Máquina,compound,weight_reps,3,12,120,,,,Musculação
 8,Puxada alta,Costas,Dorsal,Musculação,Máquina,compound,weight_reps,3,10,50,,,,Musculação
+9,Flexão de braços,Peito,Peito médio,Exercício em casa,Peso corporal,compound,reps_only,3,15,,,,,"Corrida|Crossfit"
+10,Afundo,Pernas,Quadríceps,Exercício em casa,Peso corporal,compound,reps_only,3,12,,,,,"Ciclismo|Corrida|Crossfit"
+11,Prancha abdominal,Core,Abdominais,Funcional,Peso corporal,core,duration_only,3,,,60,,,"Corrida|Crossfit|Musculação"
+12,Alongamento de isquiotibiais,Pernas,Posterior,Alongamento,Peso corporal,isolation,duration_only,2,,,30,,,Ciclismo
 13,Rosca com halter,Braços,Bíceps,Musculação,Halter,isolation,weight_reps,3,12,10,,,,Musculação
+14,Kettlebell swing,Full Body,,Funcional,Kettlebell,compound,weight_reps,3,20,16,,,,Crossfit
+15,Remada com elástico,Costas,Dorsal,Exercício em casa,Elástico,compound,reps_only,3,15,,,,,"Ciclismo|Corrida"
 16,Supino inclinado,Peito,Peito superior,Musculação,Barra,compound,weight_reps,3,10,50,,,,Musculação
 17,Supino declinado,Peito,Peito inferior,Musculação,Barra,compound,weight_reps,3,10,60,,,,Musculação
 18,Crucifixo reto,Peito,Peito médio,Musculação,Halter,isolation,weight_reps,3,12,12,,,,Musculação
@@ -70,12 +23,20 @@
 22,Elevação pélvica,Pernas,Glúteos,Musculação,Barra,compound,weight_reps,3,12,40,,,,Musculação
 23,Cadeira adutora,Pernas,Adutor,Musculação,Máquina,isolation,weight_reps,3,15,35,,,,Musculação
 24,Cadeira abdutora,Pernas,Abdutor,Musculação,Máquina,isolation,weight_reps,3,15,30,,,,Musculação
+25,Gêmeos em pé,Pernas,Panturrilha,Musculação,Máquina,isolation,weight_reps,4,15,50,,,,"Halterofilismo|Musculação"
+26,Encolhimento,Costas,Trapézio,Musculação,Halter,isolation,weight_reps,3,15,20,,,,Halterofilismo
 27,Remada cavalinho,Costas,Dorsal,Musculação,Máquina,compound,weight_reps,3,10,50,,,,Musculação
-28,Elevação lateral,Ombros,Deltoide Lateral,Musculação,Halter,isolation,weight_reps,3,12,8,,,,Musculação
-29,Crucifixo inverso,Ombros,Deltoide Posterior,Musculação,Halter,isolation,weight_reps,3,12,8,,,,Musculação
+28,Elevação lateral,Ombros,Deltoide lateral,Musculação,Halter,isolation,weight_reps,3,12,8,,,,Musculação
+29,Crucifixo inverso,Ombros,Deltoide posterior,Musculação,Halter,isolation,weight_reps,3,12,8,,,,Musculação
 30,Tríceps pulley,Braços,Tríceps,Musculação,Máquina,isolation,weight_reps,3,12,20,,,,Musculação
 31,Tríceps testa,Braços,Tríceps,Musculação,Barra,isolation,weight_reps,3,10,20,,,,Musculação
 32,Rosca inversa,Braços,Antebraço,Musculação,Barra,isolation,weight_reps,3,12,10,,,,Musculação
+33,Abdominal supra,Core,Abdominais,Musculação,Peso corporal,core,reps_only,3,20,,,,,Crossfit
+34,Abdominal infra,Core,Abdominais,Musculação,Peso corporal,core,reps_only,3,20,,,,,"Crossfit|Musculação"
+35,Giro russo,Core,Oblíquos,Funcional,Peso corporal,core,reps_only,3,30,,,,,"Corrida|Crossfit|Musculação"
+36,Corrida,Pernas,,Funcional,Peso corporal,cardio,duration_speed,1,,,1800,10,,"Ciclismo|Corrida|Crossfit"
+37,Ciclismo,Pernas,,Funcional,Máquina,cardio,duration_speed,1,,,2700,20,,Ciclismo
+38,Pular corda,Full Body,,Funcional,Peso corporal,cardio,duration_only,3,,,120,,,Crossfit
 39,Supino reto com halteres,Peito,Peito médio,Musculação,Halter,compound,weight_reps,3,10,20,,,,Musculação
 40,Supino inclinado com halteres,Peito,Peito superior,Musculação,Halter,compound,weight_reps,3,10,18,,,,Musculação
 41,Supino declinado com halteres,Peito,Peito inferior,Musculação,Halter,compound,weight_reps,3,10,20,,,,Musculação
@@ -87,6 +48,13 @@
 47,Crossover alto,Peito,Peito inferior,Musculação,Polia,isolation,weight_reps,3,12,10,,,,Musculação
 48,Crossover médio,Peito,Peito médio,Musculação,Polia,isolation,weight_reps,3,12,10,,,,Musculação
 49,Crossover baixo,Peito,Peito superior,Musculação,Polia,isolation,weight_reps,3,12,10,,,,Musculação
+50,Flexão inclinada,Peito,Peito inferior,Exercício em casa,Peso corporal,compound,reps_only,3,15,,,,,"Crossfit|Musculação"
+51,Flexão declinada,Peito,Peito superior,Exercício em casa,Peso corporal,compound,reps_only,3,15,,,,,"Crossfit|Musculação"
+52,Flexão arqueiro,Peito,Peito médio,Exercício em casa,Peso corporal,compound,reps_only,3,10,,,,,"Crossfit|Musculação"
+53,Remada Pendlay,Costas,Dorsal,Musculação,Barra,compound,weight_reps,3,8,60,,,,"Halterofilismo|Musculação"
+54,Barra fixa pronada,Costas,Dorsal,Musculação,Barra fixa,compound,reps_only,3,8,,,,,Crossfit
+55,Barra fixa supinada,Costas,Dorsal,Musculação,Barra fixa,compound,reps_only,3,8,,,,,"Crossfit|Musculação"
+56,Barra neutra,Costas,Dorsal,Musculação,Barra fixa,compound,reps_only,3,8,,,,,"Crossfit|Musculação"
 57,Puxada articulada,Costas,Dorsal,Musculação,Máquina,compound,weight_reps,3,10,45,,,,Musculação
 58,Remada máquina,Costas,Dorsal,Musculação,Máquina,compound,weight_reps,3,10,50,,,,Musculação
 59,Pulldown,Costas,Dorsal,Musculação,Máquina,compound,weight_reps,3,10,50,,,,Musculação
@@ -95,16 +63,18 @@
 62,Remada baixa,Costas,Dorsal,Musculação,Polia,compound,weight_reps,3,10,40,,,,Musculação
 63,Remada sentado,Costas,Dorsal,Musculação,Polia,compound,weight_reps,3,10,40,,,,Musculação
 64,Pullover na polia,Costas,Dorsal,Musculação,Polia,isolation,weight_reps,3,12,20,,,,Musculação
-65,Desenvolvimento atrás da nuca,Ombros,Deltoide Anterior,Musculação,Barra,compound,weight_reps,3,10,35,,,,Musculação
-66,Desenvolvimento sentado,Ombros,Deltoide Anterior,Musculação,Halter,compound,weight_reps,3,10,14,,,,Musculação
-67,Elevação frontal,Ombros,Deltoide Anterior,Musculação,Halter,isolation,weight_reps,3,12,8,,,,Musculação
-68,Desenvolvimento máquina,Ombros,Deltoide Anterior,Musculação,Máquina,compound,weight_reps,3,10,30,,,,Musculação
-69,Elevação lateral inclinada,Ombros,Deltoide Lateral,Musculação,Halter,isolation,weight_reps,3,12,6,,,,Musculação
-70,Elevação lateral unilateral,Ombros,Deltoide Lateral,Musculação,Polia,isolation,weight_reps,3,12,6,,,,Musculação
-71,Elevação lateral atrás do corpo,Ombros,Deltoide Lateral,Musculação,Polia,isolation,weight_reps,3,12,6,,,,Musculação
-72,Elevação lateral máquina,Ombros,Deltoide Lateral,Musculação,Máquina,isolation,weight_reps,3,12,20,,,,Musculação
-73,Face pull,Ombros,Deltoide Posterior,Musculação,Polia,isolation,weight_reps,3,15,12,,,,Musculação
-74,Peck deck inverso,Ombros,Deltoide Posterior,Musculação,Máquina,isolation,weight_reps,3,12,25,,,,Musculação
+65,Desenvolvimento atrás da nuca,Ombros,Deltoide anterior,Musculação,Barra,compound,weight_reps,3,10,35,,,,Musculação
+66,Desenvolvimento sentado,Ombros,Deltoide anterior,Musculação,Halter,compound,weight_reps,3,10,14,,,,Musculação
+67,Elevação frontal,Ombros,Deltoide anterior,Musculação,Halter,isolation,weight_reps,3,12,8,,,,Musculação
+68,Desenvolvimento máquina,Ombros,Deltoide anterior,Musculação,Máquina,compound,weight_reps,3,10,30,,,,Musculação
+69,Elevação lateral inclinada,Ombros,Deltoide lateral,Musculação,Halter,isolation,weight_reps,3,12,6,,,,Musculação
+70,Elevação lateral unilateral,Ombros,Deltoide lateral,Musculação,Polia,isolation,weight_reps,3,12,6,,,,Musculação
+71,Elevação lateral atrás do corpo,Ombros,Deltoide lateral,Musculação,Polia,isolation,weight_reps,3,12,6,,,,Musculação
+72,Elevação lateral máquina,Ombros,Deltoide lateral,Musculação,Máquina,isolation,weight_reps,3,12,20,,,,Musculação
+73,Face pull,Ombros,Deltoide posterior,Musculação,Polia,isolation,weight_reps,3,15,12,,,,Musculação
+74,Peck deck inverso,Ombros,Deltoide posterior,Musculação,Máquina,isolation,weight_reps,3,12,25,,,,Musculação
+75,Encolhimento com barra,Costas,Trapézio,Musculação,Barra,isolation,weight_reps,3,15,60,,,,"Halterofilismo|Musculação"
+76,High pull,Costas,Trapézio,Musculação,Barra,compound,weight_reps,3,8,50,,,,"Crossfit|Halterofilismo|Musculação"
 77,Encolhimento na polia,Costas,Trapézio,Musculação,Polia,isolation,weight_reps,3,15,20,,,,Musculação
 78,Encolhimento máquina,Costas,Trapézio,Musculação,Máquina,isolation,weight_reps,3,15,40,,,,Musculação
 79,Rosca w,Braços,Bíceps,Musculação,Barra,isolation,weight_reps,3,10,20,,,,Musculação
@@ -126,26 +96,55 @@
 95,Tríceps inverso,Braços,Tríceps,Musculação,Polia,isolation,weight_reps,3,12,15,,,,Musculação
 96,Extensão acima da cabeça,Braços,Tríceps,Musculação,Polia,isolation,weight_reps,3,12,12,,,,Musculação
 97,Tríceps máquina,Braços,Tríceps,Musculação,Máquina,isolation,weight_reps,3,12,20,,,,Musculação
+98,Paralelas,Braços,Tríceps,Exercício em casa,Peso corporal,compound,reps_only,3,10,,,,,"Crossfit|Musculação"
+99,Mergulho no banco,Braços,Tríceps,Exercício em casa,Peso corporal,compound,reps_only,3,15,,,,,"Crossfit|Musculação"
 100,Rosca punho,Braços,Antebraço,Musculação,Barra,isolation,weight_reps,3,20,10,,,,Musculação
 101,Rosca punho inversa,Braços,Antebraço,Musculação,Barra,isolation,weight_reps,3,20,10,,,,Musculação
+102,Farmer walk,Braços,Antebraço,Funcional,Halter,compound,duration_only,3,,,40,,,"Crossfit|Halterofilismo|Musculação"
+103,Dead hang,Braços,Antebraço,Funcional,Barra fixa,isolation,duration_only,3,,,30,,,"Crossfit|Musculação"
 104,Extensão de punho,Braços,Antebraço,Musculação,Barra,isolation,weight_reps,3,20,8,,,,Musculação
+105,Crunch,Core,Abdominais,Musculação,Peso corporal,core,reps_only,3,20,,,,,"Crossfit|Musculação"
 106,Abdominal máquina,Core,Abdominais,Musculação,Máquina,core,weight_reps,3,15,25,,,,Musculação
+107,Elevação de pernas,Core,Abdominais,Musculação,Peso corporal,core,reps_only,3,15,,,,,"Crossfit|Musculação"
+108,Elevação de joelhos,Core,Abdominais,Musculação,Peso corporal,core,reps_only,3,15,,,,,"Crossfit|Musculação"
+109,Woodchopper,Core,Oblíquos,Funcional,Polia,core,weight_reps,3,12,10,,,,"Corrida|Crossfit|Musculação"
+110,Prancha lateral,Core,Oblíquos,Funcional,Peso corporal,core,duration_only,3,,,30,,,Corrida
+111,Dead bug,Core,Abdominais,Funcional,Peso corporal,core,reps_only,3,10,,,,,"Crossfit|Musculação"
+112,Hollow hold,Core,Abdominais,Funcional,Peso corporal,core,duration_only,3,,,30,,,"Crossfit|Musculação"
+113,Front squat,Pernas,Quadríceps,Musculação,Barra,compound,weight_reps,4,8,50,,,,Halterofilismo
 114,Hack machine,Pernas,Quadríceps,Musculação,Máquina,compound,weight_reps,3,12,60,,,,Musculação
+115,Agachamento Goblet,Pernas,Quadríceps,Musculação,Halter,compound,weight_reps,3,12,16,,,,"Crossfit|Musculação"
+116,Passada,Pernas,Quadríceps,Musculação,Halter,compound,weight_reps,3,12,12,,,,"Crossfit|Musculação"
+117,Avanço,Pernas,Quadríceps,Musculação,Halter,compound,weight_reps,3,12,12,,,,"Crossfit|Musculação"
 118,Agachamento Smith,Pernas,Quadríceps,Musculação,Smith,compound,weight_reps,4,10,60,,,,Musculação
 119,Búlgaro Smith,Pernas,Quadríceps,Musculação,Smith,compound,weight_reps,3,10,40,,,,Musculação
+120,Levantamento terra Romeno,Pernas,Posterior,Musculação,Barra,compound,weight_reps,3,10,60,,,,"Halterofilismo|Musculação"
+121,Good morning,Pernas,Posterior,Musculação,Barra,compound,weight_reps,3,10,30,,,,"Halterofilismo|Musculação"
 122,Flexora sentada,Pernas,Posterior,Musculação,Máquina,isolation,weight_reps,3,12,25,,,,Musculação
 123,Stiff com halteres,Pernas,Posterior,Musculação,Halter,compound,weight_reps,3,10,20,,,,Musculação
 124,Hip thrust,Pernas,Glúteos,Musculação,Barra,compound,weight_reps,3,12,60,,,,Musculação
+125,Agachamento sumô,Pernas,Glúteos,Musculação,Barra,compound,weight_reps,3,12,50,,,,"Halterofilismo|Musculação"
 126,Glúteo máquina,Pernas,Glúteos,Musculação,Máquina,isolation,weight_reps,3,12,40,,,,Musculação
 127,Abdução máquina,Pernas,Glúteos,Musculação,Máquina,isolation,weight_reps,3,15,30,,,,Musculação
 128,Coice na polia,Pernas,Glúteos,Musculação,Polia,isolation,weight_reps,3,15,8,,,,Musculação
 129,Abdução na polia,Pernas,Glúteos,Musculação,Polia,isolation,weight_reps,3,15,8,,,,Musculação
+130,Afundo Búlgaro,Pernas,Glúteos,Musculação,Halter,compound,weight_reps,3,10,14,,,,"Crossfit|Musculação"
+131,Step-up,Pernas,Glúteos,Musculação,Halter,compound,weight_reps,3,12,10,,,,"Ciclismo|Corrida|Musculação"
 132,Passada lateral,Pernas,Adutor,Musculação,Peso corporal,compound,reps_only,3,12,,,,,Musculação
 133,Abdução unilateral,Pernas,Abdutor,Musculação,Polia,isolation,weight_reps,3,15,8,,,,Musculação
+134,Caminhada lateral,Pernas,Abdutor,Funcional,Elástico,isolation,reps_only,3,20,,,,,Corrida
+135,Monster walk,Pernas,Abdutor,Funcional,Elástico,isolation,reps_only,3,20,,,,,Corrida
 136,Panturrilha em pé máquina,Pernas,Panturrilha,Musculação,Máquina,isolation,weight_reps,4,15,50,,,,Musculação
 137,Panturrilha Smith,Pernas,Panturrilha,Musculação,Smith,isolation,weight_reps,4,15,40,,,,Musculação
 138,Panturrilha sentada,Pernas,Panturrilha,Musculação,Máquina,isolation,weight_reps,4,15,30,,,,Musculação
 139,Panturrilha no leg press,Pernas,Panturrilha,Musculação,Máquina,isolation,weight_reps,4,15,60,,,,Musculação
+140,Elevação unilateral,Pernas,Panturrilha,Exercício em casa,Peso corporal,isolation,reps_only,3,15,,,,,"Ciclismo|Corrida"
+141,Saltos pliométricos,Pernas,Panturrilha,Funcional,Peso corporal,compound,reps_only,3,10,,,,,"Corrida|Crossfit"
+142,Postura da criança (Balasana),Full Body,,Alongamento,Peso corporal,isolation,duration_only,3,,,30,,,Yoga
+143,Postura do cachorro olhando para baixo (Adho Mukha Svanasana),Full Body,,Alongamento,Peso corporal,isolation,duration_only,3,,,30,,,Yoga
+144,Postura do guerreiro I (Virabhadrasana I),Pernas,Quadríceps,Alongamento,Peso corporal,isolation,duration_only,3,,,30,,,Yoga
+145,Postura da árvore (Vrksasana),Full Body,,Alongamento,Peso corporal,isolation,duration_only,3,,,30,,,Yoga
+146,Postura do pombo (Eka Pada Rajakapotasana),Pernas,Glúteos,Alongamento,Peso corporal,isolation,duration_only,2,,,30,,,Yoga
 147,Flutuação,Full Body,,Funcional,Peso corporal,core,duration_only,3,,,60,,,Natação
 148,Deslizamento,Full Body,,Funcional,Peso corporal,cardio,duration_distance,4,,,30,,25,Natação
 149,Pernadas,Pernas,,Funcional,Peso corporal,cardio,duration_distance,4,,,30,,25,Natação
@@ -153,13 +152,110 @@
 151,Nado costas,Costas,,Funcional,Peso corporal,cardio,duration_distance,3,,,60,,50,Natação
 152,Nado peito,Peito,,Funcional,Peso corporal,cardio,duration_distance,3,,,60,,50,Natação
 153,Nado borboleta,Full Body,,Funcional,Peso corporal,cardio,duration_distance,3,,,60,,50,Natação
-142,Postura da criança (Balasana),Full Body,,Alongamento,Peso corporal,core,duration_only,3,,,30,,,Yoga
-143,Postura do cachorro olhando para baixo (Adho Mukha Svanasana),Full Body,,Alongamento,Peso corporal,core,duration_only,3,,,30,,,Yoga
-144,Postura do guerreiro I (Virabhadrasana I),Pernas,Quadríceps,Alongamento,Peso corporal,core,duration_only,3,,,30,,,Yoga
-145,Postura da árvore (Vrksasana),Full Body,,Alongamento,Peso corporal,core,duration_only,3,,,30,,,Yoga
-146,Postura do pombo (Eka Pada Rajakapotasana),Pernas,Glúteos,Alongamento,Peso corporal,core,duration_only,2,,,30,,,Yoga
-158,Postura do triângulo (Trikonasana),Full Body,,Alongamento,Peso corporal,core,duration_only,3,,,30,,,Yoga
-159,Postura da cadeira (Utkatasana),Pernas,Quadríceps,Alongamento,Peso corporal,core,duration_only,3,,,30,,,Yoga
-160,Postura da cobra (Bhujangasana),Costas,Lombar,Alongamento,Peso corporal,core,duration_only,3,,,30,,,Yoga
-161,Postura da montanha (Tadasana),Full Body,,Alongamento,Peso corporal,core,duration_only,3,,,30,,,Yoga
-162,Postura do meio senhor dos peixes (Ardha Matsyendrasana),Costas,Lombar,Alongamento,Peso corporal,core,duration_only,3,,,30,,,Yoga
+154,Caminhada,Pernas,,Funcional,Peso corporal,cardio,duration_speed,1,,,2700,5,,Corrida
+155,Trote,Pernas,,Funcional,Peso corporal,cardio,duration_speed,1,,,1800,8,,Corrida
+156,Arranco,Full Body,,Funcional,Barra,compound,weight_reps,4,3,50,,,,"Crossfit|Halterofilismo"
+157,Power Clean,Full Body,,Funcional,Barra,compound,weight_reps,4,3,50,,,,"Crossfit|Halterofilismo"
+158,Postura do triângulo (Trikonasana),Full Body,,Alongamento,Peso corporal,isolation,duration_only,3,,,30,,,Yoga
+159,Postura da cadeira (Utkatasana),Pernas,Quadríceps,Alongamento,Peso corporal,isolation,duration_only,3,,,30,,,Yoga
+160,Postura da cobra (Bhujangasana),Costas,Lombar,Alongamento,Peso corporal,isolation,duration_only,3,,,30,,,Yoga
+161,Postura da montanha (Tadasana),Full Body,,Alongamento,Peso corporal,isolation,duration_only,3,,,30,,,Yoga
+162,Postura do meio senhor dos peixes (Ardha Matsyendrasana),Costas,Lombar,Alongamento,Peso corporal,isolation,duration_only,3,,,30,,,Yoga
+163,Alongamento de panturrilhas,Pernas,Panturrilha,Alongamento,Peso corporal,isolation,duration_only,2,,,30,,,Ciclismo
+164,Arremesso,Full Body,,Funcional,Barra,compound,weight_reps,4,3,50,,,,Halterofilismo
+165,Abdominal borboleta,Core,Abdominais,Musculação,Peso corporal,core,reps_only,3,20,,,,,Musculação
+166,Canivete,Core,Abdominais,Funcional,Peso corporal,core,reps_only,3,15,,,,,"Crossfit|Musculação"
+167,Abdominal infra encolhido na paralela,Core,Abdominais,Musculação,Paralela,core,reps_only,3,12,,,,,"Crossfit|Musculação"
+168,Abdominal infra estendido na paralela,Core,Abdominais,Musculação,Paralela,core,reps_only,3,10,,,,,"Crossfit|Musculação"
+169,Escalador,Core,Abdominais,Funcional,Peso corporal,core,reps_only,3,20,,,,,"Corrida|Crossfit|Musculação"
+170,Abdominal estrela,Core,Abdominais,Funcional,Peso corporal,core,reps_only,3,15,,,,,Musculação
+171,Abdominal infra no banco,Core,Abdominais,Musculação,Banco,core,reps_only,3,15,,,,,Musculação
+172,Abdominal infra no banco declinado,Core,Abdominais,Musculação,Banco,core,reps_only,3,12,,,,,Musculação
+173,Abdominal bicicleta,Core,Abdominais,Exercício em casa,Peso corporal,core,reps_only,3,20,,,,,"Corrida|Musculação"
+174,Abdominal infra na bola,Core,Abdominais,Funcional,Bola,core,reps_only,3,15,,,,,Musculação
+175,Abdominal infra isométrico,Core,Abdominais,Funcional,Peso corporal,core,duration_only,3,,,30,,,Musculação
+176,Abdominal tesoura,Core,Abdominais,Exercício em casa,Peso corporal,core,reps_only,3,20,,,,,"Corrida|Musculação"
+177,Abdominal oblíquo na bola,Core,Oblíquos,Funcional,Bola,core,reps_only,3,15,,,,,Musculação
+178,Abdominal oblíquo na paralela,Core,Oblíquos,Musculação,Paralela,core,reps_only,3,12,,,,,Musculação
+179,Abdominal oblíquo na polia,Core,Oblíquos,Musculação,Polia,core,weight_reps,3,15,10,,,,Musculação
+180,Abdominal oblíquo no solo,Core,Oblíquos,Exercício em casa,Peso corporal,core,reps_only,3,20,,,,,Musculação
+181,Abdominal oblíquo unilateral,Core,Oblíquos,Exercício em casa,Peso corporal,core,reps_only,3,15,,,,,Musculação
+182,Prancha alta,Core,Abdominais,Funcional,Peso corporal,core,duration_only,3,,,40,,,"Corrida|Crossfit|Musculação"
+183,Prancha alta alternando com a baixa,Core,Abdominais,Funcional,Peso corporal,core,reps_only,3,10,,,,,"Crossfit|Musculação"
+184,Prancha abrindo e fechando os pés,Core,Abdominais,Funcional,Peso corporal,core,reps_only,3,15,,,,,"Crossfit|Musculação"
+185,Prancha tocando os ombros,Core,Abdominais,Funcional,Peso corporal,core,reps_only,3,20,,,,,"Crossfit|Musculação"
+186,Abdominal remador,Core,Abdominais,Funcional,Peso corporal,core,reps_only,3,15,,,,,Musculação
+187,Rolinho abdominal,Core,Abdominais,Funcional,Roda abdominal,core,reps_only,3,10,,,,,"Crossfit|Musculação"
+188,Abdominal supra no banco declinado,Core,Abdominais,Musculação,Banco,core,reps_only,3,15,,,,,Musculação
+189,Abdominal supra na bola,Core,Abdominais,Funcional,Bola,core,reps_only,3,15,,,,,Musculação
+190,Abdominal supra com pernas elevadas,Core,Abdominais,Exercício em casa,Peso corporal,core,reps_only,3,15,,,,,Musculação
+191,Abdominal supra na polia,Core,Abdominais,Musculação,Polia,core,weight_reps,3,15,25,,,,Musculação
+192,Air bike,Full Body,,Funcional,Máquina,cardio,duration_only,1,,,600,,,"Crossfit|Musculação"
+193,Burpee,Full Body,,Funcional,Peso corporal,cardio,reps_only,3,10,,,,,"Crossfit|Musculação"
+194,Burpee com flexão de braço,Full Body,,Funcional,Peso corporal,cardio,reps_only,3,10,,,,,"Crossfit|Musculação"
+195,Meio burpee,Full Body,,Funcional,Peso corporal,cardio,reps_only,3,12,,,,,"Crossfit|Musculação"
+196,Corrida na esteira,Pernas,,Funcional,Esteira,cardio,duration_speed,1,,,1800,10,,"Corrida|Musculação"
+197,Escada ergométrica,Pernas,,Funcional,Máquina,cardio,duration_only,1,,,900,,,Musculação
+198,Polichinelo,Full Body,,Funcional,Peso corporal,cardio,reps_only,3,30,,,,,"Crossfit|Musculação"
+199,Remo ergométrico,Full Body,,Funcional,Máquina,cardio,duration_distance,1,,,900,,2000,"Crossfit|Musculação"
+200,Subida no step,Pernas,Glúteos,Funcional,Peso corporal,cardio,reps_only,3,20,,,,,"Corrida|Musculação"
+201,Elíptico (transport),Full Body,,Funcional,Máquina,cardio,duration_only,1,,,1200,,,"Corrida|Musculação"
+202,Rosca 21,Braços,Bíceps,Musculação,Barra,isolation,weight_reps,3,21,15,,,,Musculação
+203,Rosca concentrada Arnold,Braços,Bíceps,Musculação,Halter,isolation,weight_reps,3,12,8,,,,Musculação
+204,Rosca martelo alternada,Braços,Bíceps,Musculação,Halter,isolation,weight_reps,3,12,10,,,,Musculação
+205,Rosca Scott articulada,Braços,Bíceps,Musculação,Máquina,isolation,weight_reps,3,12,20,,,,Musculação
+206,Rosca no TRX,Braços,Bíceps,Funcional,TRX,isolation,reps_only,3,12,,,,,"Crossfit|Musculação"
+207,Rosca Spider,Braços,Bíceps,Musculação,Banco Scott,isolation,weight_reps,3,12,10,,,,Musculação
+208,Rosca Baesiana,Braços,Bíceps,Musculação,Polia,isolation,weight_reps,3,12,8,,,,Musculação
+209,Rosca Hércules,Braços,Bíceps,Musculação,Polia,isolation,weight_reps,3,12,8,,,,Musculação
+210,Barra fixa no gravitron,Costas,Dorsal,Musculação,Máquina,compound,weight_reps,3,10,30,,,,Musculação
+211,Extensão lombar,Costas,Lombar,Musculação,Máquina,isolation,reps_only,3,15,,,,,"Corrida|Musculação"
+212,Perdigueiro,Core,Lombar,Funcional,Peso corporal,core,reps_only,3,12,,,,,"Corrida|Musculação"
+213,Puxada frente unilateral,Costas,Dorsal,Musculação,Polia,compound,weight_reps,3,12,25,,,,Musculação
+214,Puxada frente supinada,Costas,Dorsal,Musculação,Máquina,compound,weight_reps,3,10,45,,,,Musculação
+215,Puxada frente com triângulo,Costas,Dorsal,Musculação,Máquina,compound,weight_reps,3,10,45,,,,Musculação
+216,Remada aberta,Costas,Dorsal,Musculação,Máquina,compound,weight_reps,3,10,45,,,,Musculação
+217,Remada articulada,Costas,Dorsal,Musculação,Máquina,compound,weight_reps,3,10,50,,,,Musculação
+218,Remada fechada,Costas,Dorsal,Musculação,Polia,compound,weight_reps,3,10,45,,,,Musculação
+219,Crucifixo inverso a 90°,Ombros,Deltoide posterior,Musculação,Halter,isolation,weight_reps,3,12,8,,,,Musculação
+220,Desenvolvimento Arnold,Ombros,Deltoide anterior,Musculação,Halter,compound,weight_reps,3,10,12,,,,Musculação
+221,Desenvolvimento articulado,Ombros,Deltoide anterior,Musculação,Máquina,compound,weight_reps,3,10,30,,,,Musculação
+222,Desenvolvimento frontal no Smith,Ombros,Deltoide anterior,Musculação,Smith,compound,weight_reps,3,10,30,,,,Musculação
+223,Elevação frontal alternada com halteres,Ombros,Deltoide anterior,Musculação,Halter,isolation,weight_reps,3,12,8,,,,Musculação
+224,Elevação frontal supinada,Ombros,Deltoide anterior,Musculação,Halter,isolation,weight_reps,3,12,8,,,,Musculação
+225,Elevação lateral e frontal combinada,Ombros,Deltoide lateral,Musculação,Halter,isolation,weight_reps,3,12,6,,,,Musculação
+226,Encolhimento no Smith,Costas,Trapézio,Musculação,Smith,isolation,weight_reps,3,15,60,,,,"Halterofilismo|Musculação"
+227,Rotação externa para manguito rotador,Ombros,Deltoide posterior,Funcional,Elástico,isolation,reps_only,3,15,,,,,"Corrida|Musculação"
+228,Crucifixo inverso na polia,Ombros,Deltoide posterior,Musculação,Polia,isolation,weight_reps,3,15,8,,,,Musculação
+229,Remada alta com barra,Ombros,Deltoide lateral,Musculação,Barra,compound,weight_reps,3,12,25,,,,"Halterofilismo|Musculação"
+230,Remada alta na polia,Ombros,Deltoide lateral,Musculação,Polia,compound,weight_reps,3,12,20,,,,Musculação
+231,Remada alta no Smith,Ombros,Deltoide lateral,Musculação,Smith,compound,weight_reps,3,12,25,,,,Musculação
+232,Rotação de ombros,Ombros,Deltoide anterior,Alongamento,Peso corporal,isolation,duration_only,2,,,30,,,"Corrida|Musculação|Natação"
+233,Crucifixo declinado,Peito,Peito inferior,Musculação,Halter,isolation,weight_reps,3,12,12,,,,Musculação
+234,Flexão de braços com joelhos apoiados,Peito,Peito médio,Exercício em casa,Peso corporal,compound,reps_only,3,15,,,,,Musculação
+235,Supino inclinado articulado,Peito,Peito superior,Musculação,Máquina,compound,weight_reps,3,10,40,,,,Musculação
+236,Supino reto alternado com halteres,Peito,Peito médio,Musculação,Halter,compound,weight_reps,3,10,16,,,,Musculação
+237,Abdução no solo,Pernas,Abdutor,Exercício em casa,Peso corporal,isolation,reps_only,3,20,,,,,"Corrida|Musculação"
+238,Adutor na polia,Pernas,Adutor,Musculação,Polia,isolation,weight_reps,3,15,8,,,,Musculação
+239,Agachamento com bola na parede,Pernas,Quadríceps,Exercício em casa,Bola,compound,reps_only,3,15,,,,,Musculação
+240,Agachamento com salto,Pernas,Quadríceps,Funcional,Peso corporal,compound,reps_only,3,12,,,,,"Corrida|Crossfit|Musculação"
+241,Agachamento na parede (isométrico),Pernas,Quadríceps,Funcional,Peso corporal,compound,duration_only,3,,,45,,,"Ciclismo|Corrida|Musculação"
+242,Agachamento na máquina squat,Pernas,Quadríceps,Musculação,Máquina,compound,weight_reps,3,12,60,,,,Musculação
+243,Elevação pélvica no Smith,Pernas,Glúteos,Musculação,Smith,compound,weight_reps,3,12,40,,,,Musculação
+244,Elevação pélvica unilateral,Pernas,Glúteos,Exercício em casa,Peso corporal,compound,reps_only,3,15,,,,,"Corrida|Musculação"
+245,Cadeira extensora unilateral,Pernas,Quadríceps,Musculação,Máquina,isolation,weight_reps,3,12,20,,,,Musculação
+246,Mesa flexora unilateral,Pernas,Posterior,Musculação,Máquina,isolation,weight_reps,3,12,15,,,,Musculação
+247,Flexora em pé,Pernas,Posterior,Musculação,Máquina,isolation,weight_reps,3,12,20,,,,Musculação
+248,Flexão de quadril na polia,Pernas,Quadríceps,Musculação,Polia,isolation,weight_reps,3,15,8,,,,"Corrida|Musculação"
+249,Glúteo 4 apoios com perna estendida,Pernas,Glúteos,Exercício em casa,Peso corporal,isolation,reps_only,3,15,,,,,Musculação
+250,Glúteo 4 apoios com perna flexionada,Pernas,Glúteos,Exercício em casa,Peso corporal,isolation,reps_only,3,15,,,,,Musculação
+251,Glúteo na polia com perna flexionada,Pernas,Glúteos,Musculação,Polia,isolation,weight_reps,3,15,8,,,,Musculação
+252,Levantamento terra sumô,Pernas,Posterior,Musculação,Barra,compound,weight_reps,3,8,70,,,,"Crossfit|Halterofilismo|Musculação"
+253,Panturrilha livre,Pernas,Panturrilha,Exercício em casa,Peso corporal,isolation,reps_only,4,20,,,,,"Corrida|Musculação"
+254,Agachamento pistol,Pernas,Quadríceps,Funcional,Peso corporal,compound,reps_only,3,6,,,,,"Crossfit|Musculação"
+255,Stiff unilateral com halter,Pernas,Posterior,Musculação,Halter,compound,weight_reps,3,12,14,,,,"Corrida|Musculação"
+256,Tibial anterior,Pernas,Panturrilha,Musculação,Máquina,isolation,weight_reps,3,15,15,,,,"Corrida|Musculação"
+257,Tríceps unilateral na polia,Braços,Tríceps,Musculação,Polia,isolation,weight_reps,3,12,8,,,,Musculação
+258,Supino fechado,Braços,Tríceps,Musculação,Barra,compound,weight_reps,3,10,40,,,,"Halterofilismo|Musculação"
+259,Tríceps testa com halteres,Braços,Tríceps,Musculação,Halter,isolation,weight_reps,3,12,8,,,,Musculação
+260,Tríceps testa na polia,Braços,Tríceps,Musculação,Polia,isolation,weight_reps,3,12,15,,,,Musculação
